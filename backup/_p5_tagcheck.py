@@ -23,12 +23,14 @@ STEPS = [
     ("_resourcecheck.py", [], "RESOURCECHECK OK"),
     ("_layoutcheck.py", [], "LAYOUT OK"),
     ("_hintcheck.py", [], "HINTCHECK OK"),
+    ("_summoncheck.py", [], "OK"),
     ("_namecheck.py", [], "OK"),
 ]
 
 # 这个 tag 之前还没有的脚本 (新加的自检)
 INTRODUCED = {
     "_hintcheck.py": "P4a",
+    "_summoncheck.py": "P6e",
 }
 
 
@@ -44,7 +46,8 @@ def main():
     order = [t for t in ("baseline", "P1", "P2", "P3", "P4a", "P5")
              if t in tags]
     # P4b/P4c/P5 是 P4 的后续拆分, 也一起验
-    for extra in ("P4b", "P4c", "P5"):
+    for extra in ("P4b", "P4c", "P5",
+                  "P6a", "P6b", "P6c", "P6d", "P6e", "P6f"):
         if extra in tags and extra not in order:
             order.append(extra)
 
