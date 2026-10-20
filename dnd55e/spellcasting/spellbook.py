@@ -6,11 +6,11 @@ class SpellbookMixin:
     """SpellbookMixin"""
 
     def mastery_cap(self):
-        """18 级法术精通的法术总数: 1 环 1 个 + 2 环 1 个"""
-        return 2 if (self.class_id == "wizard" and self.level >= 18) else 0
+        """18 级法术精通的法术总数: 由职业模块决定"""
+        return self.cls_module().mastery_cap(self)
 
     def signature_cap(self):
-        return 2 if (self.class_id == "wizard" and self.level >= 20) else 0
+        return self.cls_module().signature_cap(self)
 
     def _wizard_spell_ids(self):
         """法师法术表的 id 集合 (惰性缓存)"""
@@ -22,7 +22,7 @@ class SpellbookMixin:
 
     def book_max_level(self):
         """能抄进书的最高环级 = 当前能准备的最高环级"""
-        if self.class_id != "wizard":
+        if not self.cls_module().owns_spellbook(self):
             return 0
         return max(self.max_spell_level(), 1)
 
@@ -41,9 +41,10 @@ class SpellbookMixin:
 
     def can_prepare(self, sid):
         """能否准备: 必须是法师法术, 且已在法术书中"""
-        if self.class_id != "wizard":
+        if not self.cls_module().owns_spellbook(self):
             return False
-        return self.in_book(sid) and sid in self._wizard_spell_ids()
+        return self.in_book(sid) and sid in {
+            x["id"] for x in self.r.class_spells(self.class_id)}
 
     def ritual_castable(self, sid):
         """书里的仪式法术可以不准备就直接施放 (额外 10 分钟, 不耗环位)"""
@@ -65,10 +66,11 @@ class SpellbookMixin:
         s = self.r.spell(sid)
         if not s:
             return False, "法术库里没有这个法术"
-        if self.class_id != "wizard":
+        if not self.cls_module().owns_spellbook(self):
             return False, "只有法师拥有法术书"
-        if sid not in self._wizard_spell_ids():
-            return False, f"{s['name']} 不是法师法术，不能抄进法术书"
+        if sid not in {x["id"] for x in
+                       self.r.class_spells(self.class_id)}:
+            return False, f"{s['name']} 不是本职业法术，不能抄进法术书"
         if self.in_book(sid):
             return False, f"{s['name']} 已经在法术书里了"
         if s["level"] < 1:
@@ -100,24 +102,25 @@ class SpellbookMixin:
 
     def book_auto_fill(self):
         """兼容旧存档: 没有 spellbook 字段时, 用已准备的法师法术灌满"""
-        if self.class_id != "wizard":
+        if not self.cls_module().owns_spellbook(self):
             self.spellbook = []
             return
         if self.spellbook:
             return
-        wiz = self._wizard_spell_ids()
+        own = {s["id"] for s in self.r.class_spells(self.class_id)}
         for sid in ((self.spells or {}).get("prepared") or []):
-            if sid in wiz and sid not in self.spellbook:
+            if sid in own and sid not in self.spellbook:
                 self.spellbook.append(sid)
 
     def _choice_spells(self, raw, min_level, levels, cap, one_per_level=False):
         """校验「自选法术」: 必须是本职业法术、指定环级、数量受限"""
-        if self.class_id != "wizard" or self.level < min_level:
+        if not self.cls_module().owns_spellbook(self) \
+                or self.level < min_level:
             return []
-        wiz = {s["id"] for s in self.r.class_spells("wizard")}
+        own = {s["id"] for s in self.r.class_spells(self.class_id)}
         out, used_lv = [], set()
         for sid in (raw or []):
-            if sid in out or sid not in wiz:
+            if sid in out or sid not in own:
                 continue
             s = self.r.spell(sid)
             if not s or s["level"] not in levels:

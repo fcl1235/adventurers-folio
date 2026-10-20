@@ -27,9 +27,9 @@ class WeaponsMixin:
         if "finesse" in props or name in consts.FINESSSE_SET:
             return "STR" if self.score("STR") >= self.score("DEX") else "DEX"
         # 2024 武艺: 武僧武器 (熟练的近战武器) 也可用敏捷
-        if (self.class_id == "monk" and self.level >= 1
-                and self.has_weapon_prof(name)):
-            return "DEX" if self.score("DEX") >= self.score("STR") else "STR"
+        ov = self.cls_module().weapon_ability_override(self, name, props)
+        if ov:
+            return ov
         return "STR"
 
     def is_ranged_weapon(self):
@@ -171,9 +171,7 @@ class WeaponsMixin:
     def attack_bonus(self):
         w = self.weapon_entry()
         if not w:                       # 徒手打击: 力量 (武僧可用敏捷) + 熟练
-            ab = "STR"
-            if self.class_id == "monk" and self.level >= 1:
-                ab = "DEX" if self.score("DEX") > self.score("STR") else "STR"
+            ab = self.cls_module().unarmed_ability(self) or "STR"
             return (ability_mod(self.score(ab)) + self.pb()
                     - self.exh_penalty())
         pb = self.pb() if self.has_weapon_prof(w[0]) else 0   # 未熟练不加熟练加值
@@ -197,9 +195,7 @@ class WeaponsMixin:
         w = self.weapon_entry()
         if not w:
             # 2024 徒手打击: 1 + 力量调整值; 武僧用武艺骰, 酒馆斗殴者为 1d4
-            die = 0
-            if self.class_id == "monk":
-                die = self.class_stat("martial_arts_die", 0) or 4
+            die = self.cls_module().unarmed_die(self)
             if self.fighting_style == "unarmed":
                 # 徒手战斗: 1d6; 另一手完全空着(无副手武器/无盾)则 1d8
                 die = max(die, 6)
@@ -231,12 +227,9 @@ class WeaponsMixin:
     def damage_bonus(self):
         w = self.weapon_entry()
         if not w:                       # 徒手: 伤害加值按攻击属性
-            ab = "STR"
-            if self.class_id == "monk" and self.level >= 1:
-                ab = "DEX" if self.score("DEX") > self.score("STR") else "STR"
+            ab = self.cls_module().unarmed_ability(self) or "STR"
             m = ability_mod(self.score(ab))
-            if self.class_id == "barbarian" and self.raging:
-                m += self.rage_damage()
+            m += self.cls_module().damage_bonus_extra(self, ab, False)
             return m
         _, dmg_item = self._weapon_item_bonus()
         m = (ability_mod(self.score(self.weapon_ability()))
@@ -257,7 +250,6 @@ class WeaponsMixin:
         if eff.get("heavy_damage_pb") and self.is_heavy_weapon():
             m += self.pb()
         # 狂暴伤害只加在「用力量」的攻击上 (2024 Rage)
-        if self.class_id == "barbarian" and self.raging \
-                and self.weapon_ability() == "STR":
-            m += self.rage_damage()
+        m += self.cls_module().damage_bonus_extra(
+            self, self.weapon_ability(), self.two_handed_grip)
         return m

@@ -7,10 +7,8 @@ class MetamagicMixin:
     """MetamagicMixin"""
 
     def metamagic_cap(self):
-        """已知超魔法上限: 2 级 2 个, 10 级 +2, 17 级 +2"""
-        if self.class_id != "sorcerer" or self.level < 2:
-            return 0
-        return 2 + (2 if self.level >= 10 else 0) + (2 if self.level >= 17 else 0)
+        """已知超魔法上限: 由职业模块决定"""
+        return self.cls_module().metamagic_cap(self)
 
     def metamagic_known(self):
         return [m for m in self.metamagic if m in consts.METAMAGIC][
@@ -24,8 +22,7 @@ class MetamagicMixin:
 
     def mm_free(self):
         """20 级「奥术神化」: 先天魔法期间, 每回合 1 个超魔法不花术法点"""
-        return (self.class_id == "sorcerer" and self.level >= 20
-                and self.innate_active)
+        return self.cls_module().mm_free(self)
 
     def mm_cost(self, ids):
         return sum(consts.METAMAGIC[m][1] for m in dict.fromkeys(ids)
@@ -71,7 +68,7 @@ class MetamagicMixin:
         return True, f"超魔法 {names}{saved} · {spent}"
 
     def innate_cap(self):
-        return 2 if self.class_id == "sorcerer" else 0
+        return self.cls_module().innate_cap(self)
 
     def innate_left(self):
         return max(0, self.innate_cap() - int(self.innate_used))
@@ -96,7 +93,7 @@ class MetamagicMixin:
 
     def sorcerous_rest(self):
         """术士 5 级「魔法恢复」: 短休回一半术法点 (向下取整), 1 次/长休"""
-        if self.class_id != "sorcerer" or self.level < 5:
+        if not self.cls_module().sorcerous_rest_ok(self):
             return False, ""
         if self.sorcerous_rest_used:
             return False, "「魔法恢复」本次长休已用过"

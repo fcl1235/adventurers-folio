@@ -38,20 +38,7 @@ class DerivedMixin:
         if self.species_id:
             sp = self.r.sp(self.species_id).get("speed", 30)
         no_armor = self.armor_cat() is None
-        # 野蛮人·快速移动 (5级, 非重甲)
-        if self.class_id == "barbarian" and self.level >= 5 \
-                and self.armor_cat() != "heavy":
-            sp += 10
-        # 游侠·游荡 Roving (6级, 非重甲): 速度 +10, 并获得等值攀爬/游泳速度
-        if self.class_id == "ranger" and self.level >= 6 \
-                and self.armor_cat() != "heavy":
-            sp += 10
-        # 武僧·无甲移动 (2/6/10/14/18 级 → +10/+15/+20/+25/+30, 需无甲无盾)
-        if self.class_id == "monk" and self.level >= 2 and no_armor \
-                and not self.shield:
-            sp += (30 if self.level >= 18 else 25 if self.level >= 14
-                   else 20 if self.level >= 10 else 15 if self.level >= 6
-                   else 10)
+        sp += self.cls_module().speed_bonus(self)
         sp += int(self.feat_effects().get("speed", 0) or 0)   # 通用专长: 速度
         for iid in self.items:
             it = consts.ITEMS_BY_ID.get(iid, {})
@@ -172,15 +159,14 @@ class DerivedMixin:
             if base_ac_item:
                 ac = base_ac_item + dex
                 notes.append(f"物品·基础 AC {base_ac_item}+敏捷({mod_str(dex)})")
-            elif self.class_id == "barbarian":
-                ac = 10 + dex + ability_mod(self.score("CON"))
-                notes.append("无甲防御(野蛮人) 10+敏捷+体质")
-            elif self.class_id == "monk" and not self.shield:
-                ac = 10 + dex + ability_mod(self.score("WIS"))
-                notes.append("无甲防御(武僧) 10+敏捷+感知")
             else:
-                ac = 10 + dex
-                notes.append(f"无甲 10+敏捷({mod_str(dex)})")
+                ua = self.cls_module().unarmored_ac(self, dex)
+                if ua:
+                    ac, note = ua
+                    notes.append(note)
+                else:
+                    ac = 10 + dex
+                    notes.append(f"无甲 10+敏捷({mod_str(dex)})")
         else:
             used = dex if cap is None else min(dex, cap)
             ac = base + used
@@ -228,7 +214,7 @@ class DerivedMixin:
     def wild_shapes(self):
         """荒野变形可选形态 (德鲁伊, 按等级/子职筛 CR)"""
         from .. import wildshape
-        if self.class_id != "druid":
+        if not self.cls_module().wild_shape_allowed(self):
             return []
         return wildshape.shapes(self.level, self.subclass)
 

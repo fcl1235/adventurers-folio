@@ -131,16 +131,11 @@ class FeaturesMixin:
 
     def martial_arts_die(self):
         """武僧武艺骰 (1/5/11/17 级 → d6/d8/d10/d12); 非武僧返回 0"""
-        return int(self.class_stat("martial_arts_die", 0) or 0)
+        return self.cls_module().martial_arts_die(self)
 
     def sneak_dice(self):
         """偷袭骰数 (游荡者): 优先取 SRD 逐级表, 否则 1 级起每 2 级 +1d6"""
-        if self.class_id != "rogue":
-            return 0
-        sa = self.class_stat("sneak_attack", None)
-        if isinstance(sa, dict) and sa.get("dice_count"):
-            return int(sa["dice_count"])
-        return (self.level + 1) // 2
+        return self.cls_module().sneak_dice(self)
 
     def mastery_dc(self, wname):
         """武器专精的豁免 DC (撂倒/推撞等) = 8 + 攻击属性调整值 + 熟练加值"""

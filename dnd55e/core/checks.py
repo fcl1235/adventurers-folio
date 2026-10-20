@@ -6,6 +6,11 @@ from ..consts import (ABILITIES, feat_cn)
 from ..util import (ability_mod, mod_str)
 
 
+def _ordered(pairs):
+    """把模块返回的 [(优先级, 文案)] 展开成文案列表 (稳定排序)。"""
+    return [text for _, text in sorted(pairs, key=lambda p: p[0])]
+
+
 class ChecksMixin:
     """ChecksMixin"""
 
@@ -14,9 +19,9 @@ class ChecksMixin:
         if self.has_feat("Alert", "警觉") \
                 or self.feat_effects().get("initiative_pb"):
             m += self.pb()      # 2024 Alert / 同类专长: 先攻 + 熟练加值
-        elif self.class_id == "bard" and self.level >= 2:
+        else:
             # 万事通: 未含熟练加值的属性检定 + 半熟练 (先攻是敏捷检定)
-            m += self.pb() // 2
+            m += self.cls_module().half_proficiency(self)
         return m - self.exh_penalty()      # 先攻是敏捷检定, 受力竭影响
 
     def exh_penalty(self):
@@ -31,17 +36,13 @@ class ChecksMixin:
     def ability_check_mod(self, ab):
         """纯属性检定修正 (力竭已计入; 诗人万事通给半熟练)"""
         m = ability_mod(self.score(ab)) + self.check_bonus()
-        if self.class_id == "bard" and self.level >= 2:
-            m += self.pb() // 2
+        m += self.cls_module().half_proficiency(self)
         return m - self.exh_penalty()
 
     def save_profs(self):
         """豁免熟练集合 —— 职业 + 后期特性 (武僧14 全豁免 / 游荡者15 感魅)"""
         out = set(self.cls().get("saves") or [])
-        if self.class_id == "monk" and self.level >= 14:     # 自律生还者
-            out |= set(ABILITIES)
-        if self.class_id == "rogue" and self.level >= 15:    # 滑溜心智
-            out |= {"WIS", "CHA"}
+        out |= self.cls_module().save_profs_extra(self)
         return out
 
     def resistances(self):
@@ -83,8 +84,7 @@ class ChecksMixin:
         else:
             m += int(sv or 0)
         # 守护灵光 (圣武士 6 级): 魅力调整值, 最低 +1
-        if self.class_id == "paladin" and self.level >= 6:
-            m += max(1, ability_mod(self.score("CHA")))
+        m += self.cls_module().save_bonus(self, ab)
         return m - self.exh_penalty()
 
     def skill_mod(self, sid):
@@ -94,20 +94,18 @@ class ChecksMixin:
             m += 2 * self.pb()
         elif sid in self.skill_prof:
             m += self.pb()
-        elif self.class_id == "bard" and self.level >= 2:    # 万事通: 半熟练
-            m += self.pb() // 2
+        else:
+            m += self.cls_module().half_proficiency(self)   # 万事通: 半熟练
         m += self.order_skill_bonus(sid)      # 职阶给的奥秘/宗教/自然加值
         return m - self.exh_penalty()
 
     def reliable_talent(self, sid):
         """游荡者 7 级: 熟练技能的属性检定, d20 掷出 9 或以下按 10 计"""
-        return (self.class_id == "rogue" and self.level >= 7
-                and sid in self.skill_prof)
+        return self.cls_module().reliable_talent(self, sid)
 
     def indomitable_might(self, ab):
         """野蛮人 18 级: 力量检定/豁免的总值低于力量值 → 直接用力量值"""
-        return (self.class_id == "barbarian" and self.level >= 18
-                and ab == "STR")
+        return self.cls_module().indomitable_might(self, ab)
 
     def spell_dc(self):
         c = self.casting()
@@ -145,31 +143,10 @@ class ChecksMixin:
             out.append(f"专长·Tough: HP 上限 +{2 * self.level}")
         if self.has_feat("Alert", "警觉"):
             out.append(f"专长·Alert: 先攻 +{self.pb()} (熟练加值)")
-        if self.class_id in ("barbarian", "monk") and consts.ARMORS[self.armor_index][1] is None:
+        if self.cls_module().unarmored_ac(self, 0) is not None \
+                and consts.ARMORS[self.armor_index][1] is None:
             out.append("职业·无甲防御: AC 计入第二属性")
-        if self.class_id == "barbarian" and self.level >= 5:
-            out.append("职业·快速移动: 速度 +10 尺")
-        if self.class_id == "ranger" and self.level >= 6 \
-                and self.armor_cat() != "heavy":
-            out.append(f"职业·游荡: 速度 +10 尺，攀爬/游泳速度 = {self.speed()} 尺")
-        if self.class_id == "monk" and self.level >= 2:
-            out.append("职业·无甲移动: 速度提升")
-        if self.class_id == "paladin" and self.level >= 6:
-            out.append(f"职业·守护灵光(10尺): 豁免 "
-                       f"+{max(1, ability_mod(self.score('CHA')))} (魅力, 最低 +1)")
-        if self.class_id == "monk" and self.level >= 14:
-            out.append("职业·自律生还者: 全部豁免熟练；失败可花 1 气点重掷")
-        if self.class_id == "rogue" and self.level >= 15:
-            out.append("职业·滑溜心智: 感知与魅力豁免熟练")
-        if self.class_id == "rogue" and self.level >= 7:
-            out.append("职业·可靠天赋: 熟练技能的检定，d20 掷出 9 或以下按 10 计")
-        if self.class_id == "barbarian" and self.level >= 18:
-            out.append(f"职业·不屈之力: 力量检定/豁免总值不低于力量值 "
-                       f"{self.score('STR')}")
-        if self.level >= 20 and self.class_id in ("barbarian", "monk"):
-            out.append("职业·20级压轴: 力量与体质 / 敏捷与感知 各 +4（上限 25）")
-        if self.class_id == "bard" and self.level >= 2:
-            out.append(f"职业·万事通: 非熟练检定 +{self.pb() // 2}")
+        out.extend(_ordered(self.cls_module().explain(self, "early")))
         if self.fighting_style:
             nm, desc, _ = consts.FIGHTING_STYLES[self.fighting_style]
             out.append(f"战斗风格·{nm}: {desc}")
@@ -210,29 +187,11 @@ class ChecksMixin:
                        f"{self.damage_dice()}（不适用决斗风格）")
         out.extend(self.armor_penalty())
         # 职业里程碑 (信息提示, 数值需按情境判定)
-        lv = self.level
         n_atk = self.attacks_per_action()
         if n_atk > 1:
             out.append(f"职业·额外攻击: 攻击动作可攻击 {n_atk} 次 "
                        f"（掷攻击会一次投 {n_atk} 个 d20）")
-        if self.class_id == "barbarian" and lv >= 1:
-            rd = self.rage_damage()
-            if self.raging:
-                out.append(f"职业·狂暴(进行中): 伤害 +{rd} 已计入 · "
-                           "物理伤害抗性 · 力量检定/豁免优势 · 不能专注")
-            else:
-                out.append(f"职业·狂暴: 伤害 +{rd}，物理伤害抗性 "
-                           "（在「职业」页点开狂暴后再算）")
-        if self.class_id == "rogue":
-            n = self.sneak_dice()
-            out.append(f"职业·偷袭: 额外 {n}d6 (优势或同伴相邻时，"
-                       "勾选「含偷袭」后掷伤害会加上)")
-        if self.class_id == "monk":
-            d = self.class_stat("martial_arts_die", 0)
-            out.append(f"职业·武艺: 徒手/武僧武器伤害骰 "
-                       f"{('1d%d' % d) if d else '1d4'}（附赠动作可再攻击 1 次）")
-        if self.class_id == "paladin" and lv >= 2:
-            out.append("职业·至圣斩: 命中后可用法术位追加 2d8 光耀 (每击一次)")
+        out.extend(_ordered(self.cls_module().explain(self, "late")))
         # 其余专长: 明确提示需手动应用, 避免误以为已计入
         auto = ("tough", "alert", "坚忍", "坚韧", "警觉")
         manual = [f for f in list(self.feats)

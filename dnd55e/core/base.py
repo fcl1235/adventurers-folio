@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """角色模型分片: core/base.py (由 character.py 物理拆分, P1 纯搬运)。"""
-from .. import consts
+from .. import consts, classes
 from ..consts import (ABILITIES)
 from ..util import (ability_mod, proficiency_bonus)
 from ..rules import Rules
@@ -69,25 +69,17 @@ class BaseMixin:
         self.death_fail = 0           # 死亡豁免失败数 (3 即死亡)
         self.raging = False           # 野蛮人是否处于狂暴
 
+    def cls_module(self):
+        """当前职业的规则模块 (未选职业时返回空实现)。"""
+        return classes.get(self.class_id)
+
     def ability_cap(self, ab):
-        """属性上限: 常规 20; 野蛮人 20 级(力/体) / 武僧 20 级(敏/感) 为 25"""
-        if self.class_id == "barbarian" and self.level >= 20 \
-                and ab in ("STR", "CON"):
-            return 25
-        if self.class_id == "monk" and self.level >= 20 \
-                and ab in ("DEX", "WIS"):
-            return 25
-        return 20
+        """属性上限: 常规 20, 由职业模块决定是否放宽"""
+        return self.cls_module().ability_cap(self, ab)
 
     def capstone_bonus(self, ab):
         """20 级职业压轴: 原始冠军 / 身心合一 —— 两项属性各 +4"""
-        if self.class_id == "barbarian" and self.level >= 20 \
-                and ab in ("STR", "CON"):
-            return 4
-        if self.class_id == "monk" and self.level >= 20 \
-                and ab in ("DEX", "WIS"):
-            return 4
-        return 0
+        return self.cls_module().capstone_bonus(self, ab)
 
     def score(self, ab):
         s = self.base_scores[ab]
@@ -164,15 +156,8 @@ class BaseMixin:
         return 3 if self.has_feat("Skilled", "多面手") else 0
 
     def expertise_allowance(self):
-        """专精 (Expertise) 允许项数 —— 只有游荡者/吟游诗人/游侠拥有"""
-        lv, n = self.level, 0
-        if self.class_id == "rogue":
-            n = 2 + (2 if lv >= 6 else 0)
-        elif self.class_id == "bard":
-            n = (2 if lv >= 2 else 0) + (2 if lv >= 9 else 0)
-        elif self.class_id == "ranger":
-            n = (1 if lv >= 2 else 0) + (2 if lv >= 9 else 0)
-        return n
+        """专精 (Expertise) 允许项数 —— 由职业模块决定"""
+        return self.cls_module().expertise_allowance(self, self.level)
 
     def weapon_mastery_pool(self):
         return {w[0] for w in Rules.class_mastery_pool(self.cls())}

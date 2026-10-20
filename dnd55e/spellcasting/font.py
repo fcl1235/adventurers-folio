@@ -7,7 +7,7 @@ class FontMixin:
     """FontMixin"""
 
     def font_can_use(self):
-        return self.class_id == "sorcerer" and self.level >= 2
+        return self.cls_module().font_can_use(self)
 
     def _sorcery_res(self):
         for res in self.r.class_resources(self.class_id):

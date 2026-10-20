@@ -138,13 +138,10 @@ class SerializeMixin:
         self.tough_feat = bool(d.get("tough_feat", False))
         # 术法源泉换出的临时法术位: 必须在 spell_slots_used 之前读入,
         # 否则会被当成超出职业表的非法值丢掉
-        self.font_slots = {}
-        if self.class_id == "sorcerer" and self.level >= 2:
-            for k, v in (d.get("font_slots") or {}).items():
-                kk = _int(k, 0, 1, 5)
-                vv = _int(v, 0, 0, 9)
-                if kk and vv:
-                    self.font_slots[kk] = vv
+        mod = self.cls_module()
+        pre = mod.pre_slots_state(self, d, _int)
+        if pre is None:
+            self.font_slots = {}
         self.spell_slots_used = {}
         max_slots = self.spell_slots()
         for k, v in (d.get("spell_slots_used") or {}).items():
@@ -237,7 +234,8 @@ class SerializeMixin:
                                   0, self.hit_dice_max())
         self.death_success = _int(d.get("death_success"), 0, 0, 3)
         self.death_fail = _int(d.get("death_fail"), 0, 0, 3)
-        self.raging = bool(d.get("raging", False)) and self.class_id == "barbarian"
+        self.raging = (bool(d.get("raging", False))
+                       and self.cls_module().can_rage(self))
         # 最后钳制 HP (依赖上面的 level/scores/species/tough)
         self.hp_temp = _int(d.get("hp_temp"), 0, 0, 999)
         self.hp_current = _int(d.get("hp_current"), self.hp_max(),

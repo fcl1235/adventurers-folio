@@ -65,9 +65,8 @@ class OffhandMixin:
             return 0
         m = ability_mod(self.score(self.offhand_ability()))
         extra = m if self.fighting_style == "two_weapon" else min(0, m)
-        if self.class_id == "barbarian" and self.raging \
-                and self.offhand_ability() == "STR":
-            extra += self.rage_damage()
+        extra += self.cls_module().damage_bonus_extra(
+            self, self.offhand_ability(), False)
         return extra
 
     def offhand_note(self):
