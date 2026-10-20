@@ -1,0 +1,1379 @@
+{
+ "_note": "魔法物品数据。note_only=true 表示「除已填的数值字段外，还有无法机械计算的效果」，不表示整条都不能算；resist/immune 为英文小写伤害类型。",
+ "items": [
+  {
+   "id": "ring_protection",
+   "name": "防护戒指 Ring of Protection",
+   "rarity": "rare",
+   "kind": "ring",
+   "ac": 1,
+   "save": 1,
+   "note": "AC +1，豁免 +1（需同调）",
+   "attune": true,
+   "desc": "佩戴时 AC 与豁免检定各 +1。"
+  },
+  {
+   "id": "cloak_protection",
+   "name": "防护斗篷 Cloak of Protection",
+   "rarity": "uncommon",
+   "kind": "cloak",
+   "ac": 1,
+   "save": 1,
+   "note": "AC +1，豁免 +1（需同调）",
+   "attune": true,
+   "desc": "佩戴时 AC 与豁免检定各 +1。"
+  },
+  {
+   "id": "bracers_defense",
+   "name": "防御护腕 Bracers of Defense",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "ac": 2,
+   "no_armor": true,
+   "note": "无甲且无盾时 AC +2",
+   "attune": true,
+   "desc": "不穿护甲、不使用盾牌时 AC +2。"
+  },
+  {
+   "id": "cloak_elvenkind",
+   "name": "精灵斗篷 Cloak of Elvenkind",
+   "rarity": "uncommon",
+   "kind": "cloak",
+   "note": "隐匿检定优势（隐蔽时）",
+   "attune": true,
+   "desc": "他人以感知检定发现你时有劣势，你的敏捷（隐匿）检定有优势。"
+  },
+  {
+   "id": "boots_elvenkind",
+   "name": "精灵靴 Boots of Elvenkind",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "note": "潜行移动不发出声音",
+   "attune": false,
+   "desc": "行走不发出任何声音，敏捷（隐匿）检定有优势。"
+  },
+  {
+   "id": "boots_speed",
+   "name": "速度之靴 Boots of Speed",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "note": "附赠动作点脚跟: 步行速度翻倍（需同调）",
+   "attune": true,
+   "speed_mult": 2,
+   "desc": "附赠动作点脚跟，速度翻倍且对你的借机攻击有劣势；累计使用 10 分钟后失效，直至完成长休。"
+  },
+  {
+   "id": "gauntlets_ogre",
+   "name": "食人魔力量手套 Gauntlets of Ogre Power",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "set_str": 19,
+   "note": "力量变为 19（不叠加）",
+   "attune": true,
+   "desc": "佩戴时力量变为 19；若原本力量已 ≥19 则无效果。"
+  },
+  {
+   "id": "belt_hill_giant",
+   "name": "山丘巨人力量腰带 Belt of Hill Giant Strength",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "set_str": 21,
+   "note": "力量变为 21",
+   "attune": true,
+   "desc": "佩戴时力量变为 21；若原本力量已 ≥21 则无效果。"
+  },
+  {
+   "id": "headband_intellect",
+   "name": "智力头带 Headband of Intellect",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "set_int": 19,
+   "note": "智力变为 19",
+   "attune": true,
+   "desc": "佩戴时智力变为 19；若原本智力已 ≥19 则无效果。"
+  },
+  {
+   "id": "amulet_health",
+   "name": "健康护符 Amulet of Health",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "set_con": 19,
+   "note": "体质变为 19",
+   "attune": true,
+   "desc": "佩戴时体质变为 19；若原本体质已 ≥19 则无效果。"
+  },
+  {
+   "id": "ring_free_action",
+   "name": "自由行动戒指 Ring of Free Action",
+   "rarity": "rare",
+   "kind": "ring",
+   "note": "免疫束缚与麻痹、移动不受魔法限制",
+   "attune": true,
+   "desc": "困难地形不额外消耗移动；魔法无法降低你的速度，也无法使你陷入麻痹或束缚。"
+  },
+  {
+   "id": "stone_luck",
+   "name": "幸运石 Stone of Good Luck",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "save": 1,
+   "check": 1,
+   "note": "豁免与属性检定 +1（需同调）",
+   "attune": true,
+   "desc": "随身携带时属性检定与豁免检定各 +1。"
+  },
+  {
+   "id": "animated_shield",
+   "name": "活化盾 Animated Shield",
+   "rarity": "very_rare",
+   "kind": "armor",
+   "attune": true,
+   "note_only": true,
+   "desc": "持握时可用附赠动作令盾牌活化，悬浮在你身边如同持握一般为提供防护，双手空出；持续 1 分钟，或直至你再次用附赠动作结束、死亡、陷入失能。"
+  },
+  {
+   "id": "arrow_catching_shield",
+   "name": "挡箭盾 Arrow-Catching Shield",
+   "rarity": "rare",
+   "kind": "armor",
+   "attune": true,
+   "note_only": true,
+   "desc": "持握时对抗远程攻击的 AC 额外 +2（叠加盾牌本身加值）；5 尺内的目标被远程攻击时，可用反应让自己成为该攻击的目标。"
+  },
+  {
+   "id": "armor_of_invulnerability",
+   "name": "无敌护甲 Armor of Invulnerability",
+   "rarity": "legendary",
+   "kind": "armor",
+   "attune": true,
+   "resist": [
+    "bludgeoning",
+    "piercing",
+    "slashing"
+   ],
+   "desc": "穿着时对钝击、穿刺、挥砍伤害有抗性；可用魔法动作获得对这三种伤害的免疫 10 分钟，每日一次（黎明恢复）。"
+  },
+  {
+   "id": "armor_of_resistance",
+   "name": "抗性护甲 Armor of Resistance",
+   "rarity": "rare",
+   "kind": "armor",
+   "attune": true,
+   "note_only": true,
+   "desc": "穿着时对一种伤害类型有抗性，类型由 DM 从 1d10 表中选定（酸蚀、寒冷、火焰、力场、闪电、黯蚀、毒素、心灵、光耀、雷鸣）。"
+  },
+  {
+   "id": "armor_of_vulnerability",
+   "name": "易伤护甲 Armor of Vulnerability",
+   "rarity": "rare",
+   "kind": "armor",
+   "attune": true,
+   "note_only": true,
+   "desc": "穿着时对钝击、穿刺、挥砍中由 DM 选定的一种有抗性；此为诅咒护甲，同调后受诅咒，对另外两种伤害有易伤，直至被移除诅咒。"
+  },
+  {
+   "id": "brooch_of_shielding",
+   "name": "护盾胸针 Brooch of Shielding",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "resist": [
+    "force"
+   ],
+   "desc": "佩戴时对力场伤害有抗性，并免疫魔法飞弹造成的伤害。"
+  },
+  {
+   "id": "cloak_of_displacement",
+   "name": "移位斗篷 Cloak of Displacement",
+   "rarity": "rare",
+   "kind": "cloak",
+   "attune": true,
+   "note_only": true,
+   "desc": "投射幻象使攻击你的攻击检定有劣势；受到伤害后该效果失效至你下回合开始，速度为 0 时也失效。"
+  },
+  {
+   "id": "defender",
+   "name": "守护者 Defender",
+   "rarity": "legendary",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 3,
+   "damage": 3,
+   "desc": "攻击与伤害 +3；每回合首次攻击时可把该加值全部或部分转为 AC 加值，持续到你下回合开始（须持握武器）。"
+  },
+  {
+   "id": "dwarven_plate",
+   "name": "矮人板甲 Dwarven Plate",
+   "rarity": "very_rare",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 2,
+   "desc": "穿着时 AC +2；被效果在地面上强制移动时，可用反应使移动距离减少至多 10 尺。"
+  },
+  {
+   "id": "elven_chain",
+   "name": "精灵链甲 Elven Chain",
+   "rarity": "rare",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 1,
+   "desc": "穿着时 AC +1；即使未受训于中甲或重甲，也被视为受训。"
+  },
+  {
+   "id": "glamoured_studded_leather",
+   "name": "幻饰镶钉皮甲 Glamoured Studded Leather",
+   "rarity": "rare",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 1,
+   "desc": "穿着时 AC +1；可用附赠动作让护甲呈现为普通衣物或另一种护甲的外观。"
+  },
+  {
+   "id": "mithral_armor",
+   "name": "秘银护甲 Mithral Armor",
+   "rarity": "uncommon",
+   "kind": "armor",
+   "attune": false,
+   "note_only": true,
+   "desc": "可穿在普通衣物下；若该护甲原本使敏捷（隐匿）有劣势或有力量需求，秘银版本则没有。"
+  },
+  {
+   "id": "shield_plus1",
+   "name": "盾牌 +1 Shield +1",
+   "rarity": "uncommon",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 1,
+   "desc": "持握时 AC 额外 +1（叠加盾牌本身的加值）。"
+  },
+  {
+   "id": "shield_plus2",
+   "name": "盾牌 +2 Shield +2",
+   "rarity": "rare",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 2,
+   "desc": "持握时 AC 额外 +2（叠加盾牌本身的加值）。"
+  },
+  {
+   "id": "shield_plus3",
+   "name": "盾牌 +3 Shield +3",
+   "rarity": "very_rare",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 3,
+   "desc": "持握时 AC 额外 +3（叠加盾牌本身的加值）。"
+  },
+  {
+   "id": "armor_plus1",
+   "name": "护甲 +1 Armor +1",
+   "rarity": "rare",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 1,
+   "desc": "穿着时该护甲的 AC +1。"
+  },
+  {
+   "id": "armor_plus2",
+   "name": "护甲 +2 Armor +2",
+   "rarity": "very_rare",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 2,
+   "desc": "穿着时该护甲的 AC +2。"
+  },
+  {
+   "id": "armor_plus3",
+   "name": "护甲 +3 Armor +3",
+   "rarity": "legendary",
+   "kind": "armor",
+   "attune": false,
+   "ac_bonus_armor": 3,
+   "desc": "穿着时该护甲的 AC +3。"
+  },
+  {
+   "id": "spellguard_shield",
+   "name": "抗法盾 Spellguard Shield",
+   "rarity": "very_rare",
+   "kind": "armor",
+   "attune": true,
+   "note_only": true,
+   "desc": "持握时对抗法术与其他魔法效果的豁免有优势，针对你的法术攻击检定有劣势。"
+  },
+  {
+   "id": "dragon_scale_mail",
+   "name": "龙鳞甲 Dragon Scale Mail",
+   "rarity": "very_rare",
+   "kind": "armor",
+   "attune": true,
+   "ac_bonus_armor": 1,
+   "note_only": true,
+   "desc": "AC +1，对抗龙类吐息豁免有优势，并按龙的种类获得一种伤害抗性（黑/铜：酸蚀，蓝/青铜：闪电，黄铜/金/红：火焰，绿：毒素，银/白：寒冷）；可用魔法动作感知 30 里内同种龙的方向。"
+  },
+  {
+   "id": "demon_armor",
+   "name": "恶魔护甲 Demon Armor",
+   "rarity": "very_rare",
+   "kind": "armor",
+   "attune": true,
+   "ac_bonus_armor": 1,
+   "desc": "AC +1，懂得深渊语；爪形护手使徒手打击伤害改为 1d8 挥砍并获 +1 攻击与伤害。诅咒：穿上后无法脱下，对恶魔的攻击及对抗其能力的豁免有劣势。"
+  },
+  {
+   "id": "plate_armor_of_etherealness",
+   "name": "以太板甲 Plate Armor of Etherealness",
+   "rarity": "legendary",
+   "kind": "armor",
+   "attune": true,
+   "note_only": true,
+   "desc": "穿着时可用魔法动作念出命令字获得以太化术效果，脱下护甲或再次念动即结束；每日一次（黎明恢复）。"
+  },
+  {
+   "id": "adamantine_armor",
+   "name": "精金护甲 Adamantine Armor",
+   "rarity": "uncommon",
+   "kind": "armor",
+   "attune": false,
+   "note_only": true,
+   "desc": "穿着时任何针对你的重击都变为普通命中。"
+  },
+  {
+   "id": "scarab_of_protection",
+   "name": "圣甲虫护符 Scarab of Protection",
+   "rarity": "legendary",
+   "kind": "wondrous",
+   "attune": true,
+   "ac": 1,
+   "charges": 12,
+   "charge_note": "充能耗尽后护符化为粉末并毁坏",
+   "desc": "AC +1；对抗法术的豁免有优势；对抗死灵系法术或亡灵来源的有害效果豁免失败时，可用反应消耗 1 充能改为成功。"
+  },
+  {
+   "id": "mantle_of_spell_resistance",
+   "name": "抗法斗篷 Mantle of Spell Resistance",
+   "rarity": "rare",
+   "kind": "cloak",
+   "attune": true,
+   "note_only": true,
+   "desc": "穿着时对抗法术的豁免检定有优势。"
+  },
+  {
+   "id": "ring_of_evasion",
+   "name": "回避戒指 Ring of Evasion",
+   "rarity": "rare",
+   "kind": "ring",
+   "attune": true,
+   "charges": 3,
+   "charge_note": "每日黎明恢复 1d3 点充能",
+   "desc": "敏捷豁免失败时可用反应消耗 1 充能改为成功。"
+  },
+  {
+   "id": "belt_stone_giant",
+   "name": "石巨人力量腰带 Belt of Stone Giant Strength",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": true,
+   "set_str": 23,
+   "desc": "佩戴时力量变为 23；若原本力量已 ≥23 则无效果。"
+  },
+  {
+   "id": "belt_fire_giant",
+   "name": "火巨人力量腰带 Belt of Fire Giant Strength",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": true,
+   "set_str": 25,
+   "desc": "佩戴时力量变为 25；若原本力量已 ≥25 则无效果。"
+  },
+  {
+   "id": "belt_cloud_giant",
+   "name": "云巨人力量腰带 Belt of Cloud Giant Strength",
+   "rarity": "legendary",
+   "kind": "wondrous",
+   "attune": true,
+   "set_str": 27,
+   "desc": "佩戴时力量变为 27；若原本力量已 ≥27 则无效果。"
+  },
+  {
+   "id": "belt_storm_giant",
+   "name": "风暴巨人力量腰带 Belt of Storm Giant Strength",
+   "rarity": "legendary",
+   "kind": "wondrous",
+   "attune": true,
+   "set_str": 29,
+   "desc": "佩戴时力量变为 29；若原本力量已 ≥29 则无效果。"
+  },
+  {
+   "id": "ioun_stone_protection",
+   "name": "艾恩石（防护） Ioun Stone of Protection",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "attune": true,
+   "ac": 1,
+   "desc": "掷向空中后环绕头部，AC +1；同时最多三颗艾恩石环绕。"
+  },
+  {
+   "id": "ioun_stone_agility",
+   "name": "艾恩石（敏捷） Ioun Stone of Agility",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "环绕头部时敏捷 +2，上限 20（加值型，不改变基础值）。"
+  },
+  {
+   "id": "ioun_stone_strength",
+   "name": "艾恩石（力量） Ioun Stone of Strength",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "环绕头部时力量 +2，上限 20（加值型，不改变基础值）。"
+  },
+  {
+   "id": "ioun_stone_insight",
+   "name": "艾恩石（洞察） Ioun Stone of Insight",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "环绕头部时感知 +2，上限 20（加值型，不改变基础值）。"
+  },
+  {
+   "id": "tome_of_clear_thought",
+   "name": "清明思维之书 Tome of Clear Thought",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "在 6 天内累计研读 48 小时后，智力 +2，上限 30；之后魔法失效，一个世纪后恢复。"
+  },
+  {
+   "id": "manual_of_bodily_health",
+   "name": "健身手册 Manual of Bodily Health",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "在 6 天内累计研读 48 小时后，体质 +2，上限 30；之后魔法失效，一个世纪后恢复。"
+  },
+  {
+   "id": "tome_of_leadership_and_influence",
+   "name": "领导与影响之书 Tome of Leadership and Influence",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "在 6 天内累计研读 48 小时后，魅力 +2，上限 30；之后魔法失效，一个世纪后恢复。"
+  },
+  {
+   "id": "weapon_plus1",
+   "name": "武器 +1 Weapon +1",
+   "rarity": "uncommon",
+   "kind": "weapon",
+   "attune": false,
+   "attack": 1,
+   "damage": 1,
+   "desc": "使用该魔法武器进行的攻击检定与伤害掷骰 +1。"
+  },
+  {
+   "id": "weapon_plus2",
+   "name": "武器 +2 Weapon +2",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": false,
+   "attack": 2,
+   "damage": 2,
+   "desc": "使用该魔法武器进行的攻击检定与伤害掷骰 +2。"
+  },
+  {
+   "id": "weapon_plus3",
+   "name": "武器 +3 Weapon +3",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": false,
+   "attack": 3,
+   "damage": 3,
+   "desc": "使用该魔法武器进行的攻击检定与伤害掷骰 +3。"
+  },
+  {
+   "id": "ammunition_plus1",
+   "name": "弹药 +1 Ammunition +1",
+   "rarity": "uncommon",
+   "kind": "ammunition",
+   "attune": false,
+   "attack": 1,
+   "damage": 1,
+   "desc": "使用该魔法弹药进行的攻击检定与伤害掷骰 +1；命中后弹药不再具有魔法。"
+  },
+  {
+   "id": "ammunition_plus2",
+   "name": "弹药 +2 Ammunition +2",
+   "rarity": "rare",
+   "kind": "ammunition",
+   "attune": false,
+   "attack": 2,
+   "damage": 2,
+   "desc": "使用该魔法弹药进行的攻击检定与伤害掷骰 +2；命中后弹药不再具有魔法。"
+  },
+  {
+   "id": "ammunition_plus3",
+   "name": "弹药 +3 Ammunition +3",
+   "rarity": "very_rare",
+   "kind": "ammunition",
+   "attune": false,
+   "attack": 3,
+   "damage": 3,
+   "desc": "使用该魔法弹药进行的攻击检定与伤害掷骰 +3；命中后弹药不再具有魔法。"
+  },
+  {
+   "id": "flame_tongue",
+   "name": "火焰舌 Flame Tongue",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "附赠动作念动命令字使武器燃起火焰，命中时额外造成 2d6 火焰伤害，并照亮 40 尺明亮光照与额外 40 尺微光。"
+  },
+  {
+   "id": "frost_brand",
+   "name": "霜之刃 Frost Brand",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": true,
+   "resist": [
+    "fire"
+   ],
+   "note_only": true,
+   "desc": "命中时额外造成 1d6 寒冷伤害；持握时对火焰伤害有抗性；拔出时可熄灭 30 尺内非魔法火焰，每小时一次。"
+  },
+  {
+   "id": "sun_blade",
+   "name": "阳炎剑 Sun Blade",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 2,
+   "damage": 2,
+   "desc": "剑柄可生出光刃（视为具灵巧的长剑），攻击与伤害 +2，伤害改为光耀；命中亡灵时额外 1d8 光耀伤害。"
+  },
+  {
+   "id": "dragon_slayer",
+   "name": "屠龙者 Dragon Slayer",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": false,
+   "attack": 1,
+   "damage": 1,
+   "desc": "攻击与伤害 +1；命中龙类时额外造成 3d6 该武器类型的伤害。"
+  },
+  {
+   "id": "giant_slayer",
+   "name": "屠巨人者 Giant Slayer",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": false,
+   "attack": 1,
+   "damage": 1,
+   "desc": "攻击与伤害 +1；命中巨人时额外 2d6 伤害，且目标须通过 DC 15 力量豁免否则倒地。"
+  },
+  {
+   "id": "vicious_weapon",
+   "name": "凶暴武器 Vicious Weapon",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": false,
+   "note_only": true,
+   "desc": "命中时额外造成 2d6 伤害，伤害类型与该武器原本的伤害类型相同。"
+  },
+  {
+   "id": "berserker_axe",
+   "name": "狂战士战斧 Berserker Axe",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 1,
+   "damage": 1,
+   "note_only": true,
+   "desc": "攻击与伤害 +1；同调后 HP 上限每等级 +1。诅咒：不愿放下此武器，用其他武器攻击有劣势；受伤时须通过 DC 15 感知豁免否则陷入狂暴。"
+  },
+  {
+   "id": "dagger_of_venom",
+   "name": "毒匕首 Dagger of Venom",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": false,
+   "attack": 1,
+   "damage": 1,
+   "desc": "攻击与伤害 +1；可用附赠动作在刃上涂毒，命中时目标须通过 DC 15 体质豁免，否则受 2d10 毒素伤害并陷入中毒 1 分钟；每日一次（黎明恢复）。"
+  },
+  {
+   "id": "mace_of_disruption",
+   "name": "驱散钉锤 Mace of Disruption",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "命中邪魔或亡灵时额外 2d6 光耀伤害；若目标此后 HP ≤25，须通过 DC 15 感知豁免否则被摧毁，豁免成功则恐惧至你下回合结束。"
+  },
+  {
+   "id": "mace_of_smiting",
+   "name": "重击钉锤 Mace of Smiting",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": false,
+   "attack": 1,
+   "damage": 1,
+   "desc": "攻击与伤害 +1（攻击构装体时为 +3）；攻击掷出 20 时额外 7 钝击伤害（构装体为 14），构装体若此后 HP ≤25 则被摧毁。"
+  },
+  {
+   "id": "sword_of_life_stealing",
+   "name": "窃命剑 Sword of Life Stealing",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "攻击掷出 20 时，若目标不是构装体或亡灵，额外受 15 点黯蚀伤害，你获得等量临时 HP。"
+  },
+  {
+   "id": "sword_of_wounding",
+   "name": "致伤剑 Sword of Wounding",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "命中时额外 2d6 黯蚀伤害，目标须通过 DC 15 体质豁免否则 1 小时内无法恢复 HP（每回合结束可重复豁免）。"
+  },
+  {
+   "id": "nine_lives_stealer",
+   "name": "九命夺取者 Nine Lives Stealer",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 2,
+   "damage": 2,
+   "note_only": true,
+   "desc": "攻击与伤害 +2；对 HP 少于 100 的生物攻击掷出 20 时，目标须通过 DC 15 体质豁免否则即死（构装体与亡灵自动成功）；武器有 1d8+1 充能，每次击杀消耗 1 点。"
+  },
+  {
+   "id": "sword_of_sharpness",
+   "name": "锋锐之剑 Sword of Sharpness",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "攻击物件时武器伤害骰取最大值；攻击掷出 20 时额外 14 点挥砍伤害并使目标获得 1 级力竭。"
+  },
+  {
+   "id": "vorpal_sword",
+   "name": "斩首剑 Vorpal Sword",
+   "rarity": "legendary",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 3,
+   "damage": 3,
+   "note_only": true,
+   "desc": "攻击与伤害 +3，并无视对挥砍伤害的抗性；攻击有头的生物掷出 20 时斩首（目标免疫挥砍伤害或无头则改为额外 30 点挥砍伤害）。"
+  },
+  {
+   "id": "holy_avenger",
+   "name": "神圣复仇者 Holy Avenger",
+   "rarity": "legendary",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 3,
+   "damage": 3,
+   "note_only": true,
+   "desc": "攻击与伤害 +3；命中邪魔或亡灵时额外 2d10 光耀伤害；拔出时产生 10 尺光环，你与友方对抗法术及魔法效果的豁免有优势（圣武士 17 级起扩大为 30 尺）。"
+  },
+  {
+   "id": "luck_blade",
+   "name": "幸运之刃 Luck Blade",
+   "rarity": "legendary",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 1,
+   "damage": 1,
+   "save": 1,
+   "note_only": true,
+   "desc": "攻击与伤害 +1，随身携带时豁免 +1；可重掷一次失败的 D20 检定（每日一次）；武器有 1d3 充能，可消耗 1 点施放祈愿术。"
+  },
+  {
+   "id": "oathbow",
+   "name": "誓仇弓 Oathbow",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "可指定一名宿敌：对其远程攻击有优势、无视半掩蔽与四分之三掩蔽、不受远距离劣势，命中额外 3d6 穿刺伤害；宿敌存活期间用其他武器攻击有劣势。"
+  },
+  {
+   "id": "scimitar_of_speed",
+   "name": "疾速弯刀 Scimitar of Speed",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 2,
+   "damage": 2,
+   "desc": "攻击与伤害 +2；每回合可用附赠动作以该武器攻击一次。"
+  },
+  {
+   "id": "dwarven_thrower",
+   "name": "矮人投掷锤 Dwarven Thrower",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 3,
+   "damage": 3,
+   "desc": "攻击与伤害 +3，具投掷属性（20/60 尺）；远程命中额外 1d8 力场伤害（对巨人为 2d8），命中或失手后立即飞回手中。"
+  },
+  {
+   "id": "hammer_of_thunderbolts",
+   "name": "雷霆之锤 Hammer of Thunderbolts",
+   "rarity": "legendary",
+   "kind": "weapon",
+   "attune": true,
+   "attack": 1,
+   "damage": 1,
+   "charges": 5,
+   "charge_note": "每日黎明恢复 1d4+1 点充能",
+   "desc": "攻击与伤害 +1；消耗 1 充能可投掷（20/60 尺），命中时目标与 30 尺内其他生物须通过 DC 17 体质豁免否则昏迷至你下回合结束，武器随即飞回手中。"
+  },
+  {
+   "id": "javelin_of_lightning",
+   "name": "闪电标枪 Javelin of Lightning",
+   "rarity": "uncommon",
+   "kind": "weapon",
+   "attune": false,
+   "note_only": true,
+   "desc": "命中时可改为造成闪电伤害；投掷时可不做攻击检定，化为 120 尺内 5 尺宽闪电线，范围内生物 DC 13 敏捷豁免，失败受 4d6 闪电伤害、成功减半；每日一次（黎明恢复）。"
+  },
+  {
+   "id": "trident_of_fish_command",
+   "name": "鱼类操控三叉戟 Trident of Fish Command",
+   "rarity": "uncommon",
+   "kind": "weapon",
+   "attune": true,
+   "charges": 3,
+   "charge_note": "每日黎明恢复 1d3 点充能",
+   "desc": "消耗 1 充能，可对具有游泳速度的野兽施放支配野兽（豁免 DC 15）。"
+  },
+  {
+   "id": "weapon_of_warning",
+   "name": "警戒武器 Weapon of Warning",
+   "rarity": "uncommon",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "武器在你触及内且已同调时，你与 30 尺内友军先攻检定有优势，战斗开始时自然睡眠者会被唤醒。"
+  },
+  {
+   "id": "dancing_sword",
+   "name": "舞空剑 Dancing Sword",
+   "rarity": "very_rare",
+   "kind": "weapon",
+   "attune": true,
+   "note_only": true,
+   "desc": "附赠动作将武器抛向空中，它会悬浮、飞行至多 30 尺并攻击 5 尺内一名生物（使用你的攻击加值）；攻击四次后飞回你手中。"
+  },
+  {
+   "id": "mace_of_terror",
+   "name": "恐惧钉锤 Mace of Terror",
+   "rarity": "rare",
+   "kind": "weapon",
+   "attune": true,
+   "charges": 3,
+   "charge_note": "每日黎明恢复 1d3 点充能",
+   "desc": "消耗 1 充能，以魔法动作释放恐惧波，30 尺内自选生物须通过 DC 15 感知豁免否则恐惧 1 分钟（每回合结束可重复豁免）。"
+  },
+  {
+   "id": "bracers_of_archery",
+   "name": "射手护腕 Bracers of Archery",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "damage": 2,
+   "desc": "佩戴时熟练长弓与短弓，且使用这两类武器时伤害掷骰 +2。"
+  },
+  {
+   "id": "wand_war_mage_plus1",
+   "name": "战法师魔杖 +1 Wand of the War Mage +1",
+   "rarity": "uncommon",
+   "kind": "wand",
+   "attune": true,
+   "spell_attack": 1,
+   "desc": "持握时法术攻击检定 +1，法术攻击无视半掩蔽。"
+  },
+  {
+   "id": "wand_war_mage_plus2",
+   "name": "战法师魔杖 +2 Wand of the War Mage +2",
+   "rarity": "rare",
+   "kind": "wand",
+   "attune": true,
+   "spell_attack": 2,
+   "desc": "持握时法术攻击检定 +2，法术攻击无视半掩蔽。"
+  },
+  {
+   "id": "wand_war_mage_plus3",
+   "name": "战法师魔杖 +3 Wand of the War Mage +3",
+   "rarity": "very_rare",
+   "kind": "wand",
+   "attune": true,
+   "spell_attack": 3,
+   "desc": "持握时法术攻击检定 +3，法术攻击无视半掩蔽。"
+  },
+  {
+   "id": "robe_of_the_archmagi",
+   "name": "大法师长袍 Robe of the Archmagi",
+   "rarity": "legendary",
+   "kind": "wondrous",
+   "attune": true,
+   "base_ac": 15,
+   "no_armor": true,
+   "spell_dc": 2,
+   "spell_attack": 2,
+   "note_only": true,
+   "desc": "不穿护甲时基础 AC 为 15 + 敏捷调整值；法术豁免 DC 与法术攻击加值各 +2；对抗法术与魔法效果的豁免有优势。"
+  },
+  {
+   "id": "staff_of_power",
+   "name": "力量法杖 Staff of Power",
+   "rarity": "very_rare",
+   "kind": "staff",
+   "attune": true,
+   "attack": 2,
+   "damage": 2,
+   "ac": 2,
+   "save": 2,
+   "spell_attack": 2,
+   "charges": 20,
+   "charge_note": "每日黎明恢复 2d8+4 点充能；耗尽最后 1 点后掷 1d20，出 1 则失去除攻击/伤害加值外的所有属性",
+   "desc": "可当魔法长棍使用（攻击与伤害 +2）；持握时 AC、豁免与法术攻击各 +2；可消耗充能施放寒冰锥、火球（5 环）、法术无效结界、定身怪物、浮空术、闪电束（5 环）、魔法飞弹、衰弱射线、力场墙。"
+  },
+  {
+   "id": "staff_of_the_magi",
+   "name": "法师法杖 Staff of the Magi",
+   "rarity": "legendary",
+   "kind": "staff",
+   "attune": true,
+   "attack": 2,
+   "damage": 2,
+   "spell_attack": 2,
+   "charges": 50,
+   "charge_note": "每日黎明恢复 4d6+2 点充能；耗尽最后 1 点后掷 1d20，出 20 则恢复 1d12+1 点",
+   "desc": "可当魔法长棍使用（攻击与伤害 +2），持握时法术攻击 +2，对抗法术的豁免有优势，可用反应吸收只以你为目标的法术并转化为充能，并能消耗充能施放多种法术。"
+  },
+  {
+   "id": "staff_of_the_woodlands",
+   "name": "林地法杖 Staff of the Woodlands",
+   "rarity": "rare",
+   "kind": "staff",
+   "attune": true,
+   "attack": 2,
+   "damage": 2,
+   "spell_attack": 2,
+   "charges": 6,
+   "charge_note": "每日黎明恢复 1d6 点充能；耗尽最后 1 点后掷 1d20，出 1 则变为非魔法长棍",
+   "desc": "可当魔法长棍使用（攻击与伤害 +2），持握时法术攻击 +2；可消耗充能施放动物友谊、启蒙术、树肤术、定位动植物、行踪无痕、动物交谈、植物交谈、荆棘墙，并可化为一棵大树。"
+  },
+  {
+   "id": "staff_of_striking",
+   "name": "打击法杖 Staff of Striking",
+   "rarity": "very_rare",
+   "kind": "staff",
+   "attune": true,
+   "attack": 3,
+   "damage": 3,
+   "charges": 10,
+   "charge_note": "每日黎明恢复 1d6+4 点充能；耗尽最后 1 点后掷 1d20，出 1 则变为非魔法长棍",
+   "desc": "可当魔法长棍使用（攻击与伤害 +3）；近战命中时可消耗至多 3 充能，每点额外造成 1d6 力场伤害。"
+  },
+  {
+   "id": "ring_of_warmth",
+   "name": "温暖戒指 Ring of Warmth",
+   "rarity": "uncommon",
+   "kind": "ring",
+   "attune": true,
+   "note_only": true,
+   "desc": "受到寒冷伤害时减免 2d8 点；佩戴时你与随身物品不受 0°F（-18℃）以下低温伤害。"
+  },
+  {
+   "id": "boots_of_the_winterlands",
+   "name": "冬境之靴 Boots of the Winterlands",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "resist": [
+    "cold"
+   ],
+   "desc": "对寒冷伤害有抗性，可在 0°F 以下无额外防护地活动；无视冰雪造成的困难地形。"
+  },
+  {
+   "id": "periapt_of_proof_against_poison",
+   "name": "防毒护符 Periapt of Proof against Poison",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "attune": true,
+   "immune": [
+    "poison"
+   ],
+   "condition_immune": [
+    "poisoned"
+   ],
+   "desc": "佩戴时免疫毒素伤害与中毒状态。"
+  },
+  {
+   "id": "periapt_of_health",
+   "name": "保健护符 Periapt of Health",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "可用魔法动作恢复 2d4+2 HP（每日一次，黎明恢复）；避免或结束中毒状态的豁免有优势。"
+  },
+  {
+   "id": "necklace_of_adaptation",
+   "name": "适应项链 Necklace of Adaptation",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "可在任何环境中正常呼吸；避免或结束中毒状态的豁免有优势。"
+  },
+  {
+   "id": "ring_of_mind_shielding",
+   "name": "心灵护盾戒指 Ring of Mind Shielding",
+   "rarity": "uncommon",
+   "kind": "ring",
+   "attune": true,
+   "note_only": true,
+   "desc": "免疫读取思想、判断谎言、探知阵营或生物类型的魔法；他人只能在你允许时与你心灵交流。"
+  },
+  {
+   "id": "helm_of_brilliance",
+   "name": "光辉头盔 Helm of Brilliance",
+   "rarity": "very_rare",
+   "kind": "wondrous",
+   "attune": true,
+   "resist": [
+    "fire"
+   ],
+   "note_only": true,
+   "desc": "镶有宝石：有红宝石时对火焰伤害有抗性；可用魔法动作让手持武器燃起火焰（命中额外 1d6 火焰伤害）；可消耗特定宝石施放昼明术、火球术、虹光喷射、火墙术（豁免 DC 18）；钻石光环对亡灵每回合造成 1d6 光耀伤害。"
+  },
+  {
+   "id": "ring_of_resistance",
+   "name": "抗性戒指 Ring of Resistance",
+   "rarity": "rare",
+   "kind": "ring",
+   "attune": false,
+   "note_only": true,
+   "desc": "佩戴时对一种伤害类型有抗性，类型由宝石决定（1d10 表：酸蚀、寒冷、火焰、力场、闪电、黯蚀、毒素、心灵、光耀、雷鸣）。"
+  },
+  {
+   "id": "cloak_of_arachnida",
+   "name": "蛛后斗篷 Cloak of Arachnida",
+   "rarity": "very_rare",
+   "kind": "cloak",
+   "attune": true,
+   "resist": [
+    "poison"
+   ],
+   "note_only": true,
+   "desc": "对毒素伤害有抗性；获得等于速度的攀爬速度，可空手上下垂直面与天花板；不会被蛛网困住；可施放蛛网术（DC 13，范围加倍），每日一次。"
+  },
+  {
+   "id": "staff_of_fire",
+   "name": "火焰法杖 Staff of Fire",
+   "rarity": "very_rare",
+   "kind": "staff",
+   "attune": true,
+   "resist": [
+    "fire"
+   ],
+   "charges": 10,
+   "charge_note": "每日黎明恢复 1d6+4 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "持握时对火焰伤害有抗性；可消耗充能施放燃烧之手（1）、火球术（3）、火墙术（4）。"
+  },
+  {
+   "id": "staff_of_frost",
+   "name": "寒霜法杖 Staff of Frost",
+   "rarity": "very_rare",
+   "kind": "staff",
+   "attune": true,
+   "resist": [
+    "cold"
+   ],
+   "charges": 10,
+   "charge_note": "每日黎明恢复 1d6+4 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为水毁坏",
+   "desc": "持握时对寒冷伤害有抗性；可消耗充能施放寒冰锥（5）、云雾术（1）、冰风暴（4）、冰墙术（4）。"
+  },
+  {
+   "id": "winged_boots",
+   "name": "飞翼靴 Winged Boots",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "charges": 4,
+   "charge_note": "每日黎明恢复 1d4 点充能",
+   "desc": "消耗 1 充能，以魔法动作获得 30 尺飞行速度，持续 1 小时。"
+  },
+  {
+   "id": "boots_of_levitation",
+   "name": "漂浮之靴 Boots of Levitation",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "穿着时可对自己施放浮空术。"
+  },
+  {
+   "id": "boots_of_striding_and_springing",
+   "name": "大步跳跃之靴 Boots of Striding and Springing",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "速度变为 30 尺（若原本更高则不变），且不因负重超限或穿重甲而降低；每回合一次可只花 10 尺移动跳远 30 尺。"
+  },
+  {
+   "id": "cloak_of_the_bat",
+   "name": "蝙蝠斗篷 Cloak of the Bat",
+   "rarity": "rare",
+   "kind": "cloak",
+   "attune": true,
+   "note_only": true,
+   "desc": "敏捷（隐匿）有优势；在微光或黑暗中抓住斗篷边缘可获得 40 尺飞行速度；在微光或黑暗中可对自己施放变形术化为蝙蝠，每日一次。"
+  },
+  {
+   "id": "slippers_of_spider_climbing",
+   "name": "蛛行鞋 Slippers of Spider Climbing",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "获得等于速度的攀爬速度，可空手上下垂直面与天花板；但在湿滑表面（冰、油）上无效。"
+  },
+  {
+   "id": "ring_of_water_walking",
+   "name": "水上行走戒指 Ring of Water Walking",
+   "rarity": "uncommon",
+   "kind": "ring",
+   "attune": false,
+   "note_only": true,
+   "desc": "佩戴时可对自己施放水上行走。"
+  },
+  {
+   "id": "cloak_of_the_manta_ray",
+   "name": "蝠鲼斗篷 Cloak of the Manta Ray",
+   "rarity": "uncommon",
+   "kind": "cloak",
+   "attune": true,
+   "note_only": true,
+   "desc": "佩戴时可在水下呼吸，并获得 60 尺游泳速度。"
+  },
+  {
+   "id": "horseshoes_of_speed",
+   "name": "速度马蹄铁 Horseshoes of Speed",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "attune": false,
+   "speed_bonus": 30,
+   "desc": "四只马蹄铁全部钉在同一生物蹄上时，其速度 +30 尺（主要用于坐骑）。"
+  },
+  {
+   "id": "ring_of_feather_falling",
+   "name": "羽落戒指 Ring of Feather Falling",
+   "rarity": "rare",
+   "kind": "ring",
+   "attune": true,
+   "note_only": true,
+   "desc": "佩戴时坠落每轮只下降 60 尺，且不受坠落伤害。"
+  },
+  {
+   "id": "wings_of_flying",
+   "name": "飞行之翼 Wings of Flying",
+   "rarity": "rare",
+   "kind": "cloak",
+   "attune": true,
+   "note_only": true,
+   "desc": "以魔法动作将斗篷变为背上的双翼，获得 60 尺飞行速度，持续 1 小时；消失后 1d12 小时内无法再用。"
+  },
+  {
+   "id": "ring_of_jumping",
+   "name": "跳跃戒指 Ring of Jumping",
+   "rarity": "uncommon",
+   "kind": "ring",
+   "attune": true,
+   "note_only": true,
+   "desc": "佩戴时可对自己施放跳跃术。"
+  },
+  {
+   "id": "cape_of_the_mountebank",
+   "name": "骗子斗篷 Cape of the Mountebank",
+   "rarity": "rare",
+   "kind": "cloak",
+   "attune": false,
+   "note_only": true,
+   "desc": "以魔法动作施放任意门，每日一次；离开的位置留下烟雾，使该处轻度遮蔽至你下回合结束。"
+  },
+  {
+   "id": "wand_of_fireballs",
+   "name": "火球魔杖 Wand of Fireballs",
+   "rarity": "rare",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "每次至多消耗 3 充能施放火球术（豁免 DC 15），每多 1 充能提升 1 环。"
+  },
+  {
+   "id": "wand_of_lightning_bolts",
+   "name": "闪电束魔杖 Wand of Lightning Bolts",
+   "rarity": "rare",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "每次至多消耗 3 充能施放闪电束（豁免 DC 15），每多 1 充能提升 1 环。"
+  },
+  {
+   "id": "wand_of_magic_missiles",
+   "name": "魔法飞弹魔杖 Wand of Magic Missiles",
+   "rarity": "uncommon",
+   "kind": "wand",
+   "attune": false,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "每次至多消耗 3 充能施放魔法飞弹，每多 1 充能提升 1 环。"
+  },
+  {
+   "id": "wand_of_web",
+   "name": "蛛网魔杖 Wand of Web",
+   "rarity": "uncommon",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "消耗 1 充能施放蛛网术（豁免 DC 13）。"
+  },
+  {
+   "id": "wand_of_fear",
+   "name": "恐惧魔杖 Wand of Fear",
+   "rarity": "rare",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "可施放命令术（仅「逃」或「跪」，1 充能）与恐惧术（60 尺锥形，3 充能），豁免 DC 15。"
+  },
+  {
+   "id": "wand_of_paralysis",
+   "name": "麻痹魔杖 Wand of Paralysis",
+   "rarity": "rare",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "消耗 1 充能，以魔法动作射出蓝光，60 尺内目标须通过 DC 15 体质豁免否则麻痹 1 分钟（每回合结束可重复豁免）。"
+  },
+  {
+   "id": "wand_of_polymorph",
+   "name": "变形魔杖 Wand of Polymorph",
+   "rarity": "very_rare",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "消耗 1 充能施放变形术（豁免 DC 15）。"
+  },
+  {
+   "id": "wand_of_binding",
+   "name": "束缚魔杖 Wand of Binding",
+   "rarity": "rare",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "可施放定身怪物（5 充能）与定身类人（2 充能），豁免 DC 17。"
+  },
+  {
+   "id": "wand_of_secrets",
+   "name": "秘密魔杖 Wand of Secrets",
+   "rarity": "uncommon",
+   "kind": "wand",
+   "attune": false,
+   "charges": 3,
+   "charge_note": "每日黎明恢复 1d3 点充能",
+   "desc": "消耗 1 充能，若 60 尺内有密门或陷阱，魔杖会脉动并指向最近的一个。"
+  },
+  {
+   "id": "wand_of_magic_detection",
+   "name": "侦测魔法魔杖 Wand of Magic Detection",
+   "rarity": "uncommon",
+   "kind": "wand",
+   "attune": false,
+   "charges": 3,
+   "charge_note": "每日黎明恢复 1d3 点充能",
+   "desc": "消耗 1 充能施放侦测魔法。"
+  },
+  {
+   "id": "wand_of_enemy_detection",
+   "name": "侦测敌人魔杖 Wand of Enemy Detection",
+   "rarity": "rare",
+   "kind": "wand",
+   "attune": true,
+   "charges": 7,
+   "charge_note": "每日黎明恢复 1d6+1 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为灰烬毁坏",
+   "desc": "消耗 1 充能，1 分钟内可感知 60 尺内最近敌对生物的方向（不含距离），即使其隐形、以太、伪装或躲藏。"
+  },
+  {
+   "id": "staff_of_healing",
+   "name": "治疗法杖 Staff of Healing",
+   "rarity": "rare",
+   "kind": "staff",
+   "attune": true,
+   "charges": 10,
+   "charge_note": "每日黎明恢复 1d6+4 点充能；耗尽最后 1 点后掷 1d20，出 1 则永久消失",
+   "desc": "可消耗充能施放治疗伤口（1 充能/环级，最高 4 环）、次等复原术（2）、群体治疗伤口（5）。"
+  },
+  {
+   "id": "staff_of_charming",
+   "name": "魅惑法杖 Staff of Charming",
+   "rarity": "rare",
+   "kind": "staff",
+   "attune": true,
+   "charges": 10,
+   "charge_note": "每日黎明恢复 1d8+2 点充能；耗尽最后 1 点后掷 1d20，出 1 则化为尘埃毁坏",
+   "desc": "可用 1 充能施放魅惑类人、命令术或通晓语言；成功豁免只以你为目标的附魔系法术时，可用反应消耗 1 充能将其反弹给施法者；豁免失败时每日一次可改为成功。"
+  },
+  {
+   "id": "necklace_of_fireballs",
+   "name": "火球项链 Necklace of Fireballs",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "项链上挂有 1d6+3 颗珠子；以魔法动作取下一颗掷向 60 尺内，爆开为 3 环火球术（DC 15），每多掷一颗伤害 +1d6（上限 12d6）。"
+  },
+  {
+   "id": "circlet_of_blasting",
+   "name": "爆裂头环 Circlet of Blasting",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": false,
+   "charges": 1,
+   "charge_note": "每日黎明恢复 1 次",
+   "desc": "佩戴时可施放灼热射线（攻击加值 +5）。"
+  },
+  {
+   "id": "ring_of_regeneration",
+   "name": "再生戒指 Ring of Regeneration",
+   "rarity": "very_rare",
+   "kind": "ring",
+   "attune": true,
+   "note_only": true,
+   "desc": "每 10 分钟恢复 1d6 HP（需至少 1 HP）；失去的肢体在 1d6+1 天后长回。"
+  },
+  {
+   "id": "ring_of_invisibility",
+   "name": "隐形戒指 Ring of Invisibility",
+   "rarity": "legendary",
+   "kind": "ring",
+   "attune": true,
+   "note_only": true,
+   "desc": "以魔法动作使自己隐形，直至脱下戒指或用附赠动作显形。"
+  },
+  {
+   "id": "pearl_of_power",
+   "name": "力量珍珠 Pearl of Power",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "charges": 1,
+   "charge_note": "每日黎明恢复 1 次",
+   "desc": "以魔法动作恢复一个已消耗的 3 环或更低法术位。"
+  },
+  {
+   "id": "amulet_of_proof_against_detection",
+   "name": "防侦测护符 Amulet of Proof against Detection and Location",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "佩戴时不会被预言系法术锁定，也不会被魔法探知传感器察觉，除非你允许。"
+  },
+  {
+   "id": "bag_of_holding",
+   "name": "次元袋 Bag of Holding",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "内部约 2×2×4 尺，可装 500 磅、64 立方尺，自重 5 磅；内有大 10 分钟的呼吸空气。"
+  },
+  {
+   "id": "immovable_rod",
+   "name": "不动之杆 Immovable Rod",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "按动按钮后固定在原地，可承受 8000 磅重量；可用 DC 30 力量（运动）检定移动它。"
+  },
+  {
+   "id": "portable_hole",
+   "name": "便携洞 Portable Hole",
+   "rarity": "rare",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "展开为直径 6 尺的布，可造出 10 尺深的异次元空间；合上后近乎无重量，内有 1 小时的呼吸空气。"
+  },
+  {
+   "id": "rope_of_climbing",
+   "name": "攀爬绳索 Rope of Climbing",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "60 尺长、可承重 3000 磅；以魔法动作命令一端自行移动（每回合 10 尺）；打结后变为 50 尺并让攀爬检定有优势。"
+  },
+  {
+   "id": "lantern_of_revealing",
+   "name": "显形提灯 Lantern of Revealing",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "点燃后 1 品脱油可烧 6 小时，照亮 30 尺明亮光照与额外 30 尺微光；明亮光照内的隐形生物与物件可见。"
+  },
+  {
+   "id": "goggles_of_night",
+   "name": "夜视镜 Goggles of Night",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "佩戴时获得 60 尺黑暗视觉；若已有黑暗视觉则再 +60 尺。"
+  },
+  {
+   "id": "eyes_of_the_eagle",
+   "name": "鹰眼镜 Eyes of the Eagle",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": false,
+   "note_only": true,
+   "desc": "佩戴时依赖视觉的感知（察觉）检定有优势；视野清晰时可看清极远处小至 2 尺的细节。"
+  },
+  {
+   "id": "hat_of_disguise",
+   "name": "易容帽 Hat of Disguise",
+   "rarity": "uncommon",
+   "kind": "wondrous",
+   "attune": true,
+   "note_only": true,
+   "desc": "佩戴时可施放易容术，摘下帽子即结束。"
+  }
+ ]
+}

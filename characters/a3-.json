@@ -1,0 +1,95 @@
+{
+  "system": "dnd55e-character v1",
+  "name": "a3-",
+  "level": 3,
+  "xp": 0,
+  "class_id": "druid",
+  "subclass": "Circle of the Moon",
+  "order": "magician",
+  "land": "temperate",
+  "wild_shape_id": null,
+  "metamagic": [],
+  "innate_active": false,
+  "innate_used": 0,
+  "sorcerous_rest_used": false,
+  "mastery_spells": [],
+  "signature_spells": [],
+  "signature_used": [],
+  "offhand_weapon": "",
+  "background_id": "sailor",
+  "species_id": "elf",
+  "base_scores": {
+    "STR": 8,
+    "DEX": 13,
+    "CON": 12,
+    "INT": 14,
+    "WIS": 15,
+    "CHA": 10
+  },
+  "bg_bonus": {
+    "mode": "2+1",
+    "plus2": "WIS",
+    "plus1": "DEX"
+  },
+  "asi_history": [],
+  "skill_prof": [
+    "acrobatics",
+    "insight",
+    "medicine",
+    "perception",
+    "survival"
+  ],
+  "bonus_skills": [
+    "survival"
+  ],
+  "expertise": [],
+  "weapon_mastery": [],
+  "armor_index": 7,
+  "shield": false,
+  "tough_feat": false,
+  "hp_current": 21,
+  "hp_temp": 0,
+  "spell_slots_used": {
+    "1": 0
+  },
+  "feats": [],
+  "languages": "通用语, ",
+  "equipment": "",
+  "notes": "",
+  "exhaustion": 0,
+  "conditions": [],
+  "spells": {
+    "cantrips": [
+      "guidance",
+      "starry-wisp",
+      "shillelagh"
+    ],
+    "prepared": [
+      "goodberry",
+      "healing-word",
+      "faerie-fire",
+      "flame-blade",
+      "hold-person",
+      "spike-growth"
+    ]
+  },
+  "spellbook": [],
+  "book_pending": 0,
+  "weapon": "木棍 Quarterstaff",
+  "weapon_magic": 0,
+  "two_handed_grip": true,
+  "shield_magic": 0,
+  "items": [],
+  "fighting_style": null,
+  "concentration": null,
+  "lineage": "wood",
+  "race_free_used": [],
+  "res_used": {
+    "wildshape": 0
+  },
+  "font_slots": {},
+  "hit_dice_used": 0,
+  "death_success": 0,
+  "death_fail": 0,
+  "raging": false
+}

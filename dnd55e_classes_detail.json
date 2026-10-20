@@ -1,0 +1,4291 @@
+{
+ "meta": {
+  "name": "dnd55e 职业/子职明细",
+  "rules": "D&D 2024 (5.5e / 5R), SRD 5.2 (CC-BY-4.0)",
+  "note": "职业特性与资源数值取自 SRD 5.2；非 SRD 子职为 PHB 2024 要点摘要。"
+ },
+ "classes": {
+  "barbarian": {
+   "features": [
+    {
+     "index": "barbarian-rage",
+     "level": 1,
+     "name_en": "Rage",
+     "name": "狂暴 Rage",
+     "desc": "附赠动作进入狂暴（不穿重甲）：钝击/穿刺/挥砍抗性、力量攻击伤害加值、力量检定与豁免优势。次数见「职业资源」。"
+    },
+    {
+     "index": "barbarian-unarmored-defense",
+     "level": 1,
+     "name_en": "Unarmored Defense",
+     "name": "无甲防御",
+     "desc": "未穿护甲时 AC = 10 + 敏捷调整值 + 体质调整值（可用盾牌）。"
+    },
+    {
+     "index": "barbarian-weapon-mastery",
+     "level": 1,
+     "name_en": "Weapon Mastery",
+     "name": "武器专精",
+     "desc": "选 2 件熟练武器启用其专精属性（数量随等级提升）。"
+    },
+    {
+     "index": "barbarian-danger-sense",
+     "level": 2,
+     "name_en": "Danger Sense",
+     "name": "危险感知",
+     "desc": "未失能时，对可见危险（陷阱、法术等）的敏捷豁免有优势。"
+    },
+    {
+     "index": "barbarian-reckless-attack",
+     "level": 2,
+     "name_en": "Reckless Attack",
+     "name": "鲁莽攻击",
+     "desc": "本回合首次力量攻击可选择优势；代价是到你下回合开始前，对你也全部有优势。"
+    },
+    {
+     "index": "barbarian-subclass",
+     "level": 3,
+     "name_en": "Barbarian Subclass",
+     "name": "子职：道途",
+     "desc": "3 级选择一个道途（子职），获得其 3 级特性。"
+    },
+    {
+     "index": "barbarian-primal-knowledge",
+     "level": 3,
+     "name_en": "Primal Knowledge",
+     "name": "原始知识",
+     "desc": "额外获得 1 项技能熟练（驯兽/威吓/自然/察觉/生存）；狂暴时可用力量代替该检定的属性。"
+    },
+    {
+     "index": "barbarian-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（或 +1/+1/+1，上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "barbarian-extra-attack",
+     "level": 5,
+     "name_en": "Extra Attack",
+     "name": "额外攻击",
+     "desc": "执行攻击动作时可攻击 2 次。"
+    },
+    {
+     "index": "barbarian-fast-movement",
+     "level": 5,
+     "name_en": "Fast Movement",
+     "name": "快速移动",
+     "desc": "不穿重甲时速度 +10 尺。"
+    },
+    {
+     "index": "barbarian-feral-instinct",
+     "level": 7,
+     "name_en": "Feral Instinct",
+     "name": "野性本能",
+     "desc": "先攻有优势；若先攻掷出时未狂暴，可立即免费进入狂暴。"
+    },
+    {
+     "index": "barbarian-instinctive-pounce",
+     "level": 7,
+     "name_en": "Instinctive Pounce",
+     "name": "本能扑击",
+     "desc": "进入狂暴时，可作为该附赠动作的一部分移动至多半速。"
+    },
+    {
+     "index": "barbarian-brutal-strike",
+     "level": 9,
+     "name_en": "Brutal Strike",
+     "name": "凶蛮打击",
+     "desc": "可放弃攻击优势，换取 +1d10 伤害并附加击退 15 尺或击倒等效果。"
+    },
+    {
+     "index": "barbarian-relentless-rage",
+     "level": 11,
+     "name_en": "Relentless Rage",
+     "name": "不屈狂怒",
+     "desc": "狂暴中降到 0 HP 时，可做 DC 10 体质豁免（每次递增 5），成功则保持 1 HP。"
+    },
+    {
+     "index": "barbarian-improved-brutal-strike-1",
+     "level": 13,
+     "name_en": "Improved Brutal Strike",
+     "name": "强化凶蛮打击",
+     "desc": "凶蛮打击可再选一种效果（削弱目标的下次豁免等）。"
+    },
+    {
+     "index": "barbarian-persistent-rage",
+     "level": 15,
+     "name_en": "Persistent Rage",
+     "name": "持久狂暴",
+     "desc": "狂暴不再需要每回合维持；长休时直接恢复全部狂暴次数。"
+    },
+    {
+     "index": "barbarian-improved-brutal-strike-2",
+     "level": 17,
+     "name_en": "Improved Brutal Strike",
+     "name": "强化凶蛮打击（17 级）",
+     "desc": "凶蛮打击的额外伤害提升到 2d10。"
+    },
+    {
+     "index": "barbarian-indomitable-might",
+     "level": 18,
+     "name_en": "Indomitable Might",
+     "name": "不屈之力",
+     "desc": "力量检定可把 d20 结果视为你的力量值（不掷骰）。"
+    },
+    {
+     "index": "barbarian-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "barbarian-primal-champion",
+     "level": 20,
+     "name_en": "Primal Champion",
+     "name": "原始冠军",
+     "desc": "力量与体质各 +4，上限提升到 25。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "rage",
+     "name": "狂暴 Rage",
+     "from_level": 1,
+     "short": 1,
+     "long": "all",
+     "icon": "🔥",
+     "note": "附赠动作进入（不穿重甲）：钝/穿/砍抗性，力量攻击伤害 +2(9级+3/16级+4)，力量检定与豁免优势。短休恢复 1 次。",
+     "table": {
+      "1": 2,
+      "2": 2,
+      "3": 3,
+      "4": 3,
+      "5": 3,
+      "6": 4,
+      "7": 4,
+      "8": 4,
+      "9": 4,
+      "10": 4,
+      "11": 4,
+      "12": 5,
+      "13": 5,
+      "14": 5,
+      "15": 5,
+      "16": 5,
+      "17": 6,
+      "18": 6,
+      "19": 6,
+      "20": 6
+     },
+     "formula": null
+    }
+   ],
+   "dice_note": "武器专精 {n} 件 · 狂暴伤害 +{rd}",
+   "class_specific": {
+    "1": {
+     "rage_count": 2,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 2
+    },
+    "2": {
+     "rage_count": 2,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 2
+    },
+    "3": {
+     "rage_count": 3,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 2
+    },
+    "4": {
+     "rage_count": 3,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 3
+    },
+    "5": {
+     "rage_count": 3,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 3
+    },
+    "6": {
+     "rage_count": 4,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 3
+    },
+    "7": {
+     "rage_count": 4,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 3
+    },
+    "8": {
+     "rage_count": 4,
+     "rage_damage_bonus": 2,
+     "weapon_mastery": 3
+    },
+    "9": {
+     "rage_count": 4,
+     "rage_damage_bonus": 3,
+     "weapon_mastery": 3
+    },
+    "10": {
+     "rage_count": 4,
+     "rage_damage_bonus": 3,
+     "weapon_mastery": 4
+    },
+    "11": {
+     "rage_count": 4,
+     "rage_damage_bonus": 3,
+     "weapon_mastery": 4
+    },
+    "12": {
+     "rage_count": 5,
+     "rage_damage_bonus": 3,
+     "weapon_mastery": 4
+    },
+    "13": {
+     "rage_count": 5,
+     "rage_damage_bonus": 3,
+     "weapon_mastery": 4
+    },
+    "14": {
+     "rage_count": 5,
+     "rage_damage_bonus": 3,
+     "weapon_mastery": 4
+    },
+    "15": {
+     "rage_count": 5,
+     "rage_damage_bonus": 3,
+     "weapon_mastery": 4
+    },
+    "16": {
+     "rage_count": 5,
+     "rage_damage_bonus": 4,
+     "weapon_mastery": 4
+    },
+    "17": {
+     "rage_count": 6,
+     "rage_damage_bonus": 4,
+     "weapon_mastery": 4
+    },
+    "18": {
+     "rage_count": 6,
+     "rage_damage_bonus": 4,
+     "weapon_mastery": 4
+    },
+    "19": {
+     "rage_count": 6,
+     "rage_damage_bonus": 4,
+     "weapon_mastery": 4
+    },
+    "20": {
+     "rage_count": 6,
+     "rage_damage_bonus": 4,
+     "weapon_mastery": 4
+    }
+   }
+  },
+  "bard": {
+   "features": [
+    {
+     "index": "bard-bardic-inspiration",
+     "level": 1,
+     "name_en": "Bardic Inspiration",
+     "name": "吟游诗人灵感",
+     "desc": "附赠动作给 60 尺内一名生物一颗灵感骰（d6；5/10/15 级升为 d8/d10/d12），1 小时内一次 d20 检定失败可加上骰值。次数 = 魅力调整值（至少 1），5 级起短休也全恢复。"
+    },
+    {
+     "index": "bard-spellcasting",
+     "level": 1,
+     "name_en": "Spellcasting",
+     "name": "施法",
+     "desc": "以魅力施法，法术列表见吟游诗人。"
+    },
+    {
+     "index": "bard-expertise",
+     "level": 2,
+     "name_en": "Expertise",
+     "name": "专精",
+     "desc": "选 2 项已熟练的技能，熟练加值翻倍。"
+    },
+    {
+     "index": "bard-jack-of-all-trades",
+     "level": 2,
+     "name_en": "Jack of All Trades",
+     "name": "万事通",
+     "desc": "任何未熟练的属性检定，加一半熟练加值（向下取整）。"
+    },
+    {
+     "index": "bard-subclass",
+     "level": 3,
+     "name_en": "Bard Subclass",
+     "name": "子职：学院",
+     "desc": "3 级选择一个学院（子职）。"
+    },
+    {
+     "index": "bard-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "bard-font-of-inspiration",
+     "level": 5,
+     "name_en": "Font of Inspiration",
+     "name": "灵感泉源",
+     "desc": "短休后也能恢复全部灵感次数。"
+    },
+    {
+     "index": "bard-countercharm",
+     "level": 7,
+     "name_en": "Countercharm",
+     "name": "反迷惑",
+     "desc": "反应：30 尺内你或友军对魅惑/恐慌的豁免失败时，可重掷。"
+    },
+    {
+     "index": "bard-magical-secrets",
+     "level": 10,
+     "name_en": "Magical Secrets",
+     "name": "魔法秘密",
+     "desc": "从任意职业法术列表中选 2 个法术，视为吟游诗人法术常备。"
+    },
+    {
+     "index": "bard-superior-inspiration",
+     "level": 18,
+     "name_en": "Superior Inspiration",
+     "name": "卓越灵感",
+     "desc": "掷先攻时若没有灵感次数，立刻获得 1 次。"
+    },
+    {
+     "index": "bard-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "bard-words-of-creation",
+     "level": 20,
+     "name_en": "Words of Creation",
+     "name": "创世之言",
+     "desc": "可免费施放 Power Word Heal 与 Power Word Kill 各 1 次/长休。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "inspiration",
+     "name": "吟游诗人灵感 Bardic Inspiration",
+     "from_level": 1,
+     "die": {
+      "1": 6,
+      "5": 8,
+      "10": 10,
+      "15": 12
+     },
+     "short": 0,
+     "long": "all",
+     "icon": "🎵",
+     "note": "附赠动作给 60 尺内一名生物一颗灵感骰（d6→d8→d10→d12），1 小时内一次 d20 失败可加上骰值。次数 = 魅力调整值（至少 1）。5 级「灵感泉源」后短休也会全部恢复。",
+     "short_after_level": 5,
+     "short_after": "all",
+     "table": null,
+     "formula": "cha_mod_min1"
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {
+     "bardic_inspiration_die": 6
+    },
+    "2": {
+     "bardic_inspiration_die": 6
+    },
+    "3": {
+     "bardic_inspiration_die": 6
+    },
+    "4": {
+     "bardic_inspiration_die": 6
+    },
+    "5": {
+     "bardic_inspiration_die": 8
+    },
+    "6": {
+     "bardic_inspiration_die": 8
+    },
+    "7": {
+     "bardic_inspiration_die": 8
+    },
+    "8": {
+     "bardic_inspiration_die": 8
+    },
+    "9": {
+     "bardic_inspiration_die": 8
+    },
+    "10": {
+     "bardic_inspiration_die": 10
+    },
+    "11": {
+     "bardic_inspiration_die": 10
+    },
+    "12": {
+     "bardic_inspiration_die": 10
+    },
+    "13": {
+     "bardic_inspiration_die": 10
+    },
+    "14": {
+     "bardic_inspiration_die": 10
+    },
+    "15": {
+     "bardic_inspiration_die": 12
+    },
+    "16": {
+     "bardic_inspiration_die": 12
+    },
+    "17": {
+     "bardic_inspiration_die": 12
+    },
+    "18": {
+     "bardic_inspiration_die": 12
+    },
+    "19": {
+     "bardic_inspiration_die": 12
+    },
+    "20": {
+     "bardic_inspiration_die": 12
+    }
+   }
+  },
+  "cleric": {
+   "features": [
+    {
+     "index": "cleric-divine-order",
+     "level": 1,
+     "name_en": "Divine Order",
+     "name": "神圣职阶",
+     "desc": "二选一：保护者（军用武器 + 重甲熟练）或 施法者（额外 1 个戏法，宗教检定可用智力）。"
+    },
+    {
+     "index": "cleric-spellcasting",
+     "level": 1,
+     "name_en": "Spellcasting",
+     "name": "施法",
+     "desc": "以感知施法，长休后准备法术。"
+    },
+    {
+     "index": "cleric-channel-divinity",
+     "level": 2,
+     "name_en": "Channel Divinity",
+     "name": "引导神力",
+     "desc": "神圣火花（治疗或造成光耀/死灵伤害）与驱散不死；2 级 2 次、6 级 3 次、18 级 4 次，短休恢复 1 次。"
+    },
+    {
+     "index": "cleric-subclass",
+     "level": 3,
+     "name_en": "Cleric Subclass",
+     "name": "子职：领域",
+     "desc": "3 级选择一个领域（子职）。"
+    },
+    {
+     "index": "cleric-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "cleric-sear-undead",
+     "level": 5,
+     "name_en": "Sear Undead",
+     "name": "灼烧不死",
+     "desc": "驱散不死时，豁免失败的不死生物额外受光耀伤害。"
+    },
+    {
+     "index": "cleric-blessed-strikes",
+     "level": 7,
+     "name_en": "Blessed Strikes",
+     "name": "祝福打击",
+     "desc": "戏法或武器攻击命中时，额外造成 1d8 光耀或死灵伤害（二选一）。"
+    },
+    {
+     "index": "cleric-divine-intervention",
+     "level": 10,
+     "name_en": "Divine Intervention",
+     "name": "神意干预",
+     "desc": "无需法术位与材料，直接施放 1 个 5 环以下牧师法术（1 次/长休）。"
+    },
+    {
+     "index": "cleric-improved-blessed-strikes",
+     "level": 14,
+     "name_en": "Improved Blessed Strikes",
+     "name": "强化祝福打击",
+     "desc": "祝福打击的额外伤害提升到 2d8。"
+    },
+    {
+     "index": "cleric-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "cleric-greater-divine-intervention",
+     "level": 20,
+     "name_en": "Greater Divine Intervention",
+     "name": "强效神意干预",
+     "desc": "可施放 Wish；之后 2d4 天内不能再用。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "channel",
+     "name": "引导神力 Channel Divinity",
+     "from_level": 2,
+     "short": 1,
+     "long": "all",
+     "icon": "✨",
+     "note": "神圣火花（治疗或光耀/死灵伤害）与驱散不死，子职还会追加选项。短休恢复 1 次。",
+     "table": {
+      "1": null,
+      "2": 2,
+      "3": 2,
+      "4": 2,
+      "5": 2,
+      "6": 3,
+      "7": 3,
+      "8": 3,
+      "9": 3,
+      "10": 3,
+      "11": 3,
+      "12": 3,
+      "13": 3,
+      "14": 3,
+      "15": 3,
+      "16": 3,
+      "17": 3,
+      "18": 4,
+      "19": 4,
+      "20": 4
+     },
+     "formula": null
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {
+     "channel_divinity_charges": 0
+    },
+    "2": {
+     "channel_divinity_charges": 2
+    },
+    "3": {
+     "channel_divinity_charges": 2
+    },
+    "4": {
+     "channel_divinity_charges": 2
+    },
+    "5": {
+     "channel_divinity_charges": 2
+    },
+    "6": {
+     "channel_divinity_charges": 3
+    },
+    "7": {
+     "channel_divinity_charges": 3
+    },
+    "8": {
+     "channel_divinity_charges": 3
+    },
+    "9": {
+     "channel_divinity_charges": 3
+    },
+    "10": {
+     "channel_divinity_charges": 3
+    },
+    "11": {
+     "channel_divinity_charges": 3
+    },
+    "12": {
+     "channel_divinity_charges": 3
+    },
+    "13": {
+     "channel_divinity_charges": 3
+    },
+    "14": {
+     "channel_divinity_charges": 3
+    },
+    "15": {
+     "channel_divinity_charges": 3
+    },
+    "16": {
+     "channel_divinity_charges": 3
+    },
+    "17": {
+     "channel_divinity_charges": 3
+    },
+    "18": {
+     "channel_divinity_charges": 4
+    },
+    "19": {
+     "channel_divinity_charges": 4
+    },
+    "20": {
+     "channel_divinity_charges": 4
+    }
+   }
+  },
+  "druid": {
+   "features": [
+    {
+     "index": "druid-druidic",
+     "level": 1,
+     "name_en": "Druidic",
+     "name": "德鲁伊语",
+     "desc": "掌握德鲁伊秘密语言，并自带动物交谈。"
+    },
+    {
+     "index": "druid-primal-order",
+     "level": 1,
+     "name_en": "Primal Order",
+     "name": "原始职阶",
+     "desc": "二选一：魔术师（额外 1 个戏法，自然检定可用智力）或 守护者（军用武器 + 中甲熟练）。"
+    },
+    {
+     "index": "druid-spellcasting",
+     "level": 1,
+     "name_en": "Spellcasting",
+     "name": "施法",
+     "desc": "以感知施法，长休后准备法术。"
+    },
+    {
+     "index": "druid-wild-shape",
+     "level": 2,
+     "name_en": "Wild Shape",
+     "name": "荒野变形",
+     "desc": "附赠动作变为已学会的野兽形态，持续「德鲁伊等级一半」小时；2 级 2 次、6 级 3 次、17 级 4 次，短休恢复 1 次。"
+    },
+    {
+     "index": "druid-wild-companion",
+     "level": 2,
+     "name_en": "Wild Companion",
+     "name": "荒野伙伴",
+     "desc": "可消耗 1 次荒野变形次数，施放 Find Familiar 召出魔宠。"
+    },
+    {
+     "index": "druid-subclass",
+     "level": 3,
+     "name_en": "Druid Subclass",
+     "name": "子职：结社",
+     "desc": "3 级选择一个结社（子职）。"
+    },
+    {
+     "index": "druid-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "druid-wild-resurgence",
+     "level": 5,
+     "name_en": "Wild Resurgence",
+     "name": "荒野复苏",
+     "desc": "可消耗 1 个法术位换回 1 次荒野变形（1 次/长休）。"
+    },
+    {
+     "index": "druid-elemental-fury",
+     "level": 7,
+     "name_en": "Elemental Fury",
+     "name": "元素之怒",
+     "desc": "戏法与野兽攻击额外 +1d8 元素伤害；或让 10 尺内目标受伤。"
+    },
+    {
+     "index": "druid-improved-elemental-fury",
+     "level": 15,
+     "name_en": "Improved Elemental Fury",
+     "name": "强化元素之怒",
+     "desc": "所选元素之怒强化：强力施法（10 尺以上射程的德鲁伊戏法 +300 尺）/ 原始打击（额外伤害升到 2d8）。"
+    },
+    {
+     "index": "druid-beast-spells",
+     "level": 18,
+     "name_en": "Beast Spells",
+     "name": "野兽施法",
+     "desc": "野兽形态下也能施放法术。"
+    },
+    {
+     "index": "druid-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "druid-archdruid",
+     "level": 20,
+     "name_en": "Archdruid",
+     "name": "大德鲁伊",
+     "desc": "荒野变形次数恢复更灵活，并且衰老速度变为每 10 年 1 岁。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "wildshape",
+     "name": "荒野变形 Wild Shape",
+     "from_level": 2,
+     "short": 1,
+     "long": "all",
+     "icon": "🐺",
+     "note": "附赠动作变为已学会的野兽形态，持续「等级一半」小时。短休恢复 1 次。",
+     "table": {
+      "1": null,
+      "2": 2,
+      "3": 2,
+      "4": 2,
+      "5": 2,
+      "6": 3,
+      "7": 3,
+      "8": 3,
+      "9": 3,
+      "10": 3,
+      "11": 3,
+      "12": 3,
+      "13": 3,
+      "14": 3,
+      "15": 3,
+      "16": 3,
+      "17": 4,
+      "18": 4,
+      "19": 4,
+      "20": 4
+     },
+     "formula": null
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {
+     "wild_shape_uses": 0
+    },
+    "2": {
+     "wild_shape_uses": 2
+    },
+    "3": {
+     "wild_shape_uses": 2
+    },
+    "4": {
+     "wild_shape_uses": 2
+    },
+    "5": {
+     "wild_shape_uses": 2
+    },
+    "6": {
+     "wild_shape_uses": 3
+    },
+    "7": {
+     "wild_shape_uses": 3
+    },
+    "8": {
+     "wild_shape_uses": 3
+    },
+    "9": {
+     "wild_shape_uses": 3
+    },
+    "10": {
+     "wild_shape_uses": 3
+    },
+    "11": {
+     "wild_shape_uses": 3
+    },
+    "12": {
+     "wild_shape_uses": 3
+    },
+    "13": {
+     "wild_shape_uses": 3
+    },
+    "14": {
+     "wild_shape_uses": 3
+    },
+    "15": {
+     "wild_shape_uses": 3
+    },
+    "16": {
+     "wild_shape_uses": 3
+    },
+    "17": {
+     "wild_shape_uses": 4
+    },
+    "18": {
+     "wild_shape_uses": 4
+    },
+    "19": {
+     "wild_shape_uses": 4
+    },
+    "20": {
+     "wild_shape_uses": 4
+    }
+   }
+  },
+  "fighter": {
+   "features": [
+    {
+     "index": "fighter-fighting-style",
+     "level": 1,
+     "name_en": "Fighting Style",
+     "name": "战斗风格",
+     "desc": "从战斗风格专长中选 1 个（仅战士/圣武士/游侠拥有此特性）。"
+    },
+    {
+     "index": "fighter-second-wind",
+     "level": 1,
+     "name_en": "Second Wind",
+     "name": "回气",
+     "desc": "附赠动作恢复 1d10 + 战士等级 的 HP；次数见「职业资源」，短休恢复 1 次。"
+    },
+    {
+     "index": "fighter-weapon-mastery",
+     "level": 1,
+     "name_en": "Weapon Mastery",
+     "name": "武器专精",
+     "desc": "选 3 件熟练武器启用其专精属性（数量随等级提升）。"
+    },
+    {
+     "index": "fighter-action-surge",
+     "level": 2,
+     "name_en": "Action Surge",
+     "name": "行动激增",
+     "desc": "本回合额外获得 1 个动作（不能是魔法动作）；短休或长休后恢复。"
+    },
+    {
+     "index": "fighter-tactical-mind",
+     "level": 2,
+     "name_en": "Tactical Mind",
+     "name": "战术思维",
+     "desc": "检定失败时消耗 1 次回气，加 1d10（可能翻盘）。"
+    },
+    {
+     "index": "fighter-subclass",
+     "level": 3,
+     "name_en": "Fighter Subclass",
+     "name": "子职",
+     "desc": "3 级选择一个子职。"
+    },
+    {
+     "index": "fighter-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "fighter-extra-attack",
+     "level": 5,
+     "name_en": "Extra Attack",
+     "name": "额外攻击",
+     "desc": "攻击动作可攻击 2 次。"
+    },
+    {
+     "index": "fighter-tactical-shift",
+     "level": 5,
+     "name_en": "Tactical Shift",
+     "name": "战术转移",
+     "desc": "使用回气时，可移动至多半速且不引发借机攻击。"
+    },
+    {
+     "index": "fighter-indomitable",
+     "level": 9,
+     "name_en": "Indomitable",
+     "name": "不屈",
+     "desc": "豁免失败可重掷并加战士等级加值；次数见「职业资源」（长休恢复）。"
+    },
+    {
+     "index": "fighter-tactical-master",
+     "level": 9,
+     "name_en": "Tactical Master",
+     "name": "战术大师",
+     "desc": "武器专精可临时改为 Push / Sap / Slow。"
+    },
+    {
+     "index": "fighter-two-extra-attacks",
+     "level": 11,
+     "name_en": "Two Extra Attacks",
+     "name": "双重额外攻击",
+     "desc": "攻击动作可攻击 3 次。"
+    },
+    {
+     "index": "fighter-studied-attacks",
+     "level": 13,
+     "name_en": "Studied Attacks",
+     "name": "研究攻击",
+     "desc": "连续两次攻击同一目标时，若上次失手，本次有优势。"
+    },
+    {
+     "index": "fighter-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "fighter-three-extra-attacks",
+     "level": 20,
+     "name_en": "Three Extra Attacks",
+     "name": "三重额外攻击",
+     "desc": "攻击动作可攻击 4 次。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "second_wind",
+     "name": "回气 Second Wind",
+     "from_level": 1,
+     "short": 1,
+     "long": "all",
+     "icon": "💨",
+     "note": "附赠动作恢复 1d10 + 战士等级 的 HP。短休恢复 1 次。",
+     "table": {
+      "1": 2,
+      "2": 2,
+      "3": 2,
+      "4": 3,
+      "5": 3,
+      "6": 3,
+      "7": 3,
+      "8": 3,
+      "9": 3,
+      "10": 4,
+      "11": 4,
+      "12": 4,
+      "13": 4,
+      "14": 4,
+      "15": 4,
+      "16": 4,
+      "17": 4,
+      "18": 4,
+      "19": 4,
+      "20": 4
+     },
+     "formula": null
+    },
+    {
+     "id": "action_surge",
+     "name": "行动激增 Action Surge",
+     "from_level": 2,
+     "short": "all",
+     "long": "all",
+     "icon": "⚡",
+     "note": "本回合额外 1 个动作（不能是魔法动作）；17 级起每长休 2 次，但一回合只能用 1 次。短休或长休全部恢复。",
+     "table": {
+      "1": null,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1,
+      "11": 1,
+      "12": 1,
+      "13": 1,
+      "14": 1,
+      "15": 1,
+      "16": 1,
+      "17": 2,
+      "18": 2,
+      "19": 2,
+      "20": 2
+     },
+     "formula": null
+    },
+    {
+     "id": "indomitable",
+     "name": "不屈 Indomitable",
+     "from_level": 9,
+     "short": 0,
+     "long": "all",
+     "icon": "🗿",
+     "note": "豁免失败可重掷并加战士等级加值，必须接受新结果。长休全部恢复。",
+     "table": {
+      "1": null,
+      "2": null,
+      "3": null,
+      "4": null,
+      "5": null,
+      "6": null,
+      "7": null,
+      "8": null,
+      "9": 1,
+      "10": 1,
+      "11": 1,
+      "12": 1,
+      "13": 2,
+      "14": 2,
+      "15": 2,
+      "16": 2,
+      "17": 3,
+      "18": 3,
+      "19": 3,
+      "20": 3
+     },
+     "formula": null
+    }
+   ],
+   "dice_note": "武器专精 {n} 件",
+   "class_specific": {
+    "1": {
+     "second_wind_uses": 2,
+     "weapon_mastery": 3
+    },
+    "2": {
+     "second_wind_uses": 2,
+     "weapon_mastery": 3
+    },
+    "3": {
+     "second_wind_uses": 2,
+     "weapon_mastery": 3
+    },
+    "4": {
+     "second_wind_uses": 3,
+     "weapon_mastery": 4
+    },
+    "5": {
+     "second_wind_uses": 3,
+     "weapon_mastery": 4
+    },
+    "6": {
+     "second_wind_uses": 3,
+     "weapon_mastery": 4
+    },
+    "7": {
+     "second_wind_uses": 3,
+     "weapon_mastery": 4
+    },
+    "8": {
+     "second_wind_uses": 3,
+     "weapon_mastery": 4
+    },
+    "9": {
+     "second_wind_uses": 3,
+     "weapon_mastery": 4
+    },
+    "10": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 5
+    },
+    "11": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 5
+    },
+    "12": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 5
+    },
+    "13": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 5
+    },
+    "14": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 5
+    },
+    "15": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 5
+    },
+    "16": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 6
+    },
+    "17": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 6
+    },
+    "18": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 6
+    },
+    "19": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 6
+    },
+    "20": {
+     "second_wind_uses": 4,
+     "weapon_mastery": 6
+    }
+   }
+  },
+  "monk": {
+   "features": [
+    {
+     "index": "monk-martial-arts",
+     "level": 1,
+     "name_en": "Martial Arts",
+     "name": "武艺",
+     "desc": "徒手与武僧武器可用敏捷代替力量，伤害骰随等级提升；攻击动作后可附赠动作再打 1 次。"
+    },
+    {
+     "index": "monk-unarmored-defense",
+     "level": 1,
+     "name_en": "Unarmored Defense",
+     "name": "无甲防御",
+     "desc": "无甲且无盾时 AC = 10 + 敏捷 + 感知调整值。"
+    },
+    {
+     "index": "monk-monks-focus",
+     "level": 2,
+     "name_en": "Monk's Focus",
+     "name": "气",
+     "desc": "气点数量 = 武僧等级；可用于 疾风连击 /  Patient Defense / Step of the Wind。短休或长休全部恢复。"
+    },
+    {
+     "index": "monk-unarmored-movement",
+     "level": 2,
+     "name_en": "Unarmored Movement",
+     "name": "无甲移动",
+     "desc": "无甲且无盾时速度提升（数值见职业表，10 级起可垂直移动）。"
+    },
+    {
+     "index": "monk-uncanny-metabolism",
+     "level": 2,
+     "name_en": "Uncanny Metabolism",
+     "name": "奇异代谢",
+     "desc": "掷先攻时回满气点并回复 1 个生命骰（1 次/长休）。"
+    },
+    {
+     "index": "monk-subclass",
+     "level": 3,
+     "name_en": "Monk Subclass",
+     "name": "子职：宗派",
+     "desc": "3 级选择一个宗派（子职）。"
+    },
+    {
+     "index": "monk-deflect-attacks",
+     "level": 3,
+     "name_en": "Deflect Attacks",
+     "name": "拨挡攻击",
+     "desc": "反应：减免 1d10+敏捷+等级 的钝/穿/砍伤害；减至 0 可花 1 气点反掷。"
+    },
+    {
+     "index": "monk-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "monk-slow-fall",
+     "level": 4,
+     "name_en": "Slow Fall",
+     "name": "轻身坠",
+     "desc": "反应：减少 5 × 武僧等级 的坠落伤害。"
+    },
+    {
+     "index": "monk-extra-attack",
+     "level": 5,
+     "name_en": "Extra Attack",
+     "name": "额外攻击",
+     "desc": "攻击动作可攻击 2 次。"
+    },
+    {
+     "index": "monk-stunning-strike",
+     "level": 5,
+     "name_en": "Stunning Strike",
+     "name": "震慑打击",
+     "desc": "命中后花 1 气点：目标体质豁免，失败则被震慑到你的下回合。"
+    },
+    {
+     "index": "monk-empowered-strikes",
+     "level": 6,
+     "name_en": "Empowered Strikes",
+     "name": "强化打击",
+     "desc": "徒手打击可造成力场伤害，无视对钝击的抵抗。"
+    },
+    {
+     "index": "monk-evasion",
+     "level": 7,
+     "name_en": "Evasion",
+     "name": "闪避",
+     "desc": "敏捷豁免成功则不受伤害，失败只受一半。"
+    },
+    {
+     "index": "monk-acrobatic-movement",
+     "level": 9,
+     "name_en": "Acrobatic Movement",
+     "name": "杂技移动",
+     "desc": "战斗中可在垂直面或液面上移动而不坠落。"
+    },
+    {
+     "index": "monk-heightened-focus",
+     "level": 10,
+     "name_en": "Heightened Focus",
+     "name": "专注强化",
+     "desc": "疾风连击 3 次攻击、闪避附带移动、疾行可带一名同伴。"
+    },
+    {
+     "index": "monk-self-restoration",
+     "level": 10,
+     "name_en": "Self-Restoration",
+     "name": "自我恢复",
+     "desc": "每回合结束自动解除 1 项：魅惑、恐慌、中毒。"
+    },
+    {
+     "index": "monk-deflect-energy",
+     "level": 13,
+     "name_en": "Deflect Energy",
+     "name": "拨挡能量",
+     "desc": "拨挡攻击可用于任意伤害类型（含火焰、力场）。"
+    },
+    {
+     "index": "monk-disciplined-survivor",
+     "level": 14,
+     "name_en": "Disciplined Survivor",
+     "name": "自律生还者",
+     "desc": "获得全部豁免的熟练；豁免失败时可花 1 气点重掷（必须采用新结果）。"
+    },
+    {
+     "index": "monk-perfect-focus",
+     "level": 15,
+     "name_en": "Perfect Focus",
+     "name": "完美专注",
+     "desc": "掷先攻时若气点为 0，立刻恢复 4 点。"
+    },
+    {
+     "index": "monk-superior-defense",
+     "level": 18,
+     "name_en": "Superior Defense",
+     "name": "卓越防御",
+     "desc": "附赠动作花 3 气点：1 分钟内对所有伤害有抗性。"
+    },
+    {
+     "index": "monk-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "monk-body-and-mind",
+     "level": 20,
+     "name_en": "Body and Mind",
+     "name": "身心合一",
+     "desc": "敏捷与感知各 +4，上限提升到 25。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "focus",
+     "name": "气 Focus Points",
+     "from_level": 2,
+     "short": "all",
+     "long": "all",
+     "icon": "☯",
+     "note": "气点 = 武僧等级。疾风连击 1 点、Patient Defense 1 点、Step of the Wind 1 点、震慑打击 1 点。短休或长休全部恢复。",
+     "table": null,
+     "formula": "level"
+    }
+   ],
+   "dice_note": "武艺伤害骰 {d}（徒手/武僧武器）",
+   "class_specific": {
+    "1": {
+     "martial_arts_die": 6,
+     "focus_points": 0,
+     "unarmored_movement_bonus": 0
+    },
+    "2": {
+     "martial_arts_die": 6,
+     "focus_points": 2,
+     "unarmored_movement_bonus": 10
+    },
+    "3": {
+     "martial_arts_die": 6,
+     "focus_points": 3,
+     "unarmored_movement_bonus": 10
+    },
+    "4": {
+     "martial_arts_die": 6,
+     "focus_points": 4,
+     "unarmored_movement_bonus": 10
+    },
+    "5": {
+     "martial_arts_die": 8,
+     "focus_points": 5,
+     "unarmored_movement_bonus": 10
+    },
+    "6": {
+     "martial_arts_die": 8,
+     "focus_points": 6,
+     "unarmored_movement_bonus": 15
+    },
+    "7": {
+     "martial_arts_die": 8,
+     "focus_points": 7,
+     "unarmored_movement_bonus": 15
+    },
+    "8": {
+     "martial_arts_die": 8,
+     "focus_points": 8,
+     "unarmored_movement_bonus": 15
+    },
+    "9": {
+     "martial_arts_die": 8,
+     "focus_points": 9,
+     "unarmored_movement_bonus": 15
+    },
+    "10": {
+     "martial_arts_die": 8,
+     "focus_points": 10,
+     "unarmored_movement_bonus": 20
+    },
+    "11": {
+     "martial_arts_die": 10,
+     "focus_points": 11,
+     "unarmored_movement_bonus": 20
+    },
+    "12": {
+     "martial_arts_die": 10,
+     "focus_points": 12,
+     "unarmored_movement_bonus": 20
+    },
+    "13": {
+     "martial_arts_die": 10,
+     "focus_points": 13,
+     "unarmored_movement_bonus": 20
+    },
+    "14": {
+     "martial_arts_die": 10,
+     "focus_points": 14,
+     "unarmored_movement_bonus": 25
+    },
+    "15": {
+     "martial_arts_die": 10,
+     "focus_points": 15,
+     "unarmored_movement_bonus": 25
+    },
+    "16": {
+     "martial_arts_die": 10,
+     "focus_points": 16,
+     "unarmored_movement_bonus": 25
+    },
+    "17": {
+     "martial_arts_die": 12,
+     "focus_points": 17,
+     "unarmored_movement_bonus": 25
+    },
+    "18": {
+     "martial_arts_die": 12,
+     "focus_points": 18,
+     "unarmored_movement_bonus": 30
+    },
+    "19": {
+     "martial_arts_die": 12,
+     "focus_points": 19,
+     "unarmored_movement_bonus": 30
+    },
+    "20": {
+     "martial_arts_die": 12,
+     "focus_points": 20,
+     "unarmored_movement_bonus": 30
+    }
+   }
+  },
+  "paladin": {
+   "features": [
+    {
+     "index": "paladin-lay-on-hands",
+     "level": 1,
+     "name_en": "Lay On Hands",
+     "name": "圣疗",
+     "desc": "治疗池 = 5 × 圣武士等级（长休回满）；附赠动作治疗，或花 5 点解除中毒。"
+    },
+    {
+     "index": "paladin-spellcasting",
+     "level": 1,
+     "name_en": "Spellcasting",
+     "name": "施法",
+     "desc": "以魅力施法（1 级起即有法术位）。"
+    },
+    {
+     "index": "paladin-weapon-mastery",
+     "level": 1,
+     "name_en": "Weapon Mastery",
+     "name": "武器专精",
+     "desc": "选 2 件熟练武器启用其专精属性。"
+    },
+    {
+     "index": "paladin-fighting-style",
+     "level": 2,
+     "name_en": "Fighting Style",
+     "name": "战斗风格",
+     "desc": "2 级：从战斗风格专长中选 1 个。"
+    },
+    {
+     "index": "paladin-paladins-smite",
+     "level": 2,
+     "name_en": "Paladin's Smite",
+     "name": "圣武士斩击",
+     "desc": "命中后可消耗 1 个法术位追加 2d8 光耀伤害（每回合 1 次）。"
+    },
+    {
+     "index": "paladin-channel-divinity",
+     "level": 3,
+     "name_en": "Channel Divinity",
+     "name": "引导神力",
+     "desc": "神圣感知与子职效果；3 级 2 次、11 级 3 次，短休恢复 1 次。"
+    },
+    {
+     "index": "paladin-subclass",
+     "level": 3,
+     "name_en": "Paladin Subclass",
+     "name": "子职：誓约",
+     "desc": "3 级选择一个誓约（子职）。"
+    },
+    {
+     "index": "paladin-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "paladin-extra-attack",
+     "level": 5,
+     "name_en": "Extra Attack",
+     "name": "额外攻击",
+     "desc": "攻击动作可攻击 2 次。"
+    },
+    {
+     "index": "paladin-faithful-steed",
+     "level": 5,
+     "name_en": "Faithful Steed",
+     "name": "忠诚坐骑",
+     "desc": "可免费施放 Find Steed（1 次/长休，无需材料）。"
+    },
+    {
+     "index": "paladin-aura-of-protection",
+     "level": 6,
+     "name_en": "Aura of Protection",
+     "name": "守护灵光",
+     "desc": "10 尺灵光内，你与友军的豁免 + 魅力调整值。"
+    },
+    {
+     "index": "paladin-abjure-foes",
+     "level": 9,
+     "name_en": "Abjure Foes",
+     "name": "斥退敌人",
+     "desc": "引导神力：30 尺内敌人感知豁免，失败则恐慌 1 分钟。"
+    },
+    {
+     "index": "paladin-aura-of-courage",
+     "level": 10,
+     "name_en": "Aura of Courage",
+     "name": "勇气灵光",
+     "desc": "灵光内友军免疫恐慌。"
+    },
+    {
+     "index": "paladin-radiant-strikes",
+     "level": 11,
+     "name_en": "Radiant Strikes",
+     "name": "光耀打击",
+     "desc": "武器或徒手命中额外 +1d8 光耀伤害。"
+    },
+    {
+     "index": "paladin-restoring-touch",
+     "level": 14,
+     "name_en": "Restoring Touch",
+     "name": "恢复之触",
+     "desc": "圣疗可额外解除中毒、疾病、麻痹、目盲、失聪等。"
+    },
+    {
+     "index": "paladin-aura-expansion",
+     "level": 18,
+     "name_en": "Aura Expansion",
+     "name": "灵光扩张",
+     "desc": "守护灵光 / 勇气灵光范围扩大到 30 尺。"
+    },
+    {
+     "index": "paladin-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "lay_on_hands",
+     "name": "圣疗 Lay On Hands",
+     "from_level": 1,
+     "short": 0,
+     "long": "all",
+     "icon": "🕊",
+     "note": "治疗池 = 5 × 圣武士等级（长休回满）。附赠动作治疗，或花 5 点解除中毒。",
+     "table": null,
+     "formula": "5*level"
+    },
+    {
+     "id": "channel",
+     "name": "引导神力 Channel Divinity",
+     "from_level": 3,
+     "short": 1,
+     "long": "all",
+     "icon": "✨",
+     "note": "神圣感知与子职效果。短休恢复 1 次。",
+     "table": {
+      "1": null,
+      "2": null,
+      "3": 2,
+      "4": 2,
+      "5": 2,
+      "6": 2,
+      "7": 2,
+      "8": 2,
+      "9": 2,
+      "10": 2,
+      "11": 3,
+      "12": 3,
+      "13": 3,
+      "14": 3,
+      "15": 3,
+      "16": 3,
+      "17": 3,
+      "18": 3,
+      "19": 3,
+      "20": 3
+     },
+     "formula": null
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {
+     "channel_divinity_charges": 0
+    },
+    "2": {
+     "channel_divinity_charges": 0
+    },
+    "3": {
+     "channel_divinity_charges": 2
+    },
+    "4": {
+     "channel_divinity_charges": 2
+    },
+    "5": {
+     "channel_divinity_charges": 2
+    },
+    "6": {
+     "channel_divinity_charges": 2
+    },
+    "7": {
+     "channel_divinity_charges": 2
+    },
+    "8": {
+     "channel_divinity_charges": 2
+    },
+    "9": {
+     "channel_divinity_charges": 2
+    },
+    "10": {
+     "channel_divinity_charges": 2
+    },
+    "11": {
+     "channel_divinity_charges": 3
+    },
+    "12": {
+     "channel_divinity_charges": 3
+    },
+    "13": {
+     "channel_divinity_charges": 3
+    },
+    "14": {
+     "channel_divinity_charges": 3
+    },
+    "15": {
+     "channel_divinity_charges": 3
+    },
+    "16": {
+     "channel_divinity_charges": 3
+    },
+    "17": {
+     "channel_divinity_charges": 3
+    },
+    "18": {
+     "channel_divinity_charges": 3
+    },
+    "19": {
+     "channel_divinity_charges": 3
+    },
+    "20": {
+     "channel_divinity_charges": 3
+    }
+   }
+  },
+  "ranger": {
+   "features": [
+    {
+     "index": "ranger-favored-enemy",
+     "level": 1,
+     "name_en": "Favored Enemy",
+     "name": "宿敌",
+     "desc": "始终准备 Hunter's Mark，可不耗法术位施放 2 次；5/9/13/17 级增至 3/4/5/6 次，长休全部恢复。"
+    },
+    {
+     "index": "ranger-spellcasting",
+     "level": 1,
+     "name_en": "Spellcasting",
+     "name": "施法",
+     "desc": "以感知施法。"
+    },
+    {
+     "index": "ranger-weapon-mastery",
+     "level": 1,
+     "name_en": "Weapon Mastery",
+     "name": "武器专精",
+     "desc": "选 2 件熟练武器启用其专精属性。"
+    },
+    {
+     "index": "ranger-deft-explorer",
+     "level": 2,
+     "name_en": "Deft Explorer",
+     "name": "灵巧探索者",
+     "desc": "1 项技能专精，并额外掌握 2 门语言。"
+    },
+    {
+     "index": "ranger-fighting-style",
+     "level": 2,
+     "name_en": "Fighting Style",
+     "name": "战斗风格",
+     "desc": "2 级：从战斗风格专长中选 1 个。"
+    },
+    {
+     "index": "ranger-subclass",
+     "level": 3,
+     "name_en": "Ranger Subclass",
+     "name": "子职",
+     "desc": "3 级选择一个子职。"
+    },
+    {
+     "index": "ranger-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "ranger-extra-attack",
+     "level": 5,
+     "name_en": "Extra Attack",
+     "name": "额外攻击",
+     "desc": "攻击动作可攻击 2 次。"
+    },
+    {
+     "index": "ranger-roving",
+     "level": 6,
+     "name_en": "Roving",
+     "name": "游荡",
+     "desc": "不穿重甲时速度 +10 尺；攀爬与游泳速度等于你的速度。"
+    },
+    {
+     "index": "ranger-expertise",
+     "level": 9,
+     "name_en": "Expertise",
+     "name": "专精",
+     "desc": "再选 2 项已熟练技能，熟练加值翻倍。"
+    },
+    {
+     "index": "ranger-tireless",
+     "level": 10,
+     "name_en": "Tireless",
+     "name": "不倦",
+     "desc": "附赠动作给自己 1d8 + 感知调整值 的临时 HP；短休可减 1 级力竭。"
+    },
+    {
+     "index": "ranger-relentless-hunter",
+     "level": 13,
+     "name_en": "Relentless Hunter",
+     "name": "无情猎手",
+     "desc": "受到伤害时，为维持 Hunter's Mark 的专注豁免自动成功。"
+    },
+    {
+     "index": "ranger-natures-veil",
+     "level": 14,
+     "name_en": "Nature's Veil",
+     "name": "自然面纱",
+     "desc": "附赠动作变为隐形，持续到你的下回合结束。"
+    },
+    {
+     "index": "ranger-precise-hunter",
+     "level": 17,
+     "name_en": "Precise Hunter",
+     "name": "精准猎手",
+     "desc": "对 Hunter's Mark 目标的攻击有优势。"
+    },
+    {
+     "index": "ranger-feral-senses",
+     "level": 18,
+     "name_en": "Feral Senses",
+     "name": "野性感官",
+     "desc": "可察觉 30 尺内的隐形生物，且看不见时攻击不再有劣势。"
+    },
+    {
+     "index": "ranger-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "ranger-foe-slayer",
+     "level": 20,
+     "name_en": "Foe Slayer",
+     "name": "灭敌者",
+     "desc": "Hunter's Mark 的额外伤害骰从 d6 提升为 d10。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "favored_enemy",
+     "name": "宿敌（免环 Hunter's Mark）",
+     "from_level": 1,
+     "short": 0,
+     "long": "all",
+     "icon": "🏹",
+     "note": "Hunter's Mark 始终准备；可不耗法术位施放的次数见职业表（1级2次 / 5级3 / 9级4 / 13级5 / 17级6）；长休全部恢复。",
+     "table": {
+      "1": 2,
+      "2": 2,
+      "3": 2,
+      "4": 2,
+      "5": 3,
+      "6": 3,
+      "7": 3,
+      "8": 3,
+      "9": 4,
+      "10": 4,
+      "11": 4,
+      "12": 4,
+      "13": 5,
+      "14": 5,
+      "15": 5,
+      "16": 5,
+      "17": 6,
+      "18": 6,
+      "19": 6,
+      "20": 6
+     },
+     "formula": null
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {
+     "favored_enemies": 2
+    },
+    "2": {
+     "favored_enemies": 2
+    },
+    "3": {
+     "favored_enemies": 2
+    },
+    "4": {
+     "favored_enemies": 2
+    },
+    "5": {
+     "favored_enemies": 3
+    },
+    "6": {
+     "favored_enemies": 3
+    },
+    "7": {
+     "favored_enemies": 3
+    },
+    "8": {
+     "favored_enemies": 3
+    },
+    "9": {
+     "favored_enemies": 4
+    },
+    "10": {
+     "favored_enemies": 4
+    },
+    "11": {
+     "favored_enemies": 4
+    },
+    "12": {
+     "favored_enemies": 4
+    },
+    "13": {
+     "favored_enemies": 5
+    },
+    "14": {
+     "favored_enemies": 5
+    },
+    "15": {
+     "favored_enemies": 5
+    },
+    "16": {
+     "favored_enemies": 5
+    },
+    "17": {
+     "favored_enemies": 6
+    },
+    "18": {
+     "favored_enemies": 6
+    },
+    "19": {
+     "favored_enemies": 6
+    },
+    "20": {
+     "favored_enemies": 6
+    }
+   }
+  },
+  "rogue": {
+   "features": [
+    {
+     "index": "rogue-expertise",
+     "level": 1,
+     "name_en": "Expertise",
+     "name": "专精",
+     "desc": "选 2 项已熟练技能，熟练加值翻倍。"
+    },
+    {
+     "index": "rogue-sneak-attack",
+     "level": 1,
+     "name_en": "Sneak Attack",
+     "name": "偷袭",
+     "desc": "每回合 1 次：有优势或目标旁边有你的盟友时，额外造成伤害（见职业表）。"
+    },
+    {
+     "index": "rogue-thieves-cant",
+     "level": 1,
+     "name_en": "Thieves' Cant",
+     "name": "盗贼黑话",
+     "desc": "掌握盗贼暗语与暗号。"
+    },
+    {
+     "index": "rogue-weapon-mastery",
+     "level": 1,
+     "name_en": "Weapon Mastery",
+     "name": "武器专精",
+     "desc": "选 2 件熟练武器启用其专精属性。"
+    },
+    {
+     "index": "rogue-cunning-action",
+     "level": 2,
+     "name_en": "Cunning Action",
+     "name": "灵巧动作",
+     "desc": "附赠动作执行 疾行 / 撤离 / 躲藏。"
+    },
+    {
+     "index": "rogue-subclass",
+     "level": 3,
+     "name_en": "Rogue Subclass",
+     "name": "子职",
+     "desc": "3 级选择一个子职。"
+    },
+    {
+     "index": "rogue-steady-aim",
+     "level": 3,
+     "name_en": "Steady Aim",
+     "name": "稳定瞄准",
+     "desc": "附赠动作：本回合攻击有优势，但速度归 0（不能移动）。"
+    },
+    {
+     "index": "rogue-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "rogue-cunning-strike",
+     "level": 5,
+     "name_en": "Cunning Strike",
+     "name": "灵巧打击",
+     "desc": "可牺牲 1d6 偷袭骰换取效果：中毒、绊倒、撤离等。"
+    },
+    {
+     "index": "rogue-uncanny-dodge",
+     "level": 5,
+     "name_en": "Uncanny Dodge",
+     "name": "直觉闪避",
+     "desc": "反应：把一次攻击的伤害减半。"
+    },
+    {
+     "index": "rogue-evasion",
+     "level": 7,
+     "name_en": "Evasion",
+     "name": "闪避",
+     "desc": "敏捷豁免成功不受伤害，失败只受一半。"
+    },
+    {
+     "index": "rogue-reliable-talent",
+     "level": 7,
+     "name_en": "Reliable Talent",
+     "name": "可靠天赋",
+     "desc": "熟练技能的检定，d20 掷出 9 或以下按 10 计算。"
+    },
+    {
+     "index": "rogue-improved-cunning-strike",
+     "level": 11,
+     "name_en": "Improved Cunning Strike",
+     "name": "强化灵巧打击",
+     "desc": "灵巧打击可同时施加 2 种效果（多付偷袭骰）。"
+    },
+    {
+     "index": "rogue-devious-strikes",
+     "level": 14,
+     "name_en": "Devious Strikes",
+     "name": "诡诈打击",
+     "desc": "灵巧打击新增高阶选项：眩晕(2d6)、遮蔽(3d6)、击昏(6d6)，代价从偷袭骰里扣。"
+    },
+    {
+     "index": "rogue-slippery-mind",
+     "level": 15,
+     "name_en": "Slippery Mind",
+     "name": "滑溜心智",
+     "desc": "获得感知与魅力豁免熟练。"
+    },
+    {
+     "index": "rogue-elusive",
+     "level": 18,
+     "name_en": "Elusive",
+     "name": "飘忽不定",
+     "desc": "未被失能时，任何攻击对你都没有优势。"
+    },
+    {
+     "index": "rogue-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "rogue-stroke-of-luck",
+     "level": 20,
+     "name_en": "Stroke of Luck",
+     "name": "幸运一击",
+     "desc": "检定失败可改为 20，或攻击失手改为命中（1 次/短休）。"
+    }
+   ],
+   "resources": [],
+   "dice_note": "偷袭 {n}d6",
+   "class_specific": {
+    "1": {
+     "sneak_attack": {
+      "dice_count": 1,
+      "dice_value": 6
+     }
+    },
+    "2": {
+     "sneak_attack": {
+      "dice_count": 1,
+      "dice_value": 6
+     }
+    },
+    "3": {
+     "sneak_attack": {
+      "dice_count": 2,
+      "dice_value": 6
+     }
+    },
+    "4": {
+     "sneak_attack": {
+      "dice_count": 2,
+      "dice_value": 6
+     }
+    },
+    "5": {
+     "sneak_attack": {
+      "dice_count": 3,
+      "dice_value": 6
+     }
+    },
+    "6": {
+     "sneak_attack": {
+      "dice_count": 3,
+      "dice_value": 6
+     }
+    },
+    "7": {
+     "sneak_attack": {
+      "dice_count": 4,
+      "dice_value": 6
+     }
+    },
+    "8": {
+     "sneak_attack": {
+      "dice_count": 4,
+      "dice_value": 6
+     }
+    },
+    "9": {
+     "sneak_attack": {
+      "dice_count": 5,
+      "dice_value": 6
+     }
+    },
+    "10": {
+     "sneak_attack": {
+      "dice_count": 5,
+      "dice_value": 6
+     }
+    },
+    "11": {
+     "sneak_attack": {
+      "dice_count": 6,
+      "dice_value": 6
+     }
+    },
+    "12": {
+     "sneak_attack": {
+      "dice_count": 6,
+      "dice_value": 6
+     }
+    },
+    "13": {
+     "sneak_attack": {
+      "dice_count": 7,
+      "dice_value": 6
+     }
+    },
+    "14": {
+     "sneak_attack": {
+      "dice_count": 7,
+      "dice_value": 6
+     }
+    },
+    "15": {
+     "sneak_attack": {
+      "dice_count": 8,
+      "dice_value": 6
+     }
+    },
+    "16": {
+     "sneak_attack": {
+      "dice_count": 8,
+      "dice_value": 6
+     }
+    },
+    "17": {
+     "sneak_attack": {
+      "dice_count": 9,
+      "dice_value": 6
+     }
+    },
+    "18": {
+     "sneak_attack": {
+      "dice_count": 9,
+      "dice_value": 6
+     }
+    },
+    "19": {
+     "sneak_attack": {
+      "dice_count": 10,
+      "dice_value": 6
+     }
+    },
+    "20": {
+     "sneak_attack": {
+      "dice_count": 10,
+      "dice_value": 6
+     }
+    }
+   }
+  },
+  "sorcerer": {
+   "features": [
+    {
+     "index": "sorcerer-innate-sorcery",
+     "level": 1,
+     "name_en": "Innate Sorcery",
+     "name": "先天魔法",
+     "desc": "附赠动作，1 分钟内术士法术豁免 DC +1、法术攻击掷骰有优势（2 次/长休，全部次数随长休恢复）。"
+    },
+    {
+     "index": "sorcerer-spellcasting",
+     "level": 1,
+     "name_en": "Spellcasting",
+     "name": "施法",
+     "desc": "以魅力施法，已知法术。"
+    },
+    {
+     "index": "sorcerer-font-of-magic",
+     "level": 2,
+     "name_en": "Font of Magic",
+     "name": "魔法源泉",
+     "desc": "术法点数量 = 术士等级；可在法术位与术法点之间互换。"
+    },
+    {
+     "index": "sorcerer-metamagic",
+     "level": 2,
+     "name_en": "Metamagic",
+     "name": "超魔法",
+     "desc": "2 级选 2 个超魔法选项（法术强化、孪生、瞬发等），10 级与 17 级各再 +2；使用需付术法点，每个法术只能用 1 个。"
+    },
+    {
+     "index": "sorcerer-subclass",
+     "level": 3,
+     "name_en": "Sorcerer Subclass",
+     "name": "子职：血脉",
+     "desc": "3 级选择一个血脉（子职）。"
+    },
+    {
+     "index": "sorcerer-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "sorcerer-sorcerous-restoration",
+     "level": 5,
+     "name_en": "Sorcerous Restoration",
+     "name": "魔法恢复",
+     "desc": "短休时恢复不超过「术士等级一半(向下取整)」点术法点，1 次/长休。"
+    },
+    {
+     "index": "sorcerer-sorcery-incarnate",
+     "level": 7,
+     "name_en": "Sorcery Incarnate",
+     "name": "魔法化身",
+     "desc": "先天魔法次数用完时，可花 2 点术法点激活；先天魔法期间每个法术可同时应用 2 个超魔法。"
+    },
+    {
+     "index": "sorcerer-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "sorcerer-arcane-apotheosis",
+     "level": 20,
+     "name_en": "Arcane Apotheosis",
+     "name": "奥术神化",
+     "desc": "先天魔法期间，每回合可免费使用 1 个超魔法（不消耗术法点）。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "sorcery",
+     "name": "术法点 Sorcery Points",
+     "from_level": 2,
+     "short": 0,
+     "long": "all",
+     "icon": "🌀",
+     "note": "术法点 = 术士等级。超魔法、法术位互换都消耗它；长休全部恢复（5 级起短休可恢复一半，1 次/长休）。",
+     "table": null,
+     "formula": "level"
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {
+     "sorcery_points": 0
+    },
+    "2": {
+     "sorcery_points": 2
+    },
+    "3": {
+     "sorcery_points": 3
+    },
+    "4": {
+     "sorcery_points": 4
+    },
+    "5": {
+     "sorcery_points": 5
+    },
+    "6": {
+     "sorcery_points": 6
+    },
+    "7": {
+     "sorcery_points": 7
+    },
+    "8": {
+     "sorcery_points": 8
+    },
+    "9": {
+     "sorcery_points": 9
+    },
+    "10": {
+     "sorcery_points": 10
+    },
+    "11": {
+     "sorcery_points": 11
+    },
+    "12": {
+     "sorcery_points": 12
+    },
+    "13": {
+     "sorcery_points": 13
+    },
+    "14": {
+     "sorcery_points": 14
+    },
+    "15": {
+     "sorcery_points": 15
+    },
+    "16": {
+     "sorcery_points": 16
+    },
+    "17": {
+     "sorcery_points": 17
+    },
+    "18": {
+     "sorcery_points": 18
+    },
+    "19": {
+     "sorcery_points": 19
+    },
+    "20": {
+     "sorcery_points": 20
+    }
+   }
+  },
+  "warlock": {
+   "features": [
+    {
+     "index": "warlock-eldritch-invocations",
+     "level": 1,
+     "name_en": "Eldritch Invocations",
+     "name": "魔能祈唤",
+     "desc": "选择魔能祈唤（数量见职业表），如 痛苦冲击、魔鬼视界 等。"
+    },
+    {
+     "index": "warlock-pact-magic",
+     "level": 1,
+     "name_en": "Pact Magic",
+     "name": "契约魔法",
+     "desc": "契约法术位数量少但全部为最高环，短休即恢复。"
+    },
+    {
+     "index": "warlock-magical-cunning",
+     "level": 2,
+     "name_en": "Magical Cunning",
+     "name": "魔法狡黠",
+     "desc": "1 分钟仪式恢复一半契约法术位（1 次/长休）。"
+    },
+    {
+     "index": "warlock-subclass",
+     "level": 3,
+     "name_en": "Warlock Subclass",
+     "name": "子职：宗主",
+     "desc": "3 级选择一个宗主（子职）。"
+    },
+    {
+     "index": "warlock-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "warlock-contact-patron",
+     "level": 9,
+     "name_en": "Contact Patron",
+     "name": "联络宗主",
+     "desc": "可免费施放 Contact Other Plane（1 次/长休）。"
+    },
+    {
+     "index": "warlock-mystic-arcanum",
+     "level": 11,
+     "name_en": "Mystic Arcanum",
+     "name": "秘法奥义",
+     "desc": "11/13/15/17 级各获得 1 个 6/7/8/9 环法术，各 1 次/长休。"
+    },
+    {
+     "index": "warlock-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "warlock-eldritch-master",
+     "level": 20,
+     "name_en": "Eldritch Master",
+     "name": "魔能大师",
+     "desc": "短休即可恢复全部契约法术位（1 次/长休）。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "pact_slots",
+     "name": "契约法术位 Pact Magic",
+     "from_level": 1,
+     "short": "all",
+     "long": "all",
+     "icon": "🔮",
+     "note": "契约法术位数量少但全为最高环，短休即全部恢复。",
+     "table": null,
+     "formula": "pact_slots"
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {
+     "eldritch_invocations": 1
+    },
+    "2": {
+     "eldritch_invocations": 3
+    },
+    "3": {
+     "eldritch_invocations": 3
+    },
+    "4": {
+     "eldritch_invocations": 3
+    },
+    "5": {
+     "eldritch_invocations": 5
+    },
+    "6": {
+     "eldritch_invocations": 5
+    },
+    "7": {
+     "eldritch_invocations": 6
+    },
+    "8": {
+     "eldritch_invocations": 6
+    },
+    "9": {
+     "eldritch_invocations": 7
+    },
+    "10": {
+     "eldritch_invocations": 7
+    },
+    "11": {
+     "eldritch_invocations": 7
+    },
+    "12": {
+     "eldritch_invocations": 8
+    },
+    "13": {
+     "eldritch_invocations": 8
+    },
+    "14": {
+     "eldritch_invocations": 8
+    },
+    "15": {
+     "eldritch_invocations": 9
+    },
+    "16": {
+     "eldritch_invocations": 9
+    },
+    "17": {
+     "eldritch_invocations": 9
+    },
+    "18": {
+     "eldritch_invocations": 10
+    },
+    "19": {
+     "eldritch_invocations": 10
+    },
+    "20": {
+     "eldritch_invocations": 10
+    }
+   }
+  },
+  "wizard": {
+   "features": [
+    {
+     "index": "wizard-arcane-recovery",
+     "level": 1,
+     "name_en": "Arcane Recovery",
+     "name": "奥术回想",
+     "desc": "短休时恢复总环级不超过「一半法师等级（向上取整）」的法术位，且不含 6 环以上；1 次/长休。"
+    },
+    {
+     "index": "wizard-ritual-adept",
+     "level": 1,
+     "name_en": "Ritual Adept",
+     "name": "仪式大师",
+     "desc": "法术书中的仪式法术可不准备直接仪式施放。"
+    },
+    {
+     "index": "wizard-spellcasting",
+     "level": 1,
+     "name_en": "Spellcasting",
+     "name": "施法",
+     "desc": "以智力施法，法术书写入法术。"
+    },
+    {
+     "index": "wizard-scholar",
+     "level": 2,
+     "name_en": "Scholar",
+     "name": "学者",
+     "desc": "选 1 项知识技能专精（奥秘/历史/调查/自然/宗教），抄录法术更快更省。"
+    },
+    {
+     "index": "wizard-subclass",
+     "level": 3,
+     "name_en": "Wizard Subclass",
+     "name": "子职：学派",
+     "desc": "3 级选择一个学派（子职）。"
+    },
+    {
+     "index": "wizard-ability-score-improvement",
+     "level": 4,
+     "name_en": "Ability Score Improvement",
+     "name": "属性提升 / 专长",
+     "desc": "属性 +2/+1（上限 20），或换 1 个专长。"
+    },
+    {
+     "index": "wizard-memorize-spell",
+     "level": 5,
+     "name_en": "Memorize Spell",
+     "name": "记忆法术",
+     "desc": "短休时可替换 1 个已准备法术。"
+    },
+    {
+     "index": "wizard-spell-mastery",
+     "level": 18,
+     "name_en": "Spell Mastery",
+     "name": "法术精通",
+     "desc": "选 1 个 1 环与 1 个 2 环法术，可不耗法术位随意施放。"
+    },
+    {
+     "index": "wizard-epic-boon",
+     "level": 19,
+     "name_en": "Epic Boon",
+     "name": "传奇恩惠",
+     "desc": "获得 1 个传奇恩惠专长（19 级）。"
+    },
+    {
+     "index": "wizard-signature-spells",
+     "level": 20,
+     "name_en": "Signature Spells",
+     "name": "招牌法术",
+     "desc": "选 2 个 3 环法术，各可免费施放 1 次/短休。"
+    }
+   ],
+   "resources": [
+    {
+     "id": "arcane_recovery",
+     "name": "奥术回想 Arcane Recovery",
+     "from_level": 1,
+     "short": 0,
+     "long": "all",
+     "icon": "📖",
+     "note": "每天 1 次（长休重置）：短休时恢复总环级 ≤ 一半法师等级（向上取整）的法术位，不含 6 环以上。这里的数字是可恢复的环级总量。",
+     "table": null,
+     "formula": "half_level_ceil"
+    }
+   ],
+   "dice_note": "",
+   "class_specific": {
+    "1": {},
+    "2": {},
+    "3": {},
+    "4": {},
+    "5": {},
+    "6": {},
+    "7": {},
+    "8": {},
+    "9": {},
+    "10": {},
+    "11": {},
+    "12": {},
+    "13": {},
+    "14": {},
+    "15": {},
+    "16": {},
+    "17": {},
+    "18": {},
+    "19": {},
+    "20": {}
+   }
+  }
+ },
+ "subclasses": {
+  "Path of the Berserker": {
+   "class": "barbarian",
+   "srd": true,
+   "summary": "把狂暴彻底导向暴力的纯输出道途：伤害最高、最直接，也最不怕死。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "狂怒 Frenzy",
+     "desc": "狂暴中使用鲁莽攻击时，本回合首次以力量命中的目标额外受 「狂暴伤害加值」个 d6 伤害（如 +2 就是 2d6）。"
+    },
+    {
+     "level": 6,
+     "name": "无心狂暴 Mindless Rage",
+     "desc": "狂暴期间免疫魅惑与恐慌；进入狂暴时若已被魅惑/恐慌，该状态立刻结束。"
+    },
+    {
+     "level": 10,
+     "name": "反击 Retaliation",
+     "desc": "5 尺内的生物对你造成伤害时，可用反应对它做一次近战武器或徒手攻击。"
+    },
+    {
+     "level": 14,
+     "name": "骇人威压 Intimidating Presence",
+     "desc": "附赠动作：30 尺内你选择的生物做感知豁免（DC 8+力量+熟练），失败则恐慌 1 分钟，可每回合末重掷。"
+    }
+   ]
+  },
+  "Path of the Wild Heart": {
+   "class": "barbarian",
+   "srd": false,
+   "summary": "与野兽之魂共鸣的万金油道途：能抗、能追、能带队友，生存力最强。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "野性之心狂暴 Rage of the Wilds",
+     "desc": "狂暴时选一种动物魂：熊（除力场/死灵/心灵/光耀外全部伤害抗性）、鹰（狂暴时附赠动作疾行或撤离，且借机攻击对你劣势）、狼（狂暴时盟友对距你 5 尺内的敌人攻击有优势）。"
+    },
+    {
+     "level": 6,
+     "name": "野性面貌 Aspect of the Wilds",
+     "desc": "再选一种面貌：猫头鹰（黑暗视觉 60 尺，且能读唇）、黑豹（攀爬速度等于速度）、鲑鱼（游泳速度等于速度）。"
+    },
+    {
+     "level": 10,
+     "name": "野性之力 Power of the Wilds",
+     "desc": "狂暴时动物魂效果升级（熊的抗性覆盖更广、鹰可带同伴移动、狼的范围扩大）。"
+    },
+    {
+     "level": 14,
+     "name": "野性之心强化",
+     "desc": "动物魂与面貌的增益进一步加强，狂暴时几乎免疫常见的控制与消耗。"
+    }
+   ]
+  },
+  "Path of the World Tree": {
+   "class": "barbarian",
+   "srd": false,
+   "summary": "连接世界树的守护型道途：给队友拉扯、替人挨打、靠根须控场。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "世界树的生命力 Vitality of the Tree",
+     "desc": "狂暴时获得等同于「野蛮人等级 + 体质调整值」的临时生命值，并在狂暴期间每回合回血。"
+    },
+    {
+     "level": 6,
+     "name": "世界树枝干 Branches of the Tree",
+     "desc": "反应：30 尺内一名生物被攻击时，把伤害拉到自己身上（或把队友拉离危险）。"
+    },
+    {
+     "level": 10,
+     "name": "盘根 Battering Roots",
+     "desc": "武器专精可额外选 Push / Topple，且触发距离延长到 15 尺。"
+    },
+    {
+     "level": 14,
+     "name": "沿树而行 Travel Along the Tree",
+     "desc": "附赠动作传送到 60 尺内你见过的位置，落地时可用一次攻击。"
+    }
+   ]
+  },
+  "Path of the Zealot": {
+   "class": "barbarian",
+   "srd": false,
+   "summary": "为神而战的狂热者：伤害带光耀/死灵，死了也容易拉回来，最省心的输出。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "神圣狂怒 Divine Fury",
+     "desc": "狂暴中每回合首次命中额外造成 1d6 + 野蛮人等级一半 的光耀（或死灵）伤害。"
+    },
+    {
+     "level": 3,
+     "name": "战士 of the Gods / 无畏 Warrior of the Gods",
+     "desc": "复活你的法术不需要材料成分，队友救你更便宜。"
+    },
+    {
+     "level": 6,
+     "name": "狂热专注 Fanatical Focus",
+     "desc": "狂暴中豁免失败可重掷一次（每次狂暴 1 次）。"
+    },
+    {
+     "level": 10,
+     "name": "狂热临在 Zealous Presence",
+     "desc": "附赠动作：60 尺内至多 10 名盟友下回合攻击与豁免有优势（1 次/长休）。"
+    },
+    {
+     "level": 14,
+     "name": "超越死亡 Rage Beyond Death",
+     "desc": "狂暴期间即使 0 HP 也能继续行动，只要还在狂暴就不算死亡。"
+    }
+   ]
+  },
+  "College of Dance": {
+   "class": "bard",
+   "srd": false,
+   "summary": "以身法作战的诗人：不穿甲也有高 AC，边走边打，还能带着队友一起位移。",
+   "levels": [
+    3,
+    6,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "炫目步法 Dazzling Footwork",
+     "desc": "未穿甲且无盾时 AC = 10 + 敏捷 + 魅力；徒手打击可造成 1d6 钝击并可加魅力。"
+    },
+    {
+     "level": 3,
+     "name": "激励舞步 Inspiring Movement",
+     "desc": "灵感的用法扩展：受激励者可用反应移动半速并规避借机攻击。"
+    },
+    {
+     "level": 6,
+     "name": "协同舞步 Tandem Footwork",
+     "desc": "掷先攻时，60 尺内至多 6 名盟友各加一次灵感骰到先攻。"
+    },
+    {
+     "level": 14,
+     "name": "引领闪避 Leading Evasion",
+     "desc": "敏捷豁免成功不受伤害、失败减半；且可让灵光内盟友也享受此效果。"
+    }
+   ]
+  },
+  "College of Glamour": {
+   "class": "bard",
+   "srd": false,
+   "summary": "妖精宫廷式的领袖诗人：靠临时生命与强制位移救场，社交能力极强。",
+   "levels": [
+    3,
+    6,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "迷惑披风 Mantle of Inspiration",
+     "desc": "附赠动作消耗 1 次灵感：60 尺内等同魅力调整值名盟友获得临时 HP，并可立刻用反应移动且不引发借机攻击。"
+    },
+    {
+     "level": 3,
+     "name": "迷人演出 Enthralling Performance",
+     "desc": "表演 1 分钟后，可让听众中若干生物被你魅惑 1 小时。"
+    },
+    {
+     "level": 6,
+     "name": "威严披风 Mantle of Majesty",
+     "desc": "附赠动作进入 1 分钟的威严形态，每回合可用附赠动作施放命令术（不耗法术位）。"
+    },
+    {
+     "level": 14,
+     "name": "无瑕披风 Unbreakable Majesty",
+     "desc": "敌人对你施法或攻击前须通过魅力豁免，否则该次行动失败/失手。"
+    }
+   ]
+  },
+  "College of Lore": {
+   "class": "bard",
+   "srd": true,
+   "summary": "靠知识与嘴炮取胜的万金油诗人：技能最多、法术最杂、能削弱敌人检定。",
+   "levels": [
+    3,
+    6,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "额外熟练 Bonus Proficiencies",
+     "desc": "任选 3 项技能获得熟练。"
+    },
+    {
+     "level": 3,
+     "name": "尖刻嘲讽 Cutting Words",
+     "desc": "反应：60 尺内一名生物做攻击检定、属性检定或伤害掷骰时，消耗 1 次灵感让结果减去灵感骰。"
+    },
+    {
+     "level": 6,
+     "name": "魔法发现 Magical Discoveries",
+     "desc": "从牧师、德鲁伊或法师列表学 2 个法术（戏法或有环位的都可），视为诗人法术。"
+    },
+    {
+     "level": 14,
+     "name": "无双技艺 Peerless Skill",
+     "desc": "属性检定或攻击失败时，可消耗 1 次灵感加骰，可能翻盘（失败也消耗）。"
+    }
+   ]
+  },
+  "College of Valor": {
+   "class": "bard",
+   "srd": false,
+   "summary": "能上前线砍人的战地诗人：中甲+军用武器，灵感还能加伤害或加 AC。",
+   "levels": [
+    3,
+    6,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "战斗激励 Combat Inspiration",
+     "desc": "受激励者可用灵感骰加武器伤害，或用反应加到自己 AC 上（对抗一次攻击）。"
+    },
+    {
+     "level": 3,
+     "name": "额外熟练 Bonus Proficiencies",
+     "desc": "获得军用武器与中甲熟练，可持盾。"
+    },
+    {
+     "level": 6,
+     "name": "额外攻击 Extra Attack",
+     "desc": "攻击动作可攻击 2 次。"
+    },
+    {
+     "level": 14,
+     "name": "战斗魔法 Battle Magic",
+     "desc": "施放法术之后，可用附赠动作做一次武器攻击。"
+    }
+   ]
+  },
+  "Life Domain": {
+   "class": "cleric",
+   "srd": true,
+   "summary": "治疗量最高的领域：所有治疗额外加值，引导神力可群体拉血。",
+   "levels": [
+    3,
+    6,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "生命门徒 Disciple of Life",
+     "desc": "用环位施放的治疗法术，额外恢复 2 + 法术环级 的 HP。"
+    },
+    {
+     "level": 3,
+     "name": "生命领域法术 Life Domain Spells",
+     "desc": "随等级始终准备：祝福、治愈真言、群体治愈真言、复活等。"
+    },
+    {
+     "level": 3,
+     "name": "保命 Preserve Life",
+     "desc": "引导神力：30 尺内受伤生物分配共 5 × 牧师等级 的治疗量（不能治疗满血者）。"
+    },
+    {
+     "level": 6,
+     "name": "受福治疗者 Blessed Healer",
+     "desc": "治疗他人时，自己同时恢复 2 + 环级 的 HP。"
+    },
+    {
+     "level": 17,
+     "name": "至高治疗 Supreme Healing",
+     "desc": "治疗骰全部取最大值（2d6 直接按 12 算）。"
+    }
+   ]
+  },
+  "Light Domain": {
+   "class": "cleric",
+   "srd": false,
+   "summary": "爆发型光耀领域：火球+守御闪光，攻防一体的法术炮台。",
+   "levels": [
+    3,
+    6,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "光明领域法术 Light Domain Spells",
+     "desc": "始终准备：燃烧之手、灼热射线、火球术、昼明术等。"
+    },
+    {
+     "level": 3,
+     "name": "守御之光 Warding Flare",
+     "desc": "反应：30 尺内敌人攻击时，给它劣势（感知调整值次/长休）。"
+    },
+    {
+     "level": 3,
+     "name": "黎明之光 Radiance of the Dawn",
+     "desc": "引导神力：驱散 30 尺内魔法黑暗，并对范围内敌人造成光耀伤害。"
+    },
+    {
+     "level": 6,
+     "name": "强化守御之光 Improved Flare",
+     "desc": "守御之光也能保护 30 尺内的盟友。"
+    },
+    {
+     "level": 17,
+     "name": "光冠 Corona of Light",
+     "desc": "1 分钟：30 尺明亮光照，敌人对你的火焰/光耀法术豁免劣势。"
+    }
+   ]
+  },
+  "Trickery Domain": {
+   "class": "cleric",
+   "srd": false,
+   "summary": "诡术与幻象领域：帮队友隐匿、造分身骗攻击，最适合潜行队伍。",
+   "levels": [
+    3,
+    6,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "诡术领域法术 Trickery Domain Spells",
+     "desc": "始终准备：魅惑人类、镜像术、闪现术、变形术等。"
+    },
+    {
+     "level": 3,
+     "name": "诡术祝福 Blessing of the Trickster",
+     "desc": "触碰一名生物，1 小时内它的隐匿检定有优势（可对自己用）。"
+    },
+    {
+     "level": 3,
+     "name": "召现分身 Invoke Duplicity",
+     "desc": "引导神力：造出一个幻影分身，可从分身位置施法，且你与分身夹击的目标攻击有优势。"
+    },
+    {
+     "level": 6,
+     "name": "诡术师位移 Trickster's Transposition",
+     "desc": "分身在场时，可用附赠动作与分身交换位置。"
+    },
+    {
+     "level": 17,
+     "name": "强化分身 Improved Duplicity",
+     "desc": "可同时维持 4 个分身，且分身可独立移动。"
+    }
+   ]
+  },
+  "War Domain": {
+   "class": "cleric",
+   "srd": false,
+   "summary": "为战斗而生的领域：军用武器+重甲，命中能补 +10，前线奶妈兼输出。",
+   "levels": [
+    3,
+    6,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "战争领域法术 War Domain Spells",
+     "desc": "始终准备：神恩、灵能武器、十字军披风、神能等。"
+    },
+    {
+     "level": 3,
+     "name": "战争祭司 War Priest",
+     "desc": "攻击动作后可附赠动作再做一次武器攻击（感知调整值次/长休）。"
+    },
+    {
+     "level": 3,
+     "name": "战争引导 Guided Strike",
+     "desc": "引导神力：一次攻击检定 +10（可在掷骰后使用）。"
+    },
+    {
+     "level": 6,
+     "name": "战神祝福 War God's Blessing",
+     "desc": "引导神力也可给 30 尺内盟友一次 +10 攻击。"
+    },
+    {
+     "level": 17,
+     "name": "战之化身 Avatar of Battle",
+     "desc": "对非魔法钝击、穿刺、挥砍伤害有抗性。"
+    }
+   ]
+  },
+  "Circle of the Land": {
+   "class": "druid",
+   "srd": true,
+   "summary": "按地形选法术的施法型德鲁伊：法术最全，靠地形主题补伤害与控制。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "大地结社法术 Circle of the Land Spells",
+     "desc": "每次长休选一种地形（干旱/极地/温带/热带），按德鲁伊等级始终准备对应的主题法术（如火球、冰风暴、石墙）。"
+    },
+    {
+     "level": 3,
+     "name": "大地援助 Land's Aid",
+     "desc": "消耗 1 次荒野变形：60 尺内 10 尺半径内，敌人受 2d6 死灵伤害、盟友恢复 2d6 HP。"
+    },
+    {
+     "level": 6,
+     "name": "自然恢复 Natural Recovery",
+     "desc": "可免环施放 1 个结社法术；短休还能恢复总环级 ≤ 一半德鲁伊等级的法术位。"
+    },
+    {
+     "level": 10,
+     "name": "自然守护 Nature's Ward",
+     "desc": "免疫中毒，并对当前地形对应的伤害类型有抗性。"
+    },
+    {
+     "level": 14,
+     "name": "自然庇护 Nature's Sanctuary",
+     "desc": "消耗 1 次荒野变形：15 尺立方内长出灵树藤蔓，敌人难以通过，你与盟友在其中受保护。"
+    }
+   ]
+  },
+  "Circle of the Moon": {
+   "class": "druid",
+   "srd": false,
+   "summary": "最强变形德鲁伊：荒野变形能变更强野兽，靠野兽形态打前排。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "圆月形态 Circle Forms",
+     "desc": "荒野变形可变为挑战等级更高的野兽（上限随等级提升），且变形时保留你的熟练与部分特性。"
+    },
+    {
+     "level": 6,
+     "name": "强化圆月形态 Improved Circle Forms",
+     "desc": "野兽形态的 AC 提升，攻击视为魔法，且可用附赠动作变形。"
+    },
+    {
+     "level": 10,
+     "name": "月光步 Moonlight Step",
+     "desc": "附赠动作传送到 30 尺内可见位置并进入隐形，直至下回合开始。"
+    },
+    {
+     "level": 14,
+     "name": "月华形态 Lunar Form",
+     "desc": "野兽形态下攻击额外造成 1d10 光耀伤害，且获得对应抗性。"
+    }
+   ]
+  },
+  "Circle of the Sea": {
+   "class": "druid",
+   "srd": false,
+   "summary": "潮汐主题德鲁伊：光环持续推挤+寒冷伤害，控场与位移兼具。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "海洋之怒 Wrath of the Sea",
+     "desc": "附赠动作：5 尺光环内敌人每回合受寒冷伤害并被推离 5 尺（次数=感知调整值）。"
+    },
+    {
+     "level": 6,
+     "name": "海洋之赐 Aquatic Affinity",
+     "desc": "获得等于速度的游泳速度，可在水下呼吸，并抗寒冷。"
+    },
+    {
+     "level": 10,
+     "name": "风暴之子 Stormborn",
+     "desc": "获得闪电与雷鸣抗性，且可附赠动作获得等于速度的飞行（短时）。"
+    },
+    {
+     "level": 14,
+     "name": "海洋之拥 Oceanic Gift",
+     "desc": "光环范围与伤害提升，且可将效果分享给一名盟友。"
+    }
+   ]
+  },
+  "Circle of the Stars": {
+   "class": "druid",
+   "srd": false,
+   "summary": "星座主题德鲁伊：星光形态三选一（弓/圣杯/龙），辅助与输出灵活切换。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "星图 Star Map",
+     "desc": "获得星图法器，可免环施放 guiding bolt；并可用附赠动作进入星光形态。"
+    },
+    {
+     "level": 3,
+     "name": "星光形态 Starry Form",
+     "desc": "三选一：弓（附赠动作远程光耀攻击）、圣杯（治疗加骰）、龙（智力/感知检定最低 10）。"
+    },
+    {
+     "level": 6,
+     "name": "宇宙预兆 Cosmic Omen",
+     "desc": "长休后掷 1 颗 d6，可用反应让 30 尺内一次检定加（吉）或减（凶）该值。"
+    },
+    {
+     "level": 10,
+     "name": "闪烁星座 Twinkling Constellations",
+     "desc": "星光形态可在回合开始时切换，并获得额外增益。"
+    },
+    {
+     "level": 14,
+     "name": "璀璨星辰 Full of Stars",
+     "desc": "星光形态下获得半身掩护般的抗性，且星光攻击增强。"
+    }
+   ]
+  },
+  "Battle Master": {
+   "class": "fighter",
+   "srd": false,
+   "summary": "战术型战士：卓越骰+战技，可击倒、缴械、鼓舞队友，操作感最强。",
+   "levels": [
+    3,
+    7,
+    10,
+    15,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "战技 Combat Superiority",
+     "desc": "获得 4 颗 d8 卓越骰与 3 个战技（如 精准攻击、绊倒攻击、挑衅攻击）；短休恢复全部卓越骰。"
+    },
+    {
+     "level": 3,
+     "name": "战场学识 Student of War",
+     "desc": "获得 1 项工匠工具熟练。"
+    },
+    {
+     "level": 7,
+     "name": "知己知彼 Know Your Enemy",
+     "desc": "观察 1 分钟后可得知目标的战斗属性对比（强弱项）。"
+    },
+    {
+     "level": 10,
+     "name": "强化战技 Improved Combat Superiority",
+     "desc": "卓越骰升级为 d10，战技数量增加。"
+    },
+    {
+     "level": 15,
+     "name": "不屈战技 Relentless",
+     "desc": "掷先攻时若卓越骰为 0，立刻恢复 1 颗；卓越骰升为 d12。"
+    },
+    {
+     "level": 18,
+     "name": "战技精通 Ultimate Combat Superiority",
+     "desc": "战技数量与卓越骰达到上限。"
+    }
+   ]
+  },
+  "Champion": {
+   "class": "fighter",
+   "srd": true,
+   "summary": "最简单的战士：重击范围翻倍、 athletic 全能，几乎不用记资源。",
+   "levels": [
+    3,
+    7,
+    10,
+    15,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "强化重击 Improved Critical",
+     "desc": "武器与徒手攻击掷出 19 或 20 即重击。"
+    },
+    {
+     "level": 3,
+     "name": "卓越运动员 Remarkable Athlete",
+     "desc": "先攻与力量（运动）检定有优势；重击后可移动半速且不引发借机攻击。"
+    },
+    {
+     "level": 7,
+     "name": "额外战斗风格 Additional Fighting Style",
+     "desc": "再获得 1 个战斗风格专长。"
+    },
+    {
+     "level": 10,
+     "name": "英勇战士 Heroic Warrior",
+     "desc": "战斗中若回合开始时没有英雄激励，立刻获得 1 个。"
+    },
+    {
+     "level": 15,
+     "name": "卓越重击 Superior Critical",
+     "desc": "重击范围扩大到 18-20。"
+    },
+    {
+     "level": 18,
+     "name": "生还者 Survivor",
+     "desc": "死亡豁免有优势（掷 18-20 视为 20）；回合开始若已受伤则恢复 5 + 体质调整值 HP。"
+    }
+   ]
+  },
+  "Eldritch Knight": {
+   "class": "fighter",
+   "srd": false,
+   "summary": "会施法的战士：防护/塑能法术+武器联结，攻防一体的魔剑士。",
+   "levels": [
+    3,
+    7,
+    10,
+    15,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "施法 Spellcasting",
+     "desc": "以智力施法（法师列表，偏防护与塑能）；法术位按 1/3 施法者计算。"
+    },
+    {
+     "level": 3,
+     "name": "武器联结 Weapon Bond",
+     "desc": "仪式绑定 2 件武器，可附赠动作召回，且不会被缴械。"
+    },
+    {
+     "level": 7,
+     "name": "战争魔法 War Magic",
+     "desc": "施放戏法后可附赠动作做一次武器攻击。"
+    },
+    {
+     "level": 10,
+     "name": "奥术冲锋 Eldritch Strike",
+     "desc": "武器命中后，目标对你这回合施放的法术豁免有劣势。"
+    },
+    {
+     "level": 15,
+     "name": "奥术充能 Arcane Charge",
+     "desc": "行动激增时可传送 30 尺。"
+    },
+    {
+     "level": 18,
+     "name": "强化战争魔法 Improved War Magic",
+     "desc": "施放 1 环以上法术之后也能附赠动作攻击。"
+    }
+   ]
+  },
+  "Psi Warrior": {
+   "class": "fighter",
+   "srd": false,
+   "summary": "灵能战士：能量骰可减伤、推拉、跳跃，兼具防护与战术位移。",
+   "levels": [
+    3,
+    7,
+    10,
+    15,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "灵能力量 Psionic Power",
+     "desc": "获得「智力调整值 + 2×等级」点能量骰（d6→d8→d10→d12），可用于 防护力场（减伤）、心灵推进（推/拉目标）。"
+    },
+    {
+     "level": 3,
+     "name": "心灵感应 Telekinetic Adept",
+     "desc": "可用附赠动作做念力操控（移动物体/开门/远程推挤）。"
+    },
+    {
+     "level": 7,
+     "name": "心灵掌控 Psi-Powered Leap",
+     "desc": "附赠动作获得等于速度的飞行，持续到回合结束。"
+    },
+    {
+     "level": 10,
+     "name": "心灵守御 Guarded Mind",
+     "desc": "对 psychic 伤害有抗性，且可用能量骰重掷智力/感知/魅力豁免。"
+    },
+    {
+     "level": 15,
+     "name": "心灵壁垒 Bulwark of Force",
+     "desc": "给 30 尺内至多 3 名盟友半身掩护（1 分钟）。"
+    },
+    {
+     "level": 18,
+     "name": "无碍之力 Telekinetic Master",
+     "desc": "可免费施放 telekinesis，并在其间附赠攻击。"
+    }
+   ]
+  },
+  "Warrior of Mercy": {
+   "class": "monk",
+   "srd": false,
+   "summary": "生死之间的医者武僧：气点能治疗也能加伤害，还能解状态、复活队友。",
+   "levels": [
+    3,
+    6,
+    11,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "生死之手 Hand of Healing / Hand of Harm",
+     "desc": "花 1 气点：治疗（武艺骰+感知）或让徒手命中额外造成 1d6+感知 死灵伤害。"
+    },
+    {
+     "level": 6,
+     "name": "医者之技 Physician's Touch",
+     "desc": "生死之手可额外解除中毒、疾病、目盲、失聪、麻痹等状态。"
+    },
+    {
+     "level": 11,
+     "name": "疾风疗愈 Flurry of Healing and Harm",
+     "desc": "疾风连击的每次攻击都可替换为治疗或额外伤害。"
+    },
+    {
+     "level": 17,
+     "name": "终极慈悲 Hand of Ultimate Mercy",
+     "desc": "花 5 气点复活 5 尺内死亡不超过 24 小时的生物。"
+    }
+   ]
+  },
+  "Warrior of Shadow": {
+   "class": "monk",
+   "srd": false,
+   "summary": "暗影武僧：黑暗中传送、潜行、造黑暗，最适合偷袭与渗透。",
+   "levels": [
+    3,
+    6,
+    11,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "暗影术 Shadow Arts",
+     "desc": "花 1 气点施放 黑暗术、黑暗视觉、pass without trace、silence 等。"
+    },
+    {
+     "level": 6,
+     "name": "暗影步 Shadow Step",
+     "desc": "附赠动作在 60 尺内的微光/黑暗间传送，之后本次攻击有优势。"
+    },
+    {
+     "level": 11,
+     "name": "强化暗影步 Improved Shadow Step",
+     "desc": "暗影步后可立刻做一次徒手攻击，且传送距离更远。"
+    },
+    {
+     "level": 17,
+     "name": "暗影斗篷 Cloak of Shadows",
+     "desc": "花 3 气点：在微光/黑暗中变为隐形 1 分钟（攻击或施法会现形）。"
+    }
+   ]
+  },
+  "Warrior of the Elements": {
+   "class": "monk",
+   "srd": false,
+   "summary": "元素武僧：徒手打击带元素伤害、触及 10 尺，还能爆发范围伤害。",
+   "levels": [
+    3,
+    6,
+    11,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "元素调和 Elemental Attunement",
+     "desc": "徒手攻击可造成火焰/寒冷/闪电/雷鸣伤害，触及 +10 尺，并可拉近/推开目标 10 尺。"
+    },
+    {
+     "level": 6,
+     "name": "元素爆发 Elemental Burst",
+     "desc": "花 2 气点：15 尺半径内敌人做敏捷豁免，失败受 3d8 元素伤害。"
+    },
+    {
+     "level": 11,
+     "name": "元素疾行 Stride of the Elements",
+     "desc": "获得等于速度的飞行或游泳速度，并可用元素之力移动队友。"
+    },
+    {
+     "level": 17,
+     "name": "元素化身 Elemental Epitome",
+     "desc": "元素形态下获得对应抗性，徒手伤害与范围进一步提升。"
+    }
+   ]
+  },
+  "Warrior of the Open Hand": {
+   "class": "monk",
+   "srd": true,
+   "summary": "最正统的徒手武僧：疾风连击附带击倒/推开/封借机，控场强。",
+   "levels": [
+    3,
+    6,
+    11,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "散打技法 Open Hand Technique",
+     "desc": "疾风连击命中时，目标额外承受一种效果：无法做借机攻击、力量豁免失败则倒地、或敏捷豁免失败则被推离 15 尺。"
+    },
+    {
+     "level": 6,
+     "name": "身心完整 Wholeness of Body",
+     "desc": "附赠动作掷武艺骰 + 感知调整值 回复 HP（熟练加值次/长休）。"
+    },
+    {
+     "level": 11,
+     "name": "疾步 Fleet Step",
+     "desc": "使用其他附赠动作后，可紧接着再用一次 Step of the Wind。"
+    },
+    {
+     "level": 17,
+     "name": "震颤掌 Quivering Palm",
+     "desc": "徒手命中时花 4 气点植入震动：之后可用动作令其体质豁免，失败则降到 0 HP（成功也受 10d10 死灵伤害）。"
+    }
+   ]
+  },
+  "Oath of Devotion": {
+   "class": "paladin",
+   "srd": true,
+   "summary": "最经典的骑士誓约：神圣武器+命中加魅力，灵光免疫魅惑，正面对抗最强。",
+   "levels": [
+    3,
+    7,
+    15,
+    20
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "奉献之誓法术 Oath of Devotion Spells",
+     "desc": "始终准备：护盾术、神圣武器、解除魔法、自由行动等。"
+    },
+    {
+     "level": 3,
+     "name": "神圣武器 Sacred Weapon",
+     "desc": "引导神力：10 分钟内近战攻击命中加魅力调整值，且发出光亮。"
+    },
+    {
+     "level": 7,
+     "name": "奉献灵光 Aura of Devotion",
+     "desc": "守护灵光内你与盟友免疫魅惑。"
+    },
+    {
+     "level": 15,
+     "name": "守护斩击 Smite of Protection",
+     "desc": "施放至圣斩后，灵光内你与盟友获得半身掩护直到你下回合开始。"
+    },
+    {
+     "level": 20,
+     "name": "神圣光环 Holy Nimbus",
+     "desc": "1 分钟：灵光内敌人每回合受 10 光耀伤害，你对邪魔/不死攻击有优势。"
+    }
+   ]
+  },
+  "Oath of Glory": {
+   "class": "paladin",
+   "srd": false,
+   "summary": "希腊英雄式誓约：靠自身强壮带动全队，运动与临时生命见长。",
+   "levels": [
+    3,
+    7,
+    15,
+    20
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "荣耀之誓法术 Oath of Glory Spells",
+     "desc": "始终准备：英雄气概、加速术、自由行动等。"
+    },
+    {
+     "level": 3,
+     "name": "鼓舞斩击 Inspiring Smite",
+     "desc": "引导神力：至圣斩命中后，给 30 尺内盟友分配共 2d8+等级 的临时生命。"
+    },
+    {
+     "level": 3,
+     "name": "同侪典范 Peerless Athlete",
+     "desc": "引导神力：10 分钟内运动/杂技优势，跳跃与负重翻倍。"
+    },
+    {
+     "level": 7,
+     "name": "迅捷灵光 Aura of Alacrity",
+     "desc": "灵光内你与盟友速度 +10 尺。"
+    },
+    {
+     "level": 15,
+     "name": "荣耀防御 Glorious Defense",
+     "desc": "反应：被攻击时加魅力调整值到 AC，若因此失手可立刻反击。"
+    },
+    {
+     "level": 20,
+     "name": "活着的传奇 Living Legend",
+     "desc": "1 分钟：魅力检定优势，且每回合可把一次失手改为命中。"
+    }
+   ]
+  },
+  "Oath of the Ancients": {
+   "class": "paladin",
+   "srd": false,
+   "summary": "守护自然的绿骑士：抗法术伤害光环，越到后期越难被法术杀死。",
+   "levels": [
+    3,
+    7,
+    15,
+    20
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "远古之誓法术 Oath of the Ancients Spells",
+     "desc": "始终准备：缠绕、月华之光、植物滋长、石墙术等。"
+    },
+    {
+     "level": 3,
+     "name": "自然之怒 Nature's Wrath",
+     "desc": "引导神力：用藤蔓束缚 15 尺内敌人（力量或敏捷豁免失败则被束缚）。"
+    },
+    {
+     "level": 7,
+     "name": "守护灵光 Aura of Warding",
+     "desc": "灵光内你与盟友对法术造成的伤害有抗性。"
+    },
+    {
+     "level": 15,
+     "name": "不朽哨兵 Undying Sentinel",
+     "desc": "生命值降到 0 时可改为 1 HP（1 次/长休），且不再因年老而死。"
+    },
+    {
+     "level": 20,
+     "name": "远古斗士 Elder Champion",
+     "desc": "1 分钟：每回合回复 10 HP，法术豁免 DC+1，施法可用附赠动作。"
+    }
+   ]
+  },
+  "Oath of Vengeance": {
+   "class": "paladin",
+   "srd": false,
+   "summary": "复仇型输出圣武士：对单一目标开优势，追人、反制、爆发最强。",
+   "levels": [
+    3,
+    7,
+    15,
+    20
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "复仇之誓法术 Oath of Vengeance Spells",
+     "desc": "始终准备：猎人印记、定身术、加速术、放逐术等。"
+    },
+    {
+     "level": 3,
+     "name": "仇敌誓言 Vow of Enmity",
+     "desc": "引导神力：对 10 尺内一个目标，1 分钟内你的攻击有优势。"
+    },
+    {
+     "level": 3,
+     "name": "斥退敌人 Abjure Enemy",
+     "desc": "引导神力：一个目标感知豁免失败则恐慌且速度归 0。"
+    },
+    {
+     "level": 7,
+     "name": "无情复仇 Relentless Avenger",
+     "desc": "借机攻击命中后，可移动半速且不引发借机。"
+    },
+    {
+     "level": 15,
+     "name": "复仇之魂 Soul of Vengeance",
+     "desc": "仇敌誓言的目标攻击他人时，可用反应对它做一次近战攻击。"
+    },
+    {
+     "level": 20,
+     "name": "复仇化身 Avenging Angel",
+     "desc": "1 分钟：飞行 60 尺，且周围 30 尺敌人恐慌，命中后额外 3d8 光耀。"
+    }
+   ]
+  },
+  "Beast Master": {
+   "class": "ranger",
+   "srd": false,
+   "summary": "带宠物战斗的游侠：伙伴与你共享攻击，场面压制强、操作简单。",
+   "levels": [
+    3,
+    7,
+    11,
+    15
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "原始伙伴 Primal Companion",
+     "desc": "召唤一只野兽伙伴（地/海/空三型），可指挥它攻击，且它的攻击可附带你的 Hunter's Mark 加成。"
+    },
+    {
+     "level": 7,
+     "name": "卓越训练 Exceptional Training",
+     "desc": "伙伴可用附赠动作疾行/撤离/协助，且攻击视为魔法。"
+    },
+    {
+     "level": 11,
+     "name": "野性狂怒 Bestial Fury",
+     "desc": "伙伴每回合可攻击 2 次（或与你协同夹击）。"
+    },
+    {
+     "level": 15,
+     "name": "共享法术 Share Spells",
+     "desc": "你施放的自 buff 法术可同时作用于伙伴。"
+    }
+   ]
+  },
+  "Fey Wanderer": {
+   "class": "ranger",
+   "srd": false,
+   "summary": "妖精系游侠：心灵伤害+社交加成，队伍里的脸面与控场。",
+   "levels": [
+    3,
+    7,
+    11,
+    15
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "妖精漫游者法术 Fey Wanderer Spells",
+     "desc": "始终准备：魅惑人类、迷踪步、dispelling? 等妖精主题法术。"
+    },
+    {
+     "level": 3,
+     "name": "恐惧打击 Dreadful Strikes",
+     "desc": "每回合一次，武器命中额外造成 1d4 心灵伤害（11 级升为 1d6）。"
+    },
+    {
+     "level": 3,
+     "name": "异界魅力 Otherworldly Glamour",
+     "desc": "魅力检定加感知调整值，并获得 1 项社交技能熟练。"
+    },
+    {
+     "level": 7,
+     "name": "借雾而行 Misty Wanderer",
+     "desc": "可免费施放迷踪步（熟练加值次/长休），并能带一名同伴。"
+    },
+    {
+     "level": 11,
+     "name": "妖精之怒 Fey Reinforcements",
+     "desc": "可免费施放召唤妖精（1 次/长休）。"
+    },
+    {
+     "level": 15,
+     "name": "迷雾斗篷 Misty Escape",
+     "desc": "受伤时用反应变隐形并传送 60 尺。"
+    }
+   ]
+  },
+  "Gloom Stalker": {
+   "class": "ranger",
+   "srd": false,
+   "summary": "地底/夜间猎手：首回合爆发极高，在黑暗中几乎无法被看见。",
+   "levels": [
+    3,
+    7,
+    11,
+    15
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "恐惧伏击 Dread Ambusher",
+     "desc": "先攻加感知调整值；首回合速度 +10 尺，且攻击动作可多打一次并额外 1d8。"
+    },
+    {
+     "level": 3,
+     "name": "幽暗视觉 Umbral Sight",
+     "desc": "黑暗视觉 +30 尺；处于黑暗中时对依赖黑暗视觉的生物隐形。"
+    },
+    {
+     "level": 7,
+     "name": "钢铁意志 Iron Mind",
+     "desc": "获得感知豁免熟练（或智力）。"
+    },
+    {
+     "level": 11,
+     "name": "潜行者之怒 Stalker's Flurry",
+     "desc": "攻击失手后，本回合可再攻击一次。"
+    },
+    {
+     "level": 15,
+     "name": "暗影闪避 Shadowy Dodge",
+     "desc": "被攻击时用反应给该攻击劣势，并移动 30 尺。"
+    }
+   ]
+  },
+  "Hunter": {
+   "class": "ranger",
+   "srd": true,
+   "summary": "最纯粹的猎手：不依赖宠物，靠多打一次与减伤硬吃战斗。",
+   "levels": [
+    3,
+    7,
+    11,
+    15
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "猎人知识 Hunter's Lore",
+     "desc": "对 Hunter's Mark 标记的目标，可得知它的免疫/抗性/易伤。"
+    },
+    {
+     "level": 3,
+     "name": "猎人猎物 Hunter's Prey",
+     "desc": "二选一（每次休息可换）：巨人杀手（目标受伤则额外 1d8）、破群者（攻击第二个 5 尺内目标）。"
+    },
+    {
+     "level": 7,
+     "name": "防御战术 Defensive Tactics",
+     "desc": "二选一：逃群（借机攻击对你劣势）、多重防御（被多个敌人包围时 AC +4）。"
+    },
+    {
+     "level": 11,
+     "name": "卓越猎物 Superior Hunter's Prey",
+     "desc": "每回合可将 Hunter's Mark 的额外伤害复制给 30 尺内另一名生物。"
+    },
+    {
+     "level": 15,
+     "name": "卓越防御 Superior Hunter's Defense",
+     "desc": "反应：对一次伤害及其同类型伤害获得抗性，直到本回合结束。"
+    }
+   ]
+  },
+  "Arcane Trickster": {
+   "class": "rogue",
+   "srd": false,
+   "summary": "会法术的盗贼：法师之手隔空扒窃、幻术掩护，潜行与控场兼备。",
+   "levels": [
+    3,
+    9,
+    13,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "施法 Spellcasting",
+     "desc": "以智力施法（法师列表，偏幻术与附魔）；法术位按 1/3 施法者计算。"
+    },
+    {
+     "level": 3,
+     "name": "法师之手巧技 Mage Hand Legerdemain",
+     "desc": "法师之手隐形，可隔空开锁、扒窃、投毒。"
+    },
+    {
+     "level": 9,
+     "name": "魔法伏击 Magical Ambush",
+     "desc": "躲藏状态下施法，目标对该法术的豁免有劣势。"
+    },
+    {
+     "level": 13,
+     "name": "诡术大师 Versatile Trickster",
+     "desc": "可用附赠动作让法师之手给目标制造优势（夹击）。"
+    },
+    {
+     "level": 17,
+     "name": "窃法 Spell Thief",
+     "desc": "可偷取他人刚施放的法术并自己施放（1 次/长休）。"
+    }
+   ]
+  },
+  "Assassin": {
+   "class": "rogue",
+   "srd": false,
+   "summary": "爆发型刺客：先手重击、易容毒药，单挑与斩首最强。",
+   "levels": [
+    3,
+    9,
+    13,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "刺客工具 Assassin's Tools",
+     "desc": "获得易容工具与毒药工具熟练。"
+    },
+    {
+     "level": 3,
+     "name": "暗杀 Assassinate",
+     "desc": "对尚未行动的生物攻击有优势；命中被突袭（surprised）的目标即重击。"
+    },
+    {
+     "level": 9,
+     "name": "渗透专家 Infiltration Expertise",
+     "desc": "可花 7 天建立假身份，并完美扮演。"
+    },
+    {
+     "level": 13,
+     "name": "淬毒武器 Envenom Weapons",
+     "desc": "灵巧打击可附带中毒（目标体质豁免失败则中毒并持续伤害）。"
+    },
+    {
+     "level": 17,
+     "name": "致命一击 Death Strike",
+     "desc": "被突袭目标对你的攻击豁免失败时，伤害翻倍。"
+    }
+   ]
+  },
+  "Soulknife": {
+   "class": "rogue",
+   "srd": false,
+   "summary": "灵能盗贼：凭空生成心灵匕首，可远程、可心灵沟通，无武器也能偷袭。",
+   "levels": [
+    3,
+    9,
+    13,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "心灵之刃 Psychic Blades",
+     "desc": "双手生成灵能匕首（1d6 心灵），可近战也可投掷 60 尺，并能用附赠动作再攻击一次。"
+    },
+    {
+     "level": 3,
+     "name": "灵能力量 Psionic Power",
+     "desc": "获得能量骰（d6→d8→d10→d12），可用于强化技能检定或心灵沟通。"
+    },
+    {
+     "level": 9,
+     "name": "灵魂之刃强化 Soul Blades",
+     "desc": "心灵之刃命中后可传送自己或让目标恐惧。"
+    },
+    {
+     "level": 13,
+     "name": "心灵幻影 Psychic Veil",
+     "desc": "1 小时内对自己施放隐形（1 次/长休）。"
+    },
+    {
+     "level": 17,
+     "name": "撕裂心智 Rend Mind",
+     "desc": "消耗能量骰让目标震慑或失能。"
+    }
+   ]
+  },
+  "Thief": {
+   "class": "rogue",
+   "srd": true,
+   "summary": "最经典的盗贼：附赠动作开锁/用物品，攀爬跳跃快，先攻双回合。",
+   "levels": [
+    3,
+    9,
+    13,
+    17
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "快手 Fast Hands",
+     "desc": "附赠动作可做 巧手（开锁/拆陷阱/扒窃）或 使用物品。"
+    },
+    {
+     "level": 3,
+     "name": "飞檐走壁 Second-Story Work",
+     "desc": "获得等于速度的攀爬速度；跳跃距离用敏捷计算。"
+    },
+    {
+     "level": 9,
+     "name": "卓越潜行 Supreme Sneak",
+     "desc": "灵巧打击新增「潜行攻击」：躲藏状态下攻击不暴露自己（消耗 1d6）。"
+    },
+    {
+     "level": 13,
+     "name": "使用魔法装置 Use Magic Device",
+     "desc": "可同调 4 件魔法物品；使用耗充能物品时有机会不消耗。"
+    },
+    {
+     "level": 17,
+     "name": "盗贼反应 Thief's Reflexes",
+     "desc": "战斗第一轮可行动 2 次（第二次在先攻 -10 时）。"
+    }
+   ]
+  },
+  "Aberrant Sorcery": {
+   "class": "sorcerer",
+   "srd": false,
+   "summary": "异怪血脉：心灵感应+精神伤害，法术可免成分，隐蔽性极强。",
+   "levels": [
+    3,
+    6,
+    14,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "灵能法术 Psionic Spells",
+     "desc": "始终准备：心灵尖啸、侦测思想、心灵遥控等灵能主题法术。"
+    },
+    {
+     "level": 3,
+     "name": "心灵低语 Telepathic Speech",
+     "desc": "可与 30 尺内生物心灵沟通（分钟数=术士等级）。"
+    },
+    {
+     "level": 6,
+     "name": "灵能施法 Psionic Sorcery",
+     "desc": "可用术法点代替法术位施法，且无需语言/姿势成分。"
+    },
+    {
+     "level": 14,
+     "name": "心灵防御 Psychic Defenses",
+     "desc": "对 psychic 伤害有抗性，且对魅惑/恐慌豁免有优势。"
+    },
+    {
+     "level": 18,
+     "name": "扭曲爆发 Warping Implosion",
+     "desc": "花 5 术法点把 30 尺内敌人拉向你并造成 6d10 力场伤害。"
+    }
+   ]
+  },
+  "Clockwork Sorcery": {
+   "class": "sorcerer",
+   "srd": false,
+   "summary": "机关血脉：秩序与平衡，能取消优势/劣势，还能造护盾吸收伤害。",
+   "levels": [
+    3,
+    6,
+    14,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "机关法术 Clockwork Spells",
+     "desc": "始终准备：秩序之盾、援助术、解除魔法、力场墙等。"
+    },
+    {
+     "level": 3,
+     "name": "恢复平衡 Restore Balance",
+     "desc": "反应：30 尺内一次带优势/劣势的检定改为正常掷骰（魅力调整值次/长休）。"
+    },
+    {
+     "level": 6,
+     "name": "秩序堡垒 Bastion of Law",
+     "desc": "花术法点造护盾，吸收伤害（1d8/点，持续到长休）。"
+    },
+    {
+     "level": 14,
+     "name": "秩序恍惚 Trance of Order",
+     "desc": "1 分钟内攻击检定与豁免的 d20 掷出 9 以下按 10 算。"
+    },
+    {
+     "level": 18,
+     "name": "机关骑士 Clockwork Cavalcade",
+     "desc": "召唤机关灵体：治疗盟友、修复物件、解除法术效果。"
+    }
+   ]
+  },
+  "Draconic Sorcery": {
+   "class": "sorcerer",
+   "srd": true,
+   "summary": "龙血术士：免费获得龙鳞 AC 与额外 HP，元素亲和让本命元素伤害更高。",
+   "levels": [
+    3,
+    6,
+    14,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "龙族韧性 Draconic Resilience",
+     "desc": "HP 上限 +3（每升 1 级再 +1）；未穿甲时 AC = 13 + 敏捷。"
+    },
+    {
+     "level": 3,
+     "name": "龙族法术 Draconic Spells",
+     "desc": "始终准备：变装术、色彩球、龙息、元素召唤等主题法术。"
+    },
+    {
+     "level": 6,
+     "name": "元素亲和 Elemental Affinity",
+     "desc": "选 1 种龙类伤害类型：获得该类型抗性，施放该类型法术时伤害加魅力调整值。"
+    },
+    {
+     "level": 14,
+     "name": "龙翼 Dragon Wings",
+     "desc": "附赠动作长出翅膀，获得 60 尺飞行 1 小时（1 次/长休）。"
+    },
+    {
+     "level": 18,
+     "name": "龙之伙伴 Dragon Companion",
+     "desc": "可免费施放召唤龙（1 次/长休）。"
+    }
+   ]
+  },
+  "Wild Magic": {
+   "class": "sorcerer",
+   "srd": false,
+   "summary": "混沌术士：随机魔法涌动+命运扭转，娱乐性与翻盘能力最高。",
+   "levels": [
+    3,
+    6,
+    14,
+    18
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "狂野魔法 Wild Magic Surge",
+     "desc": "施放 1 环以上法术后，DM 可让你掷 d20，掷出 1 触发随机魔法效果。"
+    },
+    {
+     "level": 3,
+     "name": "混沌潮汐 Tides of Chaos",
+     "desc": "给自己一次检定优势（1 次/长休），之后下一次涌动自动触发。"
+    },
+    {
+     "level": 6,
+     "name": "扭曲命运 Bend Luck",
+     "desc": "反应：花 1 术法点让 60 尺内一次检定 ±1d4。"
+    },
+    {
+     "level": 14,
+     "name": "受控混沌 Controlled Chaos",
+     "desc": "涌动时掷两次取其一，避免最坏结果。"
+    },
+    {
+     "level": 18,
+     "name": "法术炸弹 Spell Bombardment",
+     "desc": "伤害法术掷出最大骰时可再掷一颗并累加。"
+    }
+   ]
+  },
+  "Archfey Patron": {
+   "class": "warlock",
+   "srd": false,
+   "summary": "妖精宗主：魅惑/恐慌光环、受伤自动传送隐形，生存与社交兼顾。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "妖精法术 Archfey Spells",
+     "desc": "始终准备：魅惑人类、妖精之火、植物滋长、支配人类等。"
+    },
+    {
+     "level": 3,
+     "name": "妖精临在 Fey Presence",
+     "desc": "附赠动作：10 尺内敌人感知豁免，失败则被你魅惑或恐慌。"
+    },
+    {
+     "level": 6,
+     "name": "迷雾逃逸 Misty Escape",
+     "desc": "受伤时反应：变隐形并传送 60 尺（1 次/短休）。"
+    },
+    {
+     "level": 10,
+     "name": "迷惑防御 Beguiling Defenses",
+     "desc": "免疫魅惑；有人试图魅惑你时可用反应反制。"
+    },
+    {
+     "level": 14,
+     "name": "黑暗欢宴 Dark Delirium",
+     "desc": "1 分钟内让目标陷入幻境：被魅惑或恐慌，且看不见真实环境。"
+    }
+   ]
+  },
+  "Celestial Patron": {
+   "class": "warlock",
+   "srd": false,
+   "summary": "天界宗主：治疗池+光耀伤害，队伍里的副奶与稳定输出。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "天界法术 Celestial Spells",
+     "desc": "始终准备：治愈真言、灼热射线、昼明术、火焰风暴等。"
+    },
+    {
+     "level": 3,
+     "name": "治愈之光 Healing Light",
+     "desc": "获得 1 + 邪术师等级 颗 d6 治疗骰，附赠动作分配给 60 尺内生物。"
+    },
+    {
+     "level": 6,
+     "name": "光耀之魂 Radiant Soul",
+     "desc": "对光耀或火焰伤害有抗性；施放光耀/火焰法术时加魅力调整值伤害。"
+    },
+    {
+     "level": 10,
+     "name": "天界韧性 Celestial Resistance",
+     "desc": "长休后获得等同等级 + 魅力调整值 的临时 HP。"
+    },
+    {
+     "level": 14,
+     "name": "灼热复仇 Searing Vengeance",
+     "desc": "死亡豁免时可爆发：起身、回一半 HP、周围敌人目盲并受伤。"
+    }
+   ]
+  },
+  "Fiend Patron": {
+   "class": "warlock",
+   "srd": true,
+   "summary": "邪魔宗主：击杀回临时血、命运加骰，最直白的爆发与续航。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "邪魔祝福 Dark One's Blessing",
+     "desc": "把敌人打到 0 HP 时，获得魅力调整值 + 邪术师等级 的临时 HP。"
+    },
+    {
+     "level": 3,
+     "name": "邪魔法术 Fiend Spells",
+     "desc": "始终准备：灼热射线、定身术、火球术、石墙术等。"
+    },
+    {
+     "level": 6,
+     "name": "邪魔好运 Dark One's Own Luck",
+     "desc": "属性检定或豁免可加 1d10（1 次/短休）。"
+    },
+    {
+     "level": 10,
+     "name": "邪魔韧性 Fiendish Resilience",
+     "desc": "每次短休/长休选 1 种伤害类型（力场除外），获得其抗性。"
+    },
+    {
+     "level": 14,
+     "name": "掷入地狱 Hurl Through Hell",
+     "desc": "每回合一次：命中后把目标打入下层位面，回来时受 8d10 心灵伤害。"
+    }
+   ]
+  },
+  "Great Old One Patron": {
+   "class": "warlock",
+   "srd": false,
+   "summary": "旧日支配者宗主：心灵感应+精神护盾，控心与信息战最强。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "心灵法术 Great Old One Spells",
+     "desc": "始终准备：侦测思想、心灵尖啸、心灵遥控、支配人类等。"
+    },
+    {
+     "level": 3,
+     "name": "觉醒心灵 Awakened Mind",
+     "desc": "可与 30 尺内能理解语言的生物心灵沟通。"
+    },
+    {
+     "level": 6,
+     "name": "心灵屏障 Entropic Ward",
+     "desc": "反应：敌人攻击你时给劣势；若失手，你下次攻击它有优势。"
+    },
+    {
+     "level": 10,
+     "name": "思维护盾 Thought Shield",
+     "desc": "对 psychic 伤害有抗性；有人读心时你可反向误导。"
+    },
+    {
+     "level": 14,
+     "name": "创造奴仆 Create Thrall",
+     "desc": "可永久魅惑一名失能的人形生物作为奴仆。"
+    }
+   ]
+  },
+  "Abjurer": {
+   "class": "wizard",
+   "srd": false,
+   "summary": "防护师：奥术护盾吸收伤害，最耐打的法师，专克法术。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "防护学者 Abjuration Savant",
+     "desc": "免费抄 2 个 2 环以下防护法术，抄录防护法术更快更省。"
+    },
+    {
+     "level": 3,
+     "name": "奥术守御 Arcane Ward",
+     "desc": "施放防护法术时积攒护盾（2×法师等级 + 智力），先替你吸收伤害。"
+    },
+    {
+     "level": 6,
+     "name": "投射守御 Projected Ward",
+     "desc": "反应：把护盾转给 30 尺内一名生物承受伤害。"
+    },
+    {
+     "level": 10,
+     "name": "强化防护 Improved Abjuration",
+     "desc": "施放防护法术时可加熟练加值到相关检定。"
+    },
+    {
+     "level": 14,
+     "name": "法术抗性 Spell Resistance",
+     "desc": "对法术的豁免有优势，且法术伤害减半。"
+    }
+   ]
+  },
+  "Diviner": {
+   "class": "wizard",
+   "srd": false,
+   "summary": "预言师：预兆骰可以替换任何 d20，是最强的「改命」法师。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "预言学者 Divination Savant",
+     "desc": "免费抄 2 个 2 环以下预言法术，抄录预言法术更快更省。"
+    },
+    {
+     "level": 3,
+     "name": "预兆 Portent",
+     "desc": "每次长休后掷 2 个 d20 存为预兆；可在任意可见生物的检定前用它替换结果。"
+    },
+    {
+     "level": 6,
+     "name": "专家预言 Expert Divination",
+     "desc": "施放 2 环以上预言法术可回复 1 个较低环法术位。"
+    },
+    {
+     "level": 10,
+     "name": "第三只眼 The Third Eye",
+     "desc": "附赠动作获得 1 分钟：黑暗视觉、或看穿隐形、或读心。"
+    },
+    {
+     "level": 14,
+     "name": "更大预兆 Greater Portent",
+     "desc": "预兆骰数量提升到 3 个。"
+    }
+   ]
+  },
+  "Evoker": {
+   "class": "wizard",
+   "srd": true,
+   "summary": "塑能师：范围法术不误伤队友，伤害拉满，最省心的输出法师。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "塑能学者 Evocation Savant",
+     "desc": "免费把 2 个 2 环以下塑能法术抄进法术书，抄录塑能法术更快更省。"
+    },
+    {
+     "level": 3,
+     "name": "强化戏法 Potent Cantrip",
+     "desc": "伤害戏法即使未命中/被豁免成功，目标仍受一半伤害。"
+    },
+    {
+     "level": 6,
+     "name": "塑形法术 Sculpt Spells",
+     "desc": "施放塑能法术时，可选 1 + 法术环级 名生物不受伤害。"
+    },
+    {
+     "level": 10,
+     "name": "强化塑能 Empowered Evocation",
+     "desc": "施放塑能法术时，其中一次伤害掷骰加智力调整值。"
+    },
+    {
+     "level": 14,
+     "name": "超载 Overchannel",
+     "desc": "1-5 环伤害法术可直接取最大伤害；重复使用会承受反噬伤害。"
+    }
+   ]
+  },
+  "Illusionist": {
+   "class": "wizard",
+   "srd": false,
+   "summary": "幻术师：幻象可以变真（造出实体墙），创造力上限最高。",
+   "levels": [
+    3,
+    6,
+    10,
+    14
+   ],
+   "features": [
+    {
+     "level": 3,
+     "name": "幻术学者 Illusionist Savant",
+     "desc": "免费抄 2 个 2 环以下幻术法术，抄录幻术法术更快更省。"
+    },
+    {
+     "level": 3,
+     "name": "强化次级幻象 Improved Minor Illusion",
+     "desc": "次级幻象可同时产生声音与影像。"
+    },
+    {
+     "level": 6,
+     "name": "可塑幻象 Malleable Illusions",
+     "desc": "可随时改变自己正在维持的幻象内容。"
+    },
+    {
+     "level": 10,
+     "name": "幻象自明 Illusory Self",
+     "desc": "反应：用幻象替自己挡下一次攻击（1 次/短休）。"
+    },
+    {
+     "level": 14,
+     "name": "幻象成真 Illusory Reality",
+     "desc": "让幻象中的一件非生物物件变成真实的实体，持续 1 分钟。"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,1036 @@
+{
+ "_note": "2024 PHB 通用专长 / 战斗风格专长 / 传奇恩惠。effects 只放能机械计算的部分，其余写 desc（note_only=true）。bonus_attack_on_crit_or_kill 专指「重击或使目标降至 0 HP 后以附赠动作再发动一次武器攻击」（GWM 的 Hew）。prereq.level = 0 表示无等级前提（战斗风格专长仅由职业的战斗风格特性授予），其余条目的 level 为实际等级前提（通用专长 4、传奇恩惠 19）。fighting_style 中带 classes 字段的条目为职业专属战斗风格，集成时按职业过滤；其余为通用战斗风格。起源专长见 data/feats.json。source=PHB 2024 表示已按 2024 版原文核对，SRD 5.2 表示取自 SRD 文本。",
+ "_counts": {
+  "general": 43,
+  "fighting_style": 12,
+  "epic_boon": 7
+ },
+ "general": {
+  "Ability Score Improvement": {
+   "cn": "属性值提升",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选一项属性值 +2，或任选两项属性值各 +1。本专长不能使属性值超过 20。可重复选取。",
+   "repeatable": true,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Actor": {
+   "cn": "演员",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "CHA",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "魅力 +1（上限 20）。【伪装 Impersonation】当你伪装成某个真实或虚构的人物时，你为使别人相信你就是那个人而进行的魅力（欺瞒或表演）检定具有优势。【拟声 Mimicry】你可以模仿其他生物发出的声音，包括说话声；听到模仿的生物必须成功通过一次感知（洞悉）检定才能识破，DC = 8 + 你的魅力调整值 + 熟练加值。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Athlete": {
+   "cn": "运动员",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "STR",
+      13
+     ],
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【攀爬速度】你获得等于你速度的攀爬速度。【翻身而起】当你处于倒地状态时，只需 5 尺移动力即可起身。【跳跃】你只需助跑 5 尺即可进行助跑跳远或助跑跳高。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Charger": {
+   "cn": "冲锋手",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "STR",
+      13
+     ],
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【强化疾走】你采取疾走动作时，该动作期间你的速度 +10 尺。【冲锋攻击】若你在本回合以攻击动作进行近战攻击前，先朝目标直线移动至少 10 尺，且该攻击命中，则选择一项效果：该次攻击的伤害掷骰 +1d8；或将该目标推离至多 10 尺（目标体型不得比你大一级以上）。每回合只能使用一次。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Chef": {
+   "cn": "大厨",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "体质或感知 +1（上限 20）。【厨具熟练】若你尚无厨师工具熟练，则获得之。【滋补餐食】短休期间，若你有食材与厨师工具，可为至多 4 + 你的熟练加值 个生物烹制特殊食物；短休结束时，食用该食物并消耗至少一枚生命骰恢复 HP 的生物，额外恢复 1d8 HP。【振奋点心】花 1 小时工作或完成一次长休时，若你有食材与厨师工具，可制作数量等于你熟练加值的点心；点心制作后 8 小时内有效。生物可用附赠动作吃下一份，获得等于你熟练加值的临时 HP。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Crossbow Expert": {
+   "cn": "强弩专家",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "敏捷 +1（上限 20）。【无视装填】你无视手弩、轻弩与重弩的装填属性；握持其中之一时，即使没有空手也能为其装填弹药。【近战射击】身处敌人 5 尺内不会使你的弩攻击检定具有劣势。【双持】当你因轻型属性获得额外攻击时，若该攻击使用具有轻型属性的弩，且你尚未把属性调整值加到该伤害上，则可将其加上。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Crusher": {
+   "cn": "粉碎者",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或体质 +1（上限 20）。【推撞】每回合一次，当你以造成钝击伤害的攻击命中一个生物时，可将它移动 5 尺至未占据空间（目标体型不得比你大一级以上），且不引发借机攻击。【强化重击】当你对某生物造成钝击伤害的重击时，直到你下一回合开始，对该生物的攻击检定具有优势。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Defensive Duelist": {
+   "cn": "防御式决斗",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "敏捷 +1（上限 20）。【招架】当你持用一把灵巧武器，且另一生物以近战攻击命中你时，你可以用反应将你的熟练加值加到 AC 上，这可能使该次攻击失手；该加值对你的 AC 有效直到你下一回合开始（对所有近战攻击生效）。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Dual Wielder": {
+   "cn": "双持客",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "STR",
+      13
+     ],
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【强化双持】当你在自己回合采取攻击动作，并使用具有轻型属性的武器攻击后，可在同一回合以附赠动作发动一次额外攻击；该额外攻击必须由另一把不具有双手属性的近战武器发动，且其伤害不加你的属性调整值（除非该调整值为负）。【快速拔取】拔出或收起武器时，你可以同时拔出或收起两把不具有双手属性的武器，而非通常的一把。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Durable": {
+   "cn": "耐性",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "体质 +1（上限 20）。【蔑视死亡】你进行死亡豁免时具有优势。【快速恢复】你可以用附赠动作消耗一枚生命骰，掷骰并恢复等于该掷骰结果的 HP；使用次数等于你的熟练加值，完成短休或长休后恢复全部已消耗次数。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Elemental Adept": {
+   "cn": "元素掌控",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Spellcasting or Pact Magic"
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。选择一种伤害类型：强酸、寒冷、火焰、闪电或雷鸣。【能量精通】你施放的法术忽略对该类型伤害的抗性；此外，当你为你施放的法术掷该类型的伤害时，可将伤害骰上的 1 视为 2。可重复选取（每次选择不同的伤害类型）。",
+   "repeatable": true,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Fey-Touched": {
+   "cn": "妖精触碰",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。【妖精魔法】选择一道预言或惑控学派的 1 环法术；你始终准备该法术与“迷踪步”法术，并可用相应环阶的法术位施放它们。你可以不消耗法术位的方式各施放这两道法术一次；如此施放后，须完成长休才能再次以该方式施放该法术。施法属性为你以此专长提升的属性。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Grappler": {
+   "cn": "擒抱者",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "STR",
+      13
+     ],
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【拳打擒抱】当你在自己回合以攻击动作进行徒手打击并命中一个生物时，可同时使用伤害与擒抱两个选项；每回合只能使用一次。【攻击优势】你对你擒抱的生物进行攻击检定时具有优势。【快速摔跤】移动你擒抱的生物时，若该生物体型与你相同或更小，你无需为此额外消耗移动力。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Great Weapon Master": {
+   "cn": "巨武器大师",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "STR",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "力量 +1（上限 20）。【重武器掌握】在你回合内，当你以攻击动作使用具有重型属性的武器命中一个生物时，可令该武器对目标额外造成等于你熟练加值的伤害。【砍伐】当你用近战武器造成重击，或用其将某生物 HP 降至 0 时，可立即用附赠动作以同一把武器发动一次攻击。",
+   "repeatable": false,
+   "effects": {
+    "heavy_damage_pb": true,
+    "bonus_attack_on_crit_or_kill": true
+   },
+   "source": "PHB 2024"
+  },
+  "Heavily Armored": {
+   "cn": "重甲运用",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Medium Armor Training"
+   },
+   "desc": "力量或体质 +1（上限 20）。【护甲训练】你获得重甲训练（熟练）。",
+   "repeatable": false,
+   "effects": {
+    "armor_prof": [
+     "heavy"
+    ]
+   },
+   "source": "PHB 2024"
+  },
+  "Heavy Armor Master": {
+   "cn": "重甲大师",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Heavy Armor Training"
+   },
+   "desc": "力量或体质 +1（上限 20）。【伤害减免】当你穿着重甲被一次攻击命中时，该攻击对你造成的钝击、穿刺与挥砍伤害减少等于你熟练加值的数值。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Inspiring Leader": {
+   "cn": "领袖之证",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "WIS",
+      13
+     ],
+     [
+      "CHA",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "感知或魅力 +1（上限 20）。【振奋表演】当你完成短休或长休时，可进行一段鼓舞人心的表演（演讲、歌唱或舞蹈）；选择 30 尺内至多 6 名目睹该表演的盟友（可包括你自己），每名被选生物获得临时 HP，数值等于你的角色等级 + 你以此专长提升的属性调整值。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Keen Mind": {
+   "cn": "敏锐心灵",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "INT",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "智力 +1（上限 20）。【博学知识】选择一项技能：奥秘、历史、调查、自然或宗教。若你尚无该技能熟练，则获得熟练；若你已有熟练，则获得专精（熟练加值加倍）。【快速研习】你可以用附赠动作采取研究动作。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Lightly Armored": {
+   "cn": "轻甲运用",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【护甲训练】你获得轻甲与盾牌的训练（熟练）。",
+   "repeatable": false,
+   "effects": {
+    "armor_prof": [
+     "light",
+     "shields"
+    ]
+   },
+   "source": "PHB 2024"
+  },
+  "Mage Slayer": {
+   "cn": "巫师杀手",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【破专注】当你对一个正在专注的生物造成伤害时，它为维持专注所作的豁免检定具有劣势。【心灵防护】当你的一次智力、感知或魅力豁免检定失败时，你可以改为使其成功；使用此增益后，须完成短休或长休才能再次使用。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Martial Weapon Training": {
+   "cn": "军用武器训练",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【武器熟练】你获得军用武器的熟练。",
+   "repeatable": false,
+   "effects": {
+    "weapon_prof": [
+     "martial"
+    ]
+   },
+   "source": "PHB 2024"
+  },
+  "Medium Armor Master": {
+   "cn": "中甲大师",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Medium Armor Training"
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【灵巧穿着】当你穿着中甲且敏捷为 16 或更高时，你可将 +3（而非 +2）加到你的 AC 上。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Moderately Armored": {
+   "cn": "中甲运用",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Light Armor Training"
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【护甲训练】你获得中甲训练（熟练）。",
+   "repeatable": false,
+   "effects": {
+    "armor_prof": [
+     "medium"
+    ]
+   },
+   "source": "PHB 2024"
+  },
+  "Mounted Combatant": {
+   "cn": "骑乘战斗",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "智力或感知 +1（上限 20）。【骑乘打击】骑乘时，你对坐骑 5 尺内、体型至少比坐骑小一级的未骑乘生物进行攻击检定时具有优势。【跃开】若你的坐骑成为允许其以敏捷豁免只受一半伤害的效果的目标，则其豁免成功时不受伤害、失败时只受一半伤害；此增益要求你正骑乘该坐骑，且你与坐骑均未失能。【闪避】骑乘时，若你未失能，可强制一次命中坐骑的攻击改为命中你。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Observant": {
+   "cn": "观察力",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "INT",
+      13
+     ],
+     [
+      "WIS",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "智力或感知 +1（上限 20）。【敏锐观察者】选择一项技能：洞悉、调查或察觉。若你尚无该技能熟练，则获得熟练；若你已有熟练，则获得专精（熟练加值加倍）。【快速搜索】你可以用附赠动作采取搜索动作。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Piercer": {
+   "cn": "穿刺者",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【穿刺】每回合一次，当你以造成穿刺伤害的攻击命中一个生物时，可重掷该攻击的一枚伤害骰，且必须使用新结果。【强化重击】当你对某生物造成穿刺伤害的重击时，可额外掷一枚伤害骰，计入该次重击的额外穿刺伤害。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Poisoner": {
+   "cn": "毒师",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "敏捷或智力 +1（上限 20）。【强效毒素】当你进行造成毒素伤害的伤害掷骰时，该伤害忽略毒素抗性。【调配毒药】你获得毒药工具熟练；花 1 小时使用该工具并消耗价值 50 GP 的材料，可制作数量等于你熟练加值的毒药份数。【毒药份】你可以用附赠动作将一份毒药涂到一把武器或一份弹药上；涂抹后效力持续 1 分钟，或直到你用该物品造成伤害（以较短者为准）。当生物因该涂毒物品受到伤害时，须进行一次体质豁免，DC = 8 + 你以此专长提升的属性调整值 + 你的熟练加值；失败则受到 2d8 毒素伤害，并中毒直到你下一回合结束。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Polearm Master": {
+   "cn": "长柄武器大师",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "STR",
+      13
+     ],
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【长柄打击】当你采取攻击动作并以长棍、矛，或具有重型与触及属性的武器攻击后，可用附赠动作以该武器的另一端发动一次近战攻击，造成 1d4 钝击伤害。【反应打击】当你持用长棍、矛，或具有重型与触及属性的武器时，若有生物进入该武器的触及范围，你可以用反应对其发动一次近战攻击。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Resilient": {
+   "cn": "强健身心",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "选择一项你尚无豁免熟练的属性，该属性 +1（上限 20），并获得该属性的豁免检定熟练。",
+   "repeatable": false,
+   "effects": {
+    "save_prof_choice": 1
+   },
+   "source": "PHB 2024"
+  },
+  "Ritual Caster": {
+   "cn": "仪式施法者",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "INT",
+      13
+     ],
+     [
+      "WIS",
+      13
+     ],
+     [
+      "CHA",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。【仪式法术】选择数量等于你熟练加值的、具有仪式标签的 1 环法术；你始终准备这些法术，并可用你拥有的任意法术位施放它们。此后每当你的熟练加值提升，你可再添加一道具有仪式标签的 1 环法术到这些始终准备的法术中。这些法术的施法属性为你以此专长提升的属性。【快速仪式】你可以用仪式法术的正常施法时间（而非仪式所需的延长时间）施放一道你已准备的仪式法术，且不消耗法术位；如此施放后，须完成长休才能再次使用此增益。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Sentinel": {
+   "cn": "哨兵",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "STR",
+      13
+     ],
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【守护者】当你 5 尺内的一个生物采取撤离动作，或攻击你以外的目标时，你可以立即对该生物发动一次借机攻击。【阻截】当你以借机攻击命中一个生物时，该生物的速度在本回合剩余时间内变为 0。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Shadow-Touched": {
+   "cn": "影界触碰",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。【阴影魔法】选择一道幻术或死灵学派的 1 环法术；你始终准备该法术与“隐形术”法术，并可用相应环阶的法术位施放它们。你可以不消耗法术位的方式各施放这两道法术一次；如此施放后，须完成长休才能再次以该方式施放该法术。施法属性为你以此专长提升的属性。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Sharpshooter": {
+   "cn": "神射手",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "敏捷 +1（上限 20）。【无视掩护】你使用武器的远程攻击忽略半掩护与四分之三掩护。【近战射击】身处敌人 5 尺内不会使你的远程武器攻击检定具有劣势。【远距离射击】在远距离进行攻击不会使你的远程武器攻击检定具有劣势。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Shield Master": {
+   "cn": "盾牌大师",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Shield Training"
+   },
+   "desc": "力量 +1（上限 20）。【盾击】若你在攻击动作中攻击 5 尺内的一个生物，并以近战武器命中，且你装备着盾牌，则可立即用盾牌撞击该目标，迫使其进行力量豁免，DC = 8 + 你的力量调整值 + 熟练加值；豁免失败时，你选择将其推离你 5 尺，或使其陷入倒地状态。每回合只能使用一次。【举盾遮蔽】当你成为允许你以敏捷豁免只受一半伤害的效果的目标时，若你持用盾牌，你可以用反应在豁免成功时不受任何伤害。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Skill Expert": {
+   "cn": "技艺专家",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选一项属性 +1（上限 20）。【技能熟练】你获得一项自选技能的熟练。【专精】选择一项你已熟练但尚无专精的技能，获得该技能的专精（熟练加值加倍）。",
+   "repeatable": false,
+   "effects": {
+    "skills": 1,
+    "expertise": 1
+   },
+   "source": "PHB 2024"
+  },
+  "Skulker": {
+   "cn": "隐伏者",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "DEX",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "敏捷 +1（上限 20）。【盲视】你获得 10 尺盲视。【战场迷雾】战斗中，你作为隐匿动作的一部分进行敏捷（隐匿）检定时具有优势。【狙击】当你在隐藏状态下进行攻击检定且该次攻击失手时，该攻击不会暴露你的位置。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Slasher": {
+   "cn": "劈砍者",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【断筋】每回合一次，当你以造成挥砍伤害的攻击命中一个生物时，可使其速度降低 10 尺直到你下一回合开始。【强化重击】当你对某生物造成挥砍伤害的重击时，该生物的攻击检定具有劣势直到你下一回合开始。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Speedy": {
+   "cn": "飙速跑者",
+   "prereq": {
+    "level": 4,
+    "abilities": [
+     [
+      "DEX",
+      13
+     ],
+     [
+      "CON",
+      13
+     ]
+    ],
+    "feature": null
+   },
+   "desc": "敏捷或体质 +1（上限 20）。【速度提升】你的速度 +10 尺。【疾走越障】你在自己回合采取疾走动作时，本回合剩余时间内困难地形不额外消耗你的移动力。【灵巧移动】对你发动的借机攻击具有劣势。",
+   "repeatable": false,
+   "effects": {
+    "speed": 10
+   },
+   "source": "PHB 2024"
+  },
+  "Spell Sniper": {
+   "cn": "法术射手",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Spellcasting or Pact Magic"
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。【无视掩护】你的法术攻击检定忽略半掩护与四分之三掩护。【近战施法】身处敌人 5 尺内不会使你的法术攻击检定具有劣势。【射程提升】当你施放一道射程至少 10 尺且需要你进行攻击检定的法术时，可将该法术的射程增加 60 尺。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Telekinetic": {
+   "cn": "念动力",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。【微念力】你习得“法师之手”戏法；施放时无需言语与姿势成分，可让幽灵手隐形，且其射程与可离开你的距离均增加 30 尺。施法属性为你以此专长提升的属性。【念力推撞】你可以用附赠动作念力推撞 30 尺内一名你可见的生物；目标须成功通过力量豁免，DC = 8 + 你以此专长提升的属性调整值 + 熟练加值，否则被朝你或远离你的方向移动 5 尺。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Telepathic": {
+   "cn": "心灵感应",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。【心灵低语】你可以对 60 尺内任何你可见的生物进行心灵交流；你的心灵低语使用你掌握的语言，对方只有懂该语言才能理解，且此交流不会让对方向你进行心灵回应。【侦测思想】你始终准备“侦测思想”法术；可不消耗法术位与法术成分地施放一次，如此施放后须完成长休才能再次以该方式施放；也可用相应环阶的法术位施放。施法属性为你以此专长提升的属性。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "War Caster": {
+   "cn": "战地施法者",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": "Spellcasting or Pact Magic"
+   },
+   "desc": "智力、感知或魅力 +1（上限 20）。【专注】你为维持专注所作的体质豁免检定具有优势。【反应法术】当生物因离开你的触及范围而引发你的借机攻击时，你可以用反应对该生物施放一道法术，而非发动借机攻击；该法术的施法时间必须为一个动作，且只能以该生物为目标。【姿势成分】即使一只手或双手持用武器或盾牌，你也能完成法术的姿势成分。",
+   "repeatable": false,
+   "effects": {
+    "concentration_adv": true
+   },
+   "source": "PHB 2024"
+  },
+  "Weapon Master": {
+   "cn": "武器大师",
+   "prereq": {
+    "level": 4,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 20）。【精通属性】你可使用一种你具备熟练的简易或军用武器的精通属性；每次完成长休时，你可以改为另一种符合条件的武器。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  }
+ },
+ "fighting_style": {
+  "Archery": {
+   "cn": "箭术",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "使用远程武器进行的攻击检定 +2。",
+   "repeatable": false,
+   "effects": {
+    "attack_bonus_ranged": 2
+   },
+   "source": "PHB 2024"
+  },
+  "Blind Fighting": {
+   "cn": "盲斗",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "你获得 10 尺盲视。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Blessed Warrior": {
+   "cn": "受祝福的勇士",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "你习得两道你选择的牧师戏法（推荐神导术与圣火术）。这些戏法对你视为圣武士法术，其施法属性为魅力。每当你获得一个圣武士等级时，你可以将其中的一道戏法替换为另一道你选择的牧师戏法。",
+   "repeatable": false,
+   "effects": {
+    "spell_grants": {
+     "class": "cleric",
+     "cantrips": 2,
+     "level1": 0
+    }
+   },
+   "source": "PHB 2024",
+   "classes": [
+    "paladin"
+   ]
+  },
+  "Defense": {
+   "cn": "防御",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你穿着轻甲、中甲或重甲时，你的 AC +1。",
+   "repeatable": false,
+   "effects": {
+    "ac": 1
+   },
+   "source": "PHB 2024"
+  },
+  "Dueling": {
+   "cn": "对决",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你一只手握持一把近战武器且未持用其他武器时，你使用该武器的伤害掷骰 +2（可持用盾牌）。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Druidic Warrior": {
+   "cn": "德鲁伊教战士",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "你习得两道你选择的德鲁伊戏法（推荐神导术与点点星芒）。这些戏法对你视为游侠法术，其施法属性为感知。每当你获得一个游侠等级时，你可以将其中的一道戏法替换为另一道你选择的德鲁伊戏法。",
+   "repeatable": false,
+   "effects": {
+    "spell_grants": {
+     "class": "druid",
+     "cantrips": 2,
+     "level1": 0
+    }
+   },
+   "source": "PHB 2024",
+   "classes": [
+    "ranger"
+   ]
+  },
+  "Great Weapon Fighting": {
+   "cn": "巨武器战斗",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你用双手握持的近战武器进行攻击并掷伤害时，可将伤害骰上的 1 或 2 视为 3；该武器须具有双手或两用（Versatile）属性。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Interception": {
+   "cn": "拦截",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你能看见的一个生物以攻击检定命中你 5 尺内的另一生物时，你可以用反应使该目标受到的伤害减少 1d10 + 你的熟练加值。使用此反应时你必须持用盾牌或一把简易/军用武器。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Protection": {
+   "cn": "守护",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你能看见的一个生物攻击你 5 尺内你以外的目标时，若你持用盾牌，你可以用反应以盾牌格挡；若你在该目标 5 尺内，则引发该次攻击的攻击检定以及直到你下一回合开始前对该目标的其他攻击检定均具有劣势。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Thrown Weapon Fighting": {
+   "cn": "投掷武器战斗",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你使用具有投掷属性的武器进行远程攻击检定并命中时，该次伤害掷骰 +2。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Two-Weapon Fighting": {
+   "cn": "双武器战斗",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你因使用具有轻型属性的武器而发动额外攻击时，若你尚未把属性调整值加到该攻击的伤害上，则可将其加上。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Unarmed Fighting": {
+   "cn": "徒手战斗",
+   "prereq": {
+    "level": 0,
+    "abilities": [],
+    "feature": "Fighting Style"
+   },
+   "desc": "当你以徒手打击命中并造成伤害时，你可以造成 1d6 + 你的力量调整值 的钝击伤害，以替代徒手打击的通常伤害；若你进行该攻击检定时未持用任何武器或盾牌，则该 d6 变为 d8。此外，在你自己每个回合开始时，你可以对你擒抱的一个生物造成 1d4 钝击伤害。",
+   "repeatable": false,
+   "effects": {
+    "unarmed_die": "1d6"
+   },
+   "source": "PHB 2024"
+  }
+ },
+ "epic_boon": {
+  "Boon of Combat Prowess": {
+   "cn": "英勇战斗之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选一项属性 +1（上限 30）。【无匹瞄准】当你的一次攻击检定失手时，你可以改为命中。使用此增益后，直到你下一回合开始前不能再使用。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "SRD 5.2"
+  },
+  "Boon of Dimensional Travel": {
+   "cn": "次元旅行之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选一项属性 +1（上限 30）。【闪现步】当你采取攻击动作或魔法动作后，你可以立即传送到 30 尺内一个你能看见的未占据空间。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "SRD 5.2"
+  },
+  "Boon of Fate": {
+   "cn": "扭曲命运之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选一项属性 +1（上限 30）。【扭转命运】当你或 60 尺内另一生物在一次 d20 检定中成功或失败时，你可以掷 2d4，并将其总和作为加值或减值加到该 d20 掷骰上。使用此增益后，须掷先攻或完成短休/长休才能再次使用。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "SRD 5.2"
+  },
+  "Boon of Irresistible Offense": {
+   "cn": "无敌攻势之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "力量或敏捷 +1（上限 30）。【破除防御】你造成的钝击、穿刺与挥砍伤害始终忽略抗性。【压倒打击】当你在一次攻击检定的 d20 上掷出 20 时，你可以对目标造成额外伤害，数值等于你以此专长提升的那项属性值；该额外伤害的类型与该次攻击相同。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "SRD 5.2"
+  },
+  "Boon of Spell Recall": {
+   "cn": "法术溯回之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": "Spellcasting"
+   },
+   "desc": "智力、感知或魅力 +1（上限 30）。【免费施法】每当你使用 1–4 环的法术位施放一道法术时，掷 1d4；若掷出的数字与该法术位的环阶相同，则该法术位不被消耗。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "SRD 5.2"
+  },
+  "Boon of the Night Spirit": {
+   "cn": "暗夜精魂之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选一项属性 +1（上限 30）。【融入阴影】当你处于微光或黑暗区域时，可用附赠动作使自己获得隐形状态；当你采取一个动作、附赠动作或反应后，该状态立即结束。【幽影形态】当你处于微光或黑暗区域时，你对除心灵与光耀之外的所有伤害具有抗性。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "SRD 5.2"
+  },
+  "Boon of Truesight": {
+   "cn": "真实视觉之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选一项属性 +1（上限 30）。【真实视觉】你获得 60 尺的真实视觉。",
+   "repeatable": false,
+   "effects": {
+    "note_only": true
+   },
+   "source": "SRD 5.2"
+  }
+ }
+}

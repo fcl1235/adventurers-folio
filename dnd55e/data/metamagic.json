@@ -1,0 +1,65 @@
+{
+ "_note": "2024 PHB 超魔法: 每道法术默认只能应用 1 个; stack=true 的可与其他叠加。2 级学 2 个, 10/17 级各 +2。",
+ "options": {
+  "careful": {
+   "name": "谨慎法术 Careful Spell",
+   "cost": 1,
+   "desc": "迫使他人豁免时，可保护至多魅力调整值（至少 1）个生物：豁免自动成功，成功本应半伤时完全不受伤害。",
+   "stack": false
+  },
+  "distant": {
+   "name": "远距法术 Distant Spell",
+   "cost": 1,
+   "desc": "射程 ≥5 尺的法术射程翻倍；射程为触碰的法术改为 30 尺。",
+   "stack": false
+  },
+  "empowered": {
+   "name": "强化法术 Empowered Spell",
+   "cost": 1,
+   "desc": "伤害掷骰后可重掷至多魅力调整值（至少 1）个伤害骰，须采用新结果。可与其他超魔法同时使用。",
+   "stack": true
+  },
+  "extended": {
+   "name": "延展法术 Extended Spell",
+   "cost": 1,
+   "desc": "持续时间 ≥1 分钟的法术时长翻倍（上限 24 小时）；若需专注，维持专注的豁免有优势。",
+   "stack": false
+  },
+  "heightened": {
+   "name": "升阶法术 Heightened Spell",
+   "cost": 2,
+   "desc": "选一个目标：它对本法术的豁免（含后续豁免）有劣势。",
+   "stack": false
+  },
+  "quickened": {
+   "name": "迅捷法术 Quickened Spell",
+   "cost": 2,
+   "desc": "施法时间为 1 动作的法术改为 1 附赠动作。本回合已施放过 1 环以上法术则不能用。",
+   "stack": false
+  },
+  "seeking": {
+   "name": "探秘法术 Seeking Spell",
+   "cost": 1,
+   "desc": "法术攻击未命中时重掷 d20，须采用新结果。可与其他超魔法同时使用。",
+   "stack": true
+  },
+  "subtle": {
+   "name": "精妙法术 Subtle Spell",
+   "cost": 1,
+   "desc": "忽略言语、姿势与材料成分（有价值或会被消耗的材料除外）。",
+   "stack": false
+  },
+  "transmuted": {
+   "name": "转化法术 Transmuted Spell",
+   "cost": 1,
+   "desc": "把酸/寒/火/雷/毒/雷鸣伤害改为其中另一种。",
+   "stack": false
+  },
+  "twinned": {
+   "name": "孪生法术 Twinned Spell",
+   "cost": 1,
+   "desc": "对可升环增加目标数的法术，花 1 点使有效环级 +1（可多指定一个目标）。",
+   "stack": false
+  }
+ }
+}

@@ -1,0 +1,6007 @@
+{
+ "_note": "野兽形态数据，供德鲁伊荒野变形、游侠野兽伙伴、法师变形术使用。仅收录 Beast 类型、CR 0-6。数值取自 dnd5eapi（2024 优先，SRD 5.2；2014 补录标记 edition=2014）。",
+ "monsters": [
+  {
+   "id": "goat",
+   "name": "山羊 Goat",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "中型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 4,
+   "hp_dice": "1d8",
+   "speed": {
+    "walk": 40,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 11,
+    "DEX": 10,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 5
+   },
+   "saves": {
+    "STR": 2
+   },
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "撞击 Ram",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1 点钝击伤害；若山羊在此次攻击前直线移动 20 尺以上靠近目标，则改为 2（1d4）点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-fire-beetle",
+   "name": "巨型萤火虫 Giant Fire Beetle",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "小型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 4,
+   "hp_dice": "1d6+1",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 8,
+    "DEX": 10,
+    "CON": 12,
+    "INT": 1,
+    "WIS": 7,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 30,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 8
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "发光 Illumination",
+     "desc": "巨型萤火虫散发 10 尺半径的明亮光照，以及其外 10 尺的微光光照。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 1,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "火焰",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +1，触及 5 尺，命中造成 1 点火焰伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "seahorse",
+   "name": "海马 Seahorse",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 0,
+   "size": "微型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 20,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 1,
+    "DEX": 12,
+    "CON": 8,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 2
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2,
+    "隐匿": 5
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "海马只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "气泡冲刺 Bubble Dash",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "在水下时，海马可以移动至多其游泳速度的距离，且不会引发借机攻击。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "raven",
+   "name": "渡鸦 Raven",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 2,
+   "hp_dice": "1d4",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 50,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 14,
+    "CON": 10,
+    "INT": 5,
+    "WIS": 13,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "模仿 Mimicry",
+     "desc": "渡鸦可以模仿听过的简单声音（如低语、虫鸣）；听者通过 DC 10 感知（洞悉）检定可辨出这是模仿。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "喙啄 Beak",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "baboon",
+   "name": "狒狒 Baboon",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "小型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 3,
+   "hp_dice": "1d6",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 8,
+    "DEX": 14,
+    "CON": 11,
+    "INT": 4,
+    "WIS": 12,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有狒狒的一个未失能盟友，狒狒对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 1,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4-1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +1，触及 5 尺，命中造成 1d4-1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "cat",
+   "name": "猫 Cat",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 2,
+   "hp_dice": "1d4",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 3,
+    "DEX": 15,
+    "CON": 10,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {
+    "DEX": 4
+   },
+   "skills": {
+    "察觉": 3,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "跳跃者 Jumper",
+     "desc": "猫的跳跃距离以敏捷而非力量计算。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "抓挠 Scratch",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "owl",
+   "name": "猫头鹰 Owl",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 3,
+    "DEX": 13,
+    "CON": 8,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5,
+    "隐匿": 5
+   },
+   "senses": {
+    "darkvision": 120,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "飞掠 Flyby",
+     "desc": "猫头鹰飞离敌人触及范围时不会引发借机攻击。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "利爪 Talons",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 1 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "badger",
+   "name": "獾 Badger",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 5,
+   "hp_dice": "1d4+3",
+   "speed": {
+    "walk": 20,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false,
+    "burrow": 5
+   },
+   "abilities": {
+    "STR": 10,
+    "DEX": 11,
+    "CON": 16,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 30,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "vulture",
+   "name": "秃鹫 Vulture",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "中型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 5,
+   "hp_dice": "1d8+1",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 50,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 7,
+    "DEX": 10,
+    "CON": 13,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有秃鹫的一个未失能盟友，秃鹫对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "喙啄 Beak",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1d4 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "octopus",
+   "name": "章鱼 Octopus",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "小型",
+   "ac": 12,
+   "ac_note": "敏捷调整",
+   "hp": 3,
+   "hp_dice": "1d6",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 4,
+    "DEX": 15,
+    "CON": 11,
+    "INT": 3,
+    "WIS": 10,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 30,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "屏息 Hold Breath",
+     "desc": "章鱼可以屏息 30 分钟。"
+    },
+    {
+     "name": "水下伪装 Underwater Camouflage",
+     "desc": "章鱼在水下进行的敏捷（隐匿）检定具有优势。"
+    },
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "章鱼只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "触手 Tentacles",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1 点钝击伤害，且目标被擒抱（逃脱 DC 10）；擒抱结束前章鱼不能对其他目标使用触手。"
+    },
+    {
+     "name": "墨云 Ink Cloud",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "若章鱼在水下，可在周身喷出 5 尺半径的墨云。该区域处于重度遮蔽，持续 1 分钟，强水流可将其驱散。喷墨后章鱼可以用附赠动作执行疾走。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "rat",
+   "name": "老鼠 Rat",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 20,
+    "climb": 20,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 11,
+    "CON": 9,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 30,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "灵巧 Agile",
+     "desc": "老鼠移动离开敌人触及范围时不会引发借机攻击。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "jackal",
+   "name": "胡狼 Jackal",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "小型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 3,
+   "hp_dice": "1d6",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 8,
+    "DEX": 15,
+    "CON": 11,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 90,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 1,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4-1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +1，触及 5 尺，命中造成 1d4-1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "spider",
+   "name": "蜘蛛 Spider",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 20,
+    "climb": 20,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 14,
+    "CON": 8,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 2
+   },
+   "saves": {},
+   "skills": {
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 30,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "蜘蛛可以攀爬困难表面（包括沿天花板），无需进行属性检定。"
+    },
+    {
+     "name": "蛛网行者 Web Walker",
+     "desc": "蜘蛛无视蛛网造成的移动限制，并知晓任何接触同一蛛网的生物的位置。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1 点穿刺伤害，外加 1d4 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "1d4",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "lizard",
+   "name": "蜥蜴 Lizard",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 2,
+   "hp_dice": "1d4",
+   "speed": {
+    "walk": 20,
+    "climb": 20,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 11,
+    "CON": 10,
+    "INT": 1,
+    "WIS": 8,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 30,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 9
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "蜥蜴可以攀爬困难表面（包括沿天花板），无需进行属性检定。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "scorpion",
+   "name": "蝎子 Scorpion",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 11,
+    "CON": 8,
+    "INT": 1,
+    "WIS": 8,
+    "CHA": 2
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 10,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 9
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "尾刺 Sting",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害，外加 1d6 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "1d6",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "bat",
+   "name": "蝙蝠 Bat",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 30,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 15,
+    "CON": 8,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 60,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "crab",
+   "name": "螃蟹 Crab",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 3,
+   "hp_dice": "1d4+1",
+   "speed": {
+    "walk": 20,
+    "climb": 0,
+    "fly": 0,
+    "swim": 20,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 6,
+    "DEX": 11,
+    "CON": 12,
+    "INT": 1,
+    "WIS": 8,
+    "CHA": 2
+   },
+   "saves": {},
+   "skills": {
+    "隐匿": 2
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 30,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 9
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水陆两栖 Amphibious",
+     "desc": "螃蟹可以在空气和水中呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "钳击 Claw",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "hawk",
+   "name": "隼 Hawk",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 5,
+    "DEX": 16,
+    "CON": 8,
+    "INT": 2,
+    "WIS": 14,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 6
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 16
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "利爪 Talons",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "frog",
+   "name": "青蛙 Frog",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 20,
+    "climb": 0,
+    "fly": 0,
+    "swim": 20,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 1,
+    "DEX": 13,
+    "CON": 8,
+    "INT": 1,
+    "WIS": 8,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 1,
+    "隐匿": 3
+   },
+   "senses": {
+    "darkvision": 30,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水陆两栖 Amphibious",
+     "desc": "青蛙可以在空气和水中呼吸。"
+    },
+    {
+     "name": "立定跳跃 Standing Leap",
+     "desc": "青蛙的跳远距离至多 10 尺、跳高至多 5 尺，无论是否有助跑。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "piranha",
+   "name": "食人鱼 Piranha",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 16,
+    "CON": 9,
+    "INT": 1,
+    "WIS": 7,
+    "CHA": 2
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 8
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "食人鱼只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1 点穿刺伤害。若目标 HP 未满，该攻击检定具有优势。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "quipper",
+   "name": "食人鲤 Quipper",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 13,
+   "ac_note": "敏捷调整",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 0,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 16,
+    "CON": 9,
+    "INT": 1,
+    "WIS": 7,
+    "CHA": 2
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 8
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "血之狂热 Blood Frenzy",
+     "desc": "食人鲤对 HP 未满的生物进行近战攻击时具有优势。"
+    },
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "食人鲤只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "hyena",
+   "name": "鬣狗 Hyena",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "中型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 5,
+   "hp_dice": "1d8+1",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 11,
+    "DEX": 13,
+    "CON": 12,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有鬣狗的一个未失能盟友，鬣狗对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1d6 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "eagle",
+   "name": "鹰 Eagle",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "小型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 4,
+   "hp_dice": "1d6+1",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 6,
+    "DEX": 15,
+    "CON": 12,
+    "INT": 2,
+    "WIS": 14,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 6
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 16
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "利爪 Talons",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+2",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "deer",
+   "name": "鹿 Deer",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 4,
+   "hp_dice": "1d8",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 11,
+    "DEX": 16,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 14,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 4
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 14
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "灵巧 Agile",
+     "desc": "鹿移动离开敌人触及范围时不会引发借机攻击。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "撞击 Ram",
+     "kind": "melee",
+     "attack_bonus": 2,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +2，触及 5 尺，命中造成 1d4 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "weasel",
+   "name": "鼬 Weasel",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "微型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 1,
+   "hp_dice": "1d4-1",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 3,
+    "DEX": 16,
+    "CON": 8,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {
+    "特技": 5,
+    "察觉": 3,
+    "隐匿": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "pony",
+   "name": "小马 Pony",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "中型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 11,
+   "hp_dice": "2d8+2",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 10,
+    "CON": 13,
+    "INT": 2,
+    "WIS": 11,
+    "CHA": 7
+   },
+   "saves": {
+    "STR": 4
+   },
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "蹄击 Hooves",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+2",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-crab",
+   "name": "巨型螃蟹 Giant Crab",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "中型",
+   "ac": 15,
+   "ac_note": "天生护甲",
+   "hp": 13,
+   "hp_dice": "3d8",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 13,
+    "CON": 11,
+    "INT": 1,
+    "WIS": 9,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {
+    "隐匿": 3
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 30,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 9
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水陆两栖 Amphibious",
+     "desc": "巨型螃蟹可以在空气和水中呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "钳击 Claw",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+1",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 1d6+1 点钝击伤害。若目标为中型或更小生物，则被一只钳子擒抱（逃脱 DC 11）。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-rat",
+   "name": "巨鼠 Giant Rat",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "小型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 7,
+   "hp_dice": "2d6",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 7,
+    "DEX": 16,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 4
+   },
+   "saves": {
+    "DEX": 5
+   },
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有巨鼠的一个未失能盟友，巨鼠对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-weasel",
+   "name": "巨鼬 Giant Weasel",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 9,
+   "hp_dice": "2d8",
+   "speed": {
+    "walk": 40,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 11,
+    "DEX": 17,
+    "CON": 10,
+    "INT": 4,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "特技": 5,
+    "察觉": 3,
+    "隐匿": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "venomous-snake",
+   "name": "毒蛇 Venomous Snake",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "微型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 5,
+   "hp_dice": "2d4",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 2,
+    "DEX": 15,
+    "CON": 11,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 10,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点穿刺伤害，外加 1d6 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1d4+2",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "1d6",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "mastiff",
+   "name": "獒犬 Mastiff",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "中型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 5,
+   "hp_dice": "1d8+1",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 14,
+    "CON": 12,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {
+    "WIS": 3
+   },
+   "skills": {
+    "察觉": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 1d6+1 点穿刺伤害。若目标为中型或更小生物，则陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "blood-hawk",
+   "name": "血鹰 Blood Hawk",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "小型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 7,
+   "hp_dice": "2d6",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 6,
+    "DEX": 14,
+    "CON": 10,
+    "INT": 3,
+    "WIS": 14,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 6
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 16
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有血鹰的一个未失能盟友，血鹰对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "喙啄 Beak",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点穿刺伤害；若目标处于浴血状态，则改为 1d8+2 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "flying-snake",
+   "name": "飞天蛇 Flying Snake",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "微型",
+   "ac": 14,
+   "ac_note": "敏捷调整",
+   "hp": 5,
+   "hp_dice": "2d4",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 60,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 4,
+    "DEX": 18,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 10,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "飞掠 Flyby",
+     "desc": "飞天蛇飞离敌人触及范围时不会引发借机攻击。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 1 点穿刺伤害，外加 3d4 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "3d4",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "camel",
+   "name": "骆驼 Camel",
+   "cr": "1/8",
+   "cr_num": 0.125,
+   "xp": 25,
+   "size": "大型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 17,
+   "hp_dice": "2d10+6",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 8,
+    "CON": 17,
+    "INT": 2,
+    "WIS": 11,
+    "CHA": 5
+   },
+   "saves": {
+    "CON": 5
+   },
+   "skills": {},
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+2",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "riding-horse",
+   "name": "乘马 Riding Horse",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 13,
+   "hp_dice": "2d10+2",
+   "speed": {
+    "walk": 60,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 13,
+    "CON": 12,
+    "INT": 2,
+    "WIS": 11,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "蹄击 Hooves",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+3",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-venomous-snake",
+   "name": "巨型毒蛇 Giant Venomous Snake",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 11,
+   "hp_dice": "2d8+2",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 10,
+    "DEX": 18,
+    "CON": 13,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 10,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 10,
+     "range": null,
+     "damage": "1d4+4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 10 尺，命中造成 1d4+4 点穿刺伤害，外加 1d8 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1d4+4",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "1d8",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-badger",
+   "name": "巨型獾 Giant Badger",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 15,
+   "hp_dice": "2d8+6",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false,
+    "burrow": 10
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 10,
+    "CON": 17,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "2d4+1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 2d4+1 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-centipede",
+   "name": "巨型蜈蚣 Giant Centipede",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "小型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 9,
+   "hp_dice": "2d6+2",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 5,
+    "DEX": 14,
+    "CON": 12,
+    "INT": 1,
+    "WIS": 7,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 30,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 8
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点穿刺伤害。目标陷入中毒状态，直至巨型蜈蚣的下个回合开始。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-owl",
+   "name": "巨枭 Giant Owl",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 12,
+   "ac_note": "敏捷调整",
+   "hp": 19,
+   "hp_dice": "3d10+3",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 15,
+    "CON": 12,
+    "INT": 8,
+    "WIS": 13,
+    "CHA": 10
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 120,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "巨人枭语，能听懂通用语、精灵语与木族语但不能说",
+   "traits": [
+    {
+     "name": "飞掠 Flyby",
+     "desc": "巨枭飞离敌人触及范围时不会引发借机攻击。"
+    },
+    {
+     "name": "敏锐听觉与视觉 Keen Hearing and Sight",
+     "desc": "巨枭依赖听觉或视觉的感知检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "利爪 Talons",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+1",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 2d6+1 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "giant-wolf-spider",
+   "name": "巨狼蛛 Giant Wolf Spider",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 11,
+   "hp_dice": "2d8+2",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 12,
+    "DEX": 16,
+    "CON": 13,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3,
+    "隐匿": 7
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 10,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "巨狼蛛可以攀爬困难表面（包括沿天花板），无需进行属性检定。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点穿刺伤害，外加 2d4 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1d4+3",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "2d4",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-frog",
+   "name": "巨蛙 Giant Frog",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 18,
+   "hp_dice": "4d8",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 12,
+    "DEX": 13,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 30,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水陆两栖 Amphibious",
+     "desc": "巨蛙可以在空气和水中呼吸。"
+    },
+    {
+     "name": "立定跳跃 Standing Leap",
+     "desc": "巨蛙的跳远距离至多 20 尺、跳高至多 10 尺，无论是否有助跑。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 1d6+2 点穿刺伤害。若目标为中型或更小生物，则陷入被擒抱状态（逃脱 DC 11）。"
+    },
+    {
+     "name": "吞咽 Swallow",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": "2d4",
+     "damage_type": "强酸",
+     "save": null,
+     "dc": null,
+     "desc": "巨蛙吞咽一个正被它擒抱的小型或更小目标。被吞咽期间目标不再被擒抱，但处于目盲与束缚状态，对巨蛙体外的攻击与效果具有全身掩护。巨蛙吞咽时不能使用啃咬；巨蛙死亡时，被吞咽者不再束缚，可花费 5 尺移动从尸体中脱出并处于倒地状态。巨蛙下个回合结束时，被吞咽者受到 2d4 点强酸伤害；若未因此死亡，巨蛙将其吐出，吐出的目标处于倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-lizard",
+   "name": "巨蜥 Giant Lizard",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 19,
+   "hp_dice": "3d10+3",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 12,
+    "CON": 13,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 5
+   },
+   "saves": {
+    "DEX": 3
+   },
+   "skills": {},
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "巨蜥可以攀爬困难表面（包括沿天花板），无需进行属性检定。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-bat",
+   "name": "巨蝠 Giant Bat",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 22,
+   "hp_dice": "4d10",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 16,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 120,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "draft-horse",
+   "name": "役马 Draft Horse",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 15,
+   "hp_dice": "2d10+4",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 10,
+    "CON": 15,
+    "INT": 2,
+    "WIS": 11,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "蹄击 Hooves",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+4",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 1d4+4 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "axe-beak",
+   "name": "斧嘴鸟 Axe Beak",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 11,
+   "ac_note": "敏捷调整",
+   "hp": 19,
+   "hp_dice": "3d10+3",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 14,
+    "DEX": 12,
+    "CON": 12,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "喙啄 Beak",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+2",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "pteranodon",
+   "name": "无齿翼龙 Pteranodon",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 13,
+   "hp_dice": "3d8",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 12,
+    "DEX": 15,
+    "CON": 10,
+    "INT": 2,
+    "WIS": 9,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 1
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "飞掠 Flyby",
+     "desc": "无齿翼龙飞离敌人触及范围时不会引发借机攻击。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "wolf",
+   "name": "狼 Wolf",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 11,
+   "hp_dice": "2d8+2",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 14,
+    "DEX": 15,
+    "CON": 12,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有狼的一个未失能盟友，狼对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点穿刺伤害。若目标为中型或更小生物，则陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "constrictor-snake",
+   "name": "蟒蛇 Constrictor Snake",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 13,
+   "hp_dice": "2d10+2",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 14,
+    "CON": 12,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 10,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。"
+    },
+    {
+     "name": "紧勒 Constrict",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": "3d4",
+     "damage_type": "钝击",
+     "save": "STR",
+     "dc": 12,
+     "desc": "豁免：DC 12 力量豁免，5 尺内一个蟒蛇可见的中型或更小生物；失败则受到 3d4 点钝击伤害并陷入被擒抱状态（逃脱 DC 12）。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "boar",
+   "name": "野猪 Boar",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 13,
+   "hp_dice": "2d8+4",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 11,
+    "CON": 14,
+    "INT": 2,
+    "WIS": 9,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 9
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "浴血狂怒 Bloodied Fury",
+     "desc": "野猪处于浴血状态（HP 不足上限一半）时，其攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "抵撞 Gore",
+     "kind": "melee",
+     "attack_bonus": 3,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+1",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +3，触及 5 尺，命中造成 1d6+1 点穿刺伤害。若目标为中型或更小生物，且野猪在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 1d6 点穿刺伤害并陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "elk",
+   "name": "麋鹿 Elk",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "大型",
+   "ac": 10,
+   "ac_note": "天生护甲",
+   "hp": 11,
+   "hp_dice": "2d10",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 10,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "撞击 Ram",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+3",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点钝击伤害。若目标为大型或更小生物，且麋鹿在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 1d6 点钝击伤害并陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "panther",
+   "name": "黑豹 Panther",
+   "cr": "1/4",
+   "cr_num": 0.25,
+   "xp": 50,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 13,
+   "hp_dice": "3d8",
+   "speed": {
+    "walk": 50,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 14,
+    "DEX": 16,
+    "CON": 10,
+    "INT": 3,
+    "WIS": 14,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 4,
+    "隐匿": 7
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 14
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "撕抓 Rend",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+3",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "灵巧脱身 Nimble Escape",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "黑豹执行撤离或躲藏动作。"
+    }
+   ],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-seahorse",
+   "name": "巨型海马 Giant Seahorse",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "大型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 16,
+   "hp_dice": "3d10",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 12,
+    "CON": 11,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "巨型海马只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "撞击 Ram",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+2",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 2d6+2 点钝击伤害；若巨型海马在此次攻击前直线移动 20 尺以上靠近目标，则改为 2d8+2 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "气泡冲刺 Bubble Dash",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "在水下时，巨型海马可以移动至多其游泳速度一半的距离，且不会引发借机攻击。"
+    }
+   ],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-goat",
+   "name": "巨山羊 Giant Goat",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "大型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 19,
+   "hp_dice": "3d10+3",
+   "speed": {
+    "walk": 40,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 13,
+    "CON": 12,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 6
+   },
+   "saves": {
+    "STR": 5
+   },
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "撞击 Ram",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+3",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点钝击伤害。若目标为大型或更小生物，且巨山羊在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d4 点钝击伤害并陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-wasp",
+   "name": "巨蜂 Giant Wasp",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 22,
+   "hp_dice": "5d8",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 50,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 10,
+    "DEX": 14,
+    "CON": 10,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "飞掠 Flyby",
+     "desc": "巨蜂飞离敌人触及范围时不会引发借机攻击。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "尾刺 Sting",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点穿刺伤害，外加 2d4 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1d6+2",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "2d4",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "warhorse",
+   "name": "战马 Warhorse",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "大型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 19,
+   "hp_dice": "3d10+3",
+   "speed": {
+    "walk": 60,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 12,
+    "CON": 13,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {
+    "WIS": 3
+   },
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "蹄击 Hooves",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "2d4+4",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 2d4+4 点钝击伤害。若目标为大型或更小生物，且战马在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d4 点钝击伤害并陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "ape",
+   "name": "猿 Ape",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "中型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 19,
+   "hp_dice": "3d8+6",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 14,
+    "CON": 14,
+    "INT": 6,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "运动": 5,
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该猿发动两次拳击攻击。"
+    },
+    {
+     "name": "拳击 Fist",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+3",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点钝击伤害。"
+    },
+    {
+     "name": "投石 Rock",
+     "kind": "ranged",
+     "attack_bonus": 5,
+     "reach": null,
+     "range": [
+      25,
+      50
+     ],
+     "damage": "2d6+3",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "远程攻击：命中 +5，射程 25/50 尺，命中造成 2d6+3 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "reef-shark",
+   "name": "礁鲨 Reef Shark",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "中型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 22,
+   "hp_dice": "4d8+4",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 14,
+    "DEX": 15,
+    "CON": 13,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 30,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有礁鲨的一个未失能盟友，礁鲨对该目标的攻击检定具有优势。"
+    },
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "礁鲨只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "2d4+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 2d4+2 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "crocodile",
+   "name": "鳄鱼 Crocodile",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "大型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 13,
+   "hp_dice": "2d10+2",
+   "speed": {
+    "walk": 20,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 10,
+    "CON": 13,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 5
+   },
+   "saves": {
+    "CON": 3
+   },
+   "skills": {
+    "隐匿": 2
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "屏息 Hold Breath",
+     "desc": "鳄鱼可以屏息 1 小时。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。若目标为中型或更小生物，则陷入被擒抱状态（逃脱 DC 12）；被擒抱期间同时处于束缚状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "black-bear",
+   "name": "黑熊 Black Bear",
+   "cr": "1/2",
+   "cr_num": 0.5,
+   "xp": 100,
+   "size": "中型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 19,
+   "hp_dice": "3d8+6",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 12,
+    "CON": 14,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该熊发动两次撕抓攻击。"
+    },
+    {
+     "name": "撕抓 Rend",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+2",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-octopus",
+   "name": "巨型章鱼 Giant Octopus",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 45,
+   "hp_dice": "7d10+7",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 0,
+    "swim": 60,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 13,
+    "CON": 13,
+    "INT": 5,
+    "WIS": 10,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 4,
+    "隐匿": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 14
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "巨型章鱼只能在水下呼吸。离开水面后可以屏息 1 小时。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "触手 Tentacles",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 10,
+     "range": null,
+     "damage": "2d6+3",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 10 尺，命中造成 2d6+3 点钝击伤害。若目标为中型或更小生物，则被八条触手擒抱（逃脱 DC 13）；被擒抱期间同时处于束缚状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [
+    {
+     "name": "墨云 Ink Cloud",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "触发：巨型章鱼在水下受到伤害。响应：它喷出墨水，填满以自身为中心的 10 尺立方区域，并移动至多其游泳速度。该区域处于重度遮蔽，持续 1 分钟，或被强水流等效果驱散。"
+    }
+   ],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-vulture",
+   "name": "巨秃鹫 Giant Vulture",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 10,
+   "ac_note": "敏捷调整",
+   "hp": 22,
+   "hp_dice": "3d10+6",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 10,
+    "CON": 15,
+    "INT": 6,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "能听懂通用语但不能说",
+   "traits": [
+    {
+     "name": "敏锐视觉与嗅觉 Keen Sight and Smell",
+     "desc": "巨秃鹫依赖视觉或嗅觉的感知检定具有优势。"
+    },
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有巨秃鹫的一个未失能盟友，巨秃鹫对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该秃鹫发动两次攻击：一次喙啄和一次爪击。"
+    },
+    {
+     "name": "喙啄 Beak",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "2d4+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 2d4+2 点穿刺伤害。"
+    },
+    {
+     "name": "爪击 Talons",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+2",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 2d6+2 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "giant-spider",
+   "name": "巨蜘蛛 Giant Spider",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 26,
+   "hp_dice": "4d10+4",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 14,
+    "DEX": 16,
+    "CON": 12,
+    "INT": 2,
+    "WIS": 11,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 4,
+    "隐匿": 7
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 14
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "巨蜘蛛可以攀爬困难表面（包括沿天花板），无需进行属性检定。"
+    },
+    {
+     "name": "蛛网行者 Web Walker",
+     "desc": "巨蜘蛛无视蛛网造成的移动限制，并知晓任何接触同一蛛网的生物的位置。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点穿刺伤害，外加 2d6 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1d8+3",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "2d6",
+       "damage_type": "毒素"
+      }
+     ]
+    },
+    {
+     "name": "吐丝 Web",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": "DEX",
+     "dc": 13,
+     "desc": "豁免：DC 13 敏捷豁免，60 尺内一个巨蜘蛛可见的生物；失败则陷入束缚状态，直至蛛网被摧毁（AC 10；HP 5；对火焰伤害易伤；免疫毒素与心灵伤害）。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-toad",
+   "name": "巨蟾 Giant Toad",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 39,
+   "hp_dice": "6d10+6",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 15,
+    "DEX": 13,
+    "CON": 13,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水陆两栖 Amphibious",
+     "desc": "巨蟾可以在空气和水中呼吸。"
+    },
+    {
+     "name": "立定跳跃 Standing Leap",
+     "desc": "巨蟾的跳远距离至多 20 尺、跳高至多 10 尺，无论是否有助跑。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 4,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+2",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点穿刺伤害，外加 2d4 点毒素伤害。若目标为中型或更小生物，则陷入被擒抱状态（逃脱 DC 12）。",
+     "damage_parts": [
+      {
+       "damage": "1d6+2",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "2d4",
+       "damage_type": "毒素"
+      }
+     ]
+    },
+    {
+     "name": "吞咽 Swallow",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": "3d6",
+     "damage_type": "强酸",
+     "save": null,
+     "dc": null,
+     "desc": "巨蟾吞咽一个正被它擒抱的中型或更小目标。被吞咽期间目标不再被擒抱，但处于目盲与束缚状态，对巨蟾体外的攻击与效果具有全身掩护。目标在巨蟾每个回合结束时受到 3d6 点强酸伤害。巨蟾同时只能吞咽一个目标，且吞咽期间不能使用啃咬；巨蟾死亡时，被吞咽者不再束缚，可花费 5 尺移动从尸体中脱出并处于倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-hyena",
+   "name": "巨鬣狗 Giant Hyena",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 45,
+   "hp_dice": "6d10+12",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 14,
+    "CON": 14,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "暴走 Rampage",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "对已经处于浴血状态的生物造成伤害后，巨鬣狗可以立即移动至多其速度一半的距离，并发动一次啃咬攻击。"
+    }
+   ],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-eagle",
+   "name": "巨鹰 Giant Eagle",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "敏捷调整",
+   "hp": 26,
+   "hp_dice": "4d10+4",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 80,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 17,
+    "CON": 13,
+    "INT": 8,
+    "WIS": 14,
+    "CHA": 10
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 4
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 14
+   },
+   "languages": "巨人鹰语，能听懂通用语与风族语但不能说",
+   "traits": [
+    {
+     "name": "敏锐视觉 Keen Sight",
+     "desc": "巨鹰依赖视觉的感知检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该鹰发动两次攻击：一次喙啄和一次爪击。"
+    },
+    {
+     "name": "喙啄 Beak",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点穿刺伤害。"
+    },
+    {
+     "name": "爪击 Talons",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+3",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "dire-wolf",
+   "name": "恐狼 Dire Wolf",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 22,
+   "hp_dice": "3d10+6",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 15,
+    "CON": 15,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有恐狼的一个未失能盟友，恐狼对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d10+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d10+3 点穿刺伤害。若目标为大型或更小生物，则陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "brown-bear",
+   "name": "棕熊 Brown Bear",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 11,
+   "ac_note": "天生护甲",
+   "hp": 22,
+   "hp_dice": "3d10+6",
+   "speed": {
+    "walk": 40,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 12,
+    "CON": 15,
+    "INT": 2,
+    "WIS": 13,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该熊发动一次啃咬攻击和一次爪击攻击。"
+    },
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点穿刺伤害。"
+    },
+    {
+     "name": "爪击 Claw",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d4+3",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点挥砍伤害。若目标为大型或更小生物，则陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "lion",
+   "name": "狮 Lion",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 22,
+   "hp_dice": "4d10",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 15,
+    "CON": 11,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 8
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "群体战术 Pack Tactics",
+     "desc": "若目标 5 尺内至少有狮的一个未失能盟友，狮对该目标的攻击检定具有优势。"
+    },
+    {
+     "name": "助跑跳跃 Running Leap",
+     "desc": "有 10 尺助跑时，狮的跳远距离至多 25 尺。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该狮发动两次撕抓攻击；可将其中一次替换为一次咆哮。"
+    },
+    {
+     "name": "撕抓 Rend",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+3",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点挥砍伤害。"
+    },
+    {
+     "name": "咆哮 Roar",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": "WIS",
+     "dc": 11,
+     "desc": "豁免：DC 11 感知豁免，15 尺内一个生物；失败则陷入恐惧状态，直至狮的下个回合开始。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "tiger",
+   "name": "虎 Tiger",
+   "cr": "1",
+   "cr_num": 1,
+   "xp": 200,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 30,
+   "hp_dice": "4d10+8",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 16,
+    "CON": 14,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 8
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3,
+    "隐匿": 7
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "撕抓 Rend",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+3",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点挥砍伤害。若目标为大型或更小生物，则陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "灵巧脱身 Nimble Escape",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "虎执行撤离或躲藏动作。"
+    }
+   ],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "saber-toothed-tiger",
+   "name": "剑齿虎 Saber-Toothed Tiger",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 52,
+   "hp_dice": "7d10+14",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 17,
+    "CON": 15,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 8
+   },
+   "saves": {
+    "STR": 6,
+    "DEX": 5
+   },
+   "skills": {
+    "察觉": 5,
+    "隐匿": 7
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "助跑跳跃 Running Leap",
+     "desc": "有 10 尺助跑时，剑齿虎的跳远距离至多 25 尺。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该虎发动两次撕抓攻击。"
+    },
+    {
+     "name": "撕抓 Rend",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+4",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 2d6+4 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "灵巧脱身 Nimble Escape",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "剑齿虎执行撤离或躲藏动作。"
+    }
+   ],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "polar-bear",
+   "name": "北极熊 Polar Bear",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "大型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 42,
+   "hp_dice": "5d10+15",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 20,
+    "DEX": 14,
+    "CON": 16,
+    "INT": 2,
+    "WIS": 13,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该熊发动两次撕抓攻击。"
+    },
+    {
+     "name": "撕抓 Rend",
+     "kind": "melee",
+     "attack_bonus": 7,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+5",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +7，触及 5 尺，命中造成 1d8+5 点挥砍伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-constrictor-snake",
+   "name": "巨型蟒蛇 Giant Constrictor Snake",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "巨型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 60,
+   "hp_dice": "8d12+8",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 19,
+    "DEX": 14,
+    "CON": 12,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 10,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该蛇发动一次啃咬攻击，并使用紧勒。"
+    },
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 10,
+     "range": null,
+     "damage": "2d6+4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 10 尺，命中造成 2d6+4 点穿刺伤害。"
+    },
+    {
+     "name": "紧勒 Constrict",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": "2d8+4",
+     "damage_type": "钝击",
+     "save": "STR",
+     "dc": 14,
+     "desc": "豁免：DC 14 力量豁免，10 尺内一个巨型蟒蛇可见的大型或更小生物；失败则受到 2d8+4 点钝击伤害并陷入被擒抱状态（逃脱 DC 14）。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-boar",
+   "name": "巨野猪 Giant Boar",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 42,
+   "hp_dice": "5d10+15",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 10,
+    "CON": 16,
+    "INT": 2,
+    "WIS": 7,
+    "CHA": 5
+   },
+   "saves": {
+    "STR": 5
+   },
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 8
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "浴血狂怒 Bloodied Fury",
+     "desc": "巨野猪处于浴血状态（HP 不足上限一半）时，其攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "抵撞 Gore",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "2d6+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点穿刺伤害。若目标为大型或更小生物，且巨野猪在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d6 点穿刺伤害并陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-elk",
+   "name": "巨麋鹿 Giant Elk",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "巨型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 42,
+   "hp_dice": "5d12+10",
+   "speed": {
+    "walk": 60,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 19,
+    "DEX": 16,
+    "CON": 14,
+    "INT": 7,
+    "WIS": 14,
+    "CHA": 10
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 4
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 14
+   },
+   "languages": "巨人麋鹿语，能听懂通用语、精灵语与木族语但不能说",
+   "traits": [
+    {
+     "name": "冲锋 Charge",
+     "desc": "若巨麋鹿直线移动至少 20 尺后在同回合以撞击命中目标，目标额外受到 7（2d6）点伤害；若目标是生物，须通过 DC 14 力量豁免，否则倒地。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "撞击 Ram",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 10,
+     "range": null,
+     "damage": "2d6+4",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 10 尺，命中造成 2d6+4 点钝击伤害。"
+    },
+    {
+     "name": "蹄击 Hooves",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "4d8+4",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，只能以处于倒地状态的生物为目标，命中造成 4d8+4 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2014",
+   "source": "srd-2014"
+  },
+  {
+   "id": "allosaurus",
+   "name": "异特龙 Allosaurus",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 51,
+   "hp_dice": "6d10+18",
+   "speed": {
+    "walk": 60,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 19,
+    "DEX": 13,
+    "CON": 17,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 5
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 15
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "2d10+4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 2d10+4 点穿刺伤害。"
+    },
+    {
+     "name": "爪击 Claws",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+4",
+     "damage_type": "挥砍",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 1d8+4 点挥砍伤害。若目标为大型或更小生物，且异特龙在此次攻击前直线移动 30 尺以上靠近它，则目标陷入倒地状态，异特龙还可对它发动一次啃咬攻击。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "rhinoceros",
+   "name": "犀牛 Rhinoceros",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 45,
+   "hp_dice": "6d10+12",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 21,
+    "DEX": 8,
+    "CON": 15,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "抵撞 Gore",
+     "kind": "melee",
+     "attack_bonus": 7,
+     "reach": 5,
+     "range": null,
+     "damage": "2d8+5",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +7，触及 5 尺，命中造成 2d8+5 点穿刺伤害。若目标为大型或更小生物，且犀牛在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d8 点穿刺伤害并陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "hunter-shark",
+   "name": "猎鲨 Hunter Shark",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "大型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 45,
+   "hp_dice": "6d10+12",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 14,
+    "CON": 15,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 4
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 2
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 60,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "猎鲨只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "3d6+4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 3d6+4 点穿刺伤害。若目标 HP 未满，该攻击检定具有优势。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "plesiosaurus",
+   "name": "蛇颈龙 Plesiosaurus",
+   "cr": "2",
+   "cr_num": 2,
+   "xp": 450,
+   "size": "大型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 68,
+   "hp_dice": "8d10+24",
+   "speed": {
+    "walk": 20,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 15,
+    "CON": 16,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "屏息 Hold Breath",
+     "desc": "蛇颈龙可以屏息 1 小时。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 10,
+     "range": null,
+     "damage": "2d6+4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 10 尺，命中造成 2d6+4 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-scorpion",
+   "name": "巨蝎 Giant Scorpion",
+   "cr": "3",
+   "cr_num": 3,
+   "xp": 700,
+   "size": "大型",
+   "ac": 15,
+   "ac_note": "天生护甲",
+   "hp": 52,
+   "hp_dice": "7d10+14",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 13,
+    "CON": 15,
+    "INT": 1,
+    "WIS": 9,
+    "CHA": 3
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 60,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 9
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该蝎发动两次钳击攻击和一次尾刺攻击。"
+    },
+    {
+     "name": "钳击 Claw",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d6+3",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点钝击伤害。若目标为大型或更小生物，则被一只钳子擒抱（逃脱 DC 13）。"
+    },
+    {
+     "name": "尾刺 Sting",
+     "kind": "melee",
+     "attack_bonus": 5,
+     "reach": 5,
+     "range": null,
+     "damage": "1d8+3",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点穿刺伤害，外加 2d10 点毒素伤害。",
+     "damage_parts": [
+      {
+       "damage": "1d8+3",
+       "damage_type": "穿刺"
+      },
+      {
+       "damage": "2d10",
+       "damage_type": "毒素"
+      }
+     ]
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "ankylosaurus",
+   "name": "甲龙 Ankylosaurus",
+   "cr": "3",
+   "cr_num": 3,
+   "xp": 700,
+   "size": "巨型",
+   "ac": 15,
+   "ac_note": "天生护甲",
+   "hp": 68,
+   "hp_dice": "8d12+16",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 19,
+    "DEX": 11,
+    "CON": 15,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 5
+   },
+   "saves": {
+    "STR": 6
+   },
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该甲龙发动两次尾击攻击。"
+    },
+    {
+     "name": "尾击 Tail",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 10,
+     "range": null,
+     "damage": "1d10+4",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 10 尺，命中造成 1d10+4 点钝击伤害。若目标为巨型或更小生物，则陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "killer-whale",
+   "name": "虎鲸 Killer Whale",
+   "cr": "3",
+   "cr_num": 3,
+   "xp": 700,
+   "size": "巨型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 90,
+   "hp_dice": "12d12+12",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 60,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 19,
+    "DEX": 14,
+    "CON": 13,
+    "INT": 3,
+    "WIS": 12,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3,
+    "隐匿": 4
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 120,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "屏息 Hold Breath",
+     "desc": "虎鲸可以屏息 30 分钟。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "5d6+4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 5d6+4 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "archelon",
+   "name": "古巨龟 Archelon",
+   "cr": "4",
+   "cr_num": 4,
+   "xp": 1100,
+   "size": "巨型",
+   "ac": 17,
+   "ac_note": "天生护甲",
+   "hp": 90,
+   "hp_dice": "12d12+12",
+   "speed": {
+    "walk": 20,
+    "climb": 0,
+    "fly": 0,
+    "swim": 80,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 16,
+    "CON": 13,
+    "INT": 4,
+    "WIS": 14,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {
+    "隐匿": 5
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水陆两栖 Amphibious",
+     "desc": "古巨龟可以在空气和水中呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该古巨龟发动两次啃咬攻击。"
+    },
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 6,
+     "reach": 5,
+     "range": null,
+     "damage": "3d6+4",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +6，触及 5 尺，命中造成 3d6+4 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "hippopotamus",
+   "name": "河马 Hippopotamus",
+   "cr": "4",
+   "cr_num": 4,
+   "xp": 1100,
+   "size": "大型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 82,
+   "hp_dice": "11d10+22",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 21,
+    "DEX": 7,
+    "CON": 15,
+    "INT": 2,
+    "WIS": 12,
+    "CHA": 4
+   },
+   "saves": {
+    "STR": 7
+   },
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "屏息 Hold Breath",
+     "desc": "河马可以屏息 10 分钟。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该河马发动两次啃咬攻击。"
+    },
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 7,
+     "reach": 5,
+     "range": null,
+     "damage": "2d10+5",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +7，触及 5 尺，命中造成 2d10+5 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "elephant",
+   "name": "象 Elephant",
+   "cr": "4",
+   "cr_num": 4,
+   "xp": 1100,
+   "size": "巨型",
+   "ac": 12,
+   "ac_note": "天生护甲",
+   "hp": 76,
+   "hp_dice": "8d12+24",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 22,
+    "DEX": 9,
+    "CON": 17,
+    "INT": 3,
+    "WIS": 11,
+    "CHA": 6
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该象发动两次抵撞攻击。"
+    },
+    {
+     "name": "抵撞 Gore",
+     "kind": "melee",
+     "attack_bonus": 8,
+     "reach": 5,
+     "range": null,
+     "damage": "2d8+6",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +8，触及 5 尺，命中造成 2d8+6 点穿刺伤害。若目标为巨型或更小生物，且象在此次攻击前直线移动 20 尺以上靠近它，则目标陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "践踏 Trample",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": "2d10+6",
+     "damage_type": "钝击",
+     "save": "DEX",
+     "dc": 16,
+     "desc": "豁免：DC 16 敏捷豁免，5 尺内一个处于倒地状态的生物；失败则受到 2d10+6 点钝击伤害，成功则伤害减半。"
+    }
+   ],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "triceratops",
+   "name": "三角龙 Triceratops",
+   "cr": "5",
+   "cr_num": 5,
+   "xp": 1800,
+   "size": "巨型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 114,
+   "hp_dice": "12d12+36",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 22,
+    "DEX": 9,
+    "CON": 17,
+    "INT": 2,
+    "WIS": 11,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该三角龙发动两次抵撞攻击。"
+    },
+    {
+     "name": "抵撞 Gore",
+     "kind": "melee",
+     "attack_bonus": 9,
+     "reach": 5,
+     "range": null,
+     "damage": "2d12+6",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +9，触及 5 尺，命中造成 2d12+6 点穿刺伤害。若目标为巨型或更小生物，且三角龙在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d8 点穿刺伤害并陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-shark",
+   "name": "巨鲨 Giant Shark",
+   "cr": "5",
+   "cr_num": 5,
+   "xp": 1800,
+   "size": "巨型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 92,
+   "hp_dice": "8d12+40",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 60,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 23,
+    "DEX": 11,
+    "CON": 21,
+    "INT": 1,
+    "WIS": 10,
+    "CHA": 5
+   },
+   "saves": {},
+   "skills": {
+    "察觉": 3
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 60,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 13
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "水下呼吸 Water Breathing",
+     "desc": "巨鲨只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该鲨发动两次啃咬攻击。"
+    },
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 9,
+     "reach": 5,
+     "range": null,
+     "damage": "3d10+6",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +9，触及 5 尺，命中造成 3d10+6 点穿刺伤害。若目标 HP 未满，该攻击检定具有优势。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "giant-crocodile",
+   "name": "巨鳄 Giant Crocodile",
+   "cr": "5",
+   "cr_num": 5,
+   "xp": 1800,
+   "size": "巨型",
+   "ac": 14,
+   "ac_note": "天生护甲",
+   "hp": 85,
+   "hp_dice": "9d12+27",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 50,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 21,
+    "DEX": 9,
+    "CON": 17,
+    "INT": 2,
+    "WIS": 10,
+    "CHA": 7
+   },
+   "saves": {},
+   "skills": {
+    "隐匿": 5
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [
+    {
+     "name": "屏息 Hold Breath",
+     "desc": "巨鳄可以屏息 1 小时。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该鳄发动一次啃咬攻击和一次尾击攻击。"
+    },
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": 8,
+     "reach": 5,
+     "range": null,
+     "damage": "3d10+5",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +8，触及 5 尺，命中造成 3d10+5 点穿刺伤害。若目标为大型或更小生物，则陷入被擒抱状态（逃脱 DC 15）；被擒抱期间同时处于束缚状态，且不能被巨鳄的尾击选为目标。"
+    },
+    {
+     "name": "尾击 Tail",
+     "kind": "melee",
+     "attack_bonus": 8,
+     "reach": 10,
+     "range": null,
+     "damage": "3d8+5",
+     "damage_type": "钝击",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +8，触及 10 尺，命中造成 3d8+5 点钝击伤害。若目标为大型或更小生物，则陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  },
+  {
+   "id": "mammoth",
+   "name": "猛犸象 Mammoth",
+   "cr": "6",
+   "cr_num": 6,
+   "xp": 2300,
+   "size": "巨型",
+   "ac": 13,
+   "ac_note": "天生护甲",
+   "hp": 126,
+   "hp_dice": "11d12+55",
+   "speed": {
+    "walk": 50,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 24,
+    "DEX": 9,
+    "CON": 21,
+    "INT": 3,
+    "WIS": 11,
+    "CHA": 6
+   },
+   "saves": {
+    "STR": 10,
+    "CON": 8
+   },
+   "skills": {},
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "—",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该猛犸发动两次抵撞攻击。"
+    },
+    {
+     "name": "抵撞 Gore",
+     "kind": "melee",
+     "attack_bonus": 10,
+     "reach": 10,
+     "range": null,
+     "damage": "2d10+7",
+     "damage_type": "穿刺",
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 +10，触及 10 尺，命中造成 2d10+7 点穿刺伤害。若目标为巨型或更小生物，且猛犸在此次攻击前直线移动 20 尺以上靠近它，则目标陷入倒地状态。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "践踏 Trample",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": "4d10+7",
+     "damage_type": "钝击",
+     "save": "DEX",
+     "dc": 18,
+     "desc": "豁免：DC 18 敏捷豁免，5 尺内一个处于倒地状态的生物；失败则受到 4d10+7 点钝击伤害，成功则伤害减半。"
+    }
+   ],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd"
+  }
+ ]
+}

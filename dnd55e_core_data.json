@@ -1,0 +1,1438 @@
+{
+ "meta": {
+  "system": "D&D 5.5e (2024 rules / PHB 2024 / SRD 5.2)",
+  "version": "1.0",
+  "date": "2026-10-14",
+  "license_note": "SRD 5.2 is CC-BY 4.0 (Wizards of the Coast). Full PHB 2024 content is copyrighted - only embed SRD content directly; let users import the rest.",
+  "character_creation_order": [
+   "class",
+   "background",
+   "species",
+   "languages",
+   "ability_scores",
+   "details"
+  ]
+ },
+ "abilities": [
+  {
+   "id": "STR",
+   "name": "力量 Strength",
+   "short": "力量"
+  },
+  {
+   "id": "DEX",
+   "name": "敏捷 Dexterity",
+   "short": "敏捷"
+  },
+  {
+   "id": "CON",
+   "name": "体质 Constitution",
+   "short": "体质"
+  },
+  {
+   "id": "INT",
+   "name": "智力 Intelligence",
+   "short": "智力"
+  },
+  {
+   "id": "WIS",
+   "name": "感知 Wisdom",
+   "short": "感知"
+  },
+  {
+   "id": "CHA",
+   "name": "魅力 Charisma",
+   "short": "魅力"
+  }
+ ],
+ "ability_score_generation": {
+  "standard_array": [
+   15,
+   14,
+   13,
+   12,
+   10,
+   8
+  ],
+  "point_buy": {
+   "budget": 27,
+   "min": 8,
+   "max_before_bonus": 15,
+   "cost": {
+    "8": 0,
+    "9": 1,
+    "10": 2,
+    "11": 3,
+    "12": 4,
+    "13": 5,
+    "14": 7,
+    "15": 9
+   }
+  },
+  "roll": "4d6 drop lowest, six times",
+  "background_bonus_rule": "Choose 2 of background's 3 listed abilities: one +2 and another +1; OR +1 to all three. Cap 20."
+ },
+ "skills": [
+  {
+   "id": "acrobatics",
+   "name": "特技 Acrobatics",
+   "ability": "DEX"
+  },
+  {
+   "id": "animal_handling",
+   "name": "驯兽 Animal Handling",
+   "ability": "WIS"
+  },
+  {
+   "id": "arcana",
+   "name": "奥秘 Arcana",
+   "ability": "INT"
+  },
+  {
+   "id": "athletics",
+   "name": "运动 Athletics",
+   "ability": "STR"
+  },
+  {
+   "id": "deception",
+   "name": "欺瞒 Deception",
+   "ability": "CHA"
+  },
+  {
+   "id": "history",
+   "name": "历史 History",
+   "ability": "INT"
+  },
+  {
+   "id": "insight",
+   "name": "洞察 Insight",
+   "ability": "WIS"
+  },
+  {
+   "id": "intimidation",
+   "name": "威吓 Intimidation",
+   "ability": "CHA"
+  },
+  {
+   "id": "investigation",
+   "name": "调查 Investigation",
+   "ability": "INT"
+  },
+  {
+   "id": "medicine",
+   "name": "医药 Medicine",
+   "ability": "WIS"
+  },
+  {
+   "id": "nature",
+   "name": "自然 Nature",
+   "ability": "INT"
+  },
+  {
+   "id": "perception",
+   "name": "察觉 Perception",
+   "ability": "WIS"
+  },
+  {
+   "id": "performance",
+   "name": "表演 Performance",
+   "ability": "CHA"
+  },
+  {
+   "id": "persuasion",
+   "name": "游说 Persuasion",
+   "ability": "CHA"
+  },
+  {
+   "id": "religion",
+   "name": "宗教 Religion",
+   "ability": "INT"
+  },
+  {
+   "id": "sleight_of_hand",
+   "name": "巧手 Sleight of Hand",
+   "ability": "DEX"
+  },
+  {
+   "id": "stealth",
+   "name": "隐匿 Stealth",
+   "ability": "DEX"
+  },
+  {
+   "id": "survival",
+   "name": "生存 Survival",
+   "ability": "WIS"
+  }
+ ],
+ "progression": {
+  "xp_thresholds": {
+   "1": 0,
+   "2": 300,
+   "3": 900,
+   "4": 2700,
+   "5": 6500,
+   "6": 14000,
+   "7": 23000,
+   "8": 34000,
+   "9": 48000,
+   "10": 64000,
+   "11": 85000,
+   "12": 100000,
+   "13": 120000,
+   "14": 140000,
+   "15": 165000,
+   "16": 195000,
+   "17": 225000,
+   "18": 265000,
+   "19": 305000,
+   "20": 355000
+  },
+  "proficiency_bonus": {
+   "1": 2,
+   "2": 2,
+   "3": 2,
+   "4": 2,
+   "5": 3,
+   "6": 3,
+   "7": 3,
+   "8": 3,
+   "9": 4,
+   "10": 4,
+   "11": 4,
+   "12": 4,
+   "13": 5,
+   "14": 5,
+   "15": 5,
+   "16": 5,
+   "17": 6,
+   "18": 6,
+   "19": 6,
+   "20": 6
+  },
+  "asi_levels": [
+   4,
+   8,
+   12,
+   16
+  ],
+  "epic_boon_level": 19,
+  "capstone_level": 20,
+  "subclass_level": 3,
+  "hp_rules": {
+   "level_1": "hit_die_max + CON mod",
+   "per_level": "roll hit die + CON mod (min 1) OR fixed value per class"
+  }
+ },
+ "spell_slots": {
+  "full_caster": {
+   "1": {
+    "1": 2
+   },
+   "2": {
+    "1": 3
+   },
+   "3": {
+    "1": 4,
+    "2": 2
+   },
+   "4": {
+    "1": 4,
+    "2": 3
+   },
+   "5": {
+    "1": 4,
+    "2": 3,
+    "3": 2
+   },
+   "6": {
+    "1": 4,
+    "2": 3,
+    "3": 3
+   },
+   "7": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 1
+   },
+   "8": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 2
+   },
+   "9": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 1
+   },
+   "10": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2
+   },
+   "11": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2,
+    "6": 1
+   },
+   "12": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2,
+    "6": 1
+   },
+   "13": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2,
+    "6": 1,
+    "7": 1
+   },
+   "14": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2,
+    "6": 1,
+    "7": 1
+   },
+   "15": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2,
+    "6": 1,
+    "7": 1,
+    "8": 1
+   },
+   "16": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2,
+    "6": 1,
+    "7": 1,
+    "8": 1
+   },
+   "17": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 2,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1
+   },
+   "18": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1
+   },
+   "19": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 2,
+    "7": 1,
+    "8": 1,
+    "9": 1
+   },
+   "20": {
+    "1": 4,
+    "2": 3,
+    "3": 3,
+    "4": 3,
+    "5": 3,
+    "6": 2,
+    "7": 2,
+    "8": 1,
+    "9": 1
+   }
+  },
+  "half_caster_note": "Paladin/Ranger cast from level 1 (2x 1st-level slots); progression follows the 2014 half-caster table shifted one level earlier. Multiclass: half levels rounded up.",
+  "third_caster_note": "Eldritch Knight / Arcane Trickster: divide level by 3, round down.",
+  "warlock_note": "Pact Magic: all slots at highest level, recharge on short rest; tracked by class table, not the multiclass table.",
+  "rule": "Only one leveled spell per turn cast with a spell slot (cantrips and reaction spells unaffected)."
+ },
+ "species": [
+  {
+   "id": "aasimar",
+   "name": "阿斯莫 Aasimar",
+   "size": [
+    "Medium",
+    "Small"
+   ],
+   "speed": 30,
+   "traits": [
+    "天界抗性 (黯蚀 + 光耀伤害抗性)",
+    "黑暗视觉 60 尺",
+    "治愈之手 (动作: 掷等同熟练加值数量的 d4 恢复 HP, 1次/长休)",
+    "承光者 (习得戏法: 光亮术 Light)",
+    "天界启示 (3级: 激活时三选一 —— 天界之翼 / 死灵帷幕 / 内在光耀, 持续1分钟, 1次/长休)"
+   ]
+  },
+  {
+   "id": "dragonborn",
+   "name": "龙裔 Dragonborn",
+   "size": [
+    "Medium"
+   ],
+   "speed": 30,
+   "traits": [
+    "龙族血脉 (选择一种龙类血统)",
+    "吐息武器 (PB次/长休; 15尺锥形 或 30尺直线, 1d10 伤害, 17级增至 4d10)",
+    "伤害抗性 (与血统相同的伤害类型)",
+    "黑暗视觉 60 尺",
+    "龙族飞行 (5级: 显现龙翼, 飞行 10 分钟, 1次/长休)"
+   ]
+  },
+  {
+   "id": "dwarf",
+   "name": "矮人 Dwarf",
+   "size": [
+    "Medium"
+   ],
+   "speed": 30,
+   "traits": [
+    "黑暗视觉 120 尺",
+    "矮人韧性 (每级 HP 上限 +1)",
+    "矮人体魄 (毒素伤害抗性; 对抗中毒状态的豁免优势)",
+    "石中机警 (附赠动作: 站在石面上获得 60 尺颤动感知, 10分钟, PB次/长休)"
+   ]
+  },
+  {
+   "id": "elf",
+   "name": "精灵 Elf",
+   "size": [
+    "Medium"
+   ],
+   "speed": 30,
+   "traits": [
+    "黑暗视觉 60 尺",
+    "妖精血统 (对抗魅惑状态的豁免优势)",
+    "敏锐感官 (从 洞察/察觉/生存 中获 1 项熟练)",
+    "出神 (Trance: 以 4 小时冥想代替睡眠)",
+    "精灵血脉 (三选一): 卓尔 / 高等 / 木精灵 —— 各赠 1 戏法 + 3级与5级法术, 每个可免费施放 1次/长休"
+   ]
+  },
+  {
+   "id": "gnome",
+   "name": "侏儒 Gnome",
+   "size": [
+    "Small"
+   ],
+   "speed": 30,
+   "traits": [
+    "黑暗视觉 60 尺",
+    "侏儒狡黠 (智力/感知/魅力 豁免优势)",
+    "侏儒血脉: 森林 (戏法 次级幻影; 动物交谈 始终备好, PB次免费/长休) 或 岩土 (戏法 修复术 + 魔法伎俩)"
+   ]
+  },
+  {
+   "id": "goliath",
+   "name": "巨人 Goliath",
+   "size": [
+    "Medium"
+   ],
+   "speed": 35,
+   "traits": [
+    "巨人血统 (六选一: 云/火/霜/山岭/石/风暴巨人; 对应增益 PB次/长休)",
+    "强力体格 (挣脱擒抱的检定优势; 负重与推拖视同大体型)",
+    "巨躯形态 (5级: 附赠动作变为大体型 10 分钟, 力量检定优势, 速度+10尺, 1次/长休)"
+   ]
+  },
+  {
+   "id": "halfling",
+   "name": "半身人 Halfling",
+   "size": [
+    "Small"
+   ],
+   "speed": 30,
+   "traits": [
+    "勇敢 (对抗恐慌状态的豁免优势)",
+    "半身人灵巧 (可穿过体型更大的生物占据的空间)",
+    "幸运 (任何 d20 检定掷出 1 时可重掷)",
+    "天生隐匿 (可借体型更大的生物遮挡进行躲藏)"
+   ]
+  },
+  {
+   "id": "human",
+   "name": "人类 Human",
+   "size": [
+    "Medium",
+    "Small"
+   ],
+   "speed": 30,
+   "traits": [
+    "足智多谋 (每次长休后获得英雄激励 Heroic Inspiration)",
+    "多才多艺 (获 1 项任意技能熟练)",
+    "全能 (任选 1 个 Origin 专长)"
+   ]
+  },
+  {
+   "id": "orc",
+   "name": "兽人 Orc",
+   "size": [
+    "Medium"
+   ],
+   "speed": 30,
+   "traits": [
+    "肾上腺素冲刺 (附赠动作: 冲刺 + 临时 HP; 所有使用次数短休即恢复)",
+    "黑暗视觉 120 尺",
+    "坚韧不屈 (HP 将归 0 时改为降至 1, 1次/长休)"
+   ]
+  },
+  {
+   "id": "tiefling",
+   "name": "提夫林 Tiefling",
+   "size": [
+    "Medium",
+    "Small"
+   ],
+   "speed": 30,
+   "traits": [
+    "黑暗视觉 60 尺",
+    "异界威仪 (习得戏法: 奇术 Thaumaturgy)",
+    "炼狱血脉 (三选一): 深渊 (毒素抗性, 戏法 毒液喷溅; 3级 致病射线, 5级 人类定身) / 幽冥 (黯蚀抗性, 戏法 冻寒之触; 3级 虚假生命, 5级 衰弱射线) / 炼狱 (火焰抗性, 戏法 火焰箭; 3级 炼狱叱喝, 5级 黑暗术)"
+   ]
+  }
+ ],
+ "backgrounds": [
+  {
+   "id": "acolyte",
+   "name": "侍僧 Acolyte",
+   "abilities": [
+    "INT",
+    "WIS",
+    "CHA"
+   ],
+   "origin_feat": "Magic Initiate (Cleric)",
+   "skills": [
+    "insight",
+    "religion"
+   ],
+   "tool": "Calligrapher's Supplies"
+  },
+  {
+   "id": "artisan",
+   "name": "工匠 Artisan",
+   "abilities": [
+    "STR",
+    "DEX",
+    "INT"
+   ],
+   "origin_feat": "Crafter",
+   "skills": [
+    "persuasion",
+    "investigation"
+   ],
+   "tool": "Artisan's Tools"
+  },
+  {
+   "id": "charlatan",
+   "name": "骗子 Charlatan",
+   "abilities": [
+    "DEX",
+    "CON",
+    "CHA"
+   ],
+   "origin_feat": "Skilled",
+   "skills": [
+    "deception",
+    "sleight_of_hand"
+   ],
+   "tool": "Forgery Kit"
+  },
+  {
+   "id": "criminal",
+   "name": "罪犯 Criminal",
+   "abilities": [
+    "DEX",
+    "CON",
+    "INT"
+   ],
+   "origin_feat": "Alert",
+   "skills": [
+    "stealth",
+    "sleight_of_hand"
+   ],
+   "tool": "Thieves' Tools"
+  },
+  {
+   "id": "entertainer",
+   "name": "艺人 Entertainer",
+   "abilities": [
+    "STR",
+    "DEX",
+    "CHA"
+   ],
+   "origin_feat": "Musician",
+   "skills": [
+    "acrobatics",
+    "performance"
+   ],
+   "tool": "Musical Instrument"
+  },
+  {
+   "id": "farmer",
+   "name": "农夫 Farmer",
+   "abilities": [
+    "STR",
+    "CON",
+    "WIS"
+   ],
+   "origin_feat": "Tough",
+   "skills": [
+    "animal_handling",
+    "nature"
+   ],
+   "tool": "Carpenter's Tools"
+  },
+  {
+   "id": "guard",
+   "name": "卫兵 Guard",
+   "abilities": [
+    "STR",
+    "INT",
+    "WIS"
+   ],
+   "origin_feat": "Alert",
+   "skills": [
+    "athletics",
+    "perception"
+   ],
+   "tool": "Gaming Set"
+  },
+  {
+   "id": "guide",
+   "name": "向导 Guide",
+   "abilities": [
+    "DEX",
+    "CON",
+    "WIS"
+   ],
+   "origin_feat": "Magic Initiate (Druid)",
+   "skills": [
+    "stealth",
+    "survival"
+   ],
+   "tool": "Cartographer's Tools"
+  },
+  {
+   "id": "hermit",
+   "name": "隐士 Hermit",
+   "abilities": [
+    "CON",
+    "WIS",
+    "CHA"
+   ],
+   "origin_feat": "Healer",
+   "skills": [
+    "medicine",
+    "religion"
+   ],
+   "tool": "Herbalism Kit"
+  },
+  {
+   "id": "merchant",
+   "name": "商人 Merchant",
+   "abilities": [
+    "CON",
+    "INT",
+    "CHA"
+   ],
+   "origin_feat": "Lucky",
+   "skills": [
+    "animal_handling",
+    "persuasion"
+   ],
+   "tool": "Navigator's Tools"
+  },
+  {
+   "id": "noble",
+   "name": "贵族 Noble",
+   "abilities": [
+    "STR",
+    "INT",
+    "CHA"
+   ],
+   "origin_feat": "Skilled",
+   "skills": [
+    "history",
+    "persuasion"
+   ],
+   "tool": "Gambling Set"
+  },
+  {
+   "id": "sage",
+   "name": "贤者 Sage",
+   "abilities": [
+    "CON",
+    "INT",
+    "WIS"
+   ],
+   "origin_feat": "Magic Initiate (Wizard)",
+   "skills": [
+    "arcana",
+    "history"
+   ],
+   "tool": "Calligrapher's Supplies"
+  },
+  {
+   "id": "sailor",
+   "name": "水手 Sailor",
+   "abilities": [
+    "STR",
+    "DEX",
+    "WIS"
+   ],
+   "origin_feat": "Tavern Brawler",
+   "skills": [
+    "acrobatics",
+    "perception"
+   ],
+   "tool": "Navigator's Tools"
+  },
+  {
+   "id": "scribe",
+   "name": "抄写员 Scribe",
+   "abilities": [
+    "DEX",
+    "INT",
+    "WIS"
+   ],
+   "origin_feat": "Skilled",
+   "skills": [
+    "investigation",
+    "perception"
+   ],
+   "tool": "Calligrapher's Supplies"
+  },
+  {
+   "id": "soldier",
+   "name": "士兵 Soldier",
+   "abilities": [
+    "STR",
+    "DEX",
+    "CON"
+   ],
+   "origin_feat": "Savage Attacker",
+   "skills": [
+    "athletics",
+    "intimidation"
+   ],
+   "tool": "Gaming Set"
+  },
+  {
+   "id": "wayfarer",
+   "name": "流浪者 Wayfarer",
+   "abilities": [
+    "DEX",
+    "WIS",
+    "CHA"
+   ],
+   "origin_feat": "Lucky",
+   "skills": [
+    "insight",
+    "stealth"
+   ],
+   "tool": "Thieves' Tools"
+  }
+ ],
+ "classes": [
+  {
+   "id": "barbarian",
+   "name": "野蛮人 Barbarian",
+   "hit_die": 12,
+   "fixed_hp_per_level": "7+CON",
+   "primary": [
+    "STR"
+   ],
+   "saves": [
+    "STR",
+    "CON"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "animal_handling",
+    "athletics",
+    "intimidation",
+    "nature",
+    "perception",
+    "survival"
+   ],
+   "weapons": [
+    "simple",
+    "martial"
+   ],
+   "armor": [
+    "light",
+    "medium",
+    "shields"
+   ],
+   "casting": null,
+   "weapon_mastery_count": 2,
+   "subclasses": [
+    "Path of the Berserker",
+    "Path of the Wild Heart",
+    "Path of the World Tree",
+    "Path of the Zealot"
+   ]
+  },
+  {
+   "id": "bard",
+   "name": "吟游诗人 Bard",
+   "hit_die": 8,
+   "fixed_hp_per_level": "5+CON",
+   "primary": [
+    "CHA"
+   ],
+   "saves": [
+    "DEX",
+    "CHA"
+   ],
+   "skill_count": 3,
+   "skill_options": "*any*",
+   "weapons": [
+    "simple"
+   ],
+   "armor": [
+    "light"
+   ],
+   "tools": [
+    "3 musical instruments"
+   ],
+   "casting": {
+    "type": "full",
+    "ability": "CHA",
+    "mode": "prepared"
+   },
+   "weapon_mastery_count": 0,
+   "subclasses": [
+    "College of Dance",
+    "College of Glamour",
+    "College of Lore",
+    "College of Valor"
+   ]
+  },
+  {
+   "id": "cleric",
+   "name": "牧师 Cleric",
+   "hit_die": 8,
+   "fixed_hp_per_level": "5+CON",
+   "primary": [
+    "WIS"
+   ],
+   "saves": [
+    "WIS",
+    "CHA"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "history",
+    "insight",
+    "medicine",
+    "persuasion",
+    "religion"
+   ],
+   "weapons": [
+    "simple"
+   ],
+   "armor": [
+    "light",
+    "medium",
+    "shields"
+   ],
+   "casting": {
+    "type": "full",
+    "ability": "WIS",
+    "mode": "prepared"
+   },
+   "weapon_mastery_count": 0,
+   "subclasses": [
+    "Life Domain",
+    "Light Domain",
+    "Trickery Domain",
+    "War Domain"
+   ]
+  },
+  {
+   "id": "druid",
+   "name": "德鲁伊 Druid",
+   "hit_die": 8,
+   "fixed_hp_per_level": "5+CON",
+   "primary": [
+    "WIS"
+   ],
+   "saves": [
+    "INT",
+    "WIS"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "arcana",
+    "animal_handling",
+    "insight",
+    "medicine",
+    "nature",
+    "perception",
+    "religion",
+    "survival"
+   ],
+   "weapons": [
+    "simple"
+   ],
+   "armor": [
+    "light",
+    "medium",
+    "shields"
+   ],
+   "tools": [
+    "herbalism kit"
+   ],
+   "casting": {
+    "type": "full",
+    "ability": "WIS",
+    "mode": "prepared"
+   },
+   "weapon_mastery_count": 0,
+   "subclasses": [
+    "Circle of the Land",
+    "Circle of the Moon",
+    "Circle of the Sea",
+    "Circle of the Stars"
+   ]
+  },
+  {
+   "id": "fighter",
+   "name": "战士 Fighter",
+   "hit_die": 10,
+   "fixed_hp_per_level": "6+CON",
+   "primary": [
+    "STR",
+    "DEX"
+   ],
+   "saves": [
+    "STR",
+    "CON"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "acrobatics",
+    "animal_handling",
+    "athletics",
+    "history",
+    "insight",
+    "intimidation",
+    "persuasion",
+    "perception",
+    "survival"
+   ],
+   "weapons": [
+    "simple",
+    "martial"
+   ],
+   "armor": [
+    "light",
+    "medium",
+    "heavy",
+    "shields"
+   ],
+   "casting": null,
+   "weapon_mastery_count": 3,
+   "subclasses": [
+    "Battle Master",
+    "Champion",
+    "Eldritch Knight",
+    "Psi Warrior"
+   ]
+  },
+  {
+   "id": "monk",
+   "name": "武僧 Monk",
+   "hit_die": 8,
+   "fixed_hp_per_level": "5+CON",
+   "primary": [
+    "DEX",
+    "WIS"
+   ],
+   "saves": [
+    "STR",
+    "DEX"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "acrobatics",
+    "athletics",
+    "history",
+    "insight",
+    "religion",
+    "stealth"
+   ],
+   "weapons": [
+    "simple",
+    "martial-light-property"
+   ],
+   "armor": [],
+   "casting": null,
+   "weapon_mastery_count": 0,
+   "subclasses": [
+    "Warrior of Mercy",
+    "Warrior of Shadow",
+    "Warrior of the Elements",
+    "Warrior of the Open Hand"
+   ]
+  },
+  {
+   "id": "paladin",
+   "name": "圣武士 Paladin",
+   "hit_die": 10,
+   "fixed_hp_per_level": "6+CON",
+   "primary": [
+    "STR"
+   ],
+   "saves": [
+    "WIS",
+    "CHA"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "athletics",
+    "insight",
+    "intimidation",
+    "persuasion",
+    "religion",
+    "medicine"
+   ],
+   "weapons": [
+    "simple",
+    "martial"
+   ],
+   "armor": [
+    "light",
+    "medium",
+    "heavy",
+    "shields"
+   ],
+   "casting": {
+    "type": "half",
+    "ability": "CHA",
+    "mode": "prepared",
+    "from_level": 1
+   },
+   "weapon_mastery_count": 2,
+   "subclasses": [
+    "Oath of Devotion",
+    "Oath of Glory",
+    "Oath of the Ancients",
+    "Oath of Vengeance"
+   ]
+  },
+  {
+   "id": "ranger",
+   "name": "游侠 Ranger",
+   "hit_die": 10,
+   "fixed_hp_per_level": "6+CON",
+   "primary": [
+    "DEX",
+    "WIS"
+   ],
+   "saves": [
+    "STR",
+    "DEX"
+   ],
+   "skill_count": 3,
+   "skill_options": [
+    "animal_handling",
+    "athletics",
+    "insight",
+    "investigation",
+    "nature",
+    "perception",
+    "stealth",
+    "survival"
+   ],
+   "weapons": [
+    "simple",
+    "martial"
+   ],
+   "armor": [
+    "light",
+    "medium",
+    "shields"
+   ],
+   "casting": {
+    "type": "half",
+    "ability": "WIS",
+    "mode": "prepared",
+    "from_level": 1
+   },
+   "weapon_mastery_count": 2,
+   "subclasses": [
+    "Beast Master",
+    "Fey Wanderer",
+    "Gloom Stalker",
+    "Hunter"
+   ]
+  },
+  {
+   "id": "rogue",
+   "name": "游荡者 Rogue",
+   "hit_die": 8,
+   "fixed_hp_per_level": "5+CON",
+   "primary": [
+    "DEX"
+   ],
+   "saves": [
+    "DEX",
+    "INT"
+   ],
+   "skill_count": 4,
+   "skill_options": [
+    "acrobatics",
+    "athletics",
+    "deception",
+    "insight",
+    "intimidation",
+    "investigation",
+    "perception",
+    "persuasion",
+    "sleight_of_hand",
+    "stealth"
+   ],
+   "weapons": [
+    "simple",
+    "martial-finesse-or-light"
+   ],
+   "armor": [
+    "light"
+   ],
+   "tools": [
+    "thieves' tools"
+   ],
+   "casting": null,
+   "weapon_mastery_count": 2,
+   "subclasses": [
+    "Arcane Trickster",
+    "Assassin",
+    "Soulknife",
+    "Thief"
+   ]
+  },
+  {
+   "id": "sorcerer",
+   "name": "术士 Sorcerer",
+   "hit_die": 6,
+   "fixed_hp_per_level": "4+CON",
+   "primary": [
+    "CHA"
+   ],
+   "saves": [
+    "CON",
+    "CHA"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "arcana",
+    "deception",
+    "insight",
+    "intimidation",
+    "persuasion",
+    "religion"
+   ],
+   "weapons": [
+    "simple"
+   ],
+   "armor": [],
+   "casting": {
+    "type": "full",
+    "ability": "CHA",
+    "mode": "known"
+   },
+   "weapon_mastery_count": 0,
+   "subclasses": [
+    "Aberrant Sorcery",
+    "Clockwork Sorcery",
+    "Draconic Sorcery",
+    "Wild Magic"
+   ]
+  },
+  {
+   "id": "warlock",
+   "name": "邪术师 Warlock",
+   "hit_die": 8,
+   "fixed_hp_per_level": "5+CON",
+   "primary": [
+    "CHA"
+   ],
+   "saves": [
+    "WIS",
+    "CHA"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "arcana",
+    "deception",
+    "history",
+    "intimidation",
+    "investigation",
+    "nature",
+    "religion"
+   ],
+   "weapons": [
+    "simple"
+   ],
+   "armor": [
+    "light"
+   ],
+   "casting": {
+    "type": "pact",
+    "ability": "CHA",
+    "mode": "known",
+    "note": "slots all at max level, recharge on short rest"
+   },
+   "weapon_mastery_count": 0,
+   "subclasses": [
+    "Archfey Patron",
+    "Celestial Patron",
+    "Fiend Patron",
+    "Great Old One Patron"
+   ]
+  },
+  {
+   "id": "wizard",
+   "name": "法师 Wizard",
+   "hit_die": 6,
+   "fixed_hp_per_level": "4+CON",
+   "primary": [
+    "INT"
+   ],
+   "saves": [
+    "INT",
+    "WIS"
+   ],
+   "skill_count": 2,
+   "skill_options": [
+    "arcana",
+    "history",
+    "insight",
+    "investigation",
+    "medicine",
+    "nature",
+    "religion"
+   ],
+   "weapons": [
+    "simple"
+   ],
+   "armor": [],
+   "casting": {
+    "type": "full",
+    "ability": "INT",
+    "mode": "spellbook"
+   },
+   "weapon_mastery_count": 0,
+   "subclasses": [
+    "Abjurer",
+    "Diviner",
+    "Evoker",
+    "Illusionist"
+   ]
+  }
+ ],
+ "weapon_mastery": {
+  "granted_to": [
+   "barbarian",
+   "fighter",
+   "paladin",
+   "ranger",
+   "rogue"
+  ],
+  "counts": {
+   "fighter": 3,
+   "default": 2
+  },
+  "swap": "on Long Rest (or level up when new options unlock)",
+  "properties": {
+   "cleave": "After hitting with melee attack, make one extra attack vs second creature within 5ft of first and within reach; no ability mod to damage. Once per turn. (Greataxe, Halberd)",
+   "graze": "On a miss, deal damage equal to the ability modifier used for the attack roll. (Glaive, Greatsword)",
+   "nick": "Light-weapon extra attack becomes part of Attack action instead of Bonus Action. Once per turn. (Dagger, Light Hammer, Sickle, Scimitar)",
+   "push": "On hit, push Large-or-smaller creature up to 10ft straight away. (Greatclub, Pike, Warhammer, Heavy Crossbow)",
+   "sap": "On hit, target has Disadvantage on its next attack roll before start of your next turn. (Mace, Spear, Flail, Longsword, Morningstar, War Pick)",
+   "slow": "On hit with damage, reduce target Speed by 10ft until start of your next turn (doesn't stack past 10ft). (Club, Javelin, Light Crossbow, Sling, Whip, Longbow, Musket)",
+   "topple": "On hit, target makes CON save (DC 8 + attack ability mod + PB) or falls Prone. (Quarterstaff, Battleaxe, Lance, Maul, Trident)",
+   "vex": "On hit with damage, Advantage on your next attack roll vs that creature before end of your next turn. (Handaxe, Dart, Shortbow, Rapier, Shortsword, Blowgun, Hand Crossbow, Pistol)"
+  },
+  "fighter_tactical_master": "Level 9+: replace a mastery with Push/Sap/Slow for an attack",
+  "weapon_master_feat": "Level 4+ general feat: +1 STR or DEX, gain 1 weapon mastery"
+ },
+ "armor": [
+  {
+   "id": "padded",
+   "name": "布甲",
+   "category": "light",
+   "base_ac": 11,
+   "dex_cap": null
+  },
+  {
+   "id": "leather",
+   "name": "皮甲",
+   "category": "light",
+   "base_ac": 11,
+   "dex_cap": null
+  },
+  {
+   "id": "studded_leather",
+   "name": "镶钉皮甲",
+   "category": "light",
+   "base_ac": 12,
+   "dex_cap": null
+  },
+  {
+   "id": "hide",
+   "name": "兽皮甲",
+   "category": "medium",
+   "base_ac": 12,
+   "dex_cap": 2
+  },
+  {
+   "id": "chain_shirt",
+   "name": "锁链衫",
+   "category": "medium",
+   "base_ac": 13,
+   "dex_cap": 2
+  },
+  {
+   "id": "scale_mail",
+   "name": "鳞甲",
+   "category": "medium",
+   "base_ac": 14,
+   "dex_cap": 2
+  },
+  {
+   "id": "breastplate",
+   "name": "胸板甲",
+   "category": "medium",
+   "base_ac": 14,
+   "dex_cap": 2
+  },
+  {
+   "id": "half_plate",
+   "name": "半身板甲",
+   "category": "medium",
+   "base_ac": 15,
+   "dex_cap": 2
+  },
+  {
+   "id": "ring_mail",
+   "name": "环甲",
+   "category": "heavy",
+   "base_ac": 14,
+   "dex_cap": 0
+  },
+  {
+   "id": "chain_mail",
+   "name": "锁甲",
+   "category": "heavy",
+   "base_ac": 16,
+   "dex_cap": 0
+  },
+  {
+   "id": "splint",
+   "name": "板条甲",
+   "category": "heavy",
+   "base_ac": 17,
+   "dex_cap": 0
+  },
+  {
+   "id": "plate",
+   "name": "全身板甲",
+   "category": "heavy",
+   "base_ac": 18,
+   "dex_cap": 0
+  },
+  {
+   "id": "shield",
+   "name": "盾牌",
+   "category": "shield",
+   "base_ac": 1,
+   "dex_cap": 0,
+   "stacks": true
+  }
+ ],
+ "conditions_2024_changes": {
+  "exhaustion": "Each level: -2 to all d20 tests, -5ft speed. Long rest removes 1 level. Level 6 = death.",
+  "grappled": "Speed 0 (moving grappled creature costs double); Disadvantage on attacks vs anyone but the grappler. Escape: STR(Athletics) or DEX(Acrobatics) check vs DC 8 + grappler STR mod + PB.",
+  "incapacitated": "Also breaks Concentration and prevents speech.",
+  "invisible": "Granted by successful Hide; advantage on Initiative if unseen at combat start.",
+  "list_15": [
+   "Blinded",
+   "Charmed",
+   "Deafened",
+   "Exhaustion",
+   "Frightened",
+   "Grappled",
+   "Incapacitated",
+   "Invisible",
+   "Paralyzed",
+   "Petrified",
+   "Poisoned",
+   "Prone",
+   "Restrained",
+   "Stunned",
+   "Unconscious"
+  ]
+ },
+ "misc_rules_2024": {
+  "heroic_inspiration": "Reroll any one die (not just d20) after a roll, must use new result; can gift to another player if you already have one.",
+  "hide_action": "DC 15 DEX(Stealth) check; must be Heavily Obscured or 3/4 cover; success grants Invisible condition.",
+  "potion_of_healing": "Drink = Bonus Action; administer to another = Action.",
+  "surprised": "Disadvantage on Initiative only (no lost turn/reaction).",
+  "long_rest": "8h (6h sleep), start with 1+ HP, recovers ALL hit dice, once per 24h (16h between), interruptions add +1h each.",
+  "unarmed_strike": "Options: damage attack / Grapple (target STR or DEX save) / Shove (target STR or DEX save). One hand = one grapple.",
+  "two_weapon_fighting": "Light weapons (incl. ranged/thrown) grant Bonus Action attack with another Light weapon.",
+  "new_actions": [
+   "Influence",
+   "Magic",
+   "Search",
+   "Study",
+   "Utilize"
+  ],
+  "firearms": "Pistol (250gp) and Musket (500gp) are standard martial ranged weapons.",
+  "languages": "Common + 2 of your choice (decoupled from species)."
+ },
+ "formulas": {
+  "ability_mod": "floor((score - 10) / 2)",
+  "proficiency_bonus": "2 + floor((level - 1) / 4)",
+  "skill_check": "d20 + ability_mod + (proficient ? PB : 0) + (expertise ? PB : 0)",
+  "spell_save_dc": "8 + casting_ability_mod + PB",
+  "spell_attack": "d20 + casting_ability_mod + PB",
+  "hp_level_1": "hit_die_max + CON_mod",
+  "passive_perception": "10 + perception_mod",
+  "initiative": "DEX_mod (+ PB if Alert feat)"
+ }
+}

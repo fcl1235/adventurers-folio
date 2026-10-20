@@ -1,0 +1,64 @@
+{
+  "system": "dnd55e-character v1",
+  "name": "abc",
+  "level": 1,
+  "xp": 0,
+  "class_id": "warlock",
+  "subclass": null,
+  "background_id": "entertainer",
+  "species_id": "tiefling",
+  "base_scores": {
+    "STR": 8,
+    "DEX": 15,
+    "CON": 14,
+    "INT": 8,
+    "WIS": 10,
+    "CHA": 15
+  },
+  "bg_bonus": {
+    "mode": "2+1",
+    "plus2": "CHA",
+    "plus1": "DEX"
+  },
+  "asi_history": [],
+  "skill_prof": [
+    "acrobatics",
+    "deception",
+    "intimidation",
+    "performance"
+  ],
+  "expertise": [],
+  "weapon_mastery": [],
+  "armor_index": 2,
+  "shield": false,
+  "tough_feat": false,
+  "hp_current": 10,
+  "hp_temp": 0,
+  "spell_slots_used": {
+    "1": 0
+  },
+  "feats": [],
+  "languages": "通用语, ",
+  "equipment": "",
+  "notes": "",
+  "exhaustion": 0,
+  "conditions": [],
+  "spells": {
+    "cantrips": [
+      "eldritch-blast",
+      "poison-spray"
+    ],
+    "prepared": [
+      "hex",
+      "hellish-rebuke"
+    ]
+  },
+  "weapon": "木棒 Club",
+  "weapon_magic": 0,
+  "shield_magic": 0,
+  "items": [],
+  "fighting_style": null,
+  "concentration": null,
+  "lineage": null,
+  "race_free_used": []
+}

@@ -1,0 +1,155 @@
+{
+ "skill_bonus": {
+  "human": 1,
+  "elf": 1
+ },
+ "auto_skills": {},
+ "legacy": {
+  "half_elf": "human",
+  "half_orc": "orc"
+ },
+ "legacy_cn": {
+  "half_elf": "半精灵 Half-Elf",
+  "half_orc": "半兽人 Half-Orc"
+ },
+ "spells": {
+  "aasimar": [
+   [
+    1,
+    "light"
+   ]
+  ],
+  "elf": {
+   "drow": [
+    [
+     1,
+     "dancing-lights"
+    ],
+    [
+     3,
+     "faerie-fire"
+    ],
+    [
+     5,
+     "darkness"
+    ]
+   ],
+   "high": [
+    [
+     1,
+     "prestidigitation"
+    ],
+    [
+     3,
+     "detect-magic"
+    ],
+    [
+     5,
+     "misty-step"
+    ]
+   ],
+   "wood": [
+    [
+     1,
+     "druidcraft"
+    ],
+    [
+     3,
+     "longstrider"
+    ],
+    [
+     5,
+     "pass-without-trace"
+    ]
+   ]
+  },
+  "gnome": {
+   "forest": [
+    [
+     1,
+     "minor-illusion"
+    ],
+    [
+     1,
+     "speak-with-animals"
+    ]
+   ],
+   "rock": [
+    [
+     1,
+     "mending"
+    ],
+    [
+     1,
+     "prestidigitation"
+    ]
+   ]
+  },
+  "tiefling": {
+   "abyssal": [
+    [
+     1,
+     "thaumaturgy"
+    ],
+    [
+     1,
+     "poison-spray"
+    ],
+    [
+     3,
+     "ray-of-sickness"
+    ],
+    [
+     5,
+     "hold-person"
+    ]
+   ],
+   "chthonic": [
+    [
+     1,
+     "thaumaturgy"
+    ],
+    [
+     1,
+     "chill-touch"
+    ],
+    [
+     3,
+     "false-life"
+    ],
+    [
+     5,
+     "ray-of-enfeeblement"
+    ]
+   ],
+   "infernal": [
+    [
+     1,
+     "thaumaturgy"
+    ],
+    [
+     1,
+     "fire-bolt"
+    ],
+    [
+     3,
+     "hellish-rebuke"
+    ],
+    [
+     5,
+     "darkness"
+    ]
+   ]
+  }
+ },
+ "lineage_cn": {
+  "drow": "卓尔 Drow",
+  "high": "高等 High",
+  "wood": "木精灵 Wood",
+  "forest": "森林 Forest",
+  "rock": "岩土 Rock",
+  "abyssal": "深渊 Abyssal",
+  "chthonic": "幽冥 Chthonic",
+  "infernal": "炼狱 Infernal"
+ }
+}

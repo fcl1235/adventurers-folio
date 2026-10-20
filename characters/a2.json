@@ -1,0 +1,64 @@
+{
+  "system": "dnd55e-character v1",
+  "name": "a2",
+  "level": 2,
+  "xp": 0,
+  "class_id": "sorcerer",
+  "subclass": null,
+  "background_id": "entertainer",
+  "species_id": "aasimar",
+  "base_scores": {
+    "STR": 8,
+    "DEX": 15,
+    "CON": 14,
+    "INT": 8,
+    "WIS": 10,
+    "CHA": 15
+  },
+  "bg_bonus": {
+    "mode": "2+1",
+    "plus2": "CHA",
+    "plus1": "DEX"
+  },
+  "asi_history": [],
+  "skill_prof": [
+    "acrobatics",
+    "deception",
+    "performance",
+    "persuasion"
+  ],
+  "expertise": [],
+  "weapon_mastery": [],
+  "armor_index": 0,
+  "shield": false,
+  "tough_feat": false,
+  "hp_current": 14,
+  "hp_temp": 0,
+  "spell_slots_used": {},
+  "feats": [],
+  "languages": "通用语, ",
+  "equipment": "",
+  "notes": "",
+  "exhaustion": 0,
+  "conditions": [],
+  "spells": {
+    "cantrips": [
+      "shocking-grasp",
+      "sorcerous-burst",
+      "fire-bolt",
+      "mage-hand"
+    ],
+    "prepared": [
+      "magic-missile",
+      "chromatic-orb"
+    ]
+  },
+  "weapon": "手斧 Handaxe",
+  "weapon_magic": 0,
+  "shield_magic": 0,
+  "items": [],
+  "fighting_style": null,
+  "concentration": null,
+  "lineage": null,
+  "race_free_used": []
+}

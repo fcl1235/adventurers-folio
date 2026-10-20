@@ -1,0 +1,180 @@
+{
+ "_note": "始终准备的法术: 不占职业准备配额, 也不能被移除。class 键=职业 id, subclass 键=职业数据里的子职英文名, 值为等级门槛。",
+ "class": {
+  "druid": {
+   "1": [
+    "speak-with-animals"
+   ]
+  },
+  "paladin": {
+   "2": [
+    "divine-smite"
+   ],
+   "5": [
+    "find-steed"
+   ]
+  },
+  "ranger": {
+   "1": [
+    "hunters-mark"
+   ]
+  },
+  "warlock": {
+   "9": [
+    "contact-other-plane"
+   ]
+  }
+ },
+ "subclass": {
+  "Life Domain": {
+   "3": [
+    "aid",
+    "bless",
+    "cure-wounds",
+    "lesser-restoration"
+   ],
+   "5": [
+    "mass-healing-word",
+    "revivify"
+   ],
+   "7": [
+    "aura-of-life",
+    "death-ward"
+   ],
+   "9": [
+    "greater-restoration",
+    "mass-cure-wounds"
+   ]
+  },
+  "Oath of Devotion": {
+   "3": [
+    "protection-from-evil-and-good",
+    "shield-of-faith"
+   ],
+   "5": [
+    "aid",
+    "zone-of-truth"
+   ],
+   "9": [
+    "beacon-of-hope",
+    "dispel-magic"
+   ],
+   "13": [
+    "freedom-of-movement",
+    "guardian-of-faith"
+   ],
+   "17": [
+    "commune",
+    "flame-strike"
+   ]
+  },
+  "Draconic Sorcery": {
+   "3": [
+    "alter-self",
+    "chromatic-orb",
+    "command",
+    "dragons-breath"
+   ],
+   "5": [
+    "fear",
+    "fly"
+   ],
+   "7": [
+    "arcane-eye",
+    "charm-monster"
+   ],
+   "9": [
+    "legend-lore",
+    "summon-dragon"
+   ]
+  },
+  "Fiend Patron": {
+   "3": [
+    "burning-hands",
+    "command",
+    "scorching-ray",
+    "suggestion"
+   ],
+   "5": [
+    "fireball",
+    "stinking-cloud"
+   ],
+   "7": [
+    "fire-shield",
+    "wall-of-fire"
+   ],
+   "9": [
+    "geas",
+    "insect-plague"
+   ]
+  },
+  "Circle of the Land": {
+   "land": {
+    "arid": {
+     "3": [
+      "blur",
+      "burning-hands",
+      "fire-bolt"
+     ],
+     "5": [
+      "fireball"
+     ],
+     "7": [
+      "blight"
+     ],
+     "9": [
+      "wall-of-stone"
+     ]
+    },
+    "polar": {
+     "3": [
+      "fog-cloud",
+      "hold-person",
+      "ray-of-frost"
+     ],
+     "5": [
+      "sleet-storm"
+     ],
+     "7": [
+      "ice-storm"
+     ],
+     "9": [
+      "cone-of-cold"
+     ]
+    },
+    "temperate": {
+     "3": [
+      "misty-step",
+      "shocking-grasp",
+      "sleep"
+     ],
+     "5": [
+      "lightning-bolt"
+     ],
+     "7": [
+      "freedom-of-movement"
+     ],
+     "9": [
+      "tree-stride"
+     ]
+    },
+    "tropical": {
+     "3": [
+      "acid-splash",
+      "ray-of-sickness",
+      "web"
+     ],
+     "5": [
+      "stinking-cloud"
+     ],
+     "7": [
+      "polymorph"
+     ],
+     "9": [
+      "insect-plague"
+     ]
+    }
+   }
+  }
+ }
+}

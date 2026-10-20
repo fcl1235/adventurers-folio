@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# 运行时数据：角色存档指针（每个人本机不同）
+characters/_last.json
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+
+# 备份大文件（历史单体版本，按需再传）
+# backup/dnd55e_character_builder_monolith.py
+
+# 临时
+*.log
+~$*

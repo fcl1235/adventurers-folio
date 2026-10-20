@@ -1,0 +1,425 @@
+{
+ "weapons": [
+  [
+   "木棒 Club",
+   "简单",
+   "1d4 钝击",
+   "Slow",
+   [
+    "light"
+   ]
+  ],
+  [
+   "匕首 Dagger",
+   "简单",
+   "1d4 穿刺",
+   "Nick",
+   [
+    "finesse",
+    "light",
+    "thrown"
+   ]
+  ],
+  [
+   "大棒 Greatclub",
+   "简单",
+   "1d8 钝击",
+   "Push",
+   [
+    "two_handed"
+   ]
+  ],
+  [
+   "手斧 Handaxe",
+   "简单",
+   "1d6 挥砍",
+   "Vex",
+   [
+    "light",
+    "thrown"
+   ]
+  ],
+  [
+   "标枪 Javelin",
+   "简单",
+   "1d6 穿刺",
+   "Slow",
+   [
+    "thrown"
+   ]
+  ],
+  [
+   "轻锤 Light Hammer",
+   "简单",
+   "1d4 钝击",
+   "Nick",
+   [
+    "light",
+    "thrown"
+   ]
+  ],
+  [
+   "钉头锤 Mace",
+   "简单",
+   "1d6 钝击",
+   "Sap",
+   []
+  ],
+  [
+   "木棍 Quarterstaff",
+   "简单",
+   "1d6 钝击",
+   "Topple",
+   [
+    "versatile"
+   ],
+   "1d8"
+  ],
+  [
+   "短镰 Sickle",
+   "简单",
+   "1d4 挥砍",
+   "Nick",
+   [
+    "light"
+   ]
+  ],
+  [
+   "长矛 Spear",
+   "简单",
+   "1d6 穿刺",
+   "Sap",
+   [
+    "thrown",
+    "versatile"
+   ],
+   "1d8"
+  ],
+  [
+   "飞镖 Dart",
+   "简单",
+   "1d4 穿刺",
+   "Vex",
+   [
+    "finesse",
+    "thrown",
+    "ranged"
+   ]
+  ],
+  [
+   "轻弩 Light Crossbow",
+   "简单",
+   "1d8 穿刺",
+   "Slow",
+   [
+    "ranged",
+    "two_handed",
+    "loading"
+   ]
+  ],
+  [
+   "短弓 Shortbow",
+   "简单",
+   "1d6 穿刺",
+   "Vex",
+   [
+    "ranged",
+    "two_handed"
+   ]
+  ],
+  [
+   "投石索 Sling",
+   "简单",
+   "1d4 钝击",
+   "Slow",
+   [
+    "ranged"
+   ]
+  ],
+  [
+   "战斧 Battleaxe",
+   "军用",
+   "1d8 挥砍",
+   "Topple",
+   [
+    "versatile"
+   ],
+   "1d10"
+  ],
+  [
+   "连枷 Flail",
+   "军用",
+   "1d8 钝击",
+   "Sap",
+   []
+  ],
+  [
+   "关刀 Glaive",
+   "军用",
+   "1d10 挥砍",
+   "Graze",
+   [
+    "two_handed",
+    "heavy",
+    "reach"
+   ]
+  ],
+  [
+   "巨斧 Greataxe",
+   "军用",
+   "1d12 挥砍",
+   "Cleave",
+   [
+    "two_handed",
+    "heavy"
+   ]
+  ],
+  [
+   "巨剑 Greatsword",
+   "军用",
+   "2d6 挥砍",
+   "Graze",
+   [
+    "two_handed",
+    "heavy"
+   ]
+  ],
+  [
+   "戟 Halberd",
+   "军用",
+   "1d10 挥砍",
+   "Cleave",
+   [
+    "two_handed",
+    "heavy",
+    "reach"
+   ]
+  ],
+  [
+   "骑枪 Lance",
+   "军用",
+   "1d10 穿刺",
+   "Topple",
+   [
+    "two_handed",
+    "heavy",
+    "reach"
+   ]
+  ],
+  [
+   "长剑 Longsword",
+   "军用",
+   "1d8 挥砍",
+   "Sap",
+   [
+    "versatile"
+   ],
+   "1d10"
+  ],
+  [
+   "大锤 Maul",
+   "军用",
+   "2d6 钝击",
+   "Topple",
+   [
+    "two_handed",
+    "heavy"
+   ]
+  ],
+  [
+   "晨星 Morningstar",
+   "军用",
+   "1d8 穿刺",
+   "Sap",
+   []
+  ],
+  [
+   "长枪 Pike",
+   "军用",
+   "1d10 穿刺",
+   "Push",
+   [
+    "two_handed",
+    "heavy",
+    "reach"
+   ]
+  ],
+  [
+   "细剑 Rapier",
+   "军用",
+   "1d8 穿刺",
+   "Vex",
+   [
+    "finesse"
+   ]
+  ],
+  [
+   "弯刀 Scimitar",
+   "军用",
+   "1d6 挥砍",
+   "Nick",
+   [
+    "finesse",
+    "light"
+   ]
+  ],
+  [
+   "短剑 Shortsword",
+   "军用",
+   "1d6 穿刺",
+   "Vex",
+   [
+    "finesse",
+    "light"
+   ]
+  ],
+  [
+   "三叉戟 Trident",
+   "军用",
+   "1d8 穿刺",
+   "Topple",
+   [
+    "thrown",
+    "versatile"
+   ],
+   "1d10"
+  ],
+  [
+   "战镐 War Pick",
+   "军用",
+   "1d8 穿刺",
+   "Sap",
+   [
+    "versatile"
+   ],
+   "1d10"
+  ],
+  [
+   "战锤 Warhammer",
+   "军用",
+   "1d8 钝击",
+   "Push",
+   [
+    "versatile"
+   ],
+   "1d10"
+  ],
+  [
+   "长鞭 Whip",
+   "军用",
+   "1d4 挥砍",
+   "Slow",
+   [
+    "finesse",
+    "reach"
+   ]
+  ],
+  [
+   "吹箭 Blowgun",
+   "军用",
+   "1 穿刺",
+   "Vex",
+   [
+    "ranged",
+    "loading"
+   ]
+  ],
+  [
+   "手弩 Hand Crossbow",
+   "军用",
+   "1d6 穿刺",
+   "Vex",
+   [
+    "ranged",
+    "light",
+    "loading"
+   ]
+  ],
+  [
+   "重弩 Heavy Crossbow",
+   "军用",
+   "1d10 穿刺",
+   "Push",
+   [
+    "ranged",
+    "two_handed",
+    "heavy",
+    "loading"
+   ]
+  ],
+  [
+   "长弓 Longbow",
+   "军用",
+   "1d8 穿刺",
+   "Slow",
+   [
+    "ranged",
+    "two_handed",
+    "heavy"
+   ]
+  ],
+  [
+   "火枪 Musket",
+   "军用",
+   "1d12 穿刺",
+   "Slow",
+   [
+    "ranged",
+    "two_handed",
+    "loading"
+   ]
+  ],
+  [
+   "手枪 Pistol",
+   "军用",
+   "1d10 穿刺",
+   "Vex",
+   [
+    "ranged",
+    "loading"
+   ]
+  ]
+ ],
+ "light": [
+  "匕首 Dagger",
+  "弯刀 Scimitar",
+  "手弩 Hand Crossbow",
+  "手斧 Handaxe",
+  "木棒 Club",
+  "短剑 Shortsword",
+  "短镰 Sickle",
+  "轻锤 Light Hammer"
+ ],
+ "finesse": [
+  "匕首 Dagger",
+  "吹箭 Blowgun",
+  "弯刀 Scimitar",
+  "手弩 Hand Crossbow",
+  "手枪 Pistol",
+  "短剑 Shortsword",
+  "短镰 Sickle",
+  "细剑 Rapier",
+  "长鞭 Whip",
+  "飞镖 Dart"
+ ],
+ "mastery_desc": {
+  "Cleave": "劈砍: 近战命中后可对5尺内第二目标再攻击一次(无属性加值), 1次/回合",
+  "Graze": "擦伤: 未命中仍造成等同攻击属性调整值的伤害",
+  "Nick": "疾刺: 轻武器副手攻击并入攻击动作而非附赠动作, 1次/回合",
+  "Push": "推撞: 命中可将大体型以下目标直线推离10尺",
+  "Sap": "削弱: 命中后目标下回合前的下次攻击检定劣势",
+  "Slow": "迟缓: 命中并造成伤害后目标速度-10尺(不叠加)",
+  "Topple": "撂倒: 命中后目标Con豁免(DC8+属性+熟练)否则倒地",
+  "Vex": "迷扰: 命中并造成伤害后, 对同一目标下次攻击优势"
+ },
+ "mastery_cn": {
+  "Cleave": "劈砍",
+  "Graze": "擦伤",
+  "Nick": "疾刺",
+  "Push": "推撞",
+  "Sap": "削弱",
+  "Slow": "迟缓",
+  "Topple": "撂倒",
+  "Vex": "迷扰"
+ }
+}

@@ -1,0 +1,112 @@
+{
+ "armors": [
+  [
+   "无甲",
+   null,
+   null
+  ],
+  [
+   "皮甲(11+敏)",
+   11,
+   null
+  ],
+  [
+   "镶钉皮甲(12+敏)",
+   12,
+   null
+  ],
+  [
+   "兽皮甲(12+敏2)",
+   12,
+   2
+  ],
+  [
+   "锁链衫(13+敏2)",
+   13,
+   2
+  ],
+  [
+   "鳞甲(14+敏2)",
+   14,
+   2
+  ],
+  [
+   "胸板甲(14+敏2)",
+   14,
+   2
+  ],
+  [
+   "半身板甲(15+敏2)",
+   15,
+   2
+  ],
+  [
+   "环甲(14)",
+   14,
+   0
+  ],
+  [
+   "锁甲(16)",
+   16,
+   0
+  ],
+  [
+   "板条甲(17)",
+   17,
+   0
+  ],
+  [
+   "全身板甲(18)",
+   18,
+   0
+  ]
+ ],
+ "cats": [
+  null,
+  "light",
+  "light",
+  "medium",
+  "medium",
+  "medium",
+  "medium",
+  "medium",
+  "heavy",
+  "heavy",
+  "heavy",
+  "heavy"
+ ],
+ "cats_cn": {
+  "light": "轻甲",
+  "medium": "中甲",
+  "heavy": "重甲",
+  "shields": "盾牌"
+ },
+ "str_req": [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  13,
+  15,
+  15
+ ],
+ "stealth": [
+  false,
+  false,
+  false,
+  false,
+  false,
+  true,
+  false,
+  true,
+  true,
+  true,
+  true,
+  true
+ ]
+}
