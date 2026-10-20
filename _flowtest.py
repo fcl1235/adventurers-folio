@@ -2116,6 +2116,25 @@ check(all(m["speed"].get("fly", 0) == 0 and m["speed"].get("swim", 0) == 0
 check(all(wildshape.cr_num(m) <= 0.25 for m in _s2), "2 级 CR 上限 1/4")
 check(wildshape.shapes(1) == [], "1 级不能变形")
 
+# 2024 已知形态数与速度解禁等级
+check([wildshape.known_forms(lv) for lv in (1, 2, 3, 4, 7, 8, 20)]
+      == [0, 4, 4, 6, 6, 8, 8], "已知形态 0/4/4/6/6/8/8")
+check(wildshape.temp_hp(3) == 3, "变形临时 HP = 等级")
+check(wildshape.temp_hp(6, "Circle of the Moon") == 18, "月环 3×等级临时 HP")
+check(wildshape.suggested_ac(11, 3, 6, "Circle of the Moon") == 16,
+      "月环 AC = 13+感知")
+_m3 = mk("druid", 3)
+_m3.subclass = "Circle of the Moon"
+check(not any(m["speed"].get("fly") for m in _m3.wild_shapes()),
+      "3 级月环也不能飞 (2024 只放宽 CR)")
+check(not any(m["speed"].get("swim") for m in _m3.wild_shapes()),
+      "3 级仍无游泳形态")
+_d4 = mk("druid", 4)
+check(any(m["speed"].get("swim") for m in _d4.wild_shapes()),
+      "4 级解禁游泳形态")
+check(not any(m["speed"].get("fly") for m in _d4.wild_shapes()),
+      "4 级仍不能飞")
+
 _d8 = mk("druid", 8)
 check(len(_d8.wild_shapes()) > len(_s2), "8 级形态更多")
 check(any(m["speed"].get("fly", 0) for m in _d8.wild_shapes()), "8 级可选飞行形态")
@@ -2125,7 +2144,9 @@ check(wildshape.cap_for(12, "Circle of the Moon") == 4.0, "月环 12 级 CR 上�
 _moon = mk("druid", 6)
 _moon.subclass = "Circle of the Moon"
 check(wildshape.cap_for(6, "Circle of the Moon") == 2.0, "月环 6 级 CR 上限 2")
-check(len(_moon.wild_shapes()) > len(mk("druid", 6).wild_shapes()), "月环形态比普通多")
+check(max(wildshape.cr_num(m) for m in _moon.wild_shapes()) >
+      max(wildshape.cr_num(m) for m in mk("druid", 6).wild_shapes()),
+      "月环形态 CR 比普通高")
 
 _moon.wild_shape_id = "wolf"
 _mr = cb.Character(r)

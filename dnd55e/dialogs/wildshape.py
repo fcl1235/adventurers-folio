@@ -41,12 +41,18 @@ class WildShapeDialog(tk.Toplevel):
         self.head = ttk.Label(
             self, foreground=GOLD2,
             text=f"可选 {len(self._rows)} 种 · CR 上限 {cap}"
+                 f" · 已知形态 {_ws.known_forms(char.level)} 种"
                  + (f" · 当前：{cur['name']}" if cur else " · 当前：本体"))
         self.head.pack(anchor="w", padx=12)
         ttk.Label(self, wraplength=700, justify="left", foreground=DIM,
-                  text="2 级不能选带飞行/游泳速度的形态，4 级起解除；"
-                       "大地结社按 3/6/9/12/15/18 级放宽 CR 上限。"
-                       "变形后按这里的 AC/HP/攻击结算，角色本体数值不变。").pack(
+                  text="2 级不能选带飞行/游泳速度的形态，4 级起解除游泳、"
+                       "8 级起解除飞行；大地结社只放宽 CR 上限，不放宽速度限制。"
+                       "变形时获得临时 HP "
+                       f"{_ws.temp_hp(char.level, char.subclass)} 点"
+                       + ("（大地结社 3×等级）" if char.subclass ==
+                          "Circle of the Moon" and char.level >= 3 else "")
+                       + "；本程序列出全部符合条件形态供参考，"
+                       "角色本体数值不变。").pack(
             anchor="w", padx=12, pady=(2, 6))
 
         body = ttk.Frame(self, padding=(12, 0))
@@ -88,7 +94,16 @@ class WildShapeDialog(tk.Toplevel):
         if not m:
             return
         ab = m.get("abilities") or {}
+        wis_mod = ability_mod(self.char.score("WIS"))
+        ac = _ws.suggested_ac(m.get("ac"), wis_mod, self.char.level,
+                              self.char.subclass)
         lines = [_ws.summary(m), ""]
+        if ac != int(m.get("ac") or 0):
+            lines.append(f"变形后 AC {ac}（13 + 感知 {mod_str(wis_mod)}，"
+                         "大地结社「圆月形态」）")
+        thp = _ws.temp_hp(self.char.level, self.char.subclass)
+        lines.append(f"变形时获得临时 HP {thp} 点")
+        lines.append("")
         lines.append("力量 {} 敏捷 {} 体质 {} 智力 {} 感知 {} 魅力 {}".format(
             ab.get("STR", 0), ab.get("DEX", 0), ab.get("CON", 0),
             ab.get("INT", 0), ab.get("WIS", 0), ab.get("CHA", 0)))

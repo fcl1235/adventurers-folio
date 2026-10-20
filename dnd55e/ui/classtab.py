@@ -200,10 +200,17 @@ class ClassTabMixin():
             cur = c.wild_shape()
             ttk.Label(wrow, foreground=GOLD2,
                       text=f"可选 {len(c.wild_shapes())} 种"
+                           f" · 已知形态 {_ws.known_forms(c.level)} 种"
+                           f" · 临时 HP {_ws.temp_hp(c.level, c.subclass)}"
                            + (f" · 当前：{cur['name']}" if cur
                               else " · 当前：本体")).pack(side="left")
             ttk.Button(wrow, text="形态", style="Mini.TButton",
                        command=self._wild_shape_open).pack(side="left", padx=6)
+            ttk.Label(wsf, text="2024 规则：2 级不可带飞行/游泳，4 级解游泳、"
+                                "8 级解飞行（大地结社只放宽 CR）。"
+                                "此处按 CR 列出全部符合条件形态供参考。",
+                      style="Dim.TLabel", wraplength=540,
+                      justify="left").pack(anchor="w")
             if cur:
                 ttk.Label(wsf, text=_ws.summary(cur), foreground=DIM,
                           wraplength=540,
