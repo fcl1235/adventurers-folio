@@ -1,11 +1,50 @@
 # -*- coding: utf-8 -*-
-"""角色模型分片: spellcasting/prepare.py (由 character.py 物理拆分, P1 纯搬运)。"""
+"""法术准备：配额、可准备环级、能否准备某道法术。
+
+"这一环能不能准备/能不能学" 委托给 `levels` 子包的按环规则，
+升环加成也从那里取 —— 数据仍在 JSON，规则按环拆分在代码里。
+"""
 from .. import consts
 from ..util import (ability_mod)
+from . import levels
 
 
 class PrepareMixin:
     """PrepareMixin"""
+
+    def level_rule(self, spell_or_level):
+        """取某一环（或某道法术所属环）的规则对象。
+
+        可以传环级整数、法术字典、法术 id 字符串。
+        """
+        if isinstance(spell_or_level, dict):
+            lv = spell_or_level.get("level", 0)
+        elif isinstance(spell_or_level, str):
+            lv = (self.r.spell(spell_or_level) or {}).get("level", 0)
+        else:
+            lv = spell_or_level
+        return levels.at(lv)
+
+    def can_learn_spell(self, sid):
+        """这道法术现在能否学会/抄录（含按环的特殊规则）。"""
+        s = self.r.spell(sid)
+        if not s:
+            return False
+        return self.level_rule(s).can_learn(self, s)
+
+    def can_prepare_spell(self, sid):
+        """这道法术现在能否准备（含按环的特殊规则）。"""
+        s = self.r.spell(sid)
+        if not s:
+            return False
+        return self.level_rule(s).can_prepare(self, s)
+
+    def upcast_dice(self, sid, slot_level):
+        """这道法术用某个环位施放时的升环加成文案。"""
+        s = self.r.spell(sid)
+        if not s:
+            return ""
+        return self.level_rule(s).upcast_dice(self, s, slot_level)
 
     def max_spell_level(self):
         """当前能施放的最高环级 (由普通法术位决定; 秘契法术不算普通法术位)"""
