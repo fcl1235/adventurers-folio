@@ -131,6 +131,10 @@ class ClassModule:
         """能否荒野变形（德鲁伊）。"""
         return False
 
+    def companion(self, ch):
+        """野兽伙伴面板数据（游侠·驯兽师）。默认没有。"""
+        return None
+
     def can_rage(self, ch):
         """能否进入狂暴（野蛮人）。"""
         return False

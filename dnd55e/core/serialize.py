@@ -15,6 +15,7 @@ class SerializeMixin:
             "order": self.order,
             "land": self.land,
             "wild_shape_id": self.wild_shape_id,
+            "companion_id": self.companion_id,
             "metamagic": list(self.metamagic),
             "innate_active": self.innate_active,
             "innate_used": self.innate_used,
@@ -266,5 +267,10 @@ class SerializeMixin:
                                0, self.hp_max())
         # 特性授予的法术不再占用手动列表 (旧存档里可能存过)
         self.prune_fixed()
+        # 野兽伙伴形态: 依赖上面的 class_id / subclass / level, 必须最后读
+        comp = self.companion()
+        allowed = {o["id"] for o in (comp or {}).get("options") or []}
+        cid = d.get("companion_id")
+        self.companion_id = cid if cid in allowed else None
         # 旧存档没有法术书 → 用已准备的法师法术补齐
         self.book_auto_fill()

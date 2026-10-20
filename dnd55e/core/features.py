@@ -133,6 +133,10 @@ class FeaturesMixin:
         """是否获得全部技能熟练 (传奇恩惠「技艺」)"""
         return bool(self.boon_effects().get("skill_all_prof"))
 
+    def companion(self):
+        """野兽伙伴 (游侠·驯兽师 3 级起); 其他职业返回 None"""
+        return self.cls_module().companion(self)
+
     def class_dice_text(self):
         """职业关键数值 (骰子/次数), 让没有资源池的职业也有信息可看"""
         parts = []

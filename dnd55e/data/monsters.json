@@ -6002,6 +6002,242 @@
    "reactions": [],
    "edition": "2024",
    "source": "srd"
+  },
+  {
+   "id": "beast-of-the-land",
+   "name": "陆行兽 Beast of the Land",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "13 + 你的感知调整值",
+   "hp": 5,
+   "hp_dice": "1d8",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 14,
+    "DEX": 14,
+    "CON": 15,
+    "INT": 8,
+    "WIS": 14,
+    "CHA": 11
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "原始纽带 Primal Bond",
+     "desc": "你可以把熟练加值加到这只野兽的任何属性检定与豁免上。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "野兽打击 Beast's Strike",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "命中 = 你的法术攻击加值，触及 5 尺，伤害 1d8+2+你的感知调整值（钝击、穿刺或挥砍任选）。若它在此次攻击前直线移动至少 20 尺靠近目标，额外造成 1d6 伤害，且目标（大型或更小）倒地。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd",
+   "type": "beast",
+   "companion": true,
+   "scaling": {
+    "ac": "13 + 感知调整值",
+    "hp": "5 + 5 × 游侠等级",
+    "hp_die": "d8",
+    "per_level": 5
+   },
+   "strike": {
+    "damage": "1d8",
+    "flat": 2,
+    "ability": "WIS",
+    "damage_type": "钝击",
+    "extra": "1d6 若直线移动 20 尺"
+   }
+  },
+  {
+   "id": "beast-of-the-sea",
+   "name": "海行兽 Beast of the Sea",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "中型",
+   "ac": 13,
+   "ac_note": "13 + 你的感知调整值",
+   "hp": 5,
+   "hp_dice": "1d8",
+   "speed": {
+    "walk": 5,
+    "climb": 0,
+    "fly": 0,
+    "swim": 60,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 14,
+    "DEX": 14,
+    "CON": 15,
+    "INT": 8,
+    "WIS": 14,
+    "CHA": 11
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 90,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "两栖 Amphibious",
+     "desc": "它可以在空气与水中呼吸。"
+    },
+    {
+     "name": "原始纽带 Primal Bond",
+     "desc": "你可以把熟练加值加到这只野兽的任何属性检定与豁免上。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "野兽打击 Beast's Strike",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "命中 = 你的法术攻击加值，触及 5 尺，伤害 1d6+2+你的感知调整值（钝击或穿刺任选），命中后目标被擒抱（逃脱 DC = 你的法术豁免 DC）。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd",
+   "type": "beast",
+   "companion": true,
+   "scaling": {
+    "ac": "13 + 感知调整值",
+    "hp": "5 + 5 × 游侠等级",
+    "hp_die": "d8",
+    "per_level": 5
+   },
+   "strike": {
+    "damage": "1d6",
+    "flat": 2,
+    "ability": "WIS",
+    "damage_type": "穿刺",
+    "extra": "命中即擒抱"
+   }
+  },
+  {
+   "id": "beast-of-the-sky",
+   "name": "飞行兽 Beast of the Sky",
+   "cr": "0",
+   "cr_num": 0,
+   "xp": 10,
+   "size": "小型",
+   "ac": 13,
+   "ac_note": "13 + 你的感知调整值",
+   "hp": 4,
+   "hp_dice": "1d6",
+   "speed": {
+    "walk": 10,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 6,
+    "DEX": 16,
+    "CON": 13,
+    "INT": 8,
+    "WIS": 14,
+    "CHA": 11
+   },
+   "saves": {},
+   "skills": {},
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 12
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "飞掠 Flyby",
+     "desc": "它飞离敌人的触及范围时，不会引发借机攻击。"
+    },
+    {
+     "name": "原始纽带 Primal Bond",
+     "desc": "你可以把熟练加值加到这只野兽的任何属性检定与豁免上。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "野兽打击 Beast's Strike",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "命中 = 你的法术攻击加值，触及 5 尺，伤害 1d4+3+你的感知调整值（挥砍）。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "edition": "2024",
+   "source": "srd",
+   "type": "beast",
+   "companion": true,
+   "scaling": {
+    "ac": "13 + 感知调整值",
+    "hp": "4 + 4 × 游侠等级",
+    "hp_die": "d6",
+    "per_level": 4
+   },
+   "strike": {
+    "damage": "1d4",
+    "flat": 3,
+    "ability": "WIS",
+    "damage_type": "挥砍",
+    "extra": ""
+   }
   }
  ]
 }

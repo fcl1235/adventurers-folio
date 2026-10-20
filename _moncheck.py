@@ -157,6 +157,24 @@ def main():
                     if p.get("damage_type") not in DAMAGE_TYPES:
                         err(f"{tag} damage_parts 类型非法：{an} -> {p}")
 
+        # --- type / 伙伴 (可选字段: 只有新增的伙伴 stat block 用) ---
+        if "type" in m and not (isinstance(m["type"], str) and m["type"]):
+            err(f"{tag} type 不是非空字符串：{m.get('type')}")
+        if m.get("companion"):
+            if m.get("type") != "beast":
+                err(f"{tag} companion 的 type 必须是 beast")
+            sc = m.get("scaling") or {}
+            if not isinstance(sc, dict) or not sc.get("hp"):
+                err(f"{tag} companion 缺 scaling.hp")
+            st = m.get("strike") or {}
+            if not DICE_RE.match(str(st.get("damage"))):
+                err(f"{tag} companion 的 strike.damage 非法：{st.get('damage')}")
+            if not isinstance(st.get("flat"), int):
+                err(f"{tag} companion 的 strike.flat 不是 int")
+            if st.get("ability") not in ("STR", "DEX", "CON", "INT", "WIS",
+                                         "CHA"):
+                err(f"{tag} companion 的 strike.ability 非法")
+
     # --- CR 分档 ---
     counts = {t: 0 for t in CR_TIERS}
     for m in ms:

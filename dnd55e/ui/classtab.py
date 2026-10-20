@@ -220,6 +220,39 @@ class ClassTabMixin():
                               style="Dim.TLabel", wraplength=540,
                               justify="left").pack(anchor="w")
 
+        # ===== 1.95 野兽伙伴 (游侠·驯兽师 3 级起) =====
+        comp = c.companion()
+        if comp:
+            pf = ttk.Frame(body)
+            pf.pack(fill="x", pady=(10, 0))
+            ttk.Label(pf, text="原始伙伴 · 野兽伙伴",
+                      style="H2.TLabel").pack(anchor="w")
+            prow = ttk.Frame(pf)
+            prow.pack(fill="x")
+            cbox = ttk.Combobox(prow, width=22, state="readonly",
+                                values=[o["name"] for o in comp["options"]])
+            names = [o["name"] for o in comp["options"]]
+            if comp["name"] in names:
+                cbox.current(names.index(comp["name"]))
+            cbox.pack(side="left")
+            cbox.bind("<<ComboboxSelected>>",
+                      lambda e, v=cbox: self._companion_set(v.get()))
+            ttk.Button(prow, text="掷野兽打击", style="Mini.TButton",
+                       command=self._companion_strike).pack(side="left",
+                                                            padx=6)
+            ttk.Label(pf, foreground=GOLD2,
+                      text=f"当前：{comp['name']}  "
+                           f"AC {comp['ac']}（{comp['ac_note']}）"
+                           f" · HP {comp['hp']}（{comp['hp_formula']}）",
+                      wraplength=540,
+                      justify="left").pack(anchor="w")
+            ttk.Label(pf, text=comp["strike"], foreground=TEXT,
+                      wraplength=540,
+                      justify="left").pack(anchor="w")
+            ttk.Label(pf, text=comp["note"], style="Dim.TLabel",
+                      wraplength=540,
+                      justify="left").pack(anchor="w")
+
         # ===== 2. 子职 =====
         sf = ttk.Frame(body)
         sf.pack(fill="x", pady=(10, 0))

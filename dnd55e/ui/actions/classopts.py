@@ -16,6 +16,42 @@ from ...util import (ability_mod, mod_str, roll_dice, roll_dice_reroll,
 
 
 class ClassOptsMixin:
+    def _companion_set(self, disp_name):
+        """切换野兽伙伴形态 (只改 id, 数值由职业模块现算)"""
+        c = self.char
+        comp = c.companion() if c else None
+        if not comp:
+            return
+        for o in comp["options"]:
+            if o["name"] == disp_name:
+                c.companion_id = o["id"]
+                break
+        self.refresh()
+
+    def _companion_strike(self):
+        """掷野兽打击: 攻击 d20 + 你的法术攻击, 命中后掷伤害 + 感知"""
+        c = self.char
+        comp = c.companion() if c else None
+        if not comp:
+            return
+        raw = random.randint(1, 20)
+        hit = raw + c.spell_attack()
+        crit = " 🎯大成功!" if raw == 20 else (" 💀大失败" if raw == 1 else "")
+        st = comp.get("strike_parts") or {}
+        die = st.get("damage") or "1d4"
+        bonus = int(st.get("flat") or 0) + int(comp.get("wis_mod") or 0)
+        total, detail = roll_dice(die)
+        dmg = total + bonus
+        if raw == 20:
+            dmg += roll_dice(die)[0]
+        self._log_roll(
+            f"{comp['name']}·野兽打击: d20={raw} {mod_str(c.spell_attack())}"
+            f" ⇒ {hit}{crit} ｜ 伤害 {detail} + {bonus} = {dmg}"
+            f" {st.get('damage_type', '')}")
+        extra = st.get("extra") or ""
+        if extra and raw != 1:
+            self.status.config(text=f"🎲 {comp['name']} 命中 ⇒ {dmg} —— {extra}")
+
     def _order_set(self, key):
         """1 级职阶 (牧师/德鲁伊): 立即重算护甲/武器熟练与戏法数"""
         c = self.char

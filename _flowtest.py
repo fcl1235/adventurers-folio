@@ -2160,6 +2160,42 @@ check(_mb.wild_shape_id is None, "非法形态读档应清空")
 
 # 非德鲁伊没有形态
 check(mk("fighter", 8).wild_shapes() == [], "非德鲁伊不能荒野变形")
+# 伙伴 stat block 不该混进德鲁伊形态表
+check(all(not m.get("companion") for m in mk("druid", 20).wild_shapes()),
+      "伙伴 stat block 不算荒野变形形态")
+
+# ---- 游侠 · 驯兽师原始伙伴 ----
+check(mk("ranger", 3).companion() is None, "无子职游侠没有伙伴")
+_bm = mk("ranger", 3)
+_bm.subclass = "Beast Master"
+_cp = _bm.companion()
+check(_cp is not None, "驯兽师 3 级获得原始伙伴")
+check(len(_cp["options"]) == 3, "伙伴三形态 (陆/海/空)")
+check(_cp["ac"] == 13 + cb.ability_mod(_bm.score("WIS")),
+      "伙伴 AC = 13 + 感知")
+check(_cp["hp"] == 5 + 5 * 3, "陆行兽 HP = 5 + 5×等级")
+_bm.companion_id = "beast-of-the-sky"
+_cp = _bm.companion()
+check(_cp["id"] == "beast-of-the-sky", "伙伴形态可切换")
+check(_cp["hp"] == 4 + 4 * 3, "飞行兽 HP = 4 + 4×等级")
+check("野兽打击" in _cp["strike"], "伙伴面板有野兽打击")
+_bm.level = 1
+check(_bm.companion() is None, "1 级游侠还没有伙伴")
+
+# 伙伴形态存档往返 + 脏数据清空
+_bm.level = 5
+_bd = _bm.to_dict()
+_bm2 = cb.Character(r)
+_bm2.load_dict(_bd)
+check(_bm2.companion_id == "beast-of-the-sky", "伙伴形态存档往返")
+_bd2 = _bm.to_dict()
+_bd2["companion_id"] = "tarrasque"
+_bm3 = cb.Character(r)
+_bm3.load_dict(_bd2)
+check(_bm3.companion_id is None, "非法伙伴形态读档应清空")
+_fake = mk("fighter", 5)
+_fake.companion_id = "beast-of-the-land"
+check(_fake.companion() is None, "非驯兽师没有伙伴面板")
 
 # ---- 专长选择对话框 ----
 from dnd55e.dialogs import FeatPickerDialog, WildShapeDialog

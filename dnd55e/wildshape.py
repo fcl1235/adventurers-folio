@@ -82,6 +82,8 @@ def shapes(level, subclass=None):
     can_swim = swim_ok(level)
     out = []
     for m in consts.MONSTERS:
+        if m.get("companion"):
+            continue          # 游侠野兽伙伴的 stat block 不是德鲁伊形态
         if cr_num(m) > cap + 1e-9:
             continue
         sp = m.get("speed") or {}

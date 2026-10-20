@@ -50,6 +50,7 @@ class BaseMixin:
         self.order = None             # 1级职阶: cleric protector/thaumaturge, druid warden/magician
         self.land = "temperate"       # 大地结社: 长休时选的地形 arid/polar/temperate/tropical
         self.wild_shape_id = None     # 荒野变形当前形态 (monsters.json 的 id)
+        self.companion_id = None      # 游侠·驯兽师: 当前伙伴形态 (长休可换)
         self.metamagic = []           # 术士已知超魔法 id (2级2个, 10/17级各+2)
         self.innate_active = False    # 先天魔法生效中 (20级时让 1 个超魔法免费)
         self.innate_used = 0          # 先天魔法已用次数 (2 次/长休)
