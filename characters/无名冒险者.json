@@ -1,13 +1,14 @@
 {
   "system": "dnd55e-character v1",
   "name": "无名冒险者",
-  "level": 5,
+  "level": 19,
   "xp": 0,
-  "class_id": "wizard",
-  "subclass": null,
+  "class_id": "druid",
+  "subclass": "Circle of the Moon",
   "order": null,
   "land": "temperate",
-  "wild_shape_id": null,
+  "wild_shape_id": "wolf",
+  "companion_id": null,
   "metamagic": [],
   "innate_active": false,
   "innate_used": 0,
@@ -16,29 +17,41 @@
   "signature_spells": [],
   "signature_used": [],
   "offhand_weapon": "",
-  "background_id": "criminal",
-  "species_id": "tiefling",
+  "background_id": "sage",
+  "species_id": "human",
   "base_scores": {
     "STR": 10,
-    "DEX": 15,
-    "CON": 12,
+    "DEX": 14,
+    "CON": 14,
     "INT": 12,
-    "WIS": 10,
-    "CHA": 14
+    "WIS": 17,
+    "CHA": 10
   },
-  "bg_bonus": null,
+  "bg_bonus": {
+    "mode": "2+1",
+    "plus2": "WIS",
+    "plus1": "CON"
+  },
   "asi_history": [],
-  "skill_prof": [],
+  "skill_prof": [
+    "insight",
+    "nature",
+    "perception"
+  ],
   "bonus_skills": [],
   "expertise": [],
   "weapon_mastery": [],
   "armor_index": 0,
   "shield": false,
   "tough_feat": false,
-  "hp_current": 27,
+  "hp_current": 195,
   "hp_temp": 0,
   "spell_slots_used": {},
-  "feats": [],
+  "feats": [
+    "Boon of Fortitude",
+    "Boon of Speed",
+    "Boon of Skill"
+  ],
   "languages": "通用语, ",
   "equipment": "",
   "notes": "",
@@ -54,15 +67,23 @@
   "weapon_magic": 0,
   "two_handed_grip": false,
   "shield_magic": 0,
-  "items": [],
+  "items": [
+    "frost_brand"
+  ],
   "fighting_style": null,
-  "concentration": "darkness",
-  "lineage": "infernal",
+  "concentration": null,
+  "lineage": null,
   "race_free_used": [],
   "res_used": {},
   "font_slots": {},
   "hit_dice_used": 0,
   "death_success": 0,
   "death_fail": 0,
-  "raging": false
+  "raging": false,
+  "boon_ability": {
+    "Boon of Fortitude": "CON",
+    "Boon of Speed": "DEX"
+  },
+  "boon_resist": [],
+  "boon_expertise": []
 }

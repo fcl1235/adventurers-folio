@@ -8,6 +8,7 @@
   "order": "magician",
   "land": "temperate",
   "wild_shape_id": null,
+  "companion_id": null,
   "metamagic": [],
   "innate_active": false,
   "innate_used": 0,
@@ -91,5 +92,8 @@
   "hit_dice_used": 0,
   "death_success": 0,
   "death_fail": 0,
-  "raging": false
+  "raging": false,
+  "boon_ability": {},
+  "boon_resist": [],
+  "boon_expertise": []
 }
