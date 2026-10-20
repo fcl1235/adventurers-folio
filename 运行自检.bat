@@ -3,6 +3,10 @@ chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
+rem 界面文案含 ✓ 等符号, Windows 默认 GBK 下 print 会 UnicodeEncodeError
+set PYTHONIOENCODING=utf-8
+set DND_NO_PAUSE=1
+
 set "PY=C:\Users\admin\AppData\Local\Programs\Python\Python313\python.exe"
 if not exist "%PY%" (
     where python >nul 2>nul
@@ -44,8 +48,6 @@ if errorlevel 1 goto fail
 
 echo.
 echo ================ 6/8 hint clipping check ================
-set PYTHONIOENCODING=utf-8
-set DND_NO_PAUSE=1
 "%PY%" _hintcheck.py
 if errorlevel 1 goto fail
 
