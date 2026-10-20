@@ -23,3 +23,10 @@ desktop.ini
 # 临时
 *.log
 ~$*
+
+# 回归快照：体积大且每次改动都会变，只保留 snap_before.json 作基线
+backup/snap.json
+backup/snap_a.json
+backup/snap_b.json
+backup/snap_final.json
+backup/snap_p*.json
