@@ -97,13 +97,55 @@ class LevelUpDialog(tk.Toplevel):
             self.asi_body.pack(anchor="w", fill="x", pady=4)
             self._render_asi()
 
-        # 传奇恩惠
+        # 传奇恩惠: 下拉列出全部 12 条 (也允许手输), 再选「哪一项属性 +1」
         self.boan_entry = None
+        self.boon_ability_cb = None
+        self._boon_map = {}
         if new_lv == 19:
-            bf = ttk.LabelFrame(f, text="传奇恩惠 Epic Boon (输入名称)", padding=6)
+            bf = ttk.LabelFrame(f, text="传奇恩惠 Epic Boon", padding=6)
             bf.pack(fill="x", pady=6)
-            self.boan_entry = ttk.Entry(bf, width=34)
+            boons = consts.GENERAL_FEATS.get("epic_boon") or {}
+            self._boon_map = {f"{v.get('cn', '')} {k}".strip(): k
+                              for k, v in boons.items()}
+            self.boan_entry = ttk.Combobox(bf, width=34,
+                                           values=list(self._boon_map))
             self.boan_entry.pack(anchor="w")
+            self.boan_entry.bind("<<ComboboxSelected>>",
+                                 lambda e: self._render_boon_ability())
+            row = ttk.Frame(bf)
+            row.pack(anchor="w", pady=(4, 0))
+            ttk.Label(row, text="属性 +1 →").pack(side="left")
+            self.boon_ability_cb = ttk.Combobox(
+                row, state="readonly", width=16,
+                values=[f"{ABILITY_CN[a]}({a})" for a in ABILITIES])
+            self.boon_ability_cb.pack(side="left", padx=4)
+            self._boon_hint = ttk.Label(bf, text="", wraplength=520,
+                                        justify="left", foreground=DIM)
+            self._boon_hint.pack(anchor="w", pady=(4, 0))
+            self._render_boon_ability()
+
+    def _boon_info(self):
+        """当前选中的恩惠条目 (手输的未知名字返回 None)"""
+        raw = self.boan_entry.get().strip()
+        name = self._boon_map.get(raw, raw)
+        return name, (consts.GENERAL_FEATS.get("epic_boon") or {}).get(name)
+
+    def _render_boon_ability(self):
+        """按恩惠的 ability_boost.from 限制可选的 +1 属性"""
+        name, info = self._boon_info()
+        boost = (info or {}).get("effects", {}).get("ability_boost") or {}
+        allowed = boost.get("from") or list(ABILITIES)
+        self.boon_ability_cb.configure(
+            values=[f"{ABILITY_CN[a]}({a})" for a in allowed])
+        if self.boon_ability_cb.get() and \
+                ab_from_display(self.boon_ability_cb.get()) not in allowed:
+            self.boon_ability_cb.set("")
+        if info:
+            self._boon_hint.config(text=f"{info.get('cn', '')} {name}: "
+                                        f"{info.get('desc', '')}")
+        else:
+            self._boon_hint.config(
+                text="下拉选择恩惠可自动生效；手输的恩惠请在「笔记」页记录效果")
 
     def _sub_preview(self):
         """升级弹窗里显示子职定位 + 各级效果"""
@@ -250,8 +292,18 @@ class LevelUpDialog(tk.Toplevel):
                     rec["asi"] = {"type": "asi", "ones": abs_}
 
         if new_lv == 19:
-            rec["boon"] = self.boan_entry.get().strip() or "传奇恩惠(未命名)"
+            raw = self.boan_entry.get().strip()
+            name, info = self._boon_info()
+            rec["boon"] = name or "传奇恩惠(未命名)"
             rec["asi"] = {"type": "feat", "name": rec["boon"]}
+            disp_ab = self.boon_ability_cb.get().strip()
+            ab = ab_from_display(disp_ab) if disp_ab else None
+            allowed = ((info or {}).get("effects", {})
+                       .get("ability_boost") or {}).get("from") or list(ABILITIES)
+            rec["boon_ability"] = ab if ab in allowed else None
+            if info and not raw:
+                messagebox.showwarning("提示", "请选择传奇恩惠", parent=self)
+                return
 
         self.result = rec
         self.destroy()

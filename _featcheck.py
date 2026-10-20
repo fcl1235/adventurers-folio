@@ -21,12 +21,20 @@ EFFECT_KEYS = {
     "attack_bonus": "int", "attack_bonus_ranged": "int", "damage_bonus": "int",
     "heavy_damage_pb": "bool", "bonus_attack_on_crit_or_kill": "bool",
     "concentration_adv": "bool",
+    "hp_flat": "int", "truesight": "int", "skill_all_prof": "bool",
+    "expertise_choice": "int", "ability_boost": "dict", "resist_choice": "dict",
     "spell_grants": "dict", "note_only": "bool",
 }
+
+DAMAGE_TYPES = {"acid", "bludgeoning", "cold", "fire", "force", "lightning",
+                "necrotic", "piercing", "poison", "psychic", "radiant",
+                "slashing", "thunder"}
 
 ARMOR_ENUM = {"light", "medium", "heavy", "shields"}
 WEAPON_ENUM = {"simple", "martial"}
 ABILITIES = {"STR", "DEX", "CON", "INT", "WIS", "CHA"}
+# 传奇恩惠在 2024 PHB 里统一是「任选一项 +1, 上限 30」, 用 ability_boost 表达
+BOON_ABILITIES = {"STR", "DEX", "CON", "INT", "WIS", "CHA"}
 CLASS_IDS = {"barbarian", "bard", "cleric", "druid", "fighter", "monk",
              "paladin", "ranger", "rogue", "sorcerer", "warlock", "wizard"}
 SECTIONS = ["general", "fighting_style", "epic_boon"]
@@ -64,13 +72,16 @@ def check_prereq(name, pre):
         err("%s: prereq 不是对象" % name)
         return
     for k in pre:
-        if k not in ("level", "abilities", "feature"):
+        if k not in ("level", "abilities", "feature", "spellcasting"):
             err("%s: prereq 出现未知字段 %r" % (name, k))
     lvl = pre.get("level")
     if not isinstance(lvl, int) or isinstance(lvl, bool):
         err("%s: prereq.level 必须是整数" % name)
     elif not 0 <= lvl <= 20:
         err("%s: prereq.level 越界 %d（须 0-20，0 = 无等级前提）" % (name, lvl))
+    sc = pre.get("spellcasting")
+    if sc is not None and not isinstance(sc, bool):
+        err("%s: prereq.spellcasting 必须是布尔" % name)
     abilities = pre.get("abilities", [])
     if not isinstance(abilities, list):
         err("%s: prereq.abilities 必须是列表" % name)
@@ -128,6 +139,39 @@ def check_effects(name, eff):
                 err("%s: save 键非法 %r" % (name, k))
             if not isinstance(v, int):
                 err("%s: save.%s 应为整数" % (name, k))
+    if "ability_boost" in eff:
+        ab = eff["ability_boost"]
+        for k in ab:
+            if k not in ("from", "max"):
+                err("%s: ability_boost 出现未知字段 %r" % (name, k))
+        src = ab.get("from") or []
+        if not isinstance(src, list) or not src:
+            err("%s: ability_boost.from 应为非空列表" % name)
+        else:
+            for a in src:
+                if a not in ABILITIES:
+                    err("%s: ability_boost.from 属性名非法 %r" % (name, a))
+        mx = ab.get("max", 30)
+        if not isinstance(mx, int) or isinstance(mx, bool) or not 20 < mx <= 30:
+            err("%s: ability_boost.max 应为 21-30 的整数" % name)
+    if "resist_choice" in eff:
+        rc = eff["resist_choice"]
+        for k in rc:
+            if k not in ("from", "count"):
+                err("%s: resist_choice 出现未知字段 %r" % (name, k))
+        cnt = rc.get("count", 1)
+        if not isinstance(cnt, int) or isinstance(cnt, bool) or cnt < 1:
+            err("%s: resist_choice.count 应为正整数" % name)
+        src = rc.get("from") or []
+        if not isinstance(src, list) or not src:
+            err("%s: resist_choice.from 应为非空列表" % name)
+        else:
+            for r in src:
+                if r not in DAMAGE_TYPES:
+                    err("%s: resist_choice.from 伤害类型非法 %r" % (name, r))
+            if isinstance(cnt, int) and not isinstance(cnt, bool) \
+                    and cnt > len(src):
+                err("%s: resist_choice.count 大于可选类型数" % name)
     if "spell_grants" in eff:
         sg = eff["spell_grants"]
         cls = sg.get("class")
@@ -209,6 +253,16 @@ def main():
             eff = item.get("effects", {})
             if sec == "epic_boon" and item.get("prereq", {}).get("level") != 19:
                 err("%s: 传奇恩惠先决等级应为 19" % en)
+            if sec == "epic_boon":
+                boost = item.get("effects", {}).get("ability_boost")
+                if not isinstance(boost, dict):
+                    err("%s: 传奇恩惠应带 effects.ability_boost（任选一项 +1）" % en)
+                else:
+                    for a in (boost.get("from") or []):
+                        if a not in BOON_ABILITIES:
+                            err("%s: ability_boost.from 属性名非法 %r" % (en, a))
+                    if boost.get("max") != 30:
+                        err("%s: 传奇恩惠的 ability_boost.max 应为 30" % en)
             if sec == "fighting_style":
                 pre_fs = item.get("prereq", {})
                 if pre_fs.get("feature") != "Fighting Style":

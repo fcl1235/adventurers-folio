@@ -168,6 +168,13 @@ class AppIO:
         c.prune_fixed()          # 新得到的「始终准备」法术不再占手动列表
         if rec["asi"]:
             c.asi_history.append(rec["asi"])
+        # 传奇恩惠: 必须进 c.feats, 否则 all_feat_names() 看不到, effects 不生效
+        boon = rec.get("boon")
+        if boon and boon not in c.feats:
+            c.feats.append(boon)
+        ab = rec.get("boon_ability")
+        if boon and ab:
+            c.boon_ability[boon] = ab
         gain = max(1, c.cls()["hit_die"] // 2 + 1 +
                    ability_mod(c.score("CON")))
         c.hp_current += gain

@@ -75,6 +75,28 @@ def __getattr__(name):
 
 
 # ---- 文案小工具 (都走懒加载, 不在这里存文本) ----
+# 伤害类型英文 → 中文 (抗性/免疫展示用; 与 items.json 的英文小写键一致)
+DAMAGE_TYPES_CN = {
+    "acid": "强酸", "bludgeoning": "钝击", "cold": "寒冷", "fire": "火焰",
+    "force": "力场", "lightning": "闪电", "necrotic": "黯蚀",
+    "piercing": "穿刺", "poison": "毒素", "psychic": "心灵",
+    "radiant": "光耀", "slashing": "挥砍", "thunder": "雷鸣",
+}
+
+# 状态英文 id → 中文 (condition_immune 展示用)
+CONDITIONS_CN = {
+    "blinded": "目盲", "charmed": "魅惑", "deafened": "耳聋",
+    "exhaustion": "力竭", "frightened": "恐惧", "grappled": "擒抱",
+    "incapacitated": "失能", "invisible": "隐形", "paralyzed": "麻痹",
+    "petrified": "石化", "poisoned": "中毒", "prone": "倒地",
+    "restrained": "束缚", "stunned": "震慑", "unconscious": "昏迷",
+}
+
+
+def damage_cn(key):
+    return DAMAGE_TYPES_CN.get(key, key)
+
+
 def mastery_cn(key):
     cn = data.mastery_cn_map()
     return f"{cn[key]} {key}" if key in cn else key

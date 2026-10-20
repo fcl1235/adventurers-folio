@@ -20,6 +20,8 @@ class DerivedMixin:
             hp += 2 * self.level
         # 通用专长: 每级额外 HP
         hp += int(self.feat_effects().get("hp_per_level", 0) or 0) * self.level
+        # 传奇恩惠: HP 上限固定加值 (强健之恩惠 +40)
+        hp += int(self.boon_effects().get("hp_flat", 0) or 0)
         # 物品 HP 上限加值
         hp += sum(int(consts.ITEMS_BY_ID.get(i, {}).get("hp_bonus") or 0)
                   for i in self.items)
@@ -40,6 +42,7 @@ class DerivedMixin:
         no_armor = self.armor_cat() is None
         sp += self.cls_module().speed_bonus(self)
         sp += int(self.feat_effects().get("speed", 0) or 0)   # 通用专长: 速度
+        sp += int(self.boon_effects().get("speed", 0) or 0)   # 传奇恩惠: 速度 +30
         for iid in self.items:
             it = consts.ITEMS_BY_ID.get(iid, {})
             sp += it.get("speed", 0) + it.get("speed_bonus", 0)

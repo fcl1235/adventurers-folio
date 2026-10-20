@@ -2012,7 +2012,8 @@ print("\n[18] 通用专长 / 物品字段 / 野兽形态")
 # ---- 数据规模 ----
 check(len(cb.consts.GENERAL_FEATS["general"]) == 43, "通用专长应为 43 条")
 check(len(cb.consts.GENERAL_FEATS["fighting_style"]) == 12, "战斗风格应为 12 条")
-check(len(cb.consts.GENERAL_FEATS["epic_boon"]) == 7, "传奇恩惠应为 7 条")
+check(len(cb.consts.GENERAL_FEATS["epic_boon"]) == 12,
+      "传奇恩惠应为 12 条 (PHB 2024 全部)")
 check(len(cb.consts.MONSTERS) >= 45, f"野兽应 ≥45 只: {len(cb.consts.MONSTERS)}")
 check(len(cb.consts.MAGIC_ITEMS) >= 80, f"物品应 ≥80: {len(cb.consts.MAGIC_ITEMS)}")
 

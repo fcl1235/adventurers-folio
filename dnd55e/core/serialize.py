@@ -54,6 +54,9 @@ class SerializeMixin:
             "death_success": self.death_success,
             "death_fail": self.death_fail,
             "raging": self.raging,
+            "boon_ability": self.boon_ability,
+            "boon_resist": list(self.boon_resist),
+            "boon_expertise": list(self.boon_expertise),
         }
 
     def load_dict(self, d):
@@ -236,6 +239,27 @@ class SerializeMixin:
         self.death_fail = _int(d.get("death_fail"), 0, 0, 3)
         self.raging = (bool(d.get("raging", False))
                        and self.cls_module().can_rage(self))
+        # 传奇恩惠的选择结果: 只接受当前真实持有的恩惠, 防止脏数据
+        boons = set(self.boon_names())
+        raw_ab = d.get("boon_ability")
+        self.boon_ability = {}
+        if isinstance(raw_ab, dict):
+            for name, ab in raw_ab.items():
+                if name in boons and ab in ABILITIES:
+                    self.boon_ability[name] = ab
+        raw_res = d.get("boon_resist")
+        self.boon_resist = []
+        if isinstance(raw_res, list) and self.boon_has("resist_choice"):
+            pool = self.boon_resist_pool()
+            limit = max(1, self.boon_resist_limit())
+            for r in raw_res:
+                if r in pool and r not in self.boon_resist \
+                        and len(self.boon_resist) < limit:
+                    self.boon_resist.append(r)
+        raw_exp = d.get("boon_expertise")
+        self.boon_expertise = [s for s in (raw_exp or [])
+                               if s in self.r.skill_by_id
+                               and s not in self.boon_expertise][:1]
         # 最后钳制 HP (依赖上面的 level/scores/species/tough)
         self.hp_temp = _int(d.get("hp_temp"), 0, 0, 999)
         self.hp_current = _int(d.get("hp_current"), self.hp_max(),

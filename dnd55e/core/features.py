@@ -25,6 +25,8 @@ class FeaturesMixin:
             info = consts.FEATS_BY_NAME.get(name)
             if not info:
                 continue
+            if info.get("_sec") == "epic_boon":
+                continue    # 传奇恩惠另走 boon_effects (属性上限 30, 不能混算)
             for k, v in (info.get("effects") or {}).items():
                 if k in ("note_only",):
                     continue
@@ -43,6 +45,93 @@ class FeaturesMixin:
             if any(k.lower() in low for k in keys):
                 return True
         return False
+
+    def boon_names(self):
+        """已领取的传奇恩惠名 (英文原名), 按领取顺序去重"""
+        out = []
+        for name in self.all_feat_names():
+            info = consts.FEATS_BY_NAME.get(name)
+            if not info or info.get("_sec") != "epic_boon":
+                continue
+            if name not in out:
+                out.append(name)
+        return out
+
+    def boon_effects(self):
+        """传奇恩惠的机械效果汇总 —— 与 feat_effects 分开,
+        因为传奇恩惠的属性加值上限是 30 (普通专长仍是 20)。"""
+        out = {}
+        for name in self.boon_names():
+            info = consts.FEATS_BY_NAME.get(name) or {}
+            for k, v in (info.get("effects") or {}).items():
+                if k in ("note_only", "ability_boost"):
+                    continue
+                if k == "resist_choice":        # 已选的两项抗性
+                    for r in self.boon_resist:
+                        if r not in out.setdefault("resist", []):
+                            out["resist"].append(r)
+                    continue
+                if isinstance(v, bool):
+                    out[k] = bool(out.get(k)) or v
+                elif isinstance(v, (int, float)):
+                    out[k] = out.get(k, 0) + v
+                else:
+                    out.setdefault(k, v)
+        return out
+
+    def boon_has(self, key):
+        """是否持有带某个 effects 键的传奇恩惠 (如 resist_choice)"""
+        for name in self.boon_names():
+            info = consts.FEATS_BY_NAME.get(name) or {}
+            if key in (info.get("effects") or {}):
+                return True
+        return False
+
+    def boon_resist_pool(self):
+        """恩惠允许选择的伤害类型 (resist_choice.from 的并集)"""
+        pool = []
+        for name in self.boon_names():
+            info = consts.FEATS_BY_NAME.get(name) or {}
+            rc = (info.get("effects") or {}).get("resist_choice") or {}
+            for r in (rc.get("from") or []):
+                if r not in pool:
+                    pool.append(r)
+        return pool
+
+    def boon_resist_limit(self):
+        """可选的抗性条数上限 (resist_choice.count 之和)"""
+        n = 0
+        for name in self.boon_names():
+            info = consts.FEATS_BY_NAME.get(name) or {}
+            rc = (info.get("effects") or {}).get("resist_choice") or {}
+            n += int(rc.get("count") or 0)
+        return n
+
+    def boon_ability_cap(self, ab):
+        """传奇恩惠把单项属性上限抬到 30 (只针对它加值属性的那一项)"""
+        best = 20
+        for name in self.boon_names():
+            info = consts.FEATS_BY_NAME.get(name) or {}
+            boost = (info.get("effects") or {}).get("ability_boost") or {}
+            cap = int(boost.get("max") or 0)
+            if not cap or ab not in (boost.get("from") or []):
+                continue
+            # 只有真正把 +1 记在这一项上, 才享受上限提升
+            if self.boon_ability.get(name) == ab:
+                best = max(best, cap)
+        return best
+
+    def boon_ability_bonus(self, ab):
+        """传奇恩惠给出的 +1 (每项恩惠各 +1)"""
+        n = 0
+        for name in self.boon_names():
+            if self.boon_ability.get(name) == ab:
+                n += 1
+        return n
+
+    def skill_all_proficient(self):
+        """是否获得全部技能熟练 (传奇恩惠「技艺」)"""
+        return bool(self.boon_effects().get("skill_all_prof"))
 
     def class_dice_text(self):
         """职业关键数值 (骰子/次数), 让没有资源池的职业也有信息可看"""

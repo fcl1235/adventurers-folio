@@ -68,6 +68,10 @@ class BaseMixin:
         self.death_success = 0        # 死亡豁免成功数 (3 即稳定)
         self.death_fail = 0           # 死亡豁免失败数 (3 即死亡)
         self.raging = False           # 野蛮人是否处于狂暴
+        # ---- 传奇恩惠 (19 级起) 的选择结果 ----
+        self.boon_ability = {}        # {"Enemy name": "CON"} 传奇恩惠领到的 +1 属性
+        self.boon_resist = []         # 恩惠「能量抗性」选定的伤害类型 (如 ["fire","cold"])
+        self.boon_expertise = []      # 恩惠「技艺」选定的专精技能 id
 
     def cls_module(self):
         """当前职业的规则模块 (未选职业时返回空实现)。"""
@@ -105,6 +109,10 @@ class BaseMixin:
         s = min(20, s)
         # 20 级职业特性 (原始冠军 / 身心合一) 再 +4, 上限 25
         s = min(self.ability_cap(ab), s + self.capstone_bonus(ab))
+        # 传奇恩惠: 单项 +1 且上限抬到 30 (19 级起)
+        if self.boon_names():
+            s += self.boon_ability_bonus(ab)
+            s = min(max(self.ability_cap(ab), self.boon_ability_cap(ab)), s)
         # 魔法物品的属性设定值 (如力量腰带 21) 可突破 20 上限
         for iid in self.items:
             v = consts.ITEMS_BY_ID.get(iid, {}).get("set_" + ab.lower())

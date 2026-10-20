@@ -3,7 +3,7 @@
  "_counts": {
   "general": 43,
   "fighting_style": 12,
-  "epic_boon": 7
+  "epic_boon": 12
  },
  "general": {
   "Ability Score Improvement": {
@@ -944,6 +944,17 @@
    "desc": "任选一项属性 +1（上限 30）。【无匹瞄准】当你的一次攻击检定失手时，你可以改为命中。使用此增益后，直到你下一回合开始前不能再使用。",
    "repeatable": false,
    "effects": {
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    },
     "note_only": true
    },
    "source": "SRD 5.2"
@@ -958,6 +969,17 @@
    "desc": "任选一项属性 +1（上限 30）。【闪现步】当你采取攻击动作或魔法动作后，你可以立即传送到 30 尺内一个你能看见的未占据空间。",
    "repeatable": false,
    "effects": {
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    },
     "note_only": true
    },
    "source": "SRD 5.2"
@@ -972,6 +994,17 @@
    "desc": "任选一项属性 +1（上限 30）。【扭转命运】当你或 60 尺内另一生物在一次 d20 检定中成功或失败时，你可以掷 2d4，并将其总和作为加值或减值加到该 d20 掷骰上。使用此增益后，须掷先攻或完成短休/长休才能再次使用。",
    "repeatable": false,
    "effects": {
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    },
     "note_only": true
    },
    "source": "SRD 5.2"
@@ -986,6 +1019,13 @@
    "desc": "力量或敏捷 +1（上限 30）。【破除防御】你造成的钝击、穿刺与挥砍伤害始终忽略抗性。【压倒打击】当你在一次攻击检定的 d20 上掷出 20 时，你可以对目标造成额外伤害，数值等于你以此专长提升的那项属性值；该额外伤害的类型与该次攻击相同。",
    "repeatable": false,
    "effects": {
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX"
+     ],
+     "max": 30
+    },
     "note_only": true
    },
    "source": "SRD 5.2"
@@ -1000,6 +1040,14 @@
    "desc": "智力、感知或魅力 +1（上限 30）。【免费施法】每当你使用 1–4 环的法术位施放一道法术时，掷 1d4；若掷出的数字与该法术位的环阶相同，则该法术位不被消耗。",
    "repeatable": false,
    "effects": {
+    "ability_boost": {
+     "from": [
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    },
     "note_only": true
    },
    "source": "SRD 5.2"
@@ -1014,6 +1062,17 @@
    "desc": "任选一项属性 +1（上限 30）。【融入阴影】当你处于微光或黑暗区域时，可用附赠动作使自己获得隐形状态；当你采取一个动作、附赠动作或反应后，该状态立即结束。【幽影形态】当你处于微光或黑暗区域时，你对除心灵与光耀之外的所有伤害具有抗性。",
    "repeatable": false,
    "effects": {
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    },
     "note_only": true
    },
    "source": "SRD 5.2"
@@ -1028,9 +1087,159 @@
    "desc": "任选一项属性 +1（上限 30）。【真实视觉】你获得 60 尺的真实视觉。",
    "repeatable": false,
    "effects": {
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    },
     "note_only": true
    },
    "source": "SRD 5.2"
+  },
+  "Boon of Energy Resistance": {
+   "cn": "能量抗性之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "任选两项伤害类型获得抗性：强酸、寒冷、火焰、闪电、黯蚀、毒素、心灵、光耀、雷鸣；每次长休后可重选。属性加值另记（任选一项 +1，上限 30）。【能量转移】当你受到所选类型的伤害时，可用反应将同类型伤害导向 60 尺内另一个你能看见且未处于完全掩蔽的生物：它须通过敏捷豁免（DC = 8 + 体质调整值 + 熟练加值），失败则受到 2d12 + 你的体质调整值伤害。",
+   "repeatable": false,
+   "effects": {
+    "resist_choice": {
+     "count": 2,
+     "from": [
+      "acid",
+      "cold",
+      "fire",
+      "lightning",
+      "necrotic",
+      "poison",
+      "psychic",
+      "radiant",
+      "thunder"
+     ]
+    },
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    }
+   },
+   "source": "PHB 2024"
+  },
+  "Boon of Fortitude": {
+   "cn": "强健之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "HP 上限 +40。属性加值另记（任选一项 +1，上限 30）。【强健体魄】每当你回复 HP 时，可额外回复等于你体质调整值的 HP；这样用过一次后，直到你下一回合开始前不能再这样回复。",
+   "repeatable": false,
+   "effects": {
+    "hp_flat": 40,
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    }
+   },
+   "source": "PHB 2024"
+  },
+  "Boon of Recovery": {
+   "cn": "复原之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "属性加值另记（任选一项 +1，上限 30）。【背水一战】当你将被降至 0 HP 时，可改为降至 1 HP 并回复等于 HP 上限一半的 HP；用过一次后须完成长休才能再用。【恢复活力】你拥有一个 10 颗 d10 的骰池：可用附赠动作消耗任意颗骰并掷出，回复等于总点数的 HP；完成长休后骰池全部回满。",
+   "repeatable": false,
+   "effects": {
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    },
+    "note_only": true
+   },
+   "source": "PHB 2024"
+  },
+  "Boon of Skill": {
+   "cn": "技艺之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "获得全部 18 项技能的熟练。属性加值另记（任选一项 +1，上限 30）。【专精】另选一项你尚未专精的技能获得专精（熟练加值 ×2）。",
+   "repeatable": false,
+   "effects": {
+    "skill_all_prof": true,
+    "expertise_choice": 1,
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    }
+   },
+   "source": "PHB 2024"
+  },
+  "Boon of Speed": {
+   "cn": "迅捷之恩惠",
+   "prereq": {
+    "level": 19,
+    "abilities": [],
+    "feature": null
+   },
+   "desc": "速度 +30 尺。属性加值另记（任选一项 +1，上限 30）。【脱身高手】你可以用附赠动作执行撤离动作，并同时结束自己身上的擒抱状态。",
+   "repeatable": false,
+   "effects": {
+    "speed": 30,
+    "ability_boost": {
+     "from": [
+      "STR",
+      "DEX",
+      "CON",
+      "INT",
+      "WIS",
+      "CHA"
+     ],
+     "max": 30
+    }
+   },
+   "source": "PHB 2024"
   }
  }
 }

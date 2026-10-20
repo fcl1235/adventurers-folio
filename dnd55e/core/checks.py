@@ -46,12 +46,15 @@ class ChecksMixin:
         return out
 
     def resistances(self):
-        """伤害抗性 (来自物品, 并集去重)"""
+        """伤害抗性 (来自物品与传奇恩惠, 并集去重)"""
         out = []
         for iid in self.items:
             for r in (consts.ITEMS_BY_ID.get(iid, {}).get("resist") or []):
                 if r not in out:
                     out.append(r)
+        for r in (self.boon_effects().get("resist") or []):
+            if r not in out:
+                out.append(r)
         return out
 
     def immunities(self):
@@ -90,9 +93,9 @@ class ChecksMixin:
     def skill_mod(self, sid):
         sk = self.r.skill_by_id[sid]
         m = ability_mod(self.score(sk["ability"])) + self.check_bonus()
-        if sid in self.expertise:
+        if sid in self.expertise or sid in self.boon_expertise:
             m += 2 * self.pb()
-        elif sid in self.skill_prof:
+        elif sid in self.skill_prof or self.skill_all_proficient():
             m += self.pb()
         else:
             m += self.cls_module().half_proficiency(self)   # 万事通: 半熟练
