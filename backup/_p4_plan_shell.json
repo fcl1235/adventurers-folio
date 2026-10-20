@@ -1,0 +1,25 @@
+{
+  "src": "dnd55e/ui_shell.py",
+  "out_dir": "dnd55e/ui",
+  "header": "\"\"\"@@DOC@@\"\"\"\nimport os\nimport re\nimport tkinter as tk\nfrom tkinter import ttk, messagebox, filedialog\nfrom tkinter.simpledialog import askinteger\n\nfrom .. import consts, paths, theme, util\nfrom ..consts import (ABILITIES, ABILITY_CN, feat_cn, feat_desc, mastery_cn,\n                      size_cn, subclass_cn, tool_cn)\nfrom ..dialogs import DiceDialog\nfrom ..rules import Rules\nfrom ..theme import (BG, DIM, GOLD, GOLD2, HintText, INK, LISTBOX_STYLE,\n                     PANEL, PURPLE, TEXT, TEXT_STYLE, UI_FONT)\nfrom ..util import ability_mod, mod_str, spell_detail\nfrom . import panels, tabs\nfrom .tabs import ITEM_KINDS",
+  "aggregator": {
+    "path": "dnd55e/ui_shell.py",
+    "header": "\"\"\"窗口外壳 (菜单 / 工具栏 / 主区 / 左右栏 / 状态栏) —— 组合层。\n\n原 661 行的单文件已按职责拆开:\n    ui/shell.py    —— ShellMixin: 窗口骨架 / 菜单 / 工具栏 / 主区切换 / 中栏装配\n    ui/panels.py   —— PanelsMixin: 英雄卡 / 左栏 / 右栏 / 状态栏\n    ui/tabs.py     —— 中栏六个标签页 (已是函数式, 由 ShellMixin 调用)\n本模块保留原名与位置, 因为 app.py 与 _layoutcheck.py 从这里取 AppShell。\n\"\"\"\nfrom .ui.panels import PanelsMixin\nfrom .ui.shell import ShellMixin",
+    "cls": "AppShell",
+    "bases": ["ShellMixin", "PanelsMixin"]
+  },
+  "mods": [
+    {"mod": "shell", "cls": "ShellMixin",
+     "bases": [],
+     "doc": "窗口骨架: 初始化 / 样式 / 菜单 / 工具栏 / 主区 / 中栏装配。",
+     "methods": ["__init__", "_setup_style", "_build_menu", "_build_toolbar",
+                 "_build_main", "_show_view", "_build_empty_view",
+                 "_build_sheet_view", "_build_mid", "_build_item_grid",
+                 "_item_filter_changed"]},
+    {"mod": "panels", "cls": "PanelsMixin",
+     "bases": [],
+     "doc": "左右栏与英雄卡: 搭建控件, 数值由 ui_sheet.refresh 填。",
+     "methods": ["_chip", "_build_hero", "_build_left", "_build_right",
+                 "_build_status"]}
+  ]
+}

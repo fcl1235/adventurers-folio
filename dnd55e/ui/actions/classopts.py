@@ -1,0 +1,112 @@
+"""职业专属选项: 1 级职阶 / 德鲁伊地形 / 荒野变形 / 超魔法 / 先天魔法 / 法师自选。"""
+import random
+import tkinter as tk
+from tkinter import ttk, messagebox, filedialog
+from tkinter.simpledialog import askinteger
+
+from ... import consts, util
+from ...consts import (ABILITIES, ABILITY_CN, feat_cn, feat_desc, mastery_cn,
+                       size_cn, subclass_cn, tool_cn)
+from ...dialogs import (FeatPickerDialog, MetamagicDialog, SpellbookDialog,
+                        WildShapeDialog)
+from ...rules import Rules
+from ...theme import BG, GOLD2
+from ...util import (ability_mod, mod_str, roll_dice, roll_dice_reroll,
+                     spell_detail)
+
+
+class ClassOptsMixin:
+    def _order_set(self, key):
+        """1 级职阶 (牧师/德鲁伊): 立即重算护甲/武器熟练与戏法数"""
+        c = self.char
+        if not c:
+            return
+        c.order = key if key in (c.order_options() or {}) else None
+        self.refresh()
+
+    def _land_set(self, key):
+        """大地结社地形 (长休时可改): 换一套「始终准备」的法术"""
+        c = self.char
+        if not c:
+            return
+        ok = {k for k, _ in c.land_options()}
+        c.land = key if key in ok else "temperate"
+        c.prune_fixed()
+        self.refresh()
+
+    def _wild_shape_open(self):
+        """荒野变形: 选野兽形态 (只记录形态, 不动本体数值)"""
+        c = self.char
+        if not c or c.class_id != "druid":
+            return
+        dlg = WildShapeDialog(self, c, selftest=self._selftest)
+        if not self._selftest:
+            self.wait_window(dlg)
+        if dlg.result is not None:
+            self.refresh()
+
+    def _mm_toggle(self, mid, var):
+        c = self.char
+        if not c:
+            return
+        cur = [m for m in c.metamagic if m in consts.METAMAGIC]
+        if var.get():
+            if mid in cur:
+                return
+            if len(cur) >= c.metamagic_cap():
+                var.set(False)
+                messagebox.showinfo(
+                    "超魔法已满",
+                    f"最多同时掌握 {c.metamagic_cap()} 个超魔法"
+                    f"（10 级 / 17 级各会再 +2）。\n先取消一个再选。",
+                    parent=self)
+                return
+            cur.append(mid)
+        else:
+            cur = [m for m in cur if m != mid]
+        c.metamagic = cur
+        self.refresh()
+
+    def _innate_toggle(self):
+        c = self.char
+        if not c:
+            return
+        if c.innate_active:
+            c.innate_off()
+        else:
+            ok, msg = c.innate_on()
+            if not ok:
+                if hasattr(self, "innate_var"):
+                    self.innate_var.set(False)
+                messagebox.showinfo("提示", msg, parent=self)
+                return
+        self.refresh()
+
+    def _mastery_set(self, lv, sid):
+        """法师 18 级法术精通: 1 环 / 2 环各 1 个"""
+        c = self.char
+        if not c:
+            return
+        keep = [s for s in c.mastery_spells
+                if (c.r.spell(s) or {}).get("level") != lv]
+        if sid:
+            keep.append(sid)
+        c.mastery_spells = keep[:2]
+        c.prune_fixed()
+        self.refresh()
+
+    def _signature_set(self, idx, sid):
+        """法师 20 级招牌法术: 2 个 3 环"""
+        c = self.char
+        if not c:
+            return
+        cur = [s for s in c.signature_spells if s]
+        if idx == 0:
+            new = ([sid] if sid else []) + cur[1:]
+        else:
+            new = cur[:1] + ([sid] if sid else [])
+        c.signature_spells = [s for s in new if s][:2]
+        c.signature_used = [s for s in c.signature_used
+                            if s in c.signature_spells]
+        c.prune_fixed()
+        self.refresh()

@@ -1,0 +1,27 @@
+{
+  "src": "dnd55e/ui_sheet.py",
+  "out_dir": "dnd55e/ui",
+  "header": "\"\"\"@@DOC@@\"\"\"\nimport tkinter as tk\nfrom tkinter import ttk, messagebox, filedialog\nfrom tkinter.simpledialog import askinteger\n\nfrom .. import consts, util\nfrom ..consts import (ABILITIES, feat_cn, feat_desc, mastery_cn, size_cn,\n                      subclass_cn, tool_cn)\nfrom ..theme import DIM, GOLD2, PURPLE, TEXT, UI_FONT\nfrom ..util import ability_mod, mod_str",
+  "aggregator": {
+    "path": "dnd55e/ui_sheet.py",
+    "header": "\"\"\"角色卡刷新 (把 Character 的数值填进已建好的控件)。\n\n原 700 行的单文件已按区域拆开:\n    ui/refresh.py    —— RefreshMixin: 整卡刷新 (英雄区/HP/属性/技能/法术位/装备/专长)\n    ui/classtab.py   —— ClassTabMixin: 职业页 (资源池/超魔法/术法源泉/荒野变形/子职/特性)\n    ui/featpanel.py  —— FeatPanelMixin: 专长页与状态栏\n本模块保留原名与位置, 因为 app.py 从这里取 AppSheet。\n\"\"\"\nfrom .ui.classtab import ClassTabMixin\nfrom .ui.featpanel import FeatPanelMixin\nfrom .ui.refresh import RefreshMixin",
+    "cls": "AppSheet",
+    "bases": ["RefreshMixin", "ClassTabMixin", "FeatPanelMixin"]
+  },
+  "mods": [
+    {"mod": "refresh", "cls": "RefreshMixin",
+     "bases": [],
+     "doc": "整卡刷新: 英雄区 / HP / XP / 属性卡 / 护甲 / 技能 / 法术位 / 装备 / 专长。",
+     "methods": ["set_character", "refresh", "_feat_names", "_feat_display",
+                 "_reset_text"]},
+    {"mod": "classtab", "cls": "ClassTabMixin",
+     "bases": [],
+     "doc": "职业页: 资源池 / 生命骰 / 术法源泉 / 超魔法 / 法师自选 / 职阶 / 荒野变形 / 子职 / 特性。",
+     "methods": ["_render_class_tab", "_pick_row", "_feature_rows", "_spend_hd",
+                 "_toggle_rage", "_res_act", "_font_create", "_font_burn"]},
+    {"mod": "featpanel", "cls": "FeatPanelMixin",
+     "bases": [],
+     "doc": "专长页交互与底部状态栏。",
+     "methods": ["_on_feat_select", "_status"]}
+  ]
+}
