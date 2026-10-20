@@ -1,0 +1,143 @@
+{
+  "src": "dnd55e/wizard.py",
+  "out_dir": "dnd55e/wizard",
+  "header": "\"\"\"@@DOC@@\"\"\"\nimport tkinter as tk\nfrom tkinter import ttk, messagebox, filedialog\nfrom tkinter.simpledialog import askinteger\n\nfrom .. import consts, util\nfrom ..character import Character\nfrom ..consts import (ABILITIES, ABILITY_CN, ARMOR_PROF_CN, CAST_MODE_CN,\n                      CAST_TYPE_CN, WEAPON_PROF_CN, feat_cn, feat_desc,\n                      mastery_cn, size_cn, subclass_cn, tool_cn)\nfrom ..rules import Rules\nfrom ..theme import (BG, DIM, GOLD2, LISTBOX_STYLE, PURPLE, TEXT, TXT_BG,\n                     HintText)\nfrom ..util import (ab_from_display, ability_mod, mod_str,\n                    proficiency_bonus, roll_4d6kh3, spell_detail)",
+  "aggregator": {
+    "path": "dnd55e/wizard.py",
+    "header": "\"\"\"六步建卡向导 (模态) —— 组合层。\n\n原 1253 行的单文件已按步骤拆开:\n    wizard/core.py     —— 向导骨架: 初始化 / 步骤切换 / 校验派发 / 目标角色组装\n    wizard/class_ui.py —— 步骤 0: 职业选择 + 1 级职阶\n    wizard/bg_ui.py    —— 步骤 1: 背景 (含熟练去重)\n    wizard/species.py  —— 步骤 2: 种族 / 血统 / 传承专长\n    wizard/abilities.py—— 步骤 3: 属性 (点 buy / 标准数组 / 4d6 掷)\n    wizard/skills.py   —— 步骤 4: 技能 (职业 + 背景)\n    wizard/mastery.py  —— 步骤 5: 武器专精\n    wizard/spells.py   —— 步骤 6: 法术与戏法\n    wizard/summary.py  —— 步骤 7: 汇总\n\n**步骤序号是硬耦合**: validate_step() 用 getattr(self, f\"_validate_{self.step}\")\n动态取校验函数, 新增步骤必须同步加上 `_validate_N`。\n本模块保留原名与位置, 因为 app.py 与 _layoutcheck.py 从这里取 Wizard。\n\"\"\"\nimport tkinter as tk\n\nfrom .wizard.abilities import AbilitiesMixin\nfrom .wizard.bg_ui import BackgroundMixin\nfrom .wizard.class_ui import ClassStepMixin\nfrom .wizard.core import WizardCore\nfrom .wizard.mastery import MasteryMixin\nfrom .wizard.skills import SkillsMixin\nfrom .wizard.species import SpeciesMixin\nfrom .wizard.spells import SpellStepMixin\nfrom .wizard.summary import SummaryMixin",
+    "cls": "Wizard",
+    "bases": [
+      "WizardCore",
+      "ClassStepMixin",
+      "BackgroundMixin",
+      "SpeciesMixin",
+      "AbilitiesMixin",
+      "SkillsMixin",
+      "MasteryMixin",
+      "SpellStepMixin",
+      "SummaryMixin",
+      "tk.Toplevel"
+    ]
+  },
+  "mods": [
+    {
+      "mod": "core",
+      "cls": "WizardCore",
+      "bases": [],
+      "doc": "向导骨架: 初始化 / 步骤导航 / 校验派发 / 最终组装角色。",
+      "methods": [
+        "__init__",
+        "render_step",
+        "_skip",
+        "prev",
+        "next",
+        "validate_step",
+        "_build_char",
+        "finish"
+      ]
+    },
+    {
+      "mod": "class_ui",
+      "cls": "ClassStepMixin",
+      "bases": [],
+      "doc": "步骤 0: 职业选择与 1 级职阶。",
+      "methods": [
+        "_step_class",
+        "_show_class",
+        "_render_order",
+        "_order_picked",
+        "_validate_0"
+      ]
+    },
+    {
+      "mod": "bg_ui",
+      "cls": "BackgroundMixin",
+      "bases": [],
+      "doc": "步骤 1: 背景选择与技能熟练去重。",
+      "methods": [
+        "_step_background",
+        "_render_bg_ui",
+        "_render_bg_picks",
+        "_bg_dedup",
+        "_validate_1"
+      ]
+    },
+    {
+      "mod": "species",
+      "cls": "SpeciesMixin",
+      "bases": [],
+      "doc": "步骤 2: 种族 / 血统 / 传承专长。",
+      "methods": [
+        "_step_species",
+        "_show_hfeat_desc",
+        "_show_species",
+        "_show_lineage",
+        "_validate_2"
+      ]
+    },
+    {
+      "mod": "abilities",
+      "cls": "AbilitiesMixin",
+      "bases": [],
+      "doc": "步骤 3: 属性生成 (点买 / 标准数组 / 4d6 掷)。",
+      "methods": [
+        "_step_abilities",
+        "_current_picks",
+        "_ab_preview",
+        "_render_ab_ui",
+        "_pb_update",
+        "_do_roll",
+        "_show_rolled",
+        "_validate_3"
+      ]
+    },
+    {
+      "mod": "skills",
+      "cls": "SkillsMixin",
+      "bases": [],
+      "doc": "步骤 4: 技能选择 (职业 + 背景)。",
+      "methods": [
+        "_step_skills",
+        "_hint_skill",
+        "_update_skill_count",
+        "_on_class_skill",
+        "_on_sp_skill",
+        "_validate_4"
+      ]
+    },
+    {
+      "mod": "mastery",
+      "cls": "MasteryMixin",
+      "bases": [],
+      "doc": "步骤 5: 武器专精选择。",
+      "methods": [
+        "_step_mastery",
+        "_update_mastery_count",
+        "_on_mastery",
+        "_validate_5"
+      ]
+    },
+    {
+      "mod": "spells",
+      "cls": "SpellStepMixin",
+      "bases": [],
+      "doc": "步骤 6: 法术与戏法 (非施法者自动跳过)。",
+      "methods": [
+        "_spell_detail_text",
+        "_spell_quota",
+        "_step_spells",
+        "_sp_detail_set",
+        "_validate_6"
+      ]
+    },
+    {
+      "mod": "summary",
+      "cls": "SummaryMixin",
+      "bases": [],
+      "doc": "步骤 7: 汇总确认。",
+      "methods": [
+        "_step_summary"
+      ]
+    }
+  ]
+}

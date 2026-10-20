@@ -1,0 +1,18 @@
+{
+  "src": "dnd55e/dialogs.py",
+  "pkg": "dnd55e/dialogs",
+  "header": "\"\"\"@@DOC@@\"\"\"\nimport tkinter as tk\nfrom tkinter import ttk, messagebox, filedialog\nfrom tkinter.simpledialog import askinteger\n\nfrom .. import consts, util\nfrom ..consts import (ABILITIES, ABILITY_CN, feat_cn, feat_desc, mastery_cn,\n                      size_cn, subclass_cn, tool_cn)\nfrom ..theme import (BG, DIM, GOLD2, LISTBOX_STYLE, RED, TEXT, TEXT_STYLE,\n                     TXT_BG)\nfrom ..util import (ab_from_display, ability_mod, mod_str,\n                    proficiency_bonus, roll_dice)",
+  "facade_header": "\"\"\"各类弹出的对话框 (原来 820 行的单文件已按对话框拆开)。\n\n    dialogs/metamagic.py  —— MetamagicDialog  2024 超魔法选择\n    dialogs/spellbook.py  —— SpellbookDialog  法师法术书 (抄录/准备/仪式)\n    dialogs/feats.py      —— FeatPickerDialog 专长选择\n    dialogs/wildshape.py  —— WildShapeDialog  荒野变形形态选择\n    dialogs/levelup.py    —— LevelUpDialog    升级 (ASI / 子职 / 传奇恩惠)\n    dialogs/dice.py       —— DiceDialog       骰子工具\n\n本包保留 `dnd55e.dialogs` 这个名字与全部类名, 外部导入方式不变。\n\"\"\"",
+  "groups": [
+    {"mod": "metamagic", "doc": "2024 超魔法选择对话框。",
+     "names": ["MetamagicDialog"]},
+    {"mod": "spellbook", "doc": "法师法术书对话框: 抄录 / 准备 / 仪式施法。",
+     "names": ["SpellbookDialog"]},
+    {"mod": "feats", "doc": "专长选择对话框。", "names": ["FeatPickerDialog"]},
+    {"mod": "wildshape", "doc": "荒野变形形态选择对话框。",
+     "names": ["WildShapeDialog"]},
+    {"mod": "levelup", "doc": "升级对话框: ASI / 子职 / 传奇恩惠。",
+     "names": ["LevelUpDialog"]},
+    {"mod": "dice", "doc": "骰子工具对话框。", "names": ["DiceDialog"]}
+  ]
+}
