@@ -20,5 +20,9 @@ from .spellcasting.slots import SlotsMixin
 from .spellcasting.spellbook import SpellbookMixin
 
 
-class Character(BaseMixin, DerivedMixin, ChecksMixin, WeaponsMixin, OffhandMixin, ItemsMixin, FeaturesMixin, ResourcesMixin, SerializeMixin, SlotsMixin, PrepareMixin, FixedMixin, MetamagicMixin, FontMixin, SpellbookMixin):
+class Character(BaseMixin, DerivedMixin, ChecksMixin, WeaponsMixin,
+                OffhandMixin, ItemsMixin, FeaturesMixin,
+                ResourcesMixin, SerializeMixin, SlotsMixin,
+                PrepareMixin, FixedMixin, MetamagicMixin, FontMixin,
+                SpellbookMixin):
     """角色数据模型 (mixin 组装)。"""
