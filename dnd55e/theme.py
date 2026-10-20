@@ -2,6 +2,7 @@
 """暗色主题: 颜色常量、ttk 样式、滚动容器。"""
 import tkinter as tk
 from tkinter import ttk
+from tkinter import font as tkfont
 
 
 BG = "#17151c"        # 主背景
@@ -31,6 +32,108 @@ LISTBOX_STYLE = dict(background=CARD, foreground=TEXT, relief="flat",
                      highlightcolor=GOLD, selectbackground=GOLD,
                      selectforeground=INK, activestyle="none",
                      font=(UI_FONT, 10))
+
+class HintText(tk.Text):
+    """固定高度、可滚动的单行提示框。
+
+    为什么不用 tk.Label: Label 的高度按「行数」写死（height=2），
+    中文长句换行后行数超过写死的行数就被裁掉——这正是此前
+    「文字被挤出显示框」的根因。
+
+    这里改成 tk.Text: 高度由 height 行高固定, 文字超出时用鼠标滚轮
+    翻阅, 不改变控件尺寸, 因此父容器的版面也不会抖动
+    （`_layoutcheck.py` 有对应断言）。
+
+    用法与 Label 兼容: `.config(text=..., foreground=...)` 照旧可用。
+    """
+
+    def __init__(self, master, height=2, text="", wraplength=None, **kw):
+        kw.setdefault("wrap", "word")
+        kw.setdefault("relief", "flat")
+        kw.setdefault("borderwidth", 0)
+        kw.setdefault("highlightthickness", 0)
+        kw.setdefault("padx", 2)
+        kw.setdefault("pady", 1)
+        kw.setdefault("font", (UI_FONT, 9))
+        kw.setdefault("background", kw.pop("bg", BG))
+        kw.setdefault("foreground", kw.pop("fg", DIM))
+        # width 由 wraplength 换算: tk.Text 的宽度单位是「字符」,
+        # 直接写 width=1 会让提示框只有 1 个字宽
+        kw.setdefault("width", 1)
+        super().__init__(master, height=height, **kw)
+        if wraplength:
+            self.configure(width=self._chars_for(wraplength))
+        self.configure(state="disabled")
+        self.tag_configure("body", justify="left", lmargin1=0, lmargin2=0)
+        if text:
+            self.set_text(text)
+        self.bind("<Enter>", self._wheel_on)
+        self.bind("<Leave>", self._wheel_off)
+
+    def _chars_for(self, px):
+        """把像素宽度换成等效的字符数。
+
+        tk.Text 的 width 单位是「平均字符宽」，Tk 内部按 ASCII 字宽估算
+        （不是汉字宽），所以这里也用 '0' 去量，才能得到和原来
+        wraplength 一致的实际像素宽。
+        """
+        try:
+            f = tkfont.Font(font=self.cget("font"))
+            unit = max(1, f.measure("0"))
+            return max(8, int(px // unit))
+        except Exception:                     # 字体不可用时退回经验值
+            return max(8, int(px // 7))
+
+    # ---- 与 Label 兼容的接口 ----
+    def config(self, **kw):          # noqa: D401  (Label 同名方法)
+        fg = kw.pop("foreground", None)
+        bg = kw.pop("background", None)
+        text = kw.pop("text", None)
+        if fg is not None:
+            kw["foreground"] = fg
+            self.tag_configure("body", foreground=fg)
+        if bg is not None:
+            kw["background"] = bg
+        if kw:
+            super().config(**kw)
+        if text is not None:
+            self.set_text(text)
+
+    configure = config
+
+    def cget(self, key):
+        if key == "text":
+            return self.get_text()
+        return super().cget(key)
+
+    def set_text(self, text):
+        """换文案: 保持只读与固定高度, 滚回顶部。"""
+        self.configure(state="normal")
+        self.delete("1.0", "end")
+        if text:
+            # 末尾换行会被 Text 当成额外一行, 去掉以免多出一行空白
+            self.insert("1.0", text.rstrip("\n"))
+        self.tag_add("body", "1.0", "end")
+        self.configure(state="disabled")
+        self.yview_moveto(0)
+
+    def get_text(self):
+        return self.get("1.0", "end-1c")
+
+    # ---- 滚轮: 只在指针悬停于本控件时接管 ----
+    def _wheel_on(self, _e=None):
+        self.bind_all("<MouseWheel>", self._on_wheel)
+
+    def _wheel_off(self, _e=None):
+        self.unbind_all("<MouseWheel>")
+
+    def _on_wheel(self, e):
+        # 内容没超出时不要吞掉滚轮事件
+        first, last = self.yview()
+        if first <= 0.0 and last >= 1.0:
+            return
+        self.yview_scroll(-1 * (e.delta // 120 if e.delta else 0), "units")
+
 
 class ScrollFrame(ttk.Frame):
     """竖向滚动容器: 内容统一放进 self.body, 避免长列表撑破标签页。"""

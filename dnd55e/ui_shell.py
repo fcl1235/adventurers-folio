@@ -21,7 +21,7 @@ ITEM_KINDS = [("全部", None), ("戒指", "ring"), ("斗篷", "cloak"),
 from . import paths
 from .rules import Rules
 from .theme import (BG, DIM, GOLD, GOLD2, INK, LISTBOX_STYLE, PANEL,
-                    PURPLE, TEXT, TEXT_STYLE, UI_FONT)
+                    PURPLE, TEXT, TEXT_STYLE, UI_FONT, HintText)
 
 
 class AppShell:
@@ -294,9 +294,8 @@ class AppShell:
                        command=lambda x=a: self._roll_save(x)
                        ).pack(side="left", padx=1)
 
-        self.ab_hint = tk.Label(ab, text="鼠标停在属性名上可看该属性的用途",
-                                bg=BG, fg=DIM, wraplength=286, justify="left",
-                                anchor="nw", height=2)
+        self.ab_hint = HintText(ab, text="鼠标停在属性名上可看该属性的用途",
+                                fg=DIM, height=2, wraplength=286)
         self.ab_hint.grid(row=3, column=0, columnspan=2, sticky="w", pady=(4, 0))
 
         ar = ttk.LabelFrame(self.col_left, text=" 护甲与防御 ", padding=8)
@@ -327,9 +326,8 @@ class AppShell:
         nb.add(t1, text=" 技 能 ")
         ttk.Label(t1, text="🎲=掷检定   ✓=熟练   ◇/◆=专精 Expertise (需先熟练, 双倍熟练加值)",
                   style="Dim.TLabel").pack(anchor="w", pady=(0, 2))
-        self.skill_hint = tk.Label(t1, text="鼠标停在技能名上可看它管什么检定",
-                                   bg=BG, fg=DIM, wraplength=430,
-                                   justify="left", anchor="nw", height=2)
+        self.skill_hint = HintText(t1, text="鼠标停在技能名上可看它管什么检定",
+                                   fg=DIM, height=2, wraplength=430)
         self.skill_hint.pack(anchor="w", pady=(0, 6))
         grid = ttk.Frame(t1)
         grid.pack(fill="both", expand=True)
@@ -487,9 +485,8 @@ class AppShell:
             self.item_vars[it["id"]] = tk.BooleanVar()
         self._build_item_grid()
         # 提示行必须在滚动区外 (固定底部), 否则会被物品格压在中间
-        self.item_hint = tk.Label(mf, text="鼠标停在物品上可看效果",
-                                  bg=BG, fg=DIM, wraplength=520,
-                                  justify="left", anchor="nw", height=2)
+        self.item_hint = HintText(mf, text="鼠标停在物品上可看效果",
+                                  fg=DIM, height=2, wraplength=520)
         self.item_hint.pack(fill="x", pady=(2, 0))
 
         ttk.Label(t3, text="加成明细 (自动计算来源)", style="H2.TLabel").pack(
@@ -539,9 +536,8 @@ class AppShell:
                    ).pack(fill="x", pady=2)
         ttk.Button(fb, text="− 移除", command=self._del_feat
                    ).pack(fill="x", pady=2)
-        self.feat_info = tk.Label(t4, text="点选专长查看效果说明",
-                                  bg=BG, fg=DIM, wraplength=560,
-                                  justify="left", anchor="nw", height=3)
+        self.feat_info = HintText(t4, text="点选专长查看效果说明",
+                                  fg=DIM, height=3, wraplength=560)
         self.feat_info.pack(anchor="w", pady=(4, 0))
         ttk.Label(t4, text="※ 自动计入数值: Tough (每级 HP+2)、Alert (先攻 +熟练)；"
                            "其余专长按说明手动应用。",
@@ -604,9 +600,8 @@ class AppShell:
                                  command=lambda cn=cond: self._cond_toggled(cn))
             cb.grid(row=i // 3, column=i % 3, sticky="w", padx=4)
             cb.bind("<Enter>", lambda e, cn=cond: self._cond_hint(cn))
-        self.cond_hint = tk.Label(cf, text="鼠标停在状态名上可看效果",
-                                  bg=BG, fg=DIM, wraplength=262,
-                                  justify="left", anchor="nw", height=2)
+        self.cond_hint = HintText(cf, text="鼠标停在状态名上可看效果",
+                                  fg=DIM, height=2, wraplength=262)
         self.cond_hint.pack(anchor="w", pady=(4, 0))
         exf = ttk.Frame(cf)
         exf.pack(anchor="w", pady=(8, 0))

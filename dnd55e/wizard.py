@@ -12,7 +12,8 @@ from .consts import (ABILITIES, ABILITY_CN, ARMOR_PROF_CN, CAST_MODE_CN,
                      CAST_TYPE_CN, WEAPON_PROF_CN)
 from .character import Character
 from .rules import Rules
-from .theme import BG, DIM, GOLD2, LISTBOX_STYLE, PURPLE, TEXT, TXT_BG
+from .theme import (BG, DIM, GOLD2, LISTBOX_STYLE, PURPLE, TEXT, TXT_BG,
+                    HintText)
 from .util import ab_from_display, roll_4d6kh3
 
 
@@ -398,9 +399,8 @@ class Wizard(tk.Toplevel):
         self.cb_lineage.pack(anchor="w")
         self.cb_lineage.bind("<<ComboboxSelected>>",
                              lambda e: self._show_lineage())
-        self.lbl_lineage = tk.Label(self.lineage_frame, text="", bg=BG, fg=DIM,
-                                    wraplength=640, justify="left", anchor="nw",
-                                    height=3)
+        self.lbl_lineage = HintText(self.lineage_frame, text="", fg=DIM,
+                                    height=3, wraplength=640)
         self.lbl_lineage.pack(anchor="w", pady=(4, 0))
         # 人类「全能」: 自选 1 个 Origin 专长
         self.human_frame = ttk.LabelFrame(f, text="人类 · 全能 (自选 1 个起源专长)",
@@ -412,9 +412,8 @@ class Wizard(tk.Toplevel):
                            lambda e: self._show_hfeat_desc())
         if self.data.get("human_feat"):
             self.cb_hfeat.set(self.data["human_feat"])
-        self.lbl_hfeat = tk.Label(self.human_frame, text="", wraplength=640,
-                                  bg=BG, fg=DIM, justify="left", anchor="nw",
-                                  height=3)
+        self.lbl_hfeat = HintText(self.human_frame, text="", fg=DIM,
+                                  height=3, wraplength=640)
         self.lbl_hfeat.pack(anchor="w", pady=(4, 0))
         self._show_species()
 
@@ -825,9 +824,8 @@ class Wizard(tk.Toplevel):
         self._skill_need = need
         self._skill_summary = ttk.Label(f, text="", font=("", 10, "bold"))
         self._skill_summary.pack(anchor="w", pady=(6, 0))
-        self._skill_hint = tk.Label(f, text="把鼠标停在技能上可看它管什么检定",
-                                    bg=BG, fg=DIM, wraplength=680,
-                                    justify="left", anchor="nw", height=2)
+        self._skill_hint = HintText(f, text="把鼠标停在技能上可看它管什么检定",
+                                    fg=DIM, height=2, wraplength=680)
         self._skill_hint.pack(anchor="w", pady=(4, 0))
         self._update_skill_count()
 
