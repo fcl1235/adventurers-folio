@@ -41,9 +41,9 @@ class HintsMixin:
             text=f"{cond}: {consts.CONDITION_DESC.get(cond, '')}", foreground=GOLD2)
 
     def _item_hint(self, it):
-        # 新物品只有 desc、没有 note (note 是旧 12 条的短摘要), 两者取其一
+        # 新物品只有 desc、没有 note (note 是旧 12 条的短摘要), 两者取其一。
+        # 不再截断: item_hint 是 HintText (定高 + 可滚动), 长文自己换行/滚动,
+        # 截断只会让 63 条 note_only 物品的效果永远读不全。
         note = it.get("note") or it.get("desc", "")
-        if len(note) > 76:                # 提示行固定 2 行高, 超长截断防止撑开
-            note = note[:75] + "…"
         self.item_hint.config(text=f"{it['name']} —— {note}",
                               foreground=GOLD2)

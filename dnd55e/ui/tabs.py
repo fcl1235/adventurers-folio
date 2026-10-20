@@ -199,7 +199,7 @@ def build_gear(app, nb):
         app.item_vars[it["id"]] = tk.BooleanVar()
     app._build_item_grid()
     # 提示行必须在滚动区外 (固定底部), 否则会被物品格压在中间
-    app.item_hint = HintText(mf, text="鼠标停在物品上可看效果",
+    app.item_hint = HintText(mf, text="鼠标停在物品上可看效果 · 右键点物品开完整效果卡",
                              fg=DIM, height=2, wraplength=520)
     app.item_hint.pack(fill="x", pady=(2, 0))
 

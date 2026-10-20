@@ -7,8 +7,8 @@ from tkinter.simpledialog import askinteger
 from ... import consts, util
 from ...consts import (ABILITIES, ABILITY_CN, feat_cn, feat_desc, mastery_cn,
                        size_cn, subclass_cn, tool_cn)
-from ...dialogs import (FeatPickerDialog, MetamagicDialog, SpellbookDialog,
-                        WildShapeDialog)
+from ...dialogs import (FeatPickerDialog, ItemCardDialog, MetamagicDialog,
+                        SpellbookDialog, WildShapeDialog)
 from ...rules import Rules
 from ...theme import BG, GOLD2
 from ...util import (ability_mod, mod_str, roll_dice, roll_dice_reroll,
@@ -152,6 +152,25 @@ class GearMixin:
         elif iid in c.items:
             c.items.remove(iid)
         self.refresh()
+
+    def _item_card_open(self, iid):
+        """物品完整效果卡: 63 条 note_only 的叙述性效果只能在这里读全。"""
+        it = consts.ITEMS_BY_ID.get(iid)
+        if not it:
+            return None
+        dlg = ItemCardDialog(self, it, char=self.char,
+                             selftest=self._selftest,
+                             on_toggle=self._item_card_toggle)
+        if not self._selftest:
+            self.wait_window(dlg)
+        return dlg
+
+    def _item_card_toggle(self, iid):
+        """详情卡里的「装备/卸下」: 复用勾选逻辑, 再同步勾选框。"""
+        if iid not in self.item_vars:
+            return
+        self.item_vars[iid].set(not self.item_vars[iid].get())
+        self._item_changed(iid)
 
     def _offhand_changed(self):
         c = self.char

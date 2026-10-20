@@ -182,6 +182,9 @@ class ShellMixin():
                                  command=lambda i2=it["id"]: self._item_changed(i2))
             cb.grid(row=i // 4, column=i % 4, sticky="w", padx=3)
             cb.bind("<Enter>", lambda e, i2=it: self._item_hint(i2))
+            # 右键/中键开详情卡: 左键已被勾选占用 (切换装备状态)
+            cb.bind("<Button-2>", lambda e, i2=it["id"]: self._item_card_open(i2))
+            cb.bind("<Button-3>", lambda e, i2=it["id"]: self._item_card_open(i2))
             self.item_cbs[it["id"]] = cb
         self.item_count_lbl.config(text=f"{len(rows)} 件")
         self.item_grid.update_idletasks()

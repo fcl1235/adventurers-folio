@@ -99,6 +99,32 @@ def damage_cn(key):
     return DAMAGE_TYPES_CN.get(key, key)
 
 
+# 物品稀有度 / 类别 (详情卡展示用; 键与 items.json 一致)
+RARITY_CN = {
+    "common": "普通", "uncommon": "非普通", "rare": "稀有",
+    "very_rare": "极稀有", "legendary": "传说", "artifact": "神器",
+    "varies": "因物而异",
+}
+
+KIND_CN = {
+    "ring": "戒指", "cloak": "斗篷", "armor": "护甲", "weapon": "武器",
+    "wand": "魔杖", "staff": "法杖", "wondrous": "奇物", "potion": "药水",
+    "scroll": "卷轴", "ammunition": "弹药",
+}
+
+
+def rarity_cn(key):
+    return RARITY_CN.get(key, key or "")
+
+
+def kind_cn(key):
+    return KIND_CN.get(key, key or "")
+
+
+def condition_cn(key):
+    return CONDITIONS_CN.get(key, key)
+
+
 def mastery_cn(key):
     cn = data.mastery_cn_map()
     return f"{cn[key]} {key}" if key in cn else key
