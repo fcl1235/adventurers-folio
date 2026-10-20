@@ -4,8 +4,8 @@ from tkinter import ttk, messagebox, filedialog
 from tkinter.simpledialog import askinteger
 
 from .. import consts, util
-from ..consts import (ABILITIES, feat_cn, feat_desc, mastery_cn, size_cn,
-                      subclass_cn, tool_cn)
+from ..consts import (ABILITIES, ABILITY_CN, feat_cn, feat_desc, mastery_cn,
+                      size_cn, subclass_cn, tool_cn)
 from ..theme import DIM, GOLD2, PURPLE, TEXT, UI_FONT
 from ..util import ability_mod, mod_str
 
@@ -168,6 +168,10 @@ class ClassTabMixin():
                         c.book_spells(3), cur,
                         lambda sid, k=i: self._signature_set(k, sid))
 
+        # ===== 1.47 传奇恩惠 (19 级起): 属性 +1 / 抗性 / 专精 在这里改 =====
+        if c.boon_names():
+            self._render_boons(body, c)
+
         # ===== 1.5 1 级职阶 (牧师 神圣职阶 / 德鲁伊 原始职阶) =====
         opts = c.order_options()
         if opts:
@@ -270,6 +274,77 @@ class ClassTabMixin():
         ttk.Label(cf, text=f"{cls['name']} 职业特性", style="H2.TLabel"
                   ).pack(anchor="w")
         self._feature_rows(cf, c.class_features())
+
+    def _render_boons(self, body, c):
+        """传奇恩惠面板: 显示已持有的恩惠 + 需要玩家选择的项
+        (属性 +1 / 抗性 2 选 / 专精 1 项)"""
+        bf = ttk.Frame(body)
+        bf.pack(fill="x", pady=(10, 0))
+        ttk.Label(bf, text="传奇恩惠（19 级获得）",
+                  style="H2.TLabel").pack(anchor="w")
+        for name in c.boon_names():
+            info = dict(consts.FEATS_BY_NAME.get(name) or {})
+            eff = info.get("effects") or {}
+            box = ttk.Frame(bf)
+            box.pack(fill="x", pady=(4, 0))
+            ttk.Label(box, text=feat_cn(name), foreground=GOLD2,
+                      wraplength=540, justify="left").pack(anchor="w")
+            # --- 属性 +1 (12 条共通) ---
+            boost = eff.get("ability_boost") or {}
+            if boost:
+                allowed = boost.get("from") or list(ABILITIES)
+                row = ttk.Frame(box)
+                row.pack(anchor="w", pady=1)
+                ttk.Label(row, text="属性 +1 →", style="Dim.TLabel",
+                          ).pack(side="left")
+                cb = ttk.Combobox(
+                    row, state="readonly", width=14,
+                    values=[f"{ABILITY_CN[a]}({a})" for a in allowed])
+                cur_ab = c.boon_ability.get(name)
+                if cur_ab in allowed:
+                    cb.set(f"{ABILITY_CN[cur_ab]}({cur_ab})")
+                    cb.current(allowed.index(cur_ab))
+                cb.bind("<<ComboboxSelected>>",
+                        lambda e, b=cb, n=name, al=allowed:
+                        self._boon_ab_set(n, al[b.current()]))
+                cb.pack(side="left", padx=4)
+            # --- 抗性 2 选 (能量抗性之恩惠) ---
+            rc = eff.get("resist_choice") or {}
+            if rc:
+                pool = [r for r in (rc.get("from") or [])
+                        if r in consts.DAMAGE_TYPES_CN]
+                limit = int(rc.get("count") or 0)
+                ttk.Label(box, text=f"选 {limit} 种伤害抗性（每次长休可重选）:",
+                          style="Dim.TLabel").pack(anchor="w", pady=(2, 0))
+                grid = ttk.Frame(box)
+                grid.pack(anchor="w")
+                for i, r in enumerate(pool):
+                    v = tk.BooleanVar(value=r in c.boon_resist)
+                    ttk.Checkbutton(
+                        grid, text=consts.damage_cn(r), variable=v,
+                        command=lambda rt=r, var=v: self._boon_res_toggle(rt, var)
+                    ).grid(row=i // 3, column=i % 3, sticky="w", padx=(0, 12))
+            # --- 专精 1 项 (技艺之恩惠) ---
+            if eff.get("expertise_choice"):
+                cand = [s for s in sorted(c.skill_prof)
+                        if s not in c.expertise and s not in c.boon_expertise]
+                row = ttk.Frame(box)
+                row.pack(anchor="w", pady=1)
+                ttk.Label(row, text="专精 1 项 →", style="Dim.TLabel",
+                          ).pack(side="left")
+                names = ["（未选）"] + [
+                    f"{c.r.skill_by_id[s]['name']}" for s in cand]
+                cb = ttk.Combobox(row, state="readonly", width=16, values=names)
+                cur = (c.boon_expertise[0] if c.boon_expertise else None)
+                cb.current(cand.index(cur) + 1 if cur in cand else 0)
+                cb.bind("<<ComboboxSelected>>",
+                        lambda e, b=cb, cs=cand:
+                        self._boon_exp_set(cs[b.current() - 1]
+                                            if b.current() > 0 else None))
+                cb.pack(side="left", padx=4)
+            if info.get("desc"):
+                ttk.Label(box, text=info["desc"], style="Dim.TLabel",
+                          wraplength=540, justify="left").pack(anchor="w")
 
     def _pick_row(self, parent, label, spells, cur, on_pick):
         """一行「说明 + 下拉」, 用于法师的法术精通 / 招牌法术"""

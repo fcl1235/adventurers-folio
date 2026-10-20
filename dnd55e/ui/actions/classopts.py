@@ -34,6 +34,49 @@ class ClassOptsMixin:
         c.prune_fixed()
         self.refresh()
 
+    def _boon_ab_set(self, name, ab):
+        """传奇恩惠的「属性 +1」落到哪一项 (上限 30)"""
+        c = self.char
+        if not c or name not in c.boon_names():
+            return
+        info = consts.FEATS_BY_NAME.get(name) or {}
+        allowed = ((info.get("effects") or {}).get("ability_boost") or {}
+                   ).get("from") or list(ABILITIES)
+        if ab in allowed:
+            c.boon_ability[name] = ab
+        self.refresh()
+
+    def _boon_res_toggle(self, dtype, var):
+        """能量抗性之恩惠: 最多 limit 项, 超了就回退并提示"""
+        c = self.char
+        if not c:
+            return
+        pool = c.boon_resist_pool()
+        limit = c.boon_resist_limit()
+        got = list(c.boon_resist)
+        if var.get():
+            if dtype in pool and dtype not in got:
+                if len(got) >= limit:
+                    var.set(False)
+                    messagebox.showinfo(
+                        "已达上限", f"这个恩惠只能选 {limit} 种抗性", parent=self)
+                    return
+                got.append(dtype)
+        else:
+            got = [r for r in got if r != dtype]
+        c.boon_resist = [r for r in pool if r in got]
+        self.refresh()
+
+    def _boon_exp_set(self, sid):
+        """技艺之恩惠: 1 项已熟练技能获得专精"""
+        c = self.char
+        if not c:
+            return
+        if sid and (sid not in c.skill_prof or sid in c.expertise):
+            return
+        c.boon_expertise = [sid] if sid else []
+        self.refresh()
+
     def _wild_shape_open(self):
         """荒野变形: 选野兽形态 (只记录形态, 不动本体数值)"""
         c = self.char

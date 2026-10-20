@@ -205,6 +205,7 @@ class RefreshMixin():
              f"负重上限 {c.carry_capacity()[0]} 磅 "
              f"(推/拉/举 {c.carry_capacity()[1]} 磅) · "
              f"生命骰 d{c.hit_die()} {c.hit_dice_left()}/{c.hit_dice_max()}"]
+            + ([self._defense_line(c)] if self._defense_line(c) else [])
             + ([""] + ["• " + x for x in bonus_lines] if bonus_lines
                else ["", "（当前无额外加成来源）"])))
         self.bonus_text.config(state="disabled")
@@ -259,6 +260,23 @@ class RefreshMixin():
             text=(f"专注: {conc['name']} (体质 {mod_str(c.save_mod('CON'))})"
                   if conc else "专注: 无"))
         self._status()
+
+    def _defense_line(self, c):
+        """抗性 / 免疫 / 状态免疫 / 真实视觉 一行汇总 (没内容就返回空串)"""
+        parts = []
+        res = c.resistances()
+        if res:
+            parts.append("抗性: " + "、".join(consts.damage_cn(r) for r in res))
+        imm = c.immunities()
+        if imm:
+            parts.append("免疫: " + "、".join(consts.damage_cn(r) for r in imm))
+        cimm = c.condition_immunities()
+        if cimm:
+            parts.append("状态免疫: " + "、".join(
+                consts.CONDITIONS_CN.get(r, r) for r in cimm))
+        if c.truesight():
+            parts.append(f"真实视觉 {c.truesight()} 尺")
+        return " ｜ ".join(parts)
 
     def _feat_names(self):
         """原始专长名列表 (英文键), 显示时用 feat_cn 美化"""

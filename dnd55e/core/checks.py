@@ -2,7 +2,7 @@
 """角色模型分片: core/checks.py (由 character.py 物理拆分, P1 纯搬运)。"""
 import random
 from .. import consts
-from ..consts import (ABILITIES, feat_cn)
+from ..consts import (ABILITIES, ABILITY_CN, feat_cn)
 from ..util import (ability_mod, mod_str)
 
 
@@ -58,22 +58,32 @@ class ChecksMixin:
         return out
 
     def immunities(self):
-        """伤害免疫 (来自物品)"""
+        """伤害免疫 (物品 + 传奇恩惠)"""
         out = []
         for iid in self.items:
             for r in (consts.ITEMS_BY_ID.get(iid, {}).get("immune") or []):
                 if r not in out:
                     out.append(r)
+        for r in (self.boon_effects().get("immune") or []):
+            if r not in out:
+                out.append(r)
         return out
 
     def condition_immunities(self):
-        """状态免疫 (来自物品)"""
+        """状态免疫 (物品 + 传奇恩惠)"""
         out = []
         for iid in self.items:
             for r in (consts.ITEMS_BY_ID.get(iid, {}).get("condition_immune") or []):
                 if r not in out:
                     out.append(r)
+        for r in (self.boon_effects().get("condition_immune") or []):
+            if r not in out:
+                out.append(r)
         return out
+
+    def truesight(self):
+        """真实视觉范围 (尺; 0 表示没有) —— 来自传奇恩惠"""
+        return int(self.boon_effects().get("truesight", 0) or 0)
 
     def save_mod(self, ab):
         m = ability_mod(self.score(ab))
@@ -195,10 +205,31 @@ class ChecksMixin:
             out.append(f"职业·额外攻击: 攻击动作可攻击 {n_atk} 次 "
                        f"（掷攻击会一次投 {n_atk} 个 d20）")
         out.extend(_ordered(self.cls_module().explain(self, "late")))
+        # 传奇恩惠: 已生效的机械值逐条说明 (属性 +1 与抗性另见对应行)
+        for name in self.boon_names():
+            eff = (consts.FEATS_BY_NAME.get(name) or {}).get("effects") or {}
+            bits = []
+            if eff.get("hp_flat"):
+                bits.append(f"HP 上限 +{int(eff['hp_flat'])}")
+            if eff.get("speed"):
+                bits.append(f"速度 +{int(eff['speed'])} 尺")
+            if eff.get("skill_all_prof"):
+                bits.append("全部技能熟练")
+            if eff.get("truesight"):
+                bits.append(f"真实视觉 {int(eff['truesight'])} 尺")
+            ab = self.boon_ability.get(name)
+            if ab:
+                bits.append(f"{ABILITY_CN[ab]} +1")
+            if eff.get("resist_choice"):
+                bits.append(f"抗性 {len(self.boon_resist)}/"
+                             f"{int(eff['resist_choice'].get('count') or 0)} 已选")
+            out.append(f"传奇恩惠·{feat_cn(name).split(' ')[0]}: "
+                       + ("、".join(bits) if bits else "效果见说明"))
         # 其余专长: 明确提示需手动应用, 避免误以为已计入
         auto = ("tough", "alert", "坚忍", "坚韧", "警觉")
         manual = [f for f in list(self.feats)
-                  if not any(k in f.lower() for k in auto)]
+                  if not any(k in f.lower() for k in auto)
+                  and f not in self.boon_names()]
         if manual:
             out.append("其余专长 (需手动应用): " + "、".join(feat_cn(f) for f in manual))
         return out

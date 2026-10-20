@@ -1062,6 +1062,7 @@
    "desc": "任选一项属性 +1（上限 30）。【融入阴影】当你处于微光或黑暗区域时，可用附赠动作使自己获得隐形状态；当你采取一个动作、附赠动作或反应后，该状态立即结束。【幽影形态】当你处于微光或黑暗区域时，你对除心灵与光耀之外的所有伤害具有抗性。",
    "repeatable": false,
    "effects": {
+    "note_only": true,
     "ability_boost": {
      "from": [
       "STR",
@@ -1072,8 +1073,7 @@
       "CHA"
      ],
      "max": 30
-    },
-    "note_only": true
+    }
    },
    "source": "SRD 5.2"
   },
@@ -1087,6 +1087,7 @@
    "desc": "任选一项属性 +1（上限 30）。【真实视觉】你获得 60 尺的真实视觉。",
    "repeatable": false,
    "effects": {
+    "truesight": 60,
     "ability_boost": {
      "from": [
       "STR",
@@ -1097,8 +1098,7 @@
       "CHA"
      ],
      "max": 30
-    },
-    "note_only": true
+    }
    },
    "source": "SRD 5.2"
   },
