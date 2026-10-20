@@ -39,6 +39,8 @@ _LOADERS = {
     "FEATS_BY_NAME": data.feats_by_name,
     "MONSTERS": data.monsters,
     "MONSTERS_BY_ID": data.monsters_by_id,
+    "SUMMONS": data.summons,
+    "SUMMONS_BY_ID": data.summons_by_id,
     "SUBCLASS_CN": data.subclass_cn,
     "FIGHTING_STYLES": data.fighting_styles,
     "STYLE_MIN_LEVEL": data.style_min_level,

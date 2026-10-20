@@ -5,10 +5,11 @@ from tkinter import ttk, messagebox, filedialog
 from tkinter.simpledialog import askinteger
 
 from ... import consts, util
+from ... import summoning
 from ...consts import (ABILITIES, ABILITY_CN, feat_cn, feat_desc, mastery_cn,
                        size_cn, subclass_cn, tool_cn)
 from ...dialogs import (FeatPickerDialog, MetamagicDialog, SpellbookDialog,
-                        WildShapeDialog)
+                        SummonCardDialog, WildShapeDialog)
 from ...rules import Rules
 from ...theme import BG, GOLD2
 from ...util import (ability_mod, mod_str, roll_dice, roll_dice_reroll,
@@ -153,6 +154,23 @@ class SpellActionsMixin:
         if s and c and c.spell_dc() is not None:
             txt += f"\n\n你的法术豁免 DC {c.spell_dc()} · 法术攻击 {mod_str(c.spell_attack())}"
         self._spell_detail_set(txt)
+        # 「查看召唤物」按钮只在当前法术有召唤/变形数据时出现
+        btn = getattr(self, "summon_btn", None)
+        if btn is not None:
+            if s and summoning.summon_of(s):
+                btn.pack(side="right", padx=3)
+            else:
+                btn.pack_forget()
+
+    def _spell_summon(self):
+        """弹出当前法术的召唤物 stat block 卡"""
+        s = self._selected_spell()
+        if not s or not summoning.summon_of(s):
+            return
+        dlg = SummonCardDialog(self, spell=s,
+                               selftest=getattr(self, "_selftest", False))
+        if not getattr(self, "_selftest", False):
+            self.wait_window(dlg)
 
     def _spellbook_open(self):
         """打开法师法术书 (抄录 / 移出)"""

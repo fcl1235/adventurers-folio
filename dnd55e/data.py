@@ -169,6 +169,15 @@ def monsters_by_id():
     return {m["id"]: m for m in monsters()}
 
 
+# ---- 法术召唤物 (Summon X / 变形术 / 寻获坐骑 / 活化物件) ----
+def summons():
+    return [dict(s) for s in _load("summons")["summons"]]
+
+
+def summons_by_id():
+    return {s["id"]: s for s in summons()}
+
+
 # ---- 职业相关文案 ----
 def subclass_cn():
     return dict(_load("classes_ui")["subclass_cn"])

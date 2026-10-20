@@ -3,6 +3,7 @@
 import random
 
 from . import consts
+from . import summoning
 from .consts import (feat_cn, feat_desc, mastery_cn, size_cn,
                         subclass_cn, tool_cn)
 
@@ -111,6 +112,10 @@ def spell_detail(s):
         lines.append(" ｜ ".join(extra))
     lines.append("")
     lines.append(s["desc"] or "（效果见 SRD 原文）")
+    block = summoning.summon_block(s)
+    if block:
+        lines.append("")
+        lines.append(block)
     sc = s.get("scaling") or {}
     if len(sc) > 1:
         up = "、".join(f"{k}环:{v}" for k, v in list(sc.items())[1:4])

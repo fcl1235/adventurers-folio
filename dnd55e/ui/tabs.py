@@ -97,6 +97,9 @@ def build_spells(app, nb):
                command=app._spell_cast).pack(side="right")
     ttk.Button(bar, text="◉ 专注", style="Mini.TButton",
                command=app._spell_focus).pack(side="right", padx=3)
+    # 只有选中带召唤物数据的法术时才显示 (在 _spell_show 里控制)
+    app.summon_btn = ttk.Button(bar, text="👁 召唤物", style="Mini.TButton",
+                                command=app._spell_summon)
     app.spell_quota_lbl = ttk.Label(t2, text="", style="Dim.TLabel")
     app.spell_quota_lbl.pack(anchor="w", pady=(2, 0))
 

@@ -1,6 +1,6 @@
 {
  "system": "srp-5.2",
- "count": 339,
+ "count": 347,
  "spells": [
   {
    "id": "message",
@@ -2472,6 +2472,50 @@
    "desc_en": "You alter your physical form. Choose one of the following options. Its effects last for the duration, during which you can take a Magic action to replace the option you chose with a different one.\n  Aquatic Adaptation. You sprout gills and grow webs between your fingers. You can breathe underwater and gain a Swim Speed equal to your Speed.\n  Change Appearance. You alter your appearance. You decide what you look like, including your height, weight, facial features, sound of your voice, hair length, coloration, and other distinguishing characteristics. You can make yourself appear as a member of another species, though none of your statistics change. You can't appear as a creature of a different size, and your basic shape stays the same; if you're bipedal, you can't use this spell to become quadrupedal, for instance. For the duration, you can take a Magic action to change your appearance i"
   },
   {
+   "id": "summon-beast",
+   "name_en": "Summon Beast",
+   "name": "召唤野兽",
+   "level": 2,
+   "school": "咒法",
+   "classes": [
+    "druid",
+    "ranger"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（一枚镶金橡果内的羽毛、一撮毛皮和一条鱼尾，价值 200+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一只精魂兽：选择陆行、水栖或空中形态（专注 1 小时）。",
+   "desc_en": "You call forth a bestial spirit. Choose an environment when you cast the spell: Air, Land, or Water. The spirit uses the Bestial Spirit stat block, and the environment determines certain details in it. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "陆行",
+      "statblock": "bestial-spirit-land"
+     },
+     {
+      "name": "水栖",
+      "statblock": "bestial-spirit-water"
+     },
+     {
+      "name": "空中",
+      "statblock": "bestial-spirit-air"
+     }
+    ],
+    "note": "陆行/水栖的 HP 高于空中；空中形态有飞掠，可穿越敌人身边。"
+   }
+  },
+  {
    "id": "arcanists-magic-aura",
    "name_en": "Arcanist's Magic Aura",
    "name": "奥术魔法灵光",
@@ -2598,7 +2642,25 @@
    "area_type": "",
    "scaling": {},
    "desc": "召唤一匹精魂坐骑, 持续至你再次施法。",
-   "desc_en": "You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the Otherworldly Steed stat block. If you already have a steed from this spell, the steed is replaced by the new one.\n  The steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed's creature type-Celestial, Fey, or Fiendwhich determines certain traits in the stat block.\n  Combat. The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you.\n  Disappearance of the Steed. The steed disappears if i"
+   "desc_en": "You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the Otherworldly Steed stat block. If you already have a steed from this spell, the steed is replaced by the new one.\n  The steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed's creature type-Celestial, Fey, or Fiendwhich determines certain traits in the stat block.\n  Combat. The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you.\n  Disappearance of the Steed. The steed disappears if i",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "天界",
+      "statblock": "otherworldly-steed-celestial"
+     },
+     {
+      "name": "妖精",
+      "statblock": "otherworldly-steed-fey"
+     },
+     {
+      "name": "邪魔",
+      "statblock": "otherworldly-steed-fiend"
+     }
+    ],
+    "note": "座骑可骑乘；用更高环级施放时 AC 与 HP 随之提升。"
+   }
   },
   {
    "id": "phantasmal-force",
@@ -3968,6 +4030,96 @@
    "desc_en": "You conjure nature spirits that appear as a Large pack of spectral, intangible animals in an unoccupied space you can see within range. The pack lasts for the duration, and you choose the spirits' animal form, such as wolves, serpents, or birds.\n  You have Advantage on Strength saving throws while you're within 5 feet of the pack, and when you move on your turn, you can also move the pack up to 30 feet to an unoccupied space you can see.\n  Whenever the pack moves within 10 feet of a creature you can see and whenever a creature you can see enters a space within 10 feet of the pack or ends its turn there, you can force that creature to make a Dexterity saving throw. On a failed save, the creature takes 3d10 Slashing damage. A creature makes this save only once per turn."
   },
   {
+   "id": "summon-undead",
+   "name_en": "Summon Undead",
+   "name": "召唤亡灵",
+   "level": 3,
+   "school": "咒法",
+   "classes": [
+    "warlock",
+    "wizard"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（一颗镀金骷髅，价值 300+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一只亡灵精魂：选择幽魂、骷髅或腐尸形态（专注 1 小时）。",
+   "desc_en": "You call forth an undead spirit. Choose a form when you cast the spell: Ghostly, Skeletal, or Putrid. The spirit uses the Undead Spirit stat block, and the form determines certain traits and attacks in it. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "幽魂",
+      "statblock": "undead-spirit-ghostly"
+     },
+     {
+      "name": "骷髅",
+      "statblock": "undead-spirit-skeletal"
+     },
+     {
+      "name": "腐尸",
+      "statblock": "undead-spirit-putrid"
+     }
+    ],
+    "note": "幽魂可穿墙飞行，骷髅远程，腐尸带中毒灵光。"
+   }
+  },
+  {
+   "id": "summon-fey",
+   "name_en": "Summon Fey",
+   "name": "召唤妖精",
+   "level": 3,
+   "school": "咒法",
+   "classes": [
+    "druid",
+    "ranger",
+    "warlock",
+    "wizard"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（一朵镀金花，价值 300+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一只妖精精魂：选择暴躁、欢愉或狡黠气质（专注 1 小时）。",
+   "desc_en": "You call forth a fey spirit. It manifests in an unoccupied space that you can see within range. Choose a mood when you cast the spell: Fuming, Mirthful, or Tricksy. The spirit uses the Fey Spirit stat block, and the mood determines part of its Fey Step. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "暴躁",
+      "statblock": "fey-spirit-fuming"
+     },
+     {
+      "name": "欢愉",
+      "statblock": "fey-spirit-mirthful"
+     },
+     {
+      "name": "狡黠",
+      "statblock": "fey-spirit-tricksy"
+     }
+    ],
+    "note": "三种气质共用数值，只改变附赠动作「妖精步」的附加效果。"
+   }
+  },
+  {
    "id": "call-lightning",
    "name_en": "Call Lightning",
    "name": "召雷术",
@@ -5093,7 +5245,153 @@
    "area_type": "",
    "scaling": {},
    "desc": "把目标变成野兽(专注 1 小时)。",
-   "desc_en": "You attempt to transform a creature that you can see within range into a Beast. The target must succeed on a Wisdom saving throw or shape-shift into a Beast form for the duration. That form can be any Beast you choose that has a Challenge Rating equal to or less than the target's (or the target's level if it doesn't have a Challenge Rating). The target's game statistics are replaced by the stat block of the chosen Beast, but the target retains its alignment, personality, creature type, Hit Points, and Hit Point Dice. See the \"Animals\" section of \"Monsters\" for a sample of Beast stat blocks.\n  The target gains a number of Temporary Hit Points equal to the Hit Points of the Beast form. These Temporary Hit Points vanish if any remain when the spell ends. The spell ends early on the target if it has no Temporary Hit Points left.\n  The target is limited in the actions it can perform by the an"
+   "desc_en": "You attempt to transform a creature that you can see within range into a Beast. The target must succeed on a Wisdom saving throw or shape-shift into a Beast form for the duration. That form can be any Beast you choose that has a Challenge Rating equal to or less than the target's (or the target's level if it doesn't have a Challenge Rating). The target's game statistics are replaced by the stat block of the chosen Beast, but the target retains its alignment, personality, creature type, Hit Points, and Hit Point Dice. See the \"Animals\" section of \"Monsters\" for a sample of Beast stat blocks.\n  The target gains a number of Temporary Hit Points equal to the Hit Points of the Beast form. These Temporary Hit Points vanish if any remain when the spell ends. The spell ends early on the target if it has no Temporary Hit Points left.\n  The target is limited in the actions it can perform by the an",
+   "summon": {
+    "kind": "filter",
+    "type": "beast",
+    "cr": "target",
+    "size": "任意",
+    "exclude": [
+     "swarm"
+    ],
+    "note": "只能变为野兽，且 CR 不得超过目标原本的 CR（无 CR 时用其等级）；排除虫群。可从怪物图鉴的野兽里挑，德鲁伊形态表是最好的候选来源。"
+   }
+  },
+  {
+   "id": "summon-elemental",
+   "name_en": "Summon Elemental",
+   "name": "召唤元素",
+   "level": 4,
+   "school": "咒法",
+   "classes": [
+    "druid",
+    "ranger",
+    "wizard"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（气、一颗卵石、灰烬与水，装在镶金的小瓶里，价值 400+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一个元素精魂：选择气、土、火或水元素（专注 1 小时）。",
+   "desc_en": "You call forth an elemental spirit. Choose an element when you cast the spell: Air, Earth, Fire, or Water. The spirit uses the Elemental Spirit stat block, and the element determines its speed and the damage type of its Slam. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "气",
+      "statblock": "elemental-spirit-air"
+     },
+     {
+      "name": "土",
+      "statblock": "elemental-spirit-earth"
+     },
+     {
+      "name": "火",
+      "statblock": "elemental-spirit-fire"
+     },
+     {
+      "name": "水",
+      "statblock": "elemental-spirit-water"
+     }
+    ],
+    "note": "重击伤害类型随元素变化：土=钝击、火=火焰、水=寒冷、气=闪电。"
+   }
+  },
+  {
+   "id": "summon-aberration",
+   "name_en": "Summon Aberration",
+   "name": "召唤异怪",
+   "level": 4,
+   "school": "咒法",
+   "classes": [
+    "warlock",
+    "wizard"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（一根腌制触须与一颗眼球，装在镶铂金的小瓶里，价值 400+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一只异怪精魂：选择史拉蟾、夺心魔或眼魔亲族形态（专注 1 小时）。",
+   "desc_en": "You call forth an aberrant spirit. Choose a form when you cast the spell: Beholderkin, Mind Flayer, or Slaad. The spirit uses the Aberrant Spirit stat block, and the form determines certain traits and attacks in it. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "史拉蟾",
+      "statblock": "aberrant-spirit-slaad"
+     },
+     {
+      "name": "夺心魔",
+      "statblock": "aberrant-spirit-mind-flayer"
+     },
+     {
+      "name": "眼魔亲族",
+      "statblock": "aberrant-spirit-beholderkin"
+     }
+    ],
+    "note": "史拉蟾能再生，夺心魔带心灵灵光，眼魔亲族可悬浮远程攻击。"
+   }
+  },
+  {
+   "id": "summon-construct",
+   "name_en": "Summon Construct",
+   "name": "召唤构装",
+   "level": 4,
+   "school": "咒法",
+   "classes": [
+    "wizard"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（一个锁盒，价值 400+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一个构装精魂：选择黏土、金属或石质材质（专注 1 小时）。",
+   "desc_en": "You call forth a construct spirit. Choose a material when you cast the spell: Clay, Metal, or Stone. The spirit uses the Construct Spirit stat block, and the material determines certain traits and reactions in it. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "黏土",
+      "statblock": "construct-spirit-clay"
+     },
+     {
+      "name": "金属",
+      "statblock": "construct-spirit-metal"
+     },
+     {
+      "name": "石质",
+      "statblock": "construct-spirit-stone"
+     }
+    ],
+    "note": "三种材质共用数值，差别在特性与反应。"
+   }
   },
   {
    "id": "conjure-woodland-beings",
@@ -5252,7 +5550,25 @@
    "area_type": "",
    "scaling": {},
    "desc": "把昆虫变为巨型版本为你作战(专注 10 分钟)。",
-   "desc_en": "You summon a giant centipede, spider, or wasp (chosen when you cast the spell). It manifests in an unoccupied space you can see within range and uses the Giant Insect stat block. The form you choose determines certain details in its stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger."
+   "desc_en": "You summon a giant centipede, spider, or wasp (chosen when you cast the spell). It manifests in an unoccupied space you can see within range and uses the Giant Insect stat block. The form you choose determines certain details in its stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "蜈蚣",
+      "statblock": "giant-insect-centipede"
+     },
+     {
+      "name": "蜘蛛",
+      "statblock": "giant-insect-spider"
+     },
+     {
+      "name": "黄蜂",
+      "statblock": "giant-insect-wasp"
+     }
+    ],
+    "note": "形态在施法时选定，决定速度与附赠动作。"
+   }
   },
   {
    "id": "phantasmal-killer",
@@ -6068,6 +6384,46 @@
    "desc_en": "You conjure a Large, intangible spirit from the Elemental Planes that appears in an unoccupied space within range. Choose the spirit's element, which determines its damage type: air (Lightning), earth (Thunder), fire (Fire), or water (Cold). The spirit lasts for the duration.\n  Whenever a creature you can see enters the spirit's space or starts its turn within 5 feet of the spirit, you can force that creature to make a Dexterity saving throw if the spirit has no creature Restrained. On failed save, the target takes 8d8 damage of the spirit's type, and the target has the Restrained condition until the spell ends. At the start of each of its turns, the Restrained target repeats the save. On a failed save, the target takes 4d8 damage of the spirit's type. On a successful save, the target isn't Restrained by the spirit."
   },
   {
+   "id": "summon-celestial",
+   "name_en": "Summon Celestial",
+   "name": "召唤天界",
+   "level": 5,
+   "school": "咒法",
+   "classes": [
+    "cleric",
+    "paladin"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（一件圣物匣，价值 500+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一个天界精魂：选择复仇者或守卫者形态（专注 1 小时）。",
+   "desc_en": "You call forth a celestial spirit. Choose a form when you cast the spell: Avenger or Defender. The spirit uses the Celestial Spirit stat block, and the form determines certain details in it. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "复仇者",
+      "statblock": "celestial-spirit-avenger"
+     },
+     {
+      "name": "守卫者",
+      "statblock": "celestial-spirit-defender"
+     }
+    ],
+    "note": "复仇者远程输出、守卫者近战且 AC 与临时生命更高。"
+   }
+  },
+  {
    "id": "summon-dragon",
    "name_en": "Summon Dragon",
    "name": "召唤巨龙",
@@ -6090,7 +6446,17 @@
    "area_type": "",
    "scaling": {},
    "desc": "召唤精魂巨龙, 可吐息(专注 1 小时)。",
-   "desc_en": "You call forth a Dragon spirit. It manifests in an unoccupied space that you can see within range and uses the Draconic Spirit stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger."
+   "desc_en": "You call forth a Dragon spirit. It manifests in an unoccupied space that you can see within range and uses the Draconic Spirit stat block. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "巨龙",
+      "statblock": "draconic-spirit"
+     }
+    ],
+    "note": "召唤时选择一种伤害类型，精魂与你在法术结束前都获得该抗性。"
+   }
   },
   {
    "id": "awaken",
@@ -6586,7 +6952,17 @@
    "area_type": "",
    "scaling": {},
    "desc": "活化至多 10 件小物件为你作战(专注 1 分钟)。",
-   "desc_en": "Objects animate at your command. Choose a number of nonmagical objects within range that aren't being worn or carried, aren't fixed to a surface, and aren't Gargantuan. The maximum number of objects is equal to your spellcasting ability modifier; for this number, a Medium or smaller target counts as one object, a Large target counts as two, and a Huge target counts as three.\n  Each target animates, sprouts legs, and becomes a Construct that uses the Animated Object stat block; this creature is under your control until the spell ends or until it is reduced to 0 Hit Points. Each creature you make with this spell is an ally to you and your allies. In combat, it shares your Initiative count and takes its turn immediately after yours.\n  Until the spell ends, you can take a Bonus Action to mentally command any creature you made with this spell if the creature is within 500 feet of you (if you "
+   "desc_en": "Objects animate at your command. Choose a number of nonmagical objects within range that aren't being worn or carried, aren't fixed to a surface, and aren't Gargantuan. The maximum number of objects is equal to your spellcasting ability modifier; for this number, a Medium or smaller target counts as one object, a Large target counts as two, and a Huge target counts as three.\n  Each target animates, sprouts legs, and becomes a Construct that uses the Animated Object stat block; this creature is under your control until the spell ends or until it is reduced to 0 Hit Points. Each creature you make with this spell is an ally to you and your allies. In combat, it shares your Initiative count and takes its turn immediately after yours.\n  Until the spell ends, you can take a Bonus Action to mentally command any creature you made with this spell if the creature is within 500 feet of you (if you ",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "活化物件",
+      "statblock": "animated-object"
+     }
+    ],
+    "note": "可控物件数 = 施法属性调整值；中型或更小算 1 件、大型算 2 件、巨型算 3 件。"
+   }
   },
   {
    "id": "flame-strike",
@@ -7121,6 +7497,50 @@
    "scaling": {},
    "desc": "召唤精类生物为你作战(专注 1 小时)。",
    "desc_en": "You conjure a Medium spirit from the Feywild in an unoccupied space you can see within range. The spirit lasts for the duration, and it looks like a Fey creature of your choice. When the spirit appears, you can make one melee spell attack against a creature within 5 feet of it. On a hit, the target takes Psychic damage equal to 3d12 plus your spellcasting ability modifier, and the target has the Frightened condition until the start of your next turn, with both you and the spirit as the source of the fear.\n  As a Bonus Action on your later turns, you can teleport the spirit to an unoccupied space you can see within 30 feet of the space it left and make the attack against a creature within 5 feet of it."
+  },
+  {
+   "id": "summon-fiend",
+   "name_en": "Summon Fiend",
+   "name": "召唤邪魔",
+   "level": 6,
+   "school": "咒法",
+   "classes": [
+    "warlock",
+    "wizard"
+   ],
+   "cast": "1 动作",
+   "range": "90 尺",
+   "comp": "语/姿/材（一小瓶血，价值 600+ GP）",
+   "duration": "up to 1 小时",
+   "concentration": true,
+   "ritual": false,
+   "damage": "",
+   "damage_type": "",
+   "save": "",
+   "attack": false,
+   "area": "",
+   "area_type": "",
+   "scaling": {},
+   "desc": "召唤一个邪魔精魂：选择恶魔、魔鬼或尤格罗斯形态（专注 1 小时）。",
+   "desc_en": "You call forth a fiendish spirit. Choose a form when you cast the spell: Demon, Devil, or Yugoloth. The spirit uses the Fiendish Spirit stat block, and the form determines certain traits and attacks in it. It manifests in an unoccupied space that you can see within range. The creature disappears when it drops to 0 Hit Points or when the spell ends.\n  The creature is an ally to you and your allies. In combat, the creature shares your Initiative count, but it takes its turn immediately after yours. It obeys your verbal commands (no action required by you). If you don't issue any, it takes the Dodge action and uses its movement to avoid danger.",
+   "summon": {
+    "kind": "statblock",
+    "options": [
+     {
+      "name": "恶魔",
+      "statblock": "fiendish-spirit-demon"
+     },
+     {
+      "name": "魔鬼",
+      "statblock": "fiendish-spirit-devil"
+     },
+     {
+      "name": "尤格罗斯",
+      "statblock": "fiendish-spirit-yugoloth"
+     }
+    ],
+    "note": "恶魔死亡时爆炸，魔鬼带魔鬼视界，尤格罗斯 HP 最高。"
+   }
   },
   {
    "id": "word-of-recall",
@@ -8349,7 +8769,17 @@
    "area_type": "",
    "scaling": {},
    "desc": "把至多 10 个生物变为野兽(专注 24 小时)。",
-   "desc_en": "Choose any number of willing creatures that you can see within range. Each target shape-shifts into a Large or smaller Beast of your choice that has a Challenge Rating of 4 or lower. You can choose a different form for each target. On later turns, you can take a Magic action to transform the targets again.\n  A target's game statistics are replaced by the chosen Beast's statistics, but the target retains its creature type; Hit Points; Hit Point Dice; alignment; ability to communicate; and Intelligence, Wisdom, and Charisma scores. The target's actions are limited by the Beast form's anatomy, and it can't cast spells. The target's equipment melds into the new form, and the target can't use any of that equipment while in that form.\n  The target gains a number of Temporary Hit Points equal to the Hit Points of the first form into which it shape-shifts. These Temporary Hit Points vanish if an"
+   "desc_en": "Choose any number of willing creatures that you can see within range. Each target shape-shifts into a Large or smaller Beast of your choice that has a Challenge Rating of 4 or lower. You can choose a different form for each target. On later turns, you can take a Magic action to transform the targets again.\n  A target's game statistics are replaced by the chosen Beast's statistics, but the target retains its creature type; Hit Points; Hit Point Dice; alignment; ability to communicate; and Intelligence, Wisdom, and Charisma scores. The target's actions are limited by the Beast form's anatomy, and it can't cast spells. The target's equipment melds into the new form, and the target can't use any of that equipment while in that form.\n  The target gains a number of Temporary Hit Points equal to the Hit Points of the first form into which it shape-shifts. These Temporary Hit Points vanish if an",
+   "summon": {
+    "kind": "filter",
+    "type": "beast",
+    "cr": "4",
+    "size": "大型或更小",
+    "exclude": [
+     "swarm"
+    ],
+    "note": "每个目标可各选一种形态，CR 不得超过 4 且体型为大型或更小；之后每回合可用魔法动作再换形态。"
+   }
   },
   {
    "id": "demiplane",
@@ -8813,7 +9243,15 @@
    "area_type": "",
    "scaling": {},
    "desc": "把生物或物件永久变为另一形态。",
-   "desc_en": "Choose one creature or nonmagical object that you can see within range. The creature shape-shifts into a different creature or a nonmagical object, or the object shape-shifts into a creature (the object must be neither worn nor carried). The transformation lasts for the duration or until the target dies or is destroyed, but if you maintain Concentration on this spell for the full duration, the spell lasts until dispelled.\n   An unwilling creature can make a Wisdom saving throw, and if it succeeds, it isn't affected by this spell.\n  Creature into Creature. If you turn a creature into another kind of creature, the new form can be any kind you choose that has a Challenge Rating equal to or less than the target's Challenge Rating or level. The target's game statistics are replaced by the stat block of the new form, but it retains its Hit Points, Hit Point Dice, alignment, and personality.\n  "
+   "desc_en": "Choose one creature or nonmagical object that you can see within range. The creature shape-shifts into a different creature or a nonmagical object, or the object shape-shifts into a creature (the object must be neither worn nor carried). The transformation lasts for the duration or until the target dies or is destroyed, but if you maintain Concentration on this spell for the full duration, the spell lasts until dispelled.\n   An unwilling creature can make a Wisdom saving throw, and if it succeeds, it isn't affected by this spell.\n  Creature into Creature. If you turn a creature into another kind of creature, the new form can be any kind you choose that has a Challenge Rating equal to or less than the target's Challenge Rating or level. The target's game statistics are replaced by the stat block of the new form, but it retains its Hit Points, Hit Point Dice, alignment, and personality.\n  ",
+   "summon": {
+    "kind": "filter",
+    "type": "any",
+    "cr": "target",
+    "size": "任意",
+    "exclude": [],
+    "note": "可变为任意生物（不限野兽），CR 不得超过目标原本的 CR 或等级；也可把物件变为 CR ≤ 9 的生物。"
+   }
   },
   {
    "id": "true-resurrection",

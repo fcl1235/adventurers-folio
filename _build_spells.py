@@ -612,10 +612,25 @@ def main():
             if i % 40 == 0:
                 print("  ", i)
     out.sort(key=lambda x: (x["level"], x["name"]))
+    # 保留手工维护的 summon 字段 (召唤物 / 变形映射), 否则重抓会抹掉
+    old = {}
+    if os.path.exists(OUT):
+        try:
+            old = {s["id"]: s for s in
+                   json.load(open(OUT, encoding="utf-8"))["spells"]}
+        except (ValueError, KeyError):
+            old = {}
+    kept = 0
+    for rec in out:
+        prev = old.get(rec["id"]) or {}
+        if "summon" in prev:
+            rec["summon"] = prev["summon"]
+            kept += 1
     json.dump({"system": "srp-5.2", "count": len(out), "spells": out},
               open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     with_desc = sum(1 for s in out if s["desc"])
-    print("saved", OUT, len(out), "spells,", with_desc, "with CN desc")
+    print("saved", OUT, len(out), "spells,", with_desc, "with CN desc,",
+          kept, "with summon")
 
 
 if __name__ == "__main__":

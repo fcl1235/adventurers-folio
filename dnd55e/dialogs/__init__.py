@@ -5,6 +5,7 @@
     dialogs/feats.py      —— FeatPickerDialog 专长选择
     dialogs/wildshape.py  —— WildShapeDialog  荒野变形形态选择
     dialogs/levelup.py    —— LevelUpDialog    升级 (ASI / 子职 / 传奇恩惠)
+    dialogs/summon_card.py—— SummonCardDialog 召唤物 stat block 详情
     dialogs/dice.py       —— DiceDialog       骰子工具
 
 本包保留 `dnd55e.dialogs` 这个名字与全部类名, 外部导入方式不变。
@@ -15,6 +16,7 @@ from .spellbook import SpellbookDialog  # noqa: F401,E402
 from .feats import FeatPickerDialog  # noqa: F401,E402
 from .wildshape import WildShapeDialog  # noqa: F401,E402
 from .levelup import LevelUpDialog  # noqa: F401,E402
+from .summon_card import SummonCardDialog  # noqa: F401,E402
 from .dice import DiceDialog  # noqa: F401,E402
 
 __all__ = [
@@ -23,5 +25,6 @@ __all__ = [
     "FeatPickerDialog",
     "WildShapeDialog",
     "LevelUpDialog",
+    "SummonCardDialog",
     "DiceDialog",
 ]

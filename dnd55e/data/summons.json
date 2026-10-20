@@ -1,0 +1,2391 @@
+{
+ "_note": "法术召唤物数据，供召唤法术 / 变形术 / 寻获坐骑 / 活化物件的详情卡使用。仅收录 2024 PHB 中「由法术召出、拥有独立 stat block」的生物；AC 与 HP 在 2024 版是随施法环级变化的公式，因此以字符串保存，由界面按实际环级展示，不参与角色本体的数值计算。",
+ "count": 32,
+ "summons": [
+  {
+   "id": "bestial-spirit-land",
+   "name": "陆行精魂兽 Bestial Spirit (Land)",
+   "name_cn": "陆行精魂兽",
+   "name_en": "Bestial Spirit (Land)",
+   "spell": "summon-beast",
+   "variant": "陆行",
+   "type": "beast",
+   "size": "小型",
+   "ac": "11 + 法术环级",
+   "hp": "30 + 5 × 超出 2 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 30,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 11,
+    "CON": 16,
+    "INT": 4,
+    "WIS": 14,
+    "CHA": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "集群战术 Pack Tactics",
+     "desc": "若该精魂的至少一个盟友位于目标 5 尺内且该盟友未处于失能状态，精魂对该目标的攻击检定具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "撕裂 Rend",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，命中造成 1d8 + 4 + 法术环级 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "bestial-spirit-water",
+   "name": "水栖精魂兽 Bestial Spirit (Water)",
+   "name_cn": "水栖精魂兽",
+   "name_en": "Bestial Spirit (Water)",
+   "spell": "summon-beast",
+   "variant": "水栖",
+   "type": "beast",
+   "size": "小型",
+   "ac": "11 + 法术环级",
+   "hp": "30 + 5 × 超出 2 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 30,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 11,
+    "CON": 16,
+    "INT": 4,
+    "WIS": 14,
+    "CHA": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "集群战术 Pack Tactics",
+     "desc": "若该精魂的至少一个盟友位于目标 5 尺内且该盟友未处于失能状态，精魂对该目标的攻击检定具有优势。"
+    },
+    {
+     "name": "水陆呼吸 Water Breathing",
+     "desc": "该精魂只能在水下呼吸。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "撕裂 Rend",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，命中造成 1d8 + 4 + 法术环级 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "bestial-spirit-air",
+   "name": "飞行精魂兽 Bestial Spirit (Air)",
+   "name_cn": "飞行精魂兽",
+   "name_en": "Bestial Spirit (Air)",
+   "spell": "summon-beast",
+   "variant": "空中",
+   "type": "beast",
+   "size": "小型",
+   "ac": "11 + 法术环级",
+   "hp": "20 + 5 × 超出 2 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 11,
+    "CON": 16,
+    "INT": 4,
+    "WIS": 14,
+    "CHA": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "飞掠 Flyby",
+     "desc": "该精魂飞出敌人触及范围时不会引发借机攻击。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "撕裂 Rend",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，命中造成 1d8 + 4 + 法术环级 点穿刺伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "aberrant-spirit-slaad",
+   "name": "异怪精魂·史拉蟾 Aberrant Spirit (Slaad)",
+   "name_cn": "异怪精魂·史拉蟾",
+   "name_en": "Aberrant Spirit (Slaad)",
+   "spell": "summon-aberration",
+   "variant": "史拉蟾",
+   "type": "aberration",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "40 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 10,
+    "CON": 15,
+    "INT": 16,
+    "WIS": 10,
+    "CHA": 6
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "深潜语；理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "再生 Regeneration",
+     "desc": "若该精魂至少还有 1 点生命值，它在自己回合开始时回复 5 点生命值。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "利爪 Claw",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d10 + 3 + 法术环级 点挥砍伤害，且目标在精魂下个回合开始前无法回复生命值。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "aberrant-spirit-mind-flayer",
+   "name": "异怪精魂·夺心魔 Aberrant Spirit (Mind Flayer)",
+   "name_cn": "异怪精魂·夺心魔",
+   "name_en": "Aberrant Spirit (Mind Flayer)",
+   "spell": "summon-aberration",
+   "variant": "夺心魔",
+   "type": "aberration",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "40 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 10,
+    "CON": 15,
+    "INT": 16,
+    "WIS": 10,
+    "CHA": 6
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "深潜语；理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "低语灵光 Whispering Aura",
+     "desc": "在精魂每个回合开始时，若它未处于失能状态，它散发灵能：距它 5 尺内除你以外的每个生物做 DC = 你的法术豁免 DC 的感知豁免，失败受 2d6 点心灵伤害。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "心灵重击 Psychic Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 3 + 法术环级 点心灵伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "aberrant-spirit-beholderkin",
+   "name": "异怪精魂·眼魔亲族 Aberrant Spirit (Beholderkin)",
+   "name_cn": "异怪精魂·眼魔亲族",
+   "name_en": "Aberrant Spirit (Beholderkin)",
+   "spell": "summon-aberration",
+   "variant": "眼魔亲族",
+   "type": "aberration",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "40 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 30,
+    "swim": 0,
+    "burrow": 0,
+    "hover": true
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 10,
+    "CON": 15,
+    "INT": 16,
+    "WIS": 10,
+    "CHA": 6
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "深潜语；理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "悬浮 Hover",
+     "desc": "该精魂可悬浮于原地，即使失去移动力也不会坠落。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "眼光射线 Eye Ray",
+     "kind": "ranged",
+     "attack_bonus": null,
+     "reach": null,
+     "range": 150,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "远程攻击：命中 = 你的法术攻击加值，射程 150 尺，造成 1d8 + 3 + 法术环级 点心灵伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "celestial-spirit-avenger",
+   "name": "天界精魂·复仇者 Celestial Spirit (Avenger)",
+   "name_cn": "天界精魂·复仇者",
+   "name_en": "Celestial Spirit (Avenger)",
+   "spell": "summon-celestial",
+   "variant": "复仇者",
+   "type": "celestial",
+   "size": "大型",
+   "ac": "11 + 法术环级",
+   "hp": "40 + 10 × 超出 5 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 40,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 14,
+    "CON": 16,
+    "INT": 10,
+    "WIS": 14,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "天界语；理解你的语言但不会说",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "光耀长弓 Radiant Bow",
+     "kind": "ranged",
+     "attack_bonus": null,
+     "reach": null,
+     "range": 600,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "远程攻击：命中 = 你的法术攻击加值，射程 600 尺，造成 2d6 + 2 + 法术环级 点光耀伤害。"
+    },
+    {
+     "name": "治疗触碰 Healing Touch（1/日）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂触碰另一个生物，目标回复 2d8 + 法术环级 点生命值。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "celestial-spirit-defender",
+   "name": "天界精魂·守卫者 Celestial Spirit (Defender)",
+   "name_cn": "天界精魂·守卫者",
+   "name_en": "Celestial Spirit (Defender)",
+   "spell": "summon-celestial",
+   "variant": "守卫者",
+   "type": "celestial",
+   "size": "大型",
+   "ac": "11 + 法术环级 + 2（仅守卫者）",
+   "hp": "40 + 10 × 超出 5 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 40,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 14,
+    "CON": 16,
+    "INT": 10,
+    "WIS": 14,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "天界语；理解你的语言但不会说",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "光耀硬头锤 Radiant Mace",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d10 + 3 + 法术环级 点光耀伤害；你可以让该精魂自己或目标 10 尺内另一个它看得见的生物获得 1d10 点临时生命值。"
+    },
+    {
+     "name": "治疗触碰 Healing Touch（1/日）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂触碰另一个生物，目标回复 2d8 + 法术环级 点生命值。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "construct-spirit-clay",
+   "name": "构装精魂·黏土 Construct Spirit (Clay)",
+   "name_cn": "构装精魂·黏土",
+   "name_en": "Construct Spirit (Clay)",
+   "spell": "summon-construct",
+   "variant": "黏土",
+   "type": "construct",
+   "size": "中型",
+   "ac": "13 + 法术环级",
+   "hp": "40 + 15 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 10,
+    "CON": 18,
+    "INT": 14,
+    "WIS": 11,
+    "CHA": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "泥形 Soften",
+     "desc": "该精魂为黏土质地，外观由你决定。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 4 + 法术环级 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [
+    {
+     "name": "狂怒抽打 Berserk Lashing（仅黏土）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "触发：该精魂受到某个生物的伤害。响应：若可能，它对该生物发动一次重击，或朝该生物移动至多其一半速度且不引发借机攻击。"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "id": "construct-spirit-metal",
+   "name": "构装精魂·金属 Construct Spirit (Metal)",
+   "name_cn": "构装精魂·金属",
+   "name_en": "Construct Spirit (Metal)",
+   "spell": "summon-construct",
+   "variant": "金属",
+   "type": "construct",
+   "size": "中型",
+   "ac": "13 + 法术环级",
+   "hp": "40 + 15 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 10,
+    "CON": 18,
+    "INT": 14,
+    "WIS": 11,
+    "CHA": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "灼热之躯 Heated Body（仅金属）",
+     "desc": "以近战攻击命中该精魂、或在其擒抱中开始回合的生物，受到 1d10 点火焰伤害。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 4 + 法术环级 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "construct-spirit-stone",
+   "name": "构装精魂·石质 Construct Spirit (Stone)",
+   "name_cn": "构装精魂·石质",
+   "name_en": "Construct Spirit (Stone)",
+   "spell": "summon-construct",
+   "variant": "石质",
+   "type": "construct",
+   "size": "中型",
+   "ac": "13 + 法术环级",
+   "hp": "40 + 15 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 10,
+    "CON": 18,
+    "INT": 14,
+    "WIS": 11,
+    "CHA": 5
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "迟缓石化 Stony Lethargy（仅石质）",
+     "desc": "当生物在距该精魂 10 尺内开始回合时，精魂若能看见它，可以魔法能量笼罩它：目标做 DC = 你的法术豁免 DC 的感知豁免，失败则在其下个回合开始前不能发动借机攻击，且速度减半。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 4 + 法术环级 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "draconic-spirit",
+   "name": "龙之精魂 Draconic Spirit",
+   "name_cn": "龙之精魂",
+   "name_en": "Draconic Spirit",
+   "spell": "summon-dragon",
+   "variant": "—",
+   "type": "dragon",
+   "size": "大型",
+   "ac": "14 + 法术环级",
+   "hp": "50 + 10 × 超出 5 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 60,
+    "swim": 30,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 19,
+    "DEX": 14,
+    "CON": 17,
+    "INT": 10,
+    "WIS": 14,
+    "CHA": 14
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 30,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "龙语；理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "共享抗性 Shared Resistances",
+     "desc": "召唤时选择该精魂的一种抗性，在你法术结束前你获得该伤害类型的抗性。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的撕裂攻击次数等于「法术环级 ÷ 2」（向下取整），并使用一次吐息武器。"
+    },
+    {
+     "name": "撕裂 Rend",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 10,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 10 尺，造成 1d6 + 4 + 法术环级 点穿刺伤害。"
+    },
+    {
+     "name": "吐息武器 Breath Weapon",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂呼出 30 尺锥形能量：范围内每个生物做 DC = 你的法术豁免 DC 的敏捷豁免，失败受 2d6 点伤害（伤害类型为它拥有抗性的类型，施法时选定），成功则伤害减半。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "elemental-spirit-air",
+   "name": "元素精魂·气 Elemental Spirit (Air)",
+   "name_cn": "元素精魂·气",
+   "name_en": "Elemental Spirit (Air)",
+   "spell": "summon-elemental",
+   "variant": "气",
+   "type": "elemental",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "50 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 40,
+    "swim": 0,
+    "burrow": 0,
+    "hover": true
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 15,
+    "CON": 17,
+    "INT": 4,
+    "WIS": 10,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "原初语；理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "无定形 Amorphous Form（仅气、火、水）",
+     "desc": "该精魂可以穿过窄至 1 寸宽的缝隙，且该处不视为困难地形。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d10 + 4 + 法术环级 点闪电伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "elemental-spirit-earth",
+   "name": "元素精魂·土 Elemental Spirit (Earth)",
+   "name_cn": "元素精魂·土",
+   "name_en": "Elemental Spirit (Earth)",
+   "spell": "summon-elemental",
+   "variant": "土",
+   "type": "elemental",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "50 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 40,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 15,
+    "CON": 17,
+    "INT": 4,
+    "WIS": 10,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "原初语；理解你的语言但不会说",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d10 + 4 + 法术环级 点钝击伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "elemental-spirit-fire",
+   "name": "元素精魂·火 Elemental Spirit (Fire)",
+   "name_cn": "元素精魂·火",
+   "name_en": "Elemental Spirit (Fire)",
+   "spell": "summon-elemental",
+   "variant": "火",
+   "type": "elemental",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "50 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": true
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 15,
+    "CON": 17,
+    "INT": 4,
+    "WIS": 10,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "原初语；理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "无定形 Amorphous Form（仅气、火、水）",
+     "desc": "该精魂可以穿过窄至 1 寸宽的缝隙，且该处不视为困难地形。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d10 + 4 + 法术环级 点火焰伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "elemental-spirit-water",
+   "name": "元素精魂·水 Elemental Spirit (Water)",
+   "name_cn": "元素精魂·水",
+   "name_en": "Elemental Spirit (Water)",
+   "spell": "summon-elemental",
+   "variant": "水",
+   "type": "elemental",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "50 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 40,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 15,
+    "CON": 17,
+    "INT": 4,
+    "WIS": 10,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "原初语；理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "无定形 Amorphous Form（仅气、火、水）",
+     "desc": "该精魂可以穿过窄至 1 寸宽的缝隙，且该处不视为困难地形。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d10 + 4 + 法术环级 点寒冷伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "fey-spirit-fuming",
+   "name": "妖精精魂·暴躁 Fey Spirit (Fuming)",
+   "name_cn": "妖精精魂·暴躁",
+   "name_en": "Fey Spirit (Fuming)",
+   "spell": "summon-fey",
+   "variant": "暴躁",
+   "type": "fey",
+   "size": "小型",
+   "ac": "12 + 法术环级",
+   "hp": "30 + 10 × 超出 3 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 30,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 16,
+    "CON": 14,
+    "INT": 14,
+    "WIS": 11,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "木族语；理解你的语言但不会说",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "妖精之刃 Fey Blade",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 2d6 + 3 + 法术环级 点力场伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "妖精步 Fey Step（仅暴躁）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂传送至多 30 尺到它看得见的空地，然后：暴躁 —— 它在本回合结束前发动的下一次攻击检定具有优势。"
+    }
+   ],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "fey-spirit-mirthful",
+   "name": "妖精精魂·欢愉 Fey Spirit (Mirthful)",
+   "name_cn": "妖精精魂·欢愉",
+   "name_en": "Fey Spirit (Mirthful)",
+   "spell": "summon-fey",
+   "variant": "欢愉",
+   "type": "fey",
+   "size": "小型",
+   "ac": "12 + 法术环级",
+   "hp": "30 + 10 × 超出 3 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 30,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 16,
+    "CON": 14,
+    "INT": 14,
+    "WIS": 11,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "木族语；理解你的语言但不会说",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "妖精之刃 Fey Blade",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 2d6 + 3 + 法术环级 点力场伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "妖精步 Fey Step（仅欢愉）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂传送至多 30 尺到它看得见的空地，然后：欢愉 —— 距它 10 尺内一个它看得见的生物做 DC = 你的法术豁免 DC 的感知豁免，失败被你与该精魂魅惑 1 分钟，或在受到伤害时提前结束。"
+    }
+   ],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "fey-spirit-tricksy",
+   "name": "妖精精魂·狡黠 Fey Spirit (Tricksy)",
+   "name_cn": "妖精精魂·狡黠",
+   "name_en": "Fey Spirit (Tricksy)",
+   "spell": "summon-fey",
+   "variant": "狡黠",
+   "type": "fey",
+   "size": "小型",
+   "ac": "12 + 法术环级",
+   "hp": "30 + 10 × 超出 3 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 30,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 16,
+    "CON": 14,
+    "INT": 14,
+    "WIS": 11,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "木族语；理解你的语言但不会说",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "妖精之刃 Fey Blade",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 2d6 + 3 + 法术环级 点力场伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "妖精步 Fey Step（仅狡黠）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂传送至多 30 尺到它看得见的空地，然后：狡黠 —— 它在 5 尺内一个 10 尺立方体区域填满魔法黑暗，持续到它下个回合结束。"
+    }
+   ],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "fiendish-spirit-demon",
+   "name": "邪魔精魂·恶魔 Fiendish Spirit (Demon)",
+   "name_cn": "邪魔精魂·恶魔",
+   "name_en": "Fiendish Spirit (Demon)",
+   "spell": "summon-fiend",
+   "variant": "恶魔",
+   "type": "fiend",
+   "size": "大型",
+   "ac": "12 + 法术环级",
+   "hp": "50 + 15 × 超出 6 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 16,
+    "CON": 15,
+    "INT": 10,
+    "WIS": 10,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "深渊语、炼狱语；心灵感应 60 尺",
+   "traits": [
+    {
+     "name": "魔法抗性 Magic Resistance",
+     "desc": "该精魂对抗法术与其他魔法效应的豁免具有优势。"
+    },
+    {
+     "name": "死亡回响 Death Throes（仅恶魔）",
+     "desc": "当该精魂生命值归零或法术结束时，它爆炸：以它为中心 10 尺光环内每个生物做 DC = 你的法术豁免 DC 的敏捷豁免，失败受 2d10 + 法术环级 点火焰伤害，成功则减半。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "啃咬 Bite",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d12 + 3 + 法术环级 点黯蚀伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "fiendish-spirit-devil",
+   "name": "邪魔精魂·魔鬼 Fiendish Spirit (Devil)",
+   "name_cn": "邪魔精魂·魔鬼",
+   "name_en": "Fiendish Spirit (Devil)",
+   "spell": "summon-fiend",
+   "variant": "魔鬼",
+   "type": "fiend",
+   "size": "大型",
+   "ac": "12 + 法术环级",
+   "hp": "40 + 15 × 超出 6 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 16,
+    "CON": 15,
+    "INT": 10,
+    "WIS": 10,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "深渊语、炼狱语；心灵感应 60 尺",
+   "traits": [
+    {
+     "name": "魔法抗性 Magic Resistance",
+     "desc": "该精魂对抗法术与其他魔法效应的豁免具有优势。"
+    },
+    {
+     "name": "魔鬼视界 Devil's Sight（仅魔鬼）",
+     "desc": "魔法黑暗不会妨碍该精魂的黑暗视觉。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "炽焰打击 Fiery Strike",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": 150,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战或远程攻击：命中 = 你的法术攻击加值，触及 5 尺或射程 150 尺，造成 2d6 + 3 + 法术环级 点火焰伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "fiendish-spirit-yugoloth",
+   "name": "邪魔精魂·尤格罗斯 Fiendish Spirit (Yugoloth)",
+   "name_cn": "邪魔精魂·尤格罗斯",
+   "name_en": "Fiendish Spirit (Yugoloth)",
+   "spell": "summon-fiend",
+   "variant": "尤格罗斯",
+   "type": "fiend",
+   "size": "大型",
+   "ac": "12 + 法术环级",
+   "hp": "60 + 15 × 超出 6 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 13,
+    "DEX": 16,
+    "CON": 15,
+    "INT": 10,
+    "WIS": 10,
+    "CHA": 16
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "深渊语、炼狱语；心灵感应 60 尺",
+   "traits": [
+    {
+     "name": "魔法抗性 Magic Resistance",
+     "desc": "该精魂对抗法术与其他魔法效应的豁免具有优势。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "爪击 Claws",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 3 + 法术环级 点挥砍伤害；命中或失手后，该精魂可立即传送至多 30 尺到它看得见的空地。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "undead-spirit-ghostly",
+   "name": "亡灵精魂·幽魂 Undead Spirit (Ghostly)",
+   "name_cn": "亡灵精魂·幽魂",
+   "name_en": "Undead Spirit (Ghostly)",
+   "spell": "summon-undead",
+   "variant": "幽魂",
+   "type": "undead",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "30 + 10 × 超出 3 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 40,
+    "swim": 0,
+    "burrow": 0,
+    "hover": true
+   },
+   "abilities": {
+    "STR": 12,
+    "DEX": 16,
+    "CON": 15,
+    "INT": 4,
+    "WIS": 10,
+    "CHA": 9
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "虚体穿行 Incorporeal Passage（仅幽魂）",
+     "desc": "该精魂可如穿越困难地形般穿过其他生物与物件；若它在物件内结束回合，会被挤到最近的空地，并每移动 5 尺受到 1d10 点力场伤害。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "死亡之触 Deathly Touch",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 3 + 法术环级 点黯蚀伤害，且目标在其下个回合结束前处于恐惧状态。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "undead-spirit-skeletal",
+   "name": "亡灵精魂·骷髅 Undead Spirit (Skeletal)",
+   "name_cn": "亡灵精魂·骷髅",
+   "name_en": "Undead Spirit (Skeletal)",
+   "spell": "summon-undead",
+   "variant": "骷髅",
+   "type": "undead",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "20 + 10 × 超出 3 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 12,
+    "DEX": 16,
+    "CON": 15,
+    "INT": 4,
+    "WIS": 10,
+    "CHA": 9
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "墓穴箭矢 Grave Bolt",
+     "kind": "ranged",
+     "attack_bonus": null,
+     "reach": null,
+     "range": 150,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "远程攻击：命中 = 你的法术攻击加值，射程 150 尺，造成 2d4 + 3 + 法术环级 点黯蚀伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "undead-spirit-putrid",
+   "name": "亡灵精魂·腐尸 Undead Spirit (Putrid)",
+   "name_cn": "亡灵精魂·腐尸",
+   "name_en": "Undead Spirit (Putrid)",
+   "spell": "summon-undead",
+   "variant": "腐尸",
+   "type": "undead",
+   "size": "中型",
+   "ac": "11 + 法术环级",
+   "hp": "30 + 10 × 超出 3 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 12,
+    "DEX": 16,
+    "CON": 15,
+    "INT": 4,
+    "WIS": 10,
+    "CHA": 9
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "溃烂灵光 Festering Aura（仅腐尸）",
+     "desc": "以该精魂为中心 5 尺光环内、除你以外的生物在其回合开始时做 DC = 你的法术豁免 DC 的体质豁免，失败在其下个回合开始前中毒。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "腐朽之爪 Rotting Claw",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d6 + 3 + 法术环级 点挥砍伤害；若目标已中毒，则在其下个回合结束前麻痹。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "animated-object",
+   "name": "活化物件 Animated Object",
+   "name_cn": "活化物件",
+   "name_en": "Animated Object",
+   "spell": "animate-objects",
+   "variant": "—",
+   "type": "construct",
+   "size": "微型/小型/中型/大型/巨型",
+   "ac": "15",
+   "hp": "10（中型或更小）／20（大型）／40（巨型）",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 30,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 16,
+    "DEX": 10,
+    "CON": 10,
+    "INT": 3,
+    "WIS": 3,
+    "CHA": 1
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 30,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "构装本质 Construct Nature",
+     "desc": "该物件活化后视为构装生物，使用本 stat block 的全部数据。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "重击 Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成力场伤害：中型或更小为（法术环级 − 4）d4 + 3，大型为（法术环级 − 3）d6 + 3，巨型为（法术环级 − 3）d12 + 3，再加上你的施法属性调整值。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "giant-insect-centipede",
+   "name": "巨型昆虫·蜈蚣 Giant Insect (Centipede)",
+   "name_cn": "巨型昆虫·蜈蚣",
+   "name_en": "Giant Insect (Centipede)",
+   "spell": "giant-insect",
+   "variant": "蜈蚣",
+   "type": "beast",
+   "size": "大型",
+   "ac": "11 + 法术环级",
+   "hp": "30 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 13,
+    "CON": 15,
+    "INT": 4,
+    "WIS": 14,
+    "CHA": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "该昆虫可以攀爬困难表面（包括天花板）而无需属性检定。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "毒刺 Poison Jab",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 10,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 10 尺，造成 1d6 + 3 + 法术环级 点穿刺伤害，外加 1d4 点毒素伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "毒液喷吐 Venomous Spew（仅蜈蚣）",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该昆虫对 10 尺内一个它看得见的生物喷出毒液：目标做 DC = 你的法术豁免 DC 的体质豁免，失败在其下个回合开始前中毒。"
+    }
+   ],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "giant-insect-spider",
+   "name": "巨型昆虫·蜘蛛 Giant Insect (Spider)",
+   "name_cn": "巨型昆虫·蜘蛛",
+   "name_en": "Giant Insect (Spider)",
+   "spell": "giant-insect",
+   "variant": "蜘蛛",
+   "type": "beast",
+   "size": "大型",
+   "ac": "11 + 法术环级",
+   "hp": "30 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 13,
+    "CON": 15,
+    "INT": 4,
+    "WIS": 14,
+    "CHA": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "该昆虫可以攀爬困难表面（包括天花板）而无需属性检定。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "毒刺 Poison Jab",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 10,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 10 尺，造成 1d6 + 3 + 法术环级 点穿刺伤害，外加 1d4 点毒素伤害。"
+    },
+    {
+     "name": "蛛网弹 Web Bolt（仅蜘蛛）",
+     "kind": "ranged",
+     "attack_bonus": null,
+     "reach": null,
+     "range": 60,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "远程攻击：命中 = 你的法术攻击加值，射程 60 尺，造成 1d10 + 3 + 法术环级 点钝击伤害，且目标速度降为 0 直到该昆虫下个回合开始。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "giant-insect-wasp",
+   "name": "巨型昆虫·黄蜂 Giant Insect (Wasp)",
+   "name_cn": "巨型昆虫·黄蜂",
+   "name_en": "Giant Insect (Wasp)",
+   "spell": "giant-insect",
+   "variant": "黄蜂",
+   "type": "beast",
+   "size": "大型",
+   "ac": "11 + 法术环级",
+   "hp": "30 + 10 × 超出 4 级的环级",
+   "hp_dice": "—",
+   "speed": {
+    "walk": 40,
+    "climb": 40,
+    "fly": 40,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 17,
+    "DEX": 13,
+    "CON": 15,
+    "INT": 4,
+    "WIS": 14,
+    "CHA": 3
+   },
+   "senses": {
+    "darkvision": 60,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 10
+   },
+   "languages": "理解你的语言但不会说",
+   "traits": [
+    {
+     "name": "蛛行 Spider Climb",
+     "desc": "该昆虫可以攀爬困难表面（包括天花板）而无需属性检定。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "多重攻击 Multiattack",
+     "kind": "multiattack",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "该精魂发动的攻击次数等于「法术环级 ÷ 2」（向下取整）。"
+    },
+    {
+     "name": "毒刺 Poison Jab",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 10,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 10 尺，造成 1d6 + 3 + 法术环级 点穿刺伤害，外加 1d4 点毒素伤害。"
+    }
+   ],
+   "bonus_actions": [],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "otherworldly-steed-celestial",
+   "name": "异界坐骑·天界 Otherworldly Steed (Celestial)",
+   "name_cn": "异界坐骑·天界",
+   "name_en": "Otherworldly Steed (Celestial)",
+   "spell": "find-steed",
+   "variant": "天界",
+   "type": "celestial/fey/fiend",
+   "size": "大型",
+   "ac": "10 + 每法术环级 1 点",
+   "hp": "5 + 10 × 法术环级",
+   "hp_dice": "d10（数量 = 法术环级）",
+   "speed": {
+    "walk": 60,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 12,
+    "CON": 14,
+    "INT": 6,
+    "WIS": 12,
+    "CHA": 8
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "心灵感应 1 里（仅与你）",
+   "traits": [
+    {
+     "name": "生命纽带 Life Bond",
+     "desc": "当你因 1 环或更高环级的法术回复生命值时，若坐骑在你 5 尺内，它回复同等的生命值。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "异界重击 Otherworldly Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 法术环级 点光耀伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "治疗触碰 Healing Touch（仅天界，长休后恢复）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "坐骑 5 尺内一个生物回复 2d8 + 法术环级 点生命值。"
+    }
+   ],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "otherworldly-steed-fey",
+   "name": "异界坐骑·妖精 Otherworldly Steed (Fey)",
+   "name_cn": "异界坐骑·妖精",
+   "name_en": "Otherworldly Steed (Fey)",
+   "spell": "find-steed",
+   "variant": "妖精",
+   "type": "celestial/fey/fiend",
+   "size": "大型",
+   "ac": "10 + 每法术环级 1 点",
+   "hp": "5 + 10 × 法术环级",
+   "hp_dice": "d10（数量 = 法术环级）",
+   "speed": {
+    "walk": 60,
+    "climb": 0,
+    "fly": 0,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 12,
+    "CON": 14,
+    "INT": 6,
+    "WIS": 12,
+    "CHA": 8
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "心灵感应 1 里（仅与你）",
+   "traits": [
+    {
+     "name": "生命纽带 Life Bond",
+     "desc": "当你因 1 环或更高环级的法术回复生命值时，若坐骑在你 5 尺内，它回复同等的生命值。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "异界重击 Otherworldly Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 法术环级 点心灵伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "妖精步 Fey Step（仅妖精，长休后恢复）",
+     "kind": "other",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "坐骑连同其骑乘者传送到 60 尺内你选定的空地。"
+    }
+   ],
+   "reactions": [],
+   "note": ""
+  },
+  {
+   "id": "otherworldly-steed-fiend",
+   "name": "异界坐骑·邪魔 Otherworldly Steed (Fiend)",
+   "name_cn": "异界坐骑·邪魔",
+   "name_en": "Otherworldly Steed (Fiend)",
+   "spell": "find-steed",
+   "variant": "邪魔",
+   "type": "celestial/fey/fiend",
+   "size": "大型",
+   "ac": "10 + 每法术环级 1 点",
+   "hp": "5 + 10 × 法术环级",
+   "hp_dice": "d10（数量 = 法术环级）",
+   "speed": {
+    "walk": 60,
+    "climb": 0,
+    "fly": 60,
+    "swim": 0,
+    "burrow": 0,
+    "hover": false
+   },
+   "abilities": {
+    "STR": 18,
+    "DEX": 12,
+    "CON": 14,
+    "INT": 6,
+    "WIS": 12,
+    "CHA": 8
+   },
+   "senses": {
+    "darkvision": 0,
+    "blindsight": 0,
+    "tremorsense": 0,
+    "truesight": 0,
+    "passive_perception": 11
+   },
+   "languages": "心灵感应 1 里（仅与你）",
+   "traits": [
+    {
+     "name": "生命纽带 Life Bond",
+     "desc": "当你因 1 环或更高环级的法术回复生命值时，若坐骑在你 5 尺内，它回复同等的生命值。"
+    }
+   ],
+   "actions": [
+    {
+     "name": "异界重击 Otherworldly Slam",
+     "kind": "melee",
+     "attack_bonus": null,
+     "reach": 5,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "近战攻击：命中 = 你的法术攻击加值，触及 5 尺，造成 1d8 + 法术环级 点黯蚀伤害。"
+    }
+   ],
+   "bonus_actions": [
+    {
+     "name": "邪眼凝视 Fell Glare（仅邪魔，长休后恢复）",
+     "kind": "save",
+     "attack_bonus": null,
+     "reach": null,
+     "range": null,
+     "damage": null,
+     "damage_type": null,
+     "save": null,
+     "dc": null,
+     "desc": "坐骑 60 尺内一个它看得见的生物做 DC = 你的法术豁免 DC 的感知豁免，失败在其下个回合结束前处于恐惧状态。"
+    }
+   ],
+   "reactions": [],
+   "note": ""
+  }
+ ]
+}
