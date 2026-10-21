@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.ranger.gloom_stalker
+class: dnd2024.class.ranger
+name: {zh: 幽暗追猎者, en: Gloom Stalker}
+summary:
+  zh: |-
+    地底/夜间猎手：首回合爆发极高，在黑暗中几乎无法被看见。
+  en: |-
+    The Gloom Stalker subclass of the Ranger.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.ranger.gloom_stalker.dread_ambusher
+    name: {zh: 恐惧伏击, en: Dread Ambusher}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        先攻加感知调整值；首回合速度 +10 尺，且攻击动作可多打一次并额外 1d8。
+      en: |-
+        Dread Ambusher — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.gloom_stalker.umbral_sight
+    name: {zh: 幽暗视觉, en: Umbral Sight}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        黑暗视觉 +30 尺；处于黑暗中时对依赖黑暗视觉的生物隐形。
+      en: |-
+        Umbral Sight — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.gloom_stalker.iron_mind
+    name: {zh: 钢铁意志, en: Iron Mind}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得感知豁免熟练（或智力）。
+      en: |-
+        Iron Mind — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.gloom_stalker.stalker_s_flurry
+    name: {zh: 潜行者之怒, en: Stalker's Flurry}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        攻击失手后，本回合可再攻击一次。
+      en: |-
+        Stalker's Flurry — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.gloom_stalker.shadowy_dodge
+    name: {zh: 暗影闪避, en: Shadowy Dodge}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        被攻击时用反应给该攻击劣势，并移动 30 尺。
+      en: |-
+        Shadowy Dodge — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

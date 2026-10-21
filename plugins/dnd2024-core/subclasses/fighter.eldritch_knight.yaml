@@ -1,0 +1,116 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.fighter.eldritch_knight
+class: dnd2024.class.fighter
+name: {zh: 魔能骑士, en: Eldritch Knight}
+summary:
+  zh: |-
+    会施法的战士：防护/塑能法术+武器联结，攻防一体的魔剑士。
+  en: |-
+    The Eldritch Knight subclass of the Fighter.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.fighter.eldritch_knight.spellcasting
+    name: {zh: 施法, en: Spellcasting}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以智力施法（法师列表，偏防护与塑能）；法术位按 1/3 施法者计算。
+      en: |-
+        Spellcasting — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.eldritch_knight.weapon_bond
+    name: {zh: 武器联结, en: Weapon Bond}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        仪式绑定 2 件武器，可附赠动作召回，且不会被缴械。
+      en: |-
+        Weapon Bond — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.eldritch_knight.war_magic
+    name: {zh: 战争魔法, en: War Magic}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        施放戏法后可附赠动作做一次武器攻击。
+      en: |-
+        War Magic — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.eldritch_knight.eldritch_strike
+    name: {zh: 奥术冲锋, en: Eldritch Strike}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        武器命中后，目标对你这回合施放的法术豁免有劣势。
+      en: |-
+        Eldritch Strike — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.eldritch_knight.arcane_charge
+    name: {zh: 奥术充能, en: Arcane Charge}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        行动激增时可传送 30 尺。
+      en: |-
+        Arcane Charge — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.eldritch_knight.improved_war_magic
+    name: {zh: 强化战争魔法, en: Improved War Magic}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        施放 1 环以上法术之后也能附赠动作攻击。
+      en: |-
+        Improved War Magic — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

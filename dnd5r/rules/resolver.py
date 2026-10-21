@@ -15,6 +15,9 @@ from ..model.levels import ClassLevel, TotalLevel
 from ..model.statblock import Abilities
 from .modifiers import Modifier, Resolution, Stack, resolve
 
+# d20 上唯一能自然掷出的重击面。门槛只会被能力往小改，永远不会超过它
+CRIT_ON_20 = 20
+
 
 @dataclass(frozen=True, slots=True)
 class RefContext:
@@ -108,6 +111,15 @@ class Resolver:
         base = self.ctx.prof_bonus + stat.abilities.mod(ability)
         return resolve(modifiers, base=base, ctx=self._ctx_map)
 
+    def crit_range(self, actor: Actor, modifiers: Iterable[Modifier] = ()) -> Resolution:
+        """重击门槛：默认 20，「19 或 20 即重击」写成 `stack: min` 的 19。
+
+        用 MIN 而不是 ADD，因为这是**门槛**不是加值：强化重击（19）叠加
+        卓越重击（18）应该得 18，加法会变成 17。内容里写
+        `grant_modifier: {target: attack.crit_min, value: 19, stack: min}`。
+        """
+        return resolve(modifiers, base=CRIT_ON_20, ctx=self._ctx_map)
+
     # --- 机动与感知 ---------------------------------------------------
     def speed(self, actor: Actor, mode: str = "walk", modifiers: Iterable[Modifier] = ()) -> Resolution:
         base = actor.top().statblock.speed(mode)
@@ -141,3 +153,11 @@ class Resolver:
 def with_set(value: int, source: str) -> Modifier:
     """便捷构造：用 SET 替换基础公式（无甲防御、换 AC 公式时用）。"""
     return Modifier(target="ac", value=value, stack=Stack.SET, source=source)
+
+
+def crit_text(threshold: int) -> str:
+    """门槛 → 界面写法：20 就是「20」，19 就是「19-20」。不需要翻译。"""
+    value = int(threshold)
+    if value >= CRIT_ON_20:
+        return str(CRIT_ON_20)
+    return "%d-%d" % (max(1, value), CRIT_ON_20)

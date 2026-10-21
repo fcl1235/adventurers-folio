@@ -1,0 +1,116 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.paladin.oath_of_vengeance
+class: dnd2024.class.paladin
+name: {zh: 复仇之誓, en: Oath of Vengeance}
+summary:
+  zh: |-
+    复仇型输出圣武士：对单一目标开优势，追人、反制、爆发最强。
+  en: |-
+    The Oath of Vengeance subclass of the Paladin.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.paladin.oath_of_vengeance.oath_of_vengeance_spells
+    name: {zh: 复仇之誓法术, en: Oath of Vengeance Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：猎人印记、定身术、加速术、放逐术等。
+      en: |-
+        Oath of Vengeance Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_vengeance.vow_of_enmity
+    name: {zh: 仇敌誓言, en: Vow of Enmity}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：对 10 尺内一个目标，1 分钟内你的攻击有优势。
+      en: |-
+        Vow of Enmity — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_vengeance.abjure_enemy
+    name: {zh: 斥退敌人, en: Abjure Enemy}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：一个目标感知豁免失败则恐慌且速度归 0。
+      en: |-
+        Abjure Enemy — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_vengeance.relentless_avenger
+    name: {zh: 无情复仇, en: Relentless Avenger}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        借机攻击命中后，可移动半速且不引发借机。
+      en: |-
+        Relentless Avenger — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_vengeance.soul_of_vengeance
+    name: {zh: 复仇之魂, en: Soul of Vengeance}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        仇敌誓言的目标攻击他人时，可用反应对它做一次近战攻击。
+      en: |-
+        Soul of Vengeance — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_vengeance.avenging_angel
+    name: {zh: 复仇化身, en: Avenging Angel}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 分钟：飞行 60 尺，且周围 30 尺敌人恐慌，命中后额外 3d8 光耀。
+      en: |-
+        Avenging Angel — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.warlock.celestial_patron
+class: dnd2024.class.warlock
+name: {zh: 天界宗主, en: Celestial Patron}
+summary:
+  zh: |-
+    天界宗主：治疗池+光耀伤害，队伍里的副奶与稳定输出。
+  en: |-
+    The Celestial Patron subclass of the Warlock.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.warlock.celestial_patron.celestial_spells
+    name: {zh: 天界法术, en: Celestial Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：治愈真言、灼热射线、昼明术、火焰风暴等。
+      en: |-
+        Celestial Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.celestial_patron.healing_light
+    name: {zh: 治愈之光, en: Healing Light}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 + 邪术师等级 颗 d6 治疗骰，附赠动作分配给 60 尺内生物。
+      en: |-
+        Healing Light — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.celestial_patron.radiant_soul
+    name: {zh: 光耀之魂, en: Radiant Soul}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        对光耀或火焰伤害有抗性；施放光耀/火焰法术时加魅力调整值伤害。
+      en: |-
+        Radiant Soul — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.celestial_patron.celestial_resistance
+    name: {zh: 天界韧性, en: Celestial Resistance}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        长休后获得等同等级 + 魅力调整值 的临时 HP。
+      en: |-
+        Celestial Resistance — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.celestial_patron.searing_vengeance
+    name: {zh: 灼热复仇, en: Searing Vengeance}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        死亡豁免时可爆发：起身、回一半 HP、周围敌人目盲并受伤。
+      en: |-
+        Searing Vengeance — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

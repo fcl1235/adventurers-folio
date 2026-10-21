@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.rogue.arcane_trickster
+class: dnd2024.class.rogue
+name: {zh: 奥法诡术师, en: Arcane Trickster}
+summary:
+  zh: |-
+    会法术的盗贼：法师之手隔空扒窃、幻术掩护，潜行与控场兼备。
+  en: |-
+    The Arcane Trickster subclass of the Rogue.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.rogue.arcane_trickster.spellcasting
+    name: {zh: 施法, en: Spellcasting}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以智力施法（法师列表，偏幻术与附魔）；法术位按 1/3 施法者计算。
+      en: |-
+        Spellcasting — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.arcane_trickster.mage_hand_legerdemain
+    name: {zh: 法师之手巧技, en: Mage Hand Legerdemain}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        法师之手隐形，可隔空开锁、扒窃、投毒。
+      en: |-
+        Mage Hand Legerdemain — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.arcane_trickster.magical_ambush
+    name: {zh: 魔法伏击, en: Magical Ambush}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        躲藏状态下施法，目标对该法术的豁免有劣势。
+      en: |-
+        Magical Ambush — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.arcane_trickster.versatile_trickster
+    name: {zh: 诡术大师, en: Versatile Trickster}
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可用附赠动作让法师之手给目标制造优势（夹击）。
+      en: |-
+        Versatile Trickster — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.arcane_trickster.spell_thief
+    name: {zh: 窃法, en: Spell Thief}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可偷取他人刚施放的法术并自己施放（1 次/长休）。
+      en: |-
+        Spell Thief — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

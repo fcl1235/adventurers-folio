@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.paladin.oath_of_devotion
+class: dnd2024.class.paladin
+name: {zh: 奉献之誓, en: Oath of Devotion}
+summary:
+  zh: |-
+    最经典的骑士誓约：神圣武器+命中加魅力，灵光免疫魅惑，正面对抗最强。
+  en: |-
+    The Oath of Devotion binds Paladins to the ideals of justice and order. These Paladins meet the archetype of the knight in shining armor. They hold themselves to the highest standards of conduct, and some-for better or worse-hold the rest of the world to the same standards. Many who swear this oath are devoted to gods of law and good and use their gods' tenets as the measure of personal devotion. Others hold angels as their ideals and incorporate images of angelic wings into their helmets or coats of arms. These paladins share the following tenets: - Let your word be your promise. - Protect the weak and never fear to act. - Let your honorable deeds be an example.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.paladin.oath_of_devotion.oath_of_devotion_spells
+    name: {zh: 奉献之誓法术, en: Oath of Devotion Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：护盾术、神圣武器、解除魔法、自由行动等。
+      en: |-
+        The magic of your oath ensures you always have certain spells ready; when you reach a Paladin level specified in the Oath of Devotion Spells table, you thereafter always have the listed spells prepared. Oath of Devotion Spells Paladin Level Spells Level 3 Paladin Spells Spell School Special 5 Aid, Zone of Truth Daylight Evocation - Magic Circle Abjuration M Revivify Necromancy M Level 4 Paladin Spells Spell School Special Banishment Abjuration C Locate Creature Divination C Level 5 Paladin Spells Spell School Special Geas Enchantment - Raise Dead Necromancy M 13 Freedom of Movement, Guardian of Faith
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_devotion.sacred_weapon
+    name: {zh: 神圣武器, en: Sacred Weapon}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：10 分钟内近战攻击命中加魅力调整值，且发出光亮。
+      en: |-
+        When you take the Attack action, you can expend one use of your Channel Divinity to imbue one Melee weapon that you are holding with positive energy. For 10 minutes or until you use this feature again, you add your Charisma modifier to attack rolls you make with that weapon (minimum bonus of +1), and each time you hit with it, you cause it to deal its normal damage type or Radiant damage. The weapon also emits Bright Light in a 20-foot radius and Dim Light 20 feet beyond that. You can end this effect early (no action required). This effect also ends if you aren't carrying the weapon.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_devotion.aura_of_devotion
+    name: {zh: 奉献灵光, en: Aura of Devotion}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        守护灵光内你与盟友免疫魅惑。
+      en: |-
+        You and your allies have Immunity to the Charmed condition while in your Aura of Protection. If a Charmed ally enters the aura, that condition has no effect on that ally while there.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_devotion.smite_of_protection
+    name: {zh: 守护斩击, en: Smite of Protection}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        施放至圣斩后，灵光内你与盟友获得半身掩护直到你下回合开始。
+      en: |-
+        Your magical smite now radiates protective energy. Whenever you cast Divine Smite, you and your allies have Half Cover while in your Aura of Protection. The aura has this benefit until the start of your next turn.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_devotion.holy_nimbus
+    name: {zh: 神圣光环, en: Holy Nimbus}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 分钟：灵光内敌人每回合受 10 光耀伤害，你对邪魔/不死攻击有优势。
+      en: |-
+        As a Bonus Action, you can imbue your Aura of Protection with holy power, granting the benefits below for 10 minutes or until you end them (no action required). Once you use this feature, you can't use it again until you finish a Long Rest. You can also restore your use of it by expending a level 5 spell slot (no action required). Holy Ward. You have Advantage on any saving throw you are forced to make by a Fiend or an Undead. Radiant Damage. Whenever an enemy starts its turn in the aura, that creature takes Radiant damage equal to your Charisma modifier plus your Proficiency Bonus. Sunlight. The aura is filled with Bright Light that is sunlight.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

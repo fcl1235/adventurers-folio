@@ -1,0 +1,82 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.monk.warrior_of_mercy
+class: dnd2024.class.monk
+name: {zh: 慈悲宗, en: Warrior of Mercy}
+summary:
+  zh: |-
+    生死之间的医者武僧：气点能治疗也能加伤害，还能解状态、复活队友。
+  en: |-
+    The Warrior of Mercy subclass of the Monk.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.monk.warrior_of_mercy.hand_of_harm
+    name: {zh: 生死之手 Hand of Healing /, en: Hand of Harm}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        花 1 气点：治疗（武艺骰+感知）或让徒手命中额外造成 1d6+感知 死灵伤害。
+      en: |-
+        Hand of Harm — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_mercy.physician_s_touch
+    name: {zh: 医者之技, en: Physician's Touch}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        生死之手可额外解除中毒、疾病、目盲、失聪、麻痹等状态。
+      en: |-
+        Physician's Touch — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_mercy.flurry_of_healing_and_harm
+    name: {zh: 疾风疗愈, en: Flurry of Healing and Harm}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        疾风连击的每次攻击都可替换为治疗或额外伤害。
+      en: |-
+        Flurry of Healing and Harm — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_mercy.hand_of_ultimate_mercy
+    name: {zh: 终极慈悲, en: Hand of Ultimate Mercy}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        花 5 气点复活 5 尺内死亡不超过 24 小时的生物。
+      en: |-
+        Hand of Ultimate Mercy — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

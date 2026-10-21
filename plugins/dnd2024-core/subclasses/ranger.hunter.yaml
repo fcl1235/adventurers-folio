@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.ranger.hunter
+class: dnd2024.class.ranger
+name: {zh: 猎人, en: Hunter}
+summary:
+  zh: |-
+    最纯粹的猎手：不依赖宠物，靠多打一次与减伤硬吃战斗。
+  en: |-
+    You stalk prey in the wilds and elsewhere, using your abilities as a Hunter to protect nature and people everywhere from forces that would destroy them.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.ranger.hunter.hunter_s_lore
+    name: {zh: 猎人知识, en: Hunter's Lore}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        对 Hunter's Mark 标记的目标，可得知它的免疫/抗性/易伤。
+      en: |-
+        You can call on the forces of nature to reveal certain strengths and weaknesses of your prey. While a creature is marked by your Hunter's Mark, you know whether that creature has any Immunities, Resistances, or Vulnerabilities, and if the creature has any, you know what they are.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.hunter.hunter_s_prey
+    name: {zh: 猎人猎物, en: Hunter's Prey}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        二选一（每次休息可换）：巨人杀手（目标受伤则额外 1d8）、破群者（攻击第二个 5 尺内目标）。
+      en: |-
+        You gain one of the following feature options of your choice. Whenever you finish a Short or Long Rest, you can replace the chosen option with the other one. Colossus Slayer. Your tenacity can wear down even the most resilient foes. When you hit a creature with a weapon, the weapon deals an extra 1d8 damage to the target if it's missing any of its Hit Points. You can deal this extra damage only once per turn. Horde Breaker. Once on each of your turns when you make an attack with a weapon, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target, that is within the weapon's range, and that you haven't attacked this turn.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.hunter.defensive_tactics
+    name: {zh: 防御战术, en: Defensive Tactics}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        二选一：逃群（借机攻击对你劣势）、多重防御（被多个敌人包围时 AC +4）。
+      en: |-
+        You gain one of the following feature options of your choice. Whenever you finish a Short or Long Rest, you can replace the chosen option with the other one. Escape the Horde. Opportunity Attacks have Disadvantage against you. Multiattack Defense. When a creature hits you with an attack roll, that creature has Disadvantage on all other attack rolls against you this turn.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.hunter.superior_hunter_s_prey
+    name: {zh: 卓越猎物, en: Superior Hunter's Prey}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        每回合可将 Hunter's Mark 的额外伤害复制给 30 尺内另一名生物。
+      en: |-
+        Once per turn when you deal damage to a creature marked by your Hunter's Mark, you can also deal that spell's extra damage to a different creature that you can see within 30 feet of the first creature.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.ranger.hunter.superior_hunter_s_defense
+    name: {zh: 卓越防御, en: Superior Hunter's Defense}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：对一次伤害及其同类型伤害获得抗性，直到本回合结束。
+      en: |-
+        When you take damage, you can take a Reaction to give yourself Resistance to that damage and any other damage of the same type until the end of the current turn.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

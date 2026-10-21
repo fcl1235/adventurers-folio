@@ -1,0 +1,116 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.paladin.oath_of_glory
+class: dnd2024.class.paladin
+name: {zh: 荣耀之誓, en: Oath of Glory}
+summary:
+  zh: |-
+    希腊英雄式誓约：靠自身强壮带动全队，运动与临时生命见长。
+  en: |-
+    The Oath of Glory subclass of the Paladin.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.paladin.oath_of_glory.oath_of_glory_spells
+    name: {zh: 荣耀之誓法术, en: Oath of Glory Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：英雄气概、加速术、自由行动等。
+      en: |-
+        Oath of Glory Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_glory.inspiring_smite
+    name: {zh: 鼓舞斩击, en: Inspiring Smite}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：至圣斩命中后，给 30 尺内盟友分配共 2d8+等级 的临时生命。
+      en: |-
+        Inspiring Smite — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_glory.peerless_athlete
+    name: {zh: 同侪典范, en: Peerless Athlete}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：10 分钟内运动/杂技优势，跳跃与负重翻倍。
+      en: |-
+        Peerless Athlete — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_glory.aura_of_alacrity
+    name: {zh: 迅捷灵光, en: Aura of Alacrity}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        灵光内你与盟友速度 +10 尺。
+      en: |-
+        Aura of Alacrity — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_glory.glorious_defense
+    name: {zh: 荣耀防御, en: Glorious Defense}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：被攻击时加魅力调整值到 AC，若因此失手可立刻反击。
+      en: |-
+        Glorious Defense — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_glory.living_legend
+    name: {zh: 活着的传奇, en: Living Legend}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 分钟：魅力检定优势，且每回合可把一次失手改为命中。
+      en: |-
+        Living Legend — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

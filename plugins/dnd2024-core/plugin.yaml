@@ -4,7 +4,7 @@ api: 1
 name:
   zh: D&D 2024 核心内容
   en: D&D 2024 Core Content
-version: 0.7.0
+version: 0.8.0
 requires: []
 provides:
   classes:
@@ -20,7 +20,55 @@ provides:
     - dnd2024.class.sorcerer
     - dnd2024.class.warlock
     - dnd2024.class.wizard
-  subclasses: []
+  subclasses:
+    - dnd2024.subclass.barbarian.path_of_the_berserker
+    - dnd2024.subclass.barbarian.path_of_the_wild_heart
+    - dnd2024.subclass.barbarian.path_of_the_world_tree
+    - dnd2024.subclass.barbarian.path_of_the_zealot
+    - dnd2024.subclass.bard.college_of_dance
+    - dnd2024.subclass.bard.college_of_glamour
+    - dnd2024.subclass.bard.college_of_lore
+    - dnd2024.subclass.bard.college_of_valor
+    - dnd2024.subclass.cleric.life_domain
+    - dnd2024.subclass.cleric.light_domain
+    - dnd2024.subclass.cleric.trickery_domain
+    - dnd2024.subclass.cleric.war_domain
+    - dnd2024.subclass.druid.circle_of_the_land
+    - dnd2024.subclass.druid.circle_of_the_moon
+    - dnd2024.subclass.druid.circle_of_the_sea
+    - dnd2024.subclass.druid.circle_of_the_stars
+    - dnd2024.subclass.fighter.battle_master
+    - dnd2024.subclass.fighter.champion
+    - dnd2024.subclass.fighter.eldritch_knight
+    - dnd2024.subclass.fighter.psi_warrior
+    - dnd2024.subclass.monk.warrior_of_mercy
+    - dnd2024.subclass.monk.warrior_of_shadow
+    - dnd2024.subclass.monk.warrior_of_the_elements
+    - dnd2024.subclass.monk.warrior_of_the_open_hand
+    - dnd2024.subclass.paladin.oath_of_devotion
+    - dnd2024.subclass.paladin.oath_of_glory
+    - dnd2024.subclass.paladin.oath_of_the_ancients
+    - dnd2024.subclass.paladin.oath_of_vengeance
+    - dnd2024.subclass.ranger.beast_master
+    - dnd2024.subclass.ranger.fey_wanderer
+    - dnd2024.subclass.ranger.gloom_stalker
+    - dnd2024.subclass.ranger.hunter
+    - dnd2024.subclass.rogue.arcane_trickster
+    - dnd2024.subclass.rogue.assassin
+    - dnd2024.subclass.rogue.soulknife
+    - dnd2024.subclass.rogue.thief
+    - dnd2024.subclass.sorcerer.aberrant_sorcery
+    - dnd2024.subclass.sorcerer.clockwork_sorcery
+    - dnd2024.subclass.sorcerer.draconic_sorcery
+    - dnd2024.subclass.sorcerer.wild_magic
+    - dnd2024.subclass.warlock.archfey_patron
+    - dnd2024.subclass.warlock.celestial_patron
+    - dnd2024.subclass.warlock.fiend_patron
+    - dnd2024.subclass.warlock.great_old_one_patron
+    - dnd2024.subclass.wizard.abjurer
+    - dnd2024.subclass.wizard.diviner
+    - dnd2024.subclass.wizard.evoker
+    - dnd2024.subclass.wizard.illusionist
   species: []
   feats: []
   items:

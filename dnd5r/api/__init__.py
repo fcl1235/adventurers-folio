@@ -26,6 +26,7 @@ from ..rules.actioneconomy import ActionEconomy, ActionType
 from ..rules.armor import Loadout, ac_inputs, loadout_for
 from ..rules.build import (
     available_powers, build_actor, eligible_forms_for, morph_class_of,
+    owner_class_id, subclass_defs,
 )
 from ..rules.contributions import (
     facts_for, modifiers_for, passive_modifiers, passive_proficiencies, save_modifiers,
@@ -35,7 +36,7 @@ from ..rules.health import hit_dice_average
 from ..rules.morph import reasons_for
 from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
-from ..rules.resolver import RefContext, Resolver
+from ..rules.resolver import RefContext, Resolver, crit_text
 from ..rules.scores import score_bonus_of
 from ..rules.weapons import profiles_for
 from ..rules.powers import use_power as _use_power
@@ -57,6 +58,30 @@ def content_summary(bundle: ContentBundle, locale: str = "zh") -> dict:
     stats["class_names"] = sorted(item.name.get(locale) for item in bundle.classes.values())
     stats["plugins"] = [manifest.id for manifest in bundle.manifests]
     return stats
+
+
+def subclass_options(
+    bundle: ContentBundle,
+    class_id: str | None = None,
+    locale: str = "zh",
+) -> dict:
+    """可选子职。不给 class_id 就按职业分组全列出来（建角色界面用）。"""
+    rows = (bundle.subclasses_for(class_id) if class_id
+            else sorted(bundle.subclasses.values(), key=lambda item: (item.class_id, item.id)))
+    return {
+        "class": class_id,
+        "options": [
+            {
+                "id": sub.id,
+                "class": sub.class_id,
+                "name": sub.name.get(locale),
+                "summary": sub.summary.get(locale),
+                "unlock_level": int(sub.unlock_level),
+                "powers": len(sub.powers),
+            }
+            for sub in rows
+        ],
+    }
 
 
 # --- 建角色 -----------------------------------------------------------
@@ -95,6 +120,7 @@ def new_character(
     name_zh: str = "无名冒险者",
     name_en: str = "Unnamed Adventurer",
     actor_id: str = "pc.hero",
+    subclass: str | None = None,
 ) -> Actor:
     """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。"""
     return build_actor(
@@ -105,6 +131,7 @@ def new_character(
         name_zh=name_zh,
         name_en=name_en,
         actor_id=actor_id,
+        subclass=subclass,
     )
 
 
@@ -215,10 +242,12 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
     attack_profiles = profiles_for(actor, content.weapons, top.statblock.abilities,
                                    resolver.ctx.prof_bonus, tokens)
     attacks = [item.to_dict(locale) for item in attack_profiles]
+    crit = resolver.crit_range(top, modifiers_for(mods, "attack.crit_min"))
 
     powers = []
     for power in available_powers(content, actor):
-        reasons = can_use(power, _context(actor, locale, SeededRng(0)), None) if power.is_button else []
+        reasons = can_use(power, _context(actor, locale, SeededRng(0), power, content), None) \
+            if power.is_button else []
         powers.append({
             "id": power.id,
             "owner": power.owner,
@@ -252,6 +281,8 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
                         "proficient": key in saves_prof}
                   for key, value in saves.items()},
         "attack": {"total": attack.total, "detail": attack.describe(), "ability": attack_ability},
+        "crit": {"min": crit.total, "detail": crit.describe(),
+                 "text": crit_text(crit.total)},
         "attacks": attacks,
         "attacks_per_action": attacks_per_action,
         "conditions": list(actor.conditions.ids()),
@@ -275,6 +306,13 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
              "name": content.classes[entry.class_id].name.get(locale)
              if entry.class_id in content.classes else entry.class_id}
             for entry in profile.classes
+        ]
+        sheet["subclasses"] = [
+            {"id": sub.id, "class": sub.class_id,
+             "name": sub.name.get(locale), "summary": sub.summary.get(locale),
+             "unlock_level": int(sub.unlock_level),
+             "unlocked": int(profile.class_level(sub.class_id)) >= int(sub.unlock_level)}
+            for sub in subclass_defs(content, profile)
         ]
         sheet["total_level"] = int(profile.total)
         sheet["proficiency_bonus"] = proficiency_bonus(profile.total)
@@ -318,13 +356,17 @@ def _context(
     locale: str = "zh",
     rng: Rng | None = None,
     power: Power | None = None,
+    content: ContentBundle | None = None,
 ) -> EffectContext:
     resolver = resolver_for(actor)
     profile = actor.profile
     class_level = None
-    if profile and power is not None and power.owner in profile.class_ids:
-        class_level = profile.class_level(power.owner)
-    elif profile and len(profile.classes) == 1:
+    if profile and power is not None:
+        # 子职特性的 owner 是子职 id，要顺回父职业才能拿到 class_level
+        owner = owner_class_id(content, power) if content is not None else power.owner
+        if owner is not None and profile.has_class(owner):
+            class_level = profile.class_level(owner)
+    if class_level is None and profile and len(profile.classes) == 1:
         class_level = profile.classes[0].class_level
     total = profile.total if profile else TotalLevel(1)
     return EffectContext(
@@ -362,7 +404,7 @@ def use_power(
     """
     power = find_power(content, power_id, actor)
     economy = economy if economy is not None else ActionEconomy()
-    ctx = _context(actor, locale, SeededRng(seed), power)
+    ctx = _context(actor, locale, SeededRng(seed), power, content)
     ctx.scratch.update(choice or {})
     if any(getattr(effect, "op", "") == "morph" for effect in power.effects):
         ctx.scratch["forms"] = {form.id: form for form in eligible_forms_for(actor, content)}

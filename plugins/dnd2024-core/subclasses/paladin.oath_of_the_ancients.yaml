@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.paladin.oath_of_the_ancients
+class: dnd2024.class.paladin
+name: {zh: 远古之誓, en: Oath of the Ancients}
+summary:
+  zh: |-
+    守护自然的绿骑士：抗法术伤害光环，越到后期越难被法术杀死。
+  en: |-
+    The Oath of the Ancients subclass of the Paladin.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.paladin.oath_of_the_ancients.oath_of_the_ancients_spells
+    name: {zh: 远古之誓法术, en: Oath of the Ancients Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：缠绕、月华之光、植物滋长、石墙术等。
+      en: |-
+        Oath of the Ancients Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_the_ancients.nature_s_wrath
+    name: {zh: 自然之怒, en: Nature's Wrath}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：用藤蔓束缚 15 尺内敌人（力量或敏捷豁免失败则被束缚）。
+      en: |-
+        Nature's Wrath — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_the_ancients.aura_of_warding
+    name: {zh: 守护灵光, en: Aura of Warding}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        灵光内你与盟友对法术造成的伤害有抗性。
+      en: |-
+        Aura of Warding — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_the_ancients.undying_sentinel
+    name: {zh: 不朽哨兵, en: Undying Sentinel}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        生命值降到 0 时可改为 1 HP（1 次/长休），且不再因年老而死。
+      en: |-
+        Undying Sentinel — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.paladin.oath_of_the_ancients.elder_champion
+    name: {zh: 远古斗士, en: Elder Champion}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 分钟：每回合回复 10 HP，法术豁免 DC+1，施法可用附赠动作。
+      en: |-
+        Elder Champion — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.warlock.archfey_patron
+class: dnd2024.class.warlock
+name: {zh: 至高妖精宗主, en: Archfey Patron}
+summary:
+  zh: |-
+    妖精宗主：魅惑/恐慌光环、受伤自动传送隐形，生存与社交兼顾。
+  en: |-
+    The Archfey Patron subclass of the Warlock.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.warlock.archfey_patron.archfey_spells
+    name: {zh: 妖精法术, en: Archfey Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：魅惑人类、妖精之火、植物滋长、支配人类等。
+      en: |-
+        Archfey Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.archfey_patron.fey_presence
+    name: {zh: 妖精临在, en: Fey Presence}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作：10 尺内敌人感知豁免，失败则被你魅惑或恐慌。
+      en: |-
+        Fey Presence — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.archfey_patron.misty_escape
+    name: {zh: 迷雾逃逸, en: Misty Escape}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        受伤时反应：变隐形并传送 60 尺（1 次/短休）。
+      en: |-
+        Misty Escape — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.archfey_patron.beguiling_defenses
+    name: {zh: 迷惑防御, en: Beguiling Defenses}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        免疫魅惑；有人试图魅惑你时可用反应反制。
+      en: |-
+        Beguiling Defenses — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.warlock.archfey_patron.dark_delirium
+    name: {zh: 黑暗欢宴, en: Dark Delirium}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 分钟内让目标陷入幻境：被魅惑或恐慌，且看不见真实环境。
+      en: |-
+        Dark Delirium — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

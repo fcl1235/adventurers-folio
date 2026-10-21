@@ -1,0 +1,107 @@
+# hand-edited 手写：冠军勇士的重击范围是真实机制（attack.crit_min 走 Resolver.crit_range）。
+# 其余三条仍是 passive + note：优势管道（先攻/运动）与「回合开始补英雄激励」尚未接入原语。
+id: dnd2024.subclass.fighter.champion
+class: dnd2024.class.fighter
+name: {zh: 冠军勇士, en: Champion}
+summary:
+  zh: |-
+    最简单的战士：重击范围翻倍、全能运动员，几乎不用记资源。
+  en: |-
+    A Champion focuses on the development of martial prowess in a relentless pursuit of victory. Champions combine rigorous training with physical excellence to deal devastating blows, withstand peril, and garner glory.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.fighter.champion.improved_critical
+    name: {zh: 强化重击, en: Improved Critical}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你用武器与徒手打击的攻击检定，掷出 19 或 20 即造成重击。
+      en: |-
+        Your attack rolls with weapons and Unarmed Strikes can score a Critical Hit on a roll of 19 or 20 on the d20.
+    effects:
+      # 门槛用 min 叠：卓越重击（18）盖过它，而不是两相加成 17
+      - grant_modifier: {target: attack.crit_min, value: 19, stack: min}
+
+  - id: dnd2024.subclass.fighter.champion.remarkable_athlete
+    name: {zh: 卓越运动员, en: Remarkable Athlete}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你的先攻检定与力量（运动）检定有优势。此外，你造成重击后可以立刻移动至多一半速度，且不引发借机攻击。
+      en: |-
+        Thanks to your athleticism, you have Advantage on Initiative rolls and Strength (Athletics) checks. In addition, immediately after you score a Critical Hit, you can move up to half your Speed without provoking Opportunity Attacks.
+    effects:
+      - note:
+          zh: |-
+            优势尚未接进检定管道：目前只在说明里登记，掷骰界面还不会自动给两次取高。
+          en: |-
+            Advantage is not wired into the check pipeline yet; this entry records the rule, but the dice roller does not roll twice and take the higher.
+
+  - id: dnd2024.subclass.fighter.champion.additional_fighting_style
+    name: {zh: 额外战斗风格, en: Additional Fighting Style}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你再获得一个自选的战斗风格专长。
+      en: |-
+        You gain another Fighting Style feat of your choice.
+    effects:
+      - note:
+          zh: |-
+            选专长需要专长数据（P5 专长阶段接入）；这里只登记「多一个名额」。
+          en: |-
+            Picking the feat needs the feat data (P5 feats stage); this entry records the extra slot only.
+
+  - id: dnd2024.subclass.fighter.champion.heroic_warrior
+    name: {zh: 英勇战士, en: Heroic Warrior}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        战斗的刺激推动你走向胜利。战斗中，你可以在回合开始时若没有英雄激励则立刻获得一个。
+      en: |-
+        The thrill of battle drives you toward victory. During combat, you can give yourself Heroic Inspiration whenever you start your turn without it.
+    effects:
+      - note:
+          zh: |-
+            英雄激励是角色状态，尚未接入（`Profile` 里还没有这个字段）。
+          en: |-
+            Heroic Inspiration is character state that is not modelled yet (no such field on Profile).
+
+  - id: dnd2024.subclass.fighter.champion.superior_critical
+    name: {zh: 卓越重击, en: Superior Critical}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你用武器与徒手打击的攻击检定，掷出 18-20 即造成重击。
+      en: |-
+        Your attack rolls with weapons and Unarmed Strikes can now score a Critical Hit on a roll of 18-20 on the d20.
+    effects:
+      - grant_modifier: {target: attack.crit_min, value: 18, stack: min}
+
+  - id: dnd2024.subclass.fighter.champion.survivor
+    name: {zh: 生还者, en: Survivor}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在战斗中达到韧性的巅峰：死亡豁免检定有优势，且掷出 18-20 即视为 20；此外，若你回合开始时已受伤但生命值未超过一半，你恢复「5 + 体质调整值」点生命值。
+      en: |-
+        You attain the pinnacle of resilience in battle, giving you these benefits. Defy Death: You have Advantage on Death Saving Throws, and rolling 18-20 on a Death Saving Throw counts as rolling a 20. Spearheading Recovery: At the start of each of your turns, you regain Hit Points equal to 5 plus your Constitution modifier if you are Bloodied.
+    effects:
+      - note:
+          zh: |-
+            死亡豁免优势与「受伤即回血」都要在回合钩子里结算，当前还没有回合开始的原语。
+          en: |-
+            Death-save Advantage and the turn-start heal both need a turn hook, which the engine does not have yet.

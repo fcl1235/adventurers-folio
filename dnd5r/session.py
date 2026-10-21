@@ -24,7 +24,10 @@ from .model.profile import ClassEntry
 from .model.statblock import ABILITY_NAMES
 from .rules.actioneconomy import ActionEconomy, ActionType
 from .rules.armor import ac_inputs, loadout_for
-from .rules.build import available_powers, build_actor, eligible_forms_for, morph_class_of
+from .rules.build import (
+    available_powers, build_actor, eligible_forms_for, morph_class_of,
+    owner_class_id, subclass_defs,
+)
 from .rules.contributions import (
     facts_for, modifiers_for, passive_modifiers, passive_proficiencies,
 )
@@ -33,7 +36,7 @@ from .rules.morph import FormSpec, is_morphed
 from .rules.powers import Power, can_use, phase_label, use_power
 from .rules.progression import proficiency_bonus
 from .rules.rest import RestResult, long_rest, short_rest
-from .rules.resolver import RefContext, Resolver
+from .rules.resolver import RefContext, Resolver, crit_text
 from .rules.weapons import damage_name, profiles_for
 from .view import Card, CardAction, CharacterView, HeaderView
 
@@ -104,10 +107,12 @@ class Session:
         name_zh: str = "无名冒险者",
         name_en: str = "Unnamed Adventurer",
         actor_id: str = "pc.hero",
+        subclass: str | None = None,
     ) -> Actor:
         self.actor = build_actor(
             self.bundle, class_id=class_id, class_level=class_level,
             scores=scores, name_zh=name_zh, name_en=name_en, actor_id=actor_id,
+            subclass=subclass,
         )
         self.economy = ActionEconomy(movement=self.actor.statblock.speed("walk"))
         self.log = []
@@ -167,11 +172,12 @@ class Session:
         actor = self.character
         profile = actor.profile
         class_level = None
-        if profile is not None:
-            if power is not None and profile.has_class(power.owner):
-                class_level = profile.class_level(power.owner)
-            elif len(profile.classes) == 1:
-                class_level = profile.classes[0].class_level
+        if profile is not None and power is not None:
+            owner = owner_class_id(self.bundle, power)
+            if owner is not None and profile.has_class(owner):
+                class_level = profile.class_level(owner)
+        if class_level is None and profile is not None and len(profile.classes) == 1:
+            class_level = profile.classes[0].class_level
         total = profile.total if profile else TotalLevel(1)
         return EffectContext(
             actor=actor,
@@ -307,6 +313,12 @@ class Session:
                 continue
             for power in class_def.powers_at(entry.class_level):
                 cards.append(self._card_for(power))
+            # 子职特性跟着父职业的等级出现，和解锁等级门槛一起判定
+            for sub in subclass_defs(self.bundle, profile):
+                if sub.class_id != entry.class_id:
+                    continue
+                for power in sub.powers_at(entry.class_level):
+                    cards.append(self._card_for(power))
         return cards
 
     def _card_for(self, power: Power) -> Card:
@@ -381,6 +393,8 @@ class Session:
         tokens |= passive_proficiencies(self.bundle, actor)
         found = profiles_for(actor, self.bundle.weapons, top.statblock.abilities,
                              resolver.ctx.prof_bonus, tokens)
+        mods = passive_modifiers(self.bundle, actor, self.locale)
+        crit = resolver.crit_range(top, modifiers_for(mods, "attack.crit_min"))
         count = 1
         profile = actor.profile
         if profile is not None:
@@ -400,6 +414,8 @@ class Session:
                 detail.append("专精：%s" % item.mastery)
             if item.disadvantage:
                 detail.append("重型武器属性不足 13：攻击劣势")
+            if crit.total < 20:
+                detail.append("重击范围 %s" % crit_text(crit.total))
             cards.append(Card(
                 id="attack:%s" % item.weapon_id,
                 title=item.name.get(self.locale),

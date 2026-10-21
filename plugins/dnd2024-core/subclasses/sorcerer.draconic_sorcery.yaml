@@ -1,0 +1,105 @@
+# hand-edited 手写：龙族韧性是真实机制（HP 通道 + 无甲 AC 追加魅力）。
+# 其余四条仍是 passive + note：法术准备表、伤害类型亲和、飞行、召唤龙都缺前置系统。
+id: dnd2024.subclass.sorcerer.draconic_sorcery
+class: dnd2024.class.sorcerer
+name: {zh: 龙裔血脉, en: Draconic Sorcery}
+summary:
+  zh: |-
+    龙血术士：免费获得龙鳞 AC 与额外 HP，元素亲和让本命元素伤害更高。
+  en: |-
+    Your innate magic comes from the gift of a dragon. Perhaps an ancient dragon facing death bequeathed part of its power to you, or you were hatched from an egg touched by draconic magic.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.sorcerer.draconic_sorcery.draconic_resilience
+    name: {zh: 龙族韧性, en: Draconic Resilience}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你体内的魔法显现出龙之赠礼的生理特征：生命值上限增加 3 点，此后每获得一个术士等级再增加 1 点。
+        此外，你身上覆有龙鳞；当你未穿护甲时，基础 AC 等于 10 + 敏捷调整值 + 魅力调整值。
+      en: |-
+        The magic in your body manifests physical traits of your draconic gift. Your Hit Point maximum increases by 3, and it increases by 1 whenever you gain another Sorcerer level. Parts of you are also covered by dragon-like scales. While you aren't wearing armor, your base Armor Class equals 10 plus your Dexterity and Charisma modifiers.
+    effects:
+      # 生命上限 = 等级 + 2（1 级 +3，之后每级 +1）：per_level 记 1 点，剩下的 2 点走一次性。
+      - grant_modifier:
+          modifiers:
+            - {target: hp.per_level, value: 1}
+            - {target: hp.flat, value: 2}
+            # 无甲时基础 AC 已经含了 10 + 敏捷，这里再把魅力加上去
+            - {target: ac, value: ability.cha, when: {unarmored: true}}
+          label: 龙族韧性
+
+  - id: dnd2024.subclass.sorcerer.draconic_sorcery.draconic_spells
+    name: {zh: 龙族法术, en: Draconic Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        达到术士等级 3／5／7／9 级时，你始终准备着对应的龙族法术：
+        3 级 变身术、色彩球、命令术、龙息；5 级 恐惧术、飞行术；7 级 秘法眼、魅惑怪物；9 级 通晓传奇、召唤龙。
+      en: |-
+        When you reach a Sorcerer level specified in the Draconic Spells table, you thereafter always have the listed spells prepared: level 3 Alter Self, Chromatic Orb, Command, Dragon's Breath; level 5 Fear, Fly; level 7 Arcane Eye, Charm Monster; level 9 Legend Lore, Summon Dragon.
+    effects:
+      - note:
+          zh: |-
+            「始终准备」需要法术数据与准备位模型，法术系统接入后改成常驻准备表。
+          en: |-
+            Always-prepared spells need the spell dataset and the prepared-spell model; this becomes a fixed prepared list once the spell system lands.
+
+  - id: dnd2024.subclass.sorcerer.draconic_sorcery.elemental_affinity
+    name: {zh: 元素亲和, en: Elemental Affinity}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你的龙族魔法与某种龙类伤害类型亲和。选择强酸、寒冷、火焰、闪电或毒素之一：
+        你获得该类型的抗性；当你施放造成该类型伤害的法术时，可以把魅力调整值加到该法术的一次伤害掷骰上。
+      en: |-
+        Your draconic magic has an affinity with a damage type associated with dragons. Choose one of those types: Acid, Cold, Fire, Lightning, or Poison. You have Resistance to that damage type, and when you cast a spell that deals damage of that type, you can add your Charisma modifier to one damage roll of that spell.
+    effects:
+      - note:
+          zh: |-
+            伤害类型由玩家选择（龙类血统），且「加在法术伤害掷骰上」需要法术伤害管道。
+          en: |-
+            The damage type is a player choice (draconic ancestry), and adding to a spell damage roll needs the spell damage pipeline.
+
+  - id: dnd2024.subclass.sorcerer.draconic_sorcery.dragon_wings
+    name: {zh: 龙翼, en: Dragon Wings}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作，你背上长出龙翼，持续 1 小时或直到你解除（无需动作）。期间你获得 60 尺飞行速度。
+        使用后必须完成长休才能再次使用，除非你（无需动作）花费 3 点术法点恢复。
+      en: |-
+        As a Bonus Action, you can cause draconic wings to appear on your back. The wings last for 1 hour or until you dismiss them (no action required). For the duration, you have a Fly Speed of 60 feet. Once you use this feature, you can't use it again until you finish a Long Rest unless you spend 3 Sorcery Points (no action required) to restore your use of it.
+    effects:
+      - note:
+          zh: |-
+            角色默认没有飞行速度槽位，飞行需要「速度表可变」之后才能落地。
+          en: |-
+            Characters have no fly speed slot by default; this waits for mutable speed sets.
+
+  - id: dnd2024.subclass.sorcerer.draconic_sorcery.dragon_companion
+    name: {zh: 龙之伙伴, en: Dragon Companion}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你可以无需材料成分地施放「召唤龙」。你也可以不消耗法术位地施放它一次，完成长休后恢复这种用法。
+        你开始施放该法术时，可以修改它使其无需专注；若如此做，该次施法的持续时间为 1 分钟。
+      en: |-
+        You can cast Summon Dragon without a Material component. You can also cast it once without a spell slot, and you regain the ability to cast it in this way when you finish a Long Rest. Whenever you start casting the spell, you can modify it so that it doesn't require Concentration. If you do so, the spell's duration becomes 1 minute for that casting.
+    effects:
+      - note:
+          zh: |-
+            依赖法术系统与召唤物数据，随 P8 召唤阶段接入。
+          en: |-
+            Depends on the spell system and summon data; lands with the P8 summoning stage.

@@ -41,6 +41,7 @@ def _character(args):
     return bundle, api.new_character(
         bundle, args.cls, args.level, _scores(args),
         name_zh=args.zh, name_en=args.en,
+        subclass=getattr(args, "subclass", None),
     )
 
 
@@ -107,6 +108,24 @@ def cmd_forms(args) -> int:
     return 0
 
 
+def cmd_subclasses(args) -> int:
+    """按职业分组列出子职 —— 建角色时先看这张表。"""
+    bundle = api.load_content(args.root)
+    options = api.subclass_options(bundle, args.cls or None, locale=args.lang)
+    current = None
+    for row in options["options"]:
+        if row["class"] != current:
+            current = row["class"]
+            class_def = bundle.classes.get(current)
+            label = class_def.name.get(args.lang) if class_def else current
+            print("%s（%s）" % (label, current))
+        print("  %-48s L%-2d %2d 条  %s"
+              % (row["id"], row["unlock_level"], row["powers"], row["name"]))
+    if not options["options"]:
+        print("这个职业没有子职")
+    return 0
+
+
 def cmd_plugins(args) -> int:
     for row in api.plugin_summary(args.root):
         print("%-18s %-8s %-8s %s" % (row["id"], row["kind"], row["version"], row["name"]))
@@ -152,7 +171,8 @@ def cmd_play(args) -> int:
     """无头剧本：掉血 → 用能力 → 短休 → 长休。每一步都真的跑一遍。"""
     session = api.Session.open(args.root, locale=args.lang, seed=args.seed)
     actor = session.create_character(args.cls, args.level, _scores(args),
-                                     name_zh=args.zh, name_en=args.en)
+                                     name_zh=args.zh, name_en=args.en,
+                                     subclass=getattr(args, "subclass", None))
     print("=== 初始 ===")
     _print_view(session.view())
 
@@ -186,6 +206,7 @@ def cmd_play(args) -> int:
 
 def _add_character_args(parser) -> None:
     parser.add_argument("--class", dest="cls", default="dnd2024.class.fighter")
+    parser.add_argument("--subclass", default=None, help="子职 id（如 dnd2024.subclass.fighter.champion）")
     parser.add_argument("--level", type=int, default=1)
     parser.add_argument("--zh", default="无名冒险者")
     parser.add_argument("--en", default="Unnamed Adventurer")
@@ -218,6 +239,12 @@ def main(argv=None) -> int:
     use.add_argument("--form", default=None, help="变形类能力要选的形态 id")
     use.add_argument("--seed", type=int, default=None)
     use.set_defaults(func=cmd_use)
+
+    subs = sub.add_parser("subclasses", help="列出子职（可按职业过滤）")
+    subs.add_argument("--class", dest="cls", default=None)
+    subs.add_argument("--root", default="plugins")
+    subs.add_argument("--lang", default="zh", choices=["zh", "en"])
+    subs.set_defaults(func=cmd_subclasses)
 
     forms = sub.add_parser("forms", help="列出当前可选形态（德鲁伊）")
     _add_character_args(forms)

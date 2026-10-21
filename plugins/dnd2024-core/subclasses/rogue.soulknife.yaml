@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.rogue.soulknife
+class: dnd2024.class.rogue
+name: {zh: 魂刃, en: Soulknife}
+summary:
+  zh: |-
+    灵能盗贼：凭空生成心灵匕首，可远程、可心灵沟通，无武器也能偷袭。
+  en: |-
+    The Soulknife subclass of the Rogue.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.rogue.soulknife.psychic_blades
+    name: {zh: 心灵之刃, en: Psychic Blades}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        双手生成灵能匕首（1d6 心灵），可近战也可投掷 60 尺，并能用附赠动作再攻击一次。
+      en: |-
+        Psychic Blades — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.soulknife.psionic_power
+    name: {zh: 灵能力量, en: Psionic Power}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得能量骰（d6→d8→d10→d12），可用于强化技能检定或心灵沟通。
+      en: |-
+        Psionic Power — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.soulknife.soul_blades
+    name: {zh: 灵魂之刃强化, en: Soul Blades}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        心灵之刃命中后可传送自己或让目标恐惧。
+      en: |-
+        Soul Blades — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.soulknife.psychic_veil
+    name: {zh: 心灵幻影, en: Psychic Veil}
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 小时内对自己施放隐形（1 次/长休）。
+      en: |-
+        Psychic Veil — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.soulknife.rend_mind
+    name: {zh: 撕裂心智, en: Rend Mind}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        消耗能量骰让目标震慑或失能。
+      en: |-
+        Rend Mind — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

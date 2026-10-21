@@ -1,0 +1,82 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.barbarian.path_of_the_world_tree
+class: dnd2024.class.barbarian
+name: {zh: 世界树道途, en: Path of the World Tree}
+summary:
+  zh: |-
+    连接世界树的守护型道途：给队友拉扯、替人挨打、靠根须控场。
+  en: |-
+    The Path of the World Tree subclass of the Barbarian.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.barbarian.path_of_the_world_tree.vitality_of_the_tree
+    name: {zh: 世界树的生命力, en: Vitality of the Tree}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴时获得等同于「野蛮人等级 + 体质调整值」的临时生命值，并在狂暴期间每回合回血。
+      en: |-
+        Vitality of the Tree — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_world_tree.branches_of_the_tree
+    name: {zh: 世界树枝干, en: Branches of the Tree}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：30 尺内一名生物被攻击时，把伤害拉到自己身上（或把队友拉离危险）。
+      en: |-
+        Branches of the Tree — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_world_tree.battering_roots
+    name: {zh: 盘根, en: Battering Roots}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        武器专精可额外选 Push / Topple，且触发距离延长到 15 尺。
+      en: |-
+        Battering Roots — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_world_tree.travel_along_the_tree
+    name: {zh: 沿树而行, en: Travel Along the Tree}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作传送到 60 尺内你见过的位置，落地时可用一次攻击。
+      en: |-
+        Travel Along the Tree — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

@@ -38,8 +38,9 @@ class ClassEntry:
 @dataclass(frozen=True, slots=True)
 class Profile:
     classes: tuple[ClassEntry, ...]
-    # 子职是显示名（"Circle of the Moon"），不是 id —— 内容里就是这么写的
-    subclass: str | None = None
+    # 子职是**内容 id**（"dnd2024.subclass.<class>.<subclass>"），不是显示名。
+    # 兼职可以有两个子职，所以这里是元组 —— 每个职业各挂各的那一个。
+    subclasses: tuple[str, ...] = ()
     proficiencies: frozenset[str] = frozenset()
     expertise: frozenset[str] = frozenset()
     languages: frozenset[str] = frozenset()
@@ -54,6 +55,11 @@ class Profile:
             if entry.class_id in seen:
                 raise RuleError("职业重复：%s" % entry.class_id)
             seen.add(entry.class_id)
+        for subclass_id in self.subclasses:
+            if not is_valid(subclass_id):
+                raise RuleError("子职 id 不合规范：%r" % (subclass_id,))
+        if len(set(self.subclasses)) != len(self.subclasses):
+            raise RuleError("子职重复：%s" % ", ".join(self.subclasses))
         # 熟练与专精必须是熟练的子集
         unknown = set(self.expertise) - set(self.proficiencies)
         if unknown:
@@ -67,7 +73,7 @@ class Profile:
     def add_class(self, class_id: str, class_level: int) -> "Profile":
         return Profile(
             classes=self.classes + (ClassEntry.make(class_id, class_level),),
-            subclass=self.subclass,
+            subclasses=self.subclasses,
             proficiencies=self.proficiencies,
             expertise=self.expertise,
             languages=self.languages,
@@ -99,10 +105,13 @@ class Profile:
         return len(self.classes) > 1
 
     # --- 集合型贡献 ---------------------------------------------------
-    def with_subclass(self, subclass: str | None) -> "Profile":
+    def with_subclass(self, subclass_id: str) -> "Profile":
+        """挂上子职（幂等）。「同一职业只能有一个子职」由内容层校验。"""
+        if subclass_id in self.subclasses:
+            return self
         return Profile(
             classes=self.classes,
-            subclass=subclass,
+            subclasses=self.subclasses + (subclass_id,),
             proficiencies=self.proficiencies,
             expertise=self.expertise,
             languages=self.languages,
@@ -110,11 +119,31 @@ class Profile:
             choices=self.choices,
         )
 
+    def without_subclass(self, subclass_id: str | None = None) -> "Profile":
+        """摘掉一个子职；不给 id 就全摘（改职业时用）。"""
+        keep = () if subclass_id is None else tuple(
+            item for item in self.subclasses if item != subclass_id
+        )
+        if keep == self.subclasses:
+            return self
+        return Profile(
+            classes=self.classes,
+            subclasses=keep,
+            proficiencies=self.proficiencies,
+            expertise=self.expertise,
+            languages=self.languages,
+            feats=self.feats,
+            choices=self.choices,
+        )
+
+    def has_subclass(self, subclass_id: str) -> bool:
+        return subclass_id in self.subclasses
+
     def with_proficiencies(self, add: Iterable[str] = (), remove: Iterable[str] = ()) -> "Profile":
         new = (set(self.proficiencies) | set(add)) - set(remove)
         return Profile(
             classes=self.classes,
-            subclass=self.subclass,
+            subclasses=self.subclasses,
             proficiencies=frozenset(new),
             expertise=frozenset(set(self.expertise) - set(remove)),
             languages=self.languages,
@@ -126,7 +155,7 @@ class Profile:
         """只写事实，总等级不写（C5）。"""
         return {
             "classes": [entry.to_dict() for entry in self.classes],
-            "subclass": self.subclass,
+            "subclasses": list(self.subclasses),
             "proficiencies": sorted(self.proficiencies),
             "expertise": sorted(self.expertise),
             "languages": sorted(self.languages),
@@ -140,9 +169,13 @@ class Profile:
             ClassEntry.make(str(item["id"]), int(item["class_level"]))
             for item in data.get("classes", ())
         )
+        raw = data.get("subclasses")
+        if raw is None:                       # 旧档写的是单个 subclass
+            single = data.get("subclass")
+            raw = [single] if single else []
         return cls(
             classes=entries,
-            subclass=data.get("subclass"),
+            subclasses=tuple(str(item) for item in raw),
             proficiencies=frozenset(data.get("proficiencies", ())),
             expertise=frozenset(data.get("expertise", ())),
             languages=frozenset(data.get("languages", ())),

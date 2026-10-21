@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.druid.circle_of_the_stars
+class: dnd2024.class.druid
+name: {zh: 星辰结社, en: Circle of the Stars}
+summary:
+  zh: |-
+    星座主题德鲁伊：星光形态三选一（弓/圣杯/龙），辅助与输出灵活切换。
+  en: |-
+    The Circle of the Stars subclass of the Druid.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.druid.circle_of_the_stars.star_map
+    name: {zh: 星图, en: Star Map}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得星图法器，可免环施放 guiding bolt；并可用附赠动作进入星光形态。
+      en: |-
+        Star Map — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.druid.circle_of_the_stars.starry_form
+    name: {zh: 星光形态, en: Starry Form}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        三选一：弓（附赠动作远程光耀攻击）、圣杯（治疗加骰）、龙（智力/感知检定最低 10）。
+      en: |-
+        Starry Form — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.druid.circle_of_the_stars.cosmic_omen
+    name: {zh: 宇宙预兆, en: Cosmic Omen}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        长休后掷 1 颗 d6，可用反应让 30 尺内一次检定加（吉）或减（凶）该值。
+      en: |-
+        Cosmic Omen — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.druid.circle_of_the_stars.twinkling_constellations
+    name: {zh: 闪烁星座, en: Twinkling Constellations}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        星光形态可在回合开始时切换，并获得额外增益。
+      en: |-
+        Twinkling Constellations — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.druid.circle_of_the_stars.full_of_stars
+    name: {zh: 璀璨星辰, en: Full of Stars}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        星光形态下获得半身掩护般的抗性，且星光攻击增强。
+      en: |-
+        Full of Stars — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

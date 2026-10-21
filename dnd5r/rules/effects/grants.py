@@ -261,6 +261,7 @@ def _with_languages(profile, extra):
 
     return Profile(
         classes=profile.classes,
+        subclasses=profile.subclasses,
         proficiencies=profile.proficiencies,
         expertise=profile.expertise,
         languages=frozenset(set(profile.languages) | set(extra)),

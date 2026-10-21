@@ -1,0 +1,82 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.bard.college_of_glamour
+class: dnd2024.class.bard
+name: {zh: 魅力学院, en: College of Glamour}
+summary:
+  zh: |-
+    妖精宫廷式的领袖诗人：靠临时生命与强制位移救场，社交能力极强。
+  en: |-
+    The College of Glamour subclass of the Bard.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.bard.college_of_glamour.mantle_of_inspiration
+    name: {zh: 迷惑披风, en: Mantle of Inspiration}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作消耗 1 次灵感：60 尺内等同魅力调整值名盟友获得临时 HP，并可立刻用反应移动且不引发借机攻击。
+      en: |-
+        Mantle of Inspiration — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.bard.college_of_glamour.enthralling_performance
+    name: {zh: 迷人演出, en: Enthralling Performance}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        表演 1 分钟后，可让听众中若干生物被你魅惑 1 小时。
+      en: |-
+        Enthralling Performance — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.bard.college_of_glamour.mantle_of_majesty
+    name: {zh: 威严披风, en: Mantle of Majesty}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作进入 1 分钟的威严形态，每回合可用附赠动作施放命令术（不耗法术位）。
+      en: |-
+        Mantle of Majesty — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.bard.college_of_glamour.unbreakable_majesty
+    name: {zh: 无瑕披风, en: Unbreakable Majesty}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        敌人对你施法或攻击前须通过魅力豁免，否则该次行动失败/失手。
+      en: |-
+        Unbreakable Majesty — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

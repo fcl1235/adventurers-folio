@@ -1,0 +1,82 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.monk.warrior_of_the_open_hand
+class: dnd2024.class.monk
+name: {zh: 散打宗, en: Warrior of the Open Hand}
+summary:
+  zh: |-
+    最正统的徒手武僧：疾风连击附带击倒/推开/封借机，控场强。
+  en: |-
+    Warriors of the Open Hand are masters of unarmed combat. They learn techniques to push and trip their opponents and manipulate their own energy to protect themselves from harm.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.monk.warrior_of_the_open_hand.open_hand_technique
+    name: {zh: 散打技法, en: Open Hand Technique}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        疾风连击命中时，目标额外承受一种效果：无法做借机攻击、力量豁免失败则倒地、或敏捷豁免失败则被推离 15 尺。
+      en: |-
+        Whenever you hit a creature with an attack granted by your Flurry of Blows, you can impose one of the following effects on that target. Addle. The target can't make Opportunity Attacks until the start of its next turn. Push. The target must succeed on a Strength saving throw or be pushed up to 15 feet away from you. Topple. The target must succeed on a Dexterity saving throw or have the Prone condition.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_the_open_hand.wholeness_of_body
+    name: {zh: 身心完整, en: Wholeness of Body}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作掷武艺骰 + 感知调整值 回复 HP（熟练加值次/长休）。
+      en: |-
+        You gain the ability to heal yourself. As a Bonus Action, you can roll your Martial Arts die. You regain a number of Hit Points equal to the number rolled plus your Wisdom modifier (minimum of 1 Hit Point regained). You can use this feature a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_the_open_hand.fleet_step
+    name: {zh: 疾步, en: Fleet Step}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        使用其他附赠动作后，可紧接着再用一次 Step of the Wind。
+      en: |-
+        When you take a Bonus Action other than Step of the Wind, you can also use Step of the Wind immediately after that Bonus Action.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_the_open_hand.quivering_palm
+    name: {zh: 震颤掌, en: Quivering Palm}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        徒手命中时花 4 气点植入震动：之后可用动作令其体质豁免，失败则降到 0 HP（成功也受 10d10 死灵伤害）。
+      en: |-
+        You gain the ability to set up lethal vibrations in someone's body. When you hit a creature with an Unarmed Strike, you can expend 4 Focus Points to start these imperceptible vibrations, which last for a number of days equal to your Monk level. The vibrations are harmless unless you take an action to end them. Alternatively, when you take the Attack action on your turn, you can forgo one of the attacks to end the vibrations. To end them, you and the target must be on the same plane of existence. When you end them, the target must make a Constitution saving throw, taking 10d12 Force damage on a failed save or half as much damage on a successful one. You can have only one creature under the effect of this feature at a time. You can end the vibrations harmlessly (no action required).
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

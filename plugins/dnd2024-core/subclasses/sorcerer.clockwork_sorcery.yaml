@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.sorcerer.clockwork_sorcery
+class: dnd2024.class.sorcerer
+name: {zh: 机关血脉, en: Clockwork Sorcery}
+summary:
+  zh: |-
+    机关血脉：秩序与平衡，能取消优势/劣势，还能造护盾吸收伤害。
+  en: |-
+    The Clockwork Sorcery subclass of the Sorcerer.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.sorcerer.clockwork_sorcery.clockwork_spells
+    name: {zh: 机关法术, en: Clockwork Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：秩序之盾、援助术、解除魔法、力场墙等。
+      en: |-
+        Clockwork Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.clockwork_sorcery.restore_balance
+    name: {zh: 恢复平衡, en: Restore Balance}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：30 尺内一次带优势/劣势的检定改为正常掷骰（魅力调整值次/长休）。
+      en: |-
+        Restore Balance — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.clockwork_sorcery.bastion_of_law
+    name: {zh: 秩序堡垒, en: Bastion of Law}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        花术法点造护盾，吸收伤害（1d8/点，持续到长休）。
+      en: |-
+        Bastion of Law — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.clockwork_sorcery.trance_of_order
+    name: {zh: 秩序恍惚, en: Trance of Order}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 分钟内攻击检定与豁免的 d20 掷出 9 以下按 10 算。
+      en: |-
+        Trance of Order — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.clockwork_sorcery.clockwork_cavalcade
+    name: {zh: 机关骑士, en: Clockwork Cavalcade}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        召唤机关灵体：治疗盟友、修复物件、解除法术效果。
+      en: |-
+        Clockwork Cavalcade — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

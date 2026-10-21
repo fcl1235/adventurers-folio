@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.rogue.assassin
+class: dnd2024.class.rogue
+name: {zh: 刺客, en: Assassin}
+summary:
+  zh: |-
+    爆发型刺客：先手重击、易容毒药，单挑与斩首最强。
+  en: |-
+    The Assassin subclass of the Rogue.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.rogue.assassin.assassin_s_tools
+    name: {zh: 刺客工具, en: Assassin's Tools}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得易容工具与毒药工具熟练。
+      en: |-
+        Assassin's Tools — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.assassin.assassinate
+    name: {zh: 暗杀, en: Assassinate}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        对尚未行动的生物攻击有优势；命中被突袭（surprised）的目标即重击。
+      en: |-
+        Assassinate — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.assassin.infiltration_expertise
+    name: {zh: 渗透专家, en: Infiltration Expertise}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可花 7 天建立假身份，并完美扮演。
+      en: |-
+        Infiltration Expertise — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.assassin.envenom_weapons
+    name: {zh: 淬毒武器, en: Envenom Weapons}
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        灵巧打击可附带中毒（目标体质豁免失败则中毒并持续伤害）。
+      en: |-
+        Envenom Weapons — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.assassin.death_strike
+    name: {zh: 致命一击, en: Death Strike}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        被突袭目标对你的攻击豁免失败时，伤害翻倍。
+      en: |-
+        Death Strike — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

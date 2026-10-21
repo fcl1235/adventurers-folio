@@ -1,0 +1,82 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.monk.warrior_of_the_elements
+class: dnd2024.class.monk
+name: {zh: 元素宗, en: Warrior of the Elements}
+summary:
+  zh: |-
+    元素武僧：徒手打击带元素伤害、触及 10 尺，还能爆发范围伤害。
+  en: |-
+    The Warrior of the Elements subclass of the Monk.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.monk.warrior_of_the_elements.elemental_attunement
+    name: {zh: 元素调和, en: Elemental Attunement}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        徒手攻击可造成火焰/寒冷/闪电/雷鸣伤害，触及 +10 尺，并可拉近/推开目标 10 尺。
+      en: |-
+        Elemental Attunement — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_the_elements.elemental_burst
+    name: {zh: 元素爆发, en: Elemental Burst}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        花 2 气点：15 尺半径内敌人做敏捷豁免，失败受 3d8 元素伤害。
+      en: |-
+        Elemental Burst — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_the_elements.stride_of_the_elements
+    name: {zh: 元素疾行, en: Stride of the Elements}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得等于速度的飞行或游泳速度，并可用元素之力移动队友。
+      en: |-
+        Stride of the Elements — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.monk.warrior_of_the_elements.elemental_epitome
+    name: {zh: 元素化身, en: Elemental Epitome}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        元素形态下获得对应抗性，徒手伤害与范围进一步提升。
+      en: |-
+        Elemental Epitome — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

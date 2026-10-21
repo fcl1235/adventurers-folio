@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.sorcerer.aberrant_sorcery
+class: dnd2024.class.sorcerer
+name: {zh: 异怪血脉, en: Aberrant Sorcery}
+summary:
+  zh: |-
+    异怪血脉：心灵感应+精神伤害，法术可免成分，隐蔽性极强。
+  en: |-
+    The Aberrant Sorcery subclass of the Sorcerer.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.sorcerer.aberrant_sorcery.psionic_spells
+    name: {zh: 灵能法术, en: Psionic Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：心灵尖啸、侦测思想、心灵遥控等灵能主题法术。
+      en: |-
+        Psionic Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.aberrant_sorcery.telepathic_speech
+    name: {zh: 心灵低语, en: Telepathic Speech}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可与 30 尺内生物心灵沟通（分钟数=术士等级）。
+      en: |-
+        Telepathic Speech — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.aberrant_sorcery.psionic_sorcery
+    name: {zh: 灵能施法, en: Psionic Sorcery}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可用术法点代替法术位施法，且无需语言/姿势成分。
+      en: |-
+        Psionic Sorcery — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.aberrant_sorcery.psychic_defenses
+    name: {zh: 心灵防御, en: Psychic Defenses}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        对 psychic 伤害有抗性，且对魅惑/恐慌豁免有优势。
+      en: |-
+        Psychic Defenses — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.sorcerer.aberrant_sorcery.warping_implosion
+    name: {zh: 扭曲爆发, en: Warping Implosion}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        花 5 术法点把 30 尺内敌人拉向你并造成 6d10 力场伤害。
+      en: |-
+        Warping Implosion — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

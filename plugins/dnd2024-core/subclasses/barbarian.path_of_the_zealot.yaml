@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.barbarian.path_of_the_zealot
+class: dnd2024.class.barbarian
+name: {zh: 狂热者道途, en: Path of the Zealot}
+summary:
+  zh: |-
+    为神而战的狂热者：伤害带光耀/死灵，死了也容易拉回来，最省心的输出。
+  en: |-
+    The Path of the Zealot subclass of the Barbarian.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.barbarian.path_of_the_zealot.divine_fury
+    name: {zh: 神圣狂怒, en: Divine Fury}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴中每回合首次命中额外造成 1d6 + 野蛮人等级一半 的光耀（或死灵）伤害。
+      en: |-
+        Divine Fury — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_zealot.warrior_of_the_gods
+    name: {zh: 战士 of the Gods / 无畏, en: Warrior of the Gods}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        复活你的法术不需要材料成分，队友救你更便宜。
+      en: |-
+        Warrior of the Gods — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_zealot.fanatical_focus
+    name: {zh: 狂热专注, en: Fanatical Focus}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴中豁免失败可重掷一次（每次狂暴 1 次）。
+      en: |-
+        Fanatical Focus — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_zealot.zealous_presence
+    name: {zh: 狂热临在, en: Zealous Presence}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作：60 尺内至多 10 名盟友下回合攻击与豁免有优势（1 次/长休）。
+      en: |-
+        Zealous Presence — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_zealot.rage_beyond_death
+    name: {zh: 超越死亡, en: Rage Beyond Death}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴期间即使 0 HP 也能继续行动，只要还在狂暴就不算死亡。
+      en: |-
+        Rage Beyond Death — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

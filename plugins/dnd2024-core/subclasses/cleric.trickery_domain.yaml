@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.cleric.trickery_domain
+class: dnd2024.class.cleric
+name: {zh: 诡术领域, en: Trickery Domain}
+summary:
+  zh: |-
+    诡术与幻象领域：帮队友隐匿、造分身骗攻击，最适合潜行队伍。
+  en: |-
+    The Trickery Domain subclass of the Cleric.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.cleric.trickery_domain.trickery_domain_spells
+    name: {zh: 诡术领域法术, en: Trickery Domain Spells}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备：魅惑人类、镜像术、闪现术、变形术等。
+      en: |-
+        Trickery Domain Spells — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.cleric.trickery_domain.blessing_of_the_trickster
+    name: {zh: 诡术祝福, en: Blessing of the Trickster}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        触碰一名生物，1 小时内它的隐匿检定有优势（可对自己用）。
+      en: |-
+        Blessing of the Trickster — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.cleric.trickery_domain.invoke_duplicity
+    name: {zh: 召现分身, en: Invoke Duplicity}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：造出一个幻影分身，可从分身位置施法，且你与分身夹击的目标攻击有优势。
+      en: |-
+        Invoke Duplicity — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.cleric.trickery_domain.trickster_s_transposition
+    name: {zh: 诡术师位移, en: Trickster's Transposition}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        分身在场时，可用附赠动作与分身交换位置。
+      en: |-
+        Trickster's Transposition — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.cleric.trickery_domain.improved_duplicity
+    name: {zh: 强化分身, en: Improved Duplicity}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可同时维持 4 个分身，且分身可独立移动。
+      en: |-
+        Improved Duplicity — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from ..content import ClassDef, ContentBundle
+from ..content import ClassDef, ContentBundle, SubclassDef
 from ..kernel.errors import RuleError
 from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
@@ -19,7 +19,9 @@ from ..model.profile import ClassEntry, Profile
 from ..model.resources import Pool, PoolKind, Refresh
 from ..model.statblock import Abilities, Statblock
 from .health import hit_dice_pool, hit_points_max
+from .modifiers import resolve as resolve_modifiers
 from .morph import eligible_forms
+from .powers import Power
 from .progression import proficiency_bonus
 from .scores import apply_score_bonuses, score_bonuses
 
@@ -40,6 +42,33 @@ def _ref_map(
     }
 
 
+def subclass_defs(bundle: ContentBundle, profile: Profile | None) -> tuple[SubclassDef, ...]:
+    """档案里挂着的子职（内容不存在时跳过 —— 缺插件不该让整张卡崩掉）。"""
+    if profile is None:
+        return ()
+    return tuple(
+        bundle.subclasses[item] for item in profile.subclasses
+        if item in bundle.subclasses
+    )
+
+
+def _hp_bonus(powers, target: str, ref: Mapping[str, Any]) -> int:
+    """HP 通道：`hp.per_level`（每级 +N）/ `hp.flat`（一次性 +N）。
+
+    走 Modifier 是为了让「坚韧 +2×等级」「龙裔韧性 +3×术士等级」共用一条通道 ——
+    数值与等级的关系写在内容的 Amount 里，代码不知道谁是术士。
+    """
+    mods = [
+        mod for power in powers
+        for effect in power.effects
+        for mod in getattr(effect, "modifiers", ())
+        if mod.target == target
+    ]
+    if not mods:
+        return 0
+    return resolve_modifiers(mods, base=0, ctx=dict(ref)).total
+
+
 def build_actor(
     bundle: ContentBundle,
     class_id: str,
@@ -50,6 +79,7 @@ def build_actor(
     actor_id: str = "pc.hero",
     kind: ActorKind = ActorKind.PC,
     extra_proficiencies: tuple[str, ...] = (),
+    subclass: str | None = None,
 ) -> Actor:
     """建一个单职业角色。兼职在 P3 的 Session 里做（要合并位表与熟练来源）。"""
     class_def: ClassDef = bundle.class_def(class_id)
@@ -57,21 +87,33 @@ def build_actor(
     total = TotalLevel(int(level))
     prof = proficiency_bonus(total)
 
+    # 子职只在自己职业的等级达到门槛后才给特性（3 级才选，1–2 级传进来也不生效）
+    sub = bundle.subclass(subclass) if subclass else None
+    if sub is not None and sub.class_id != class_id:
+        raise RuleError("子职 %s 不属于职业 %s" % (sub.id, class_id))
+    sub_powers = sub.powers_at(level) if sub is not None else ()
+
     # 属性加值通道：原始冠军 / 身心合一这类「属性值 +4」的能力在这里落地。
     # 必须在算 HP 之前：加值改了体质调整值，HP 上限跟着变，否则 20 级会少 40 点。
     powers = class_def.powers_at(level)
-    bonuses = score_bonuses(powers)
+    all_powers = tuple(powers) + tuple(p for p in sub_powers if p not in powers)
+    bonuses = score_bonuses(all_powers)
     abilities = apply_score_bonuses(Abilities.of(**dict(scores)), bonuses)
 
     con_mod = abilities.mod("con")
-    hp_max = hit_points_max(class_def.hit_die, con_mod, level)
-
     name = Text.of(name_zh, name_en)
     statblock = Statblock(name=name, abilities=abilities)
+    ref = _ref_map(abilities, level, total, prof, statblock.speeds)
+    hp_max = hit_points_max(
+        class_def.hit_die, con_mod, level,
+        per_level_bonus=_hp_bonus(all_powers, "hp.per_level", ref),
+        flat_bonus=_hp_bonus(all_powers, "hp.flat", ref),
+    )
 
     saves = tuple("save.%s" % key for key in class_def.saves)
     profile = Profile(
         classes=(ClassEntry.make(class_id, level),),
+        subclasses=(sub.id,) if sub is not None else (),
         proficiencies=(frozenset(saves)
                        | frozenset(class_def.proficiencies)
                        | frozenset(extra_proficiencies)),
@@ -87,7 +129,6 @@ def build_actor(
         display_name=name_zh,
     )
 
-    ref = _ref_map(abilities, level, total, prof, statblock.speeds)
     for resource in class_def.resources:
         pool = resource.build(level, ref)
         if pool.capacity <= 0:
@@ -115,10 +156,13 @@ def class_level_of(actor: Actor, class_id: str) -> ClassLevel:
 
 
 def available_powers(bundle: ContentBundle, actor: Actor):
-    """这个角色当前解锁的全部能力（按钮 + 被动）。
+    """这个角色当前解锁的全部能力（按钮 + 被动），**含子职特性**。
 
-    走 `ClassDef.powers_at` 而不是 `PowerBook.for_class`：前者会按等级把
-    patch 叠上去（18 级野兽施法解除变形施法禁令），后者是未叠层的原版。
+    走 `powers_at` 而不是 `PowerBook.for_class`：前者会按等级把 patch 叠上去
+    （18 级野兽施法解除变形施法禁令），后者是未叠层的原版。
+
+    子职特性用**父职业**的等级判定：「3 级才拿子职」由 `SubclassDef.powers_at`
+    的等级门槛表达，所以这里不需要先看职业几级再决定要不要加子职。
     """
     if actor.profile is None:
         return ()
@@ -127,7 +171,22 @@ def available_powers(bundle: ContentBundle, actor: Actor):
         class_def = bundle.classes.get(entry.class_id)
         if class_def is not None:
             found.extend(class_def.powers_at(entry.class_level))
+        for sub in subclass_defs(bundle, actor.profile):
+            if sub.class_id == entry.class_id:
+                found.extend(sub.powers_at(entry.class_level))
     return tuple(sorted(found, key=lambda item: (item.owner, int(item.level), item.id)))
+
+
+def owner_class_id(bundle: ContentBundle, power: Power) -> str | None:
+    """这个能力属于哪个职业 —— 子职特性的 owner 是子职，要顺着 class 找回去。
+
+    派生数值里 `class_level` 这类符号引用必须绑到**父职业**的等级上，
+    否则子职特性的「每级 +3」会算成 0 或者总等级。
+    """
+    if power.owner in bundle.classes:
+        return power.owner
+    subclass = bundle.subclasses.get(power.owner)
+    return None if subclass is None else subclass.class_id
 
 
 def morph_class_of(actor: Actor, bundle: ContentBundle):

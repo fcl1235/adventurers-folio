@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.rogue.thief
+class: dnd2024.class.rogue
+name: {zh: 盗贼, en: Thief}
+summary:
+  zh: |-
+    最经典的盗贼：附赠动作开锁/用物品，攀爬跳跃快，先攻双回合。
+  en: |-
+    A mix of burglar, treasure hunter, and explorer, you are the epitome of an adventurer. In addition to improving your agility and stealth, you gain abilities useful for delving into ruins and getting maximum benefit from the magic items you find there.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.rogue.thief.fast_hands
+    name: {zh: 快手, en: Fast Hands}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作可做 巧手（开锁/拆陷阱/扒窃）或 使用物品。
+      en: |-
+        As a Bonus Action, you can do one of the following. Sleight of Hand. Make a Dexterity (Sleight of Hand) check to pick a lock or disarm a trap with Thieves' Tools or to pick a pocket. Use an Object. Take the Utilize action, or take the Magic action to use a magic item that requires that action.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.thief.second_story_work
+    name: {zh: 飞檐走壁, en: Second-Story Work}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得等于速度的攀爬速度；跳跃距离用敏捷计算。
+      en: |-
+        You've trained to get into especially hard-to-reach places, granting you these benefits. Climber. You gain a Climb Speed equal to your Speed. Jumper. You can determine your jump distance using your Dexterity rather than your Strength.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.thief.supreme_sneak
+    name: {zh: 卓越潜行, en: Supreme Sneak}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        灵巧打击新增「潜行攻击」：躲藏状态下攻击不暴露自己（消耗 1d6）。
+      en: |-
+        You gain the following Cunning Strike option. Stealth Attack (Cost: 1d6). If you have the Hide action's Invisible condition, this attack doesn't end that condition on you if you end the turn behind Three-Quarters Cover or Total Cover.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.thief.use_magic_device
+    name: {zh: 使用魔法装置, en: Use Magic Device}
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可同调 4 件魔法物品；使用耗充能物品时有机会不消耗。
+      en: |-
+        You've learned how to maximize use of magic items, granting you the following benefits. Attunement. You can attune to up to four magic items at once. Charges. Whenever you use a magic item property that expends charges, roll 1d6. On a roll of 6, you use the property without expending the charges. Scrolls. You can use any Spell Scroll, using Intelligence as your spellcasting ability for the spell. If the spell is a cantrip or a level 1 spell, you can cast it reliably. If the scroll contains a higher-level spell, you must first succeed on an Intelligence (Arcana) check (DC 10 plus the spell's level). On a successful check, you cast the spell from the scroll. On a failed check, the scroll disintegrates.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.rogue.thief.thief_s_reflexes
+    name: {zh: 盗贼反应, en: Thief's Reflexes}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        战斗第一轮可行动 2 次（第二次在先攻 -10 时）。
+      en: |-
+        You are adept at laying ambushes and quickly escaping danger. You can take two turns during the first round of any combat. You take your first turn at your normal Initiative and your second turn at your Initiative minus 10.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

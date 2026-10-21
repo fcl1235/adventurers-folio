@@ -106,7 +106,11 @@ class Resolution:
     terms: tuple[Term, ...] = ()
 
     def describe(self) -> str:
-        """「16 = 13 皮甲 + 2 敏捷 + 1 风格」"""
+        """「16 = 13 皮甲 + 2 敏捷 + 1 风格」
+
+        不是加法的项要写清语义：MAX/MIN 是「取高／取低」而不是加减
+        —— 重击门槛写 19 和 18，合计是 18，写成「+19 +18」会算成 57。
+        """
         if not self.terms:
             return str(self.total)
         if len(self.terms) == 1 and self.terms[0].source == "@base":
@@ -114,9 +118,15 @@ class Resolution:
         bits = []
         for term in self.terms:
             source = "基础" if term.source == "@base" else term.source.lstrip("@")
-            sign = "+" if term.value >= 0 else "-"
-            bits.append("%s%d %s" % (sign, abs(term.value), source))
-        return "%d = %s" % (self.total, " ".join(bits).lstrip("+").strip())
+            if term.stack is Stack.MAX:
+                bits.append("取高 %d %s" % (term.value, source))
+            elif term.stack is Stack.MIN:
+                bits.append("取低 %d %s" % (term.value, source))
+            else:
+                sign = "+" if term.value >= 0 else "-"
+                bits.append("%s%d %s" % (sign, abs(term.value), source))
+        head = bits[0] if self.terms[0].stack is not Stack.ADD else bits[0].lstrip("+")
+        return "%d = %s" % (self.total, " ".join([head] + bits[1:]).lstrip("+").strip())
 
     def sources(self) -> tuple[str, ...]:
         return tuple(term.source for term in self.terms)

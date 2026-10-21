@@ -305,6 +305,27 @@ def parse_weapon(data: Any, where: str = "") -> WeaponDef:
 
 
 # --- 职业 -------------------------------------------------------------
+def powers_at_level(powers: tuple[Power, ...], class_level: ClassLevel) -> tuple[Power, ...]:
+    """当前等级解锁的能力，**并且把已解锁的 patch 应用进去**。
+
+    叠层必须在这里做而不是加载时做：18 级的「野兽施法」要解除变形期间
+    的施法禁令，如果在加载时全局套用，2 级德鲁伊也能施法了。
+
+    职业与子职共用这一份实现：子职特性的等级也按**父职业等级**算，
+    「3 级才拿子职」这条规则由等级门槛自然表达，不需要额外的开关。
+    """
+    picked = [power for power in powers if int(power.level) <= int(class_level)]
+    picked.sort(key=lambda item: (int(item.level), item.id))
+    index = {power.id: power for power in picked}
+    for power in picked:
+        if not power.augments:
+            continue
+        for target_id in power.augments:
+            if target_id in index:      # 目标也解锁了才叠，跨职业的交由校验期报错
+                index[target_id] = apply_patch(index[target_id], power)
+    return tuple(index[power.id] for power in picked)
+
+
 @dataclass(frozen=True)
 class ClassDef:
     id: str
@@ -349,21 +370,8 @@ class ClassDef:
         raise PluginError("%s 没有资源 %s" % (self.id, resource_id))
 
     def powers_at(self, class_level: ClassLevel) -> tuple[Power, ...]:
-        """当前等级解锁的能力，**并且把已解锁的 patch 应用进去**。
-
-        叠层必须在这里做而不是加载时做：18 级的「野兽施法」要解除变形期间
-        的施法禁令，如果在加载时全局套用，2 级德鲁伊也能施法了。
-        """
-        picked = [power for power in self.powers if int(power.level) <= int(class_level)]
-        picked.sort(key=lambda item: (int(item.level), item.id))
-        index = {power.id: power for power in picked}
-        for power in picked:
-            if not power.augments:
-                continue
-            for target_id in power.augments:
-                if target_id in index:      # 目标也解锁了才叠，跨职业的交由校验期报错
-                    index[target_id] = apply_patch(index[target_id], power)
-        return tuple(index[power.id] for power in picked)
+        """当前等级解锁的能力（含叠层）。规则见 `powers_at_level()`。"""
+        return powers_at_level(self.powers, class_level)
 
     def slots_at(self, class_level: ClassLevel) -> tuple[int, ...]:
         """这一级的 9 个环位容量。没有该级条目时按最近的下界（与资源表同规则）。"""
@@ -397,6 +405,81 @@ class ClassDef:
             "resources": [item.to_dict() for item in self.resources],
             "powers": len(self.powers),
         }
+
+
+# --- 子职 -------------------------------------------------------------
+@dataclass(frozen=True)
+class SubclassDef:
+    """一个子职：挂在某个职业上的一组特性。
+
+    子职**不是**职业的字段，而是独立内容：它自带 id、自带特性表，
+    通过 `class_id` 挂回去。这样「一个职业有四个子职」不需要职业文件知道
+    任何子职的事，第三方插件也能给已有职业补子职。
+    """
+
+    id: str
+    class_id: str
+    name: Text
+    summary: Text
+    unlock_level: ClassLevel = ClassLevel(3)
+    powers: tuple[Power, ...] = ()
+    source: str = ""
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("子职 id 不合规范：%r" % (self.id,))
+        if not is_valid(self.class_id):
+            raise PluginError("子职 %s 的 class_id 不合规范：%r" % (self.id, self.class_id))
+        seen = set()
+        for power in self.powers:
+            if power.id in seen:
+                raise PluginError("子职 %s 的特性 id 重复：%s" % (self.id, power.id))
+            seen.add(power.id)
+
+    def powers_at(self, class_level: ClassLevel) -> tuple[Power, ...]:
+        """按**父职业等级**解锁的特性（含叠层）。"""
+        if int(class_level) < int(self.unlock_level):
+            return ()
+        return powers_at_level(self.powers, class_level)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "class": self.class_id,
+            "name": self.name.to_dict(),
+            "summary": self.summary.to_dict(),
+            "unlock_level": int(self.unlock_level),
+            "powers": len(self.powers),
+        }
+
+
+def parse_subclass(data: Any, source: str = "", unlock_level: int = 3) -> SubclassDef:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的子职定义必须是映射" % source)
+    for key in ("id", "class", "name", "powers"):
+        if key not in data:
+            raise PluginError("%s 的子职定义缺少 %s" % (source, key))
+
+    ident = str(data["id"])
+    powers = tuple(
+        parse_power(row, owner=ident, source=source)
+        for row in (data.get("powers") or ())
+    )
+    try:
+        level = as_class_level(int(data.get("unlock_level", unlock_level)))
+    except RuleError as exc:
+        raise PluginError("%s 的子职解锁等级不合法：%s" % (ident, exc))
+    return SubclassDef(
+        id=ident,
+        class_id=str(data["class"]),
+        name=Text.from_dict(data["name"], where="%s name" % ident),
+        # summary 可以省：没有就退回名字，免得界面上出现空行
+        summary=Text.from_dict(data["summary"], where="%s summary" % ident)
+        if data.get("summary") else Text.from_dict(data["name"], where="%s name" % ident),
+        unlock_level=level,
+        powers=powers,
+        source=source,
+    )
 
 
 def parse_cr_axis(data: Any) -> CrAxis | None:
@@ -566,6 +649,7 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
 class PluginContent:
     manifest: Manifest | None = None
     classes: dict[str, ClassDef] = field(default_factory=dict)
+    subclasses: dict[str, SubclassDef] = field(default_factory=dict)
     book: PowerBook = field(default_factory=PowerBook)
     forms: dict[str, FormSpec] = field(default_factory=dict)
     armors: dict[str, ArmorDef] = field(default_factory=dict)
@@ -580,6 +664,7 @@ class PluginContent:
 @dataclass
 class ContentBundle:
     classes: dict[str, ClassDef] = field(default_factory=dict)
+    subclasses: dict[str, SubclassDef] = field(default_factory=dict)
     book: PowerBook = field(default_factory=PowerBook)
     forms: dict[str, FormSpec] = field(default_factory=dict)
     armors: dict[str, ArmorDef] = field(default_factory=dict)
@@ -607,9 +692,23 @@ class ContentBundle:
             raise PluginError("没有这件武器：%s" % weapon_id)
         return self.weapons[weapon_id]
 
+    def subclass(self, subclass_id: str) -> SubclassDef:
+        if subclass_id not in self.subclasses:
+            raise PluginError("没有这个子职：%s（已加载：%s）"
+                              % (subclass_id, ", ".join(sorted(self.subclasses)) or "无"))
+        return self.subclasses[subclass_id]
+
+    def subclasses_for(self, class_id: str) -> tuple[SubclassDef, ...]:
+        """某个职业可选的全部子职（按 id 排序，保证界面顺序稳定）。"""
+        return tuple(sorted(
+            (item for item in self.subclasses.values() if item.class_id == class_id),
+            key=lambda item: item.id,
+        ))
+
     def stats(self) -> dict[str, Any]:
         return {
             "classes": len(self.classes),
+            "subclasses": len(self.subclasses),
             "powers": len(self.book.ids()),
             "forms": len(self.forms),
             "armors": len(self.armors),
@@ -647,6 +746,24 @@ def load_plugin(folder: str | Path) -> PluginContent:
             continue
         result.classes[class_def.id] = class_def
         for power in class_def.powers:
+            try:
+                result.book.add(power)
+            except PluginError as exc:
+                result.errors.append(str(exc))
+
+    for path in sorted((base / "subclasses").glob("*.yaml")) \
+            if (base / "subclasses").exists() else []:
+        rel = "%s/subclasses/%s" % (base.name, path.name)
+        try:
+            subclass = parse_subclass(_read_yaml(path), source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if subclass.id in result.subclasses:
+            result.errors.append("%s 的子职 id 重复：%s" % (rel, subclass.id))
+            continue
+        result.subclasses[subclass.id] = subclass
+        for power in subclass.powers:
             try:
                 result.book.add(power)
             except PluginError as exc:
@@ -755,13 +872,34 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("能力 %s 重复提供" % power.id)
                 continue
             bundle.book.add(power)
+        for subclass_id, subclass in content.subclasses.items():
+            if subclass_id in bundle.subclasses:
+                bundle.errors.append("子职 %s 重复提供" % subclass_id)
+                continue
+            bundle.subclasses[subclass_id] = subclass
+    _check_subclass_classes(bundle)
     bundle.book.validate_augments()
     return bundle
 
 
+def _check_subclass_classes(bundle: ContentBundle) -> None:
+    """子职必须挂在已加载的职业上。
+
+    只能放在合并之后做：职业与子职可以来自不同插件（第三方给核心职业补子职）。
+    解析期查不到别的插件有没有这个职业，所以这一步晚于解析是必然的。
+    """
+    for subclass in bundle.subclasses.values():
+        if subclass.class_id not in bundle.classes:
+            bundle.errors.append(
+                "子职 %s 挂在未知职业 %s 上（来自 %s）"
+                % (subclass.id, subclass.class_id, subclass.source or "?")
+            )
+
+
 __all__ = [
-    "ResourceDef", "ClassDef", "ArmorDef", "WeaponDef", "PluginContent", "ContentBundle",
-    "parse_resource", "parse_class", "parse_cr_axis", "parse_form",
-    "parse_armor", "parse_weapon",
+    "ResourceDef", "ClassDef", "SubclassDef", "ArmorDef", "WeaponDef",
+    "PluginContent", "ContentBundle",
+    "parse_resource", "parse_class", "parse_subclass", "parse_cr_axis", "parse_form",
+    "parse_armor", "parse_weapon", "powers_at_level",
     "load_plugin", "load_all",
 ]

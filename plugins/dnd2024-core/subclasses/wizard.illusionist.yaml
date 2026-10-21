@@ -1,0 +1,99 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.wizard.illusionist
+class: dnd2024.class.wizard
+name: {zh: 幻术师, en: Illusionist}
+summary:
+  zh: |-
+    幻术师：幻象可以变真（造出实体墙），创造力上限最高。
+  en: |-
+    The Illusionist subclass of the Wizard.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.wizard.illusionist.illusionist_savant
+    name: {zh: 幻术学者, en: Illusionist Savant}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        免费抄 2 个 2 环以下幻术法术，抄录幻术法术更快更省。
+      en: |-
+        Illusionist Savant — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.wizard.illusionist.improved_minor_illusion
+    name: {zh: 强化次级幻象, en: Improved Minor Illusion}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        次级幻象可同时产生声音与影像。
+      en: |-
+        Improved Minor Illusion — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.wizard.illusionist.malleable_illusions
+    name: {zh: 可塑幻象, en: Malleable Illusions}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可随时改变自己正在维持的幻象内容。
+      en: |-
+        Malleable Illusions — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.wizard.illusionist.illusory_self
+    name: {zh: 幻象自明, en: Illusory Self}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：用幻象替自己挡下一次攻击（1 次/短休）。
+      en: |-
+        Illusory Self — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.wizard.illusionist.illusory_reality
+    name: {zh: 幻象成真, en: Illusory Reality}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        让幻象中的一件非生物物件变成真实的实体，持续 1 分钟。
+      en: |-
+        Illusory Reality — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

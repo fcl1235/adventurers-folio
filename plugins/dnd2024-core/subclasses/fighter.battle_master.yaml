@@ -1,0 +1,116 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.fighter.battle_master
+class: dnd2024.class.fighter
+name: {zh: 战斗大师, en: Battle Master}
+summary:
+  zh: |-
+    战术型战士：卓越骰+战技，可击倒、缴械、鼓舞队友，操作感最强。
+  en: |-
+    The Battle Master subclass of the Fighter.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.fighter.battle_master.combat_superiority
+    name: {zh: 战技, en: Combat Superiority}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 4 颗 d8 卓越骰与 3 个战技（如 精准攻击、绊倒攻击、挑衅攻击）；短休恢复全部卓越骰。
+      en: |-
+        Combat Superiority — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.battle_master.student_of_war
+    name: {zh: 战场学识, en: Student of War}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 项工匠工具熟练。
+      en: |-
+        Student of War — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.battle_master.know_your_enemy
+    name: {zh: 知己知彼, en: Know Your Enemy}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        观察 1 分钟后可得知目标的战斗属性对比（强弱项）。
+      en: |-
+        Know Your Enemy — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.battle_master.improved_combat_superiority
+    name: {zh: 强化战技, en: Improved Combat Superiority}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        卓越骰升级为 d10，战技数量增加。
+      en: |-
+        Improved Combat Superiority — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.battle_master.relentless
+    name: {zh: 不屈战技, en: Relentless}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        掷先攻时若卓越骰为 0，立刻恢复 1 颗；卓越骰升为 d12。
+      en: |-
+        Relentless — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.fighter.battle_master.ultimate_combat_superiority
+    name: {zh: 战技精通, en: Ultimate Combat Superiority}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        战技数量与卓越骰达到上限。
+      en: |-
+        Ultimate Combat Superiority — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.

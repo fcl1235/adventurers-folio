@@ -1,0 +1,82 @@
+# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+
+id: dnd2024.subclass.barbarian.path_of_the_berserker
+class: dnd2024.class.barbarian
+name: {zh: 狂战士道途, en: Path of the Berserker}
+summary:
+  zh: |-
+    把狂暴彻底导向暴力的纯输出道途：伤害最高、最直接，也最不怕死。
+  en: |-
+    Barbarians who walk the Path of the Berserker direct their Rage primarily toward violence. Their path is one of untrammeled fury, and they thrill in the chaos of battle as they allow their Rage to seize and empower them.
+unlock_level: 3
+
+powers:
+  - id: dnd2024.subclass.barbarian.path_of_the_berserker.frenzy
+    name: {zh: 狂怒, en: Frenzy}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴中使用鲁莽攻击时，本回合首次以力量命中的目标额外受 「狂暴伤害加值」个 d6 伤害（如 +2 就是 2d6）。
+      en: |-
+        If you use Reckless Attack while your Rage is active, you deal extra damage to the first target you hit on your turn with a Strength-based attack. To determine the extra damage, roll a number of d6s equal to your Rage Damage bonus, and add them together. The damage has the same type as the weapon or Unarmed Strike used for the attack.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_berserker.mindless_rage
+    name: {zh: 无心狂暴, en: Mindless Rage}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴期间免疫魅惑与恐慌；进入狂暴时若已被魅惑/恐慌，该状态立刻结束。
+      en: |-
+        You have Immunity to the Charmed and Frightened conditions while your Rage is active. If you're Charmed or Frightened when you enter your Rage, the condition ends on you.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_berserker.retaliation
+    name: {zh: 反击, en: Retaliation}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        5 尺内的生物对你造成伤害时，可用反应对它做一次近战武器或徒手攻击。
+      en: |-
+        When you take damage from a creature that is within 5 feet of you, you can take a Reaction to make one melee attack against that creature, using a weapon or an Unarmed Strike.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
+
+  - id: dnd2024.subclass.barbarian.path_of_the_berserker.intimidating_presence
+    name: {zh: 骇人威压, en: Intimidating Presence}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作：30 尺内你选择的生物做感知豁免（DC 8+力量+熟练），失败则恐慌 1 分钟，可每回合末重掷。
+      en: |-
+        As a Bonus Action, you can strike terror into others with your menacing presence and primal power. When you do so, each creature of your choice in a 30-foot Emanation originating from you must make a Wisdom saving throw (DC 8 plus your Strength modifier and Proficiency Bonus). On a failed save, a creature has the Frightened condition for 1 minute. At the end of each of the Frightened creature's turns, the creature repeats the save, ending the effect on itself on a success. Once you use this feature, you can't use it again until you finish a Long Rest unless you expend a use of your Rage (no action required) to restore your use of it.
+    effects:
+      - note:
+          zh: |-
+            本条尚未接入数值原语，规则原文如上。
+          en: |-
+            No numeric primitive is wired to this feature yet; the rule text above is the source.
