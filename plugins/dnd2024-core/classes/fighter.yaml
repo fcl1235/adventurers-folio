@@ -1,0 +1,196 @@
+id: dnd2024.class.fighter
+name:
+  zh: 战士
+  en: Fighter
+hit_die: 10
+primary: [str, dex]
+saves: [str, con]
+caster: none
+subclass_level: 3
+skill_choices: 2
+skill_list:
+  - acrobatics
+  - animal_handling
+  - athletics
+  - history
+  - insight
+  - intimidation
+  - persuasion
+  - perception
+  - survival
+
+resources:
+  # 回气：短休回 1 次，长休全回。次数按战士等级查表，兼职不按总等级
+  - id: dnd2024.resource.fighter.second_wind
+    kind: charge
+    refresh: long_rest
+    recover_on_short_rest: 1
+    label: { zh: 回气, en: Second Wind }
+    by_level: { 1: 2, 2: 2, 3: 2, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3,
+                10: 4, 11: 4, 12: 4, 13: 4, 14: 4, 15: 4, 16: 4, 17: 4, 18: 4, 19: 4, 20: 4 }
+
+  # 行动激增：短休或长休都全部恢复
+  - id: dnd2024.resource.fighter.action_surge
+    kind: charge
+    refresh: short_rest
+    label: { zh: 行动激增, en: Action Surge }
+    by_level: { 2: 1, 17: 2 }
+
+  # 不屈：只有长休恢复
+  - id: dnd2024.resource.fighter.indomitable
+    kind: charge
+    refresh: long_rest
+    label: { zh: 不屈, en: Indomitable }
+    by_level: { 9: 1, 13: 2, 17: 3 }
+
+powers:
+  - id: dnd2024.class.fighter.fighting_style
+    name: { zh: 战斗风格, en: Fighting Style }
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: 选择一项战斗风格专长。这是 2024 版把战斗风格并入专长的做法，具体选项在专长里。
+      en: You gain a Fighting Style feat. In the 2024 rules Fighting Style is a feat, not a class feature option list.
+    effects:
+      - note:
+          zh: 1 级从「战斗风格」专长中选 1 项（该专长类别只由战士／圣武士／游侠授予）。
+          en: Choose one Fighting Style feat at level 1 (that feat category is granted only by Fighter, Paladin, or Ranger).
+
+  - id: dnd2024.class.fighter.second_wind
+    name: { zh: 回气, en: Second Wind }
+    level: 1
+    kind: activated
+    cost: { action: bonus, resource: dnd2024.resource.fighter.second_wind, label: 回气 }
+    target: self
+    text:
+      zh: 附赠动作，恢复 1d10 ＋ 战士等级 点生命值。次数在短休时恢复 1 次，长休全部恢复。
+      en: As a Bonus Action, regain 1d10 plus your Fighter level Hit Points. You regain one use on a Short Rest and all uses on a Long Rest.
+    effects:
+      - heal: { dice: 1d10, plus: class_level }
+
+  - id: dnd2024.class.fighter.weapon_mastery
+    name: { zh: 武器专精, en: Weapon Mastery }
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: 选择若干件熟练武器启用其专精属性（推、削、缓、烦、翻、瞄）。数量 1 级 3 件，4 级 4 件，10 级 5 件，17 级 6 件。
+      en: Choose weapons whose mastery properties you can use. You know 3 at level 1, 4 at level 4, 5 at level 10, and 6 at level 17.
+    effects:
+      - note:
+          zh: 专精数量表在职业数据里；具体武器的专精属性属于武器数据。
+          en: Mastery counts live in class data; per-weapon mastery properties live in weapon data.
+
+  - id: dnd2024.class.fighter.action_surge
+    name: { zh: 行动激增, en: Action Surge }
+    level: 2
+    kind: activated
+    cost: { action: free, resource: dnd2024.resource.fighter.action_surge, label: 行动激增 }
+    target: self
+    text:
+      zh: 本回合额外获得 1 个动作，但该动作不能用于施法。17 级起每短休 2 次，但同一回合只能用 1 次。
+      en: You gain one additional action this turn, which can't be used to cast a spell. From level 17 you get two uses per rest, but only one per turn.
+    effects:
+      - grant_action: { kind: action, amount: 1 }
+      - note:
+          zh: 额外动作不能是魔法动作；同一回合只能用一次行动激增。
+          en: The extra action can't be a Magic action, and you can use Action Surge only once per turn.
+
+  - id: dnd2024.class.fighter.tactical_mind
+    name: { zh: 战术思维, en: Tactical Mind }
+    level: 2
+    kind: triggered
+    phase: on_fail_check
+    cost: { resource: dnd2024.resource.fighter.second_wind, label: 回气 }
+    target: self
+    text:
+      zh: 属性检定失败时，可消耗一次回气次数改为掷 1d10 加在这次检定上。若加完仍然失败，这次回气次数不消耗。
+      en: When you fail an ability check, you can expend a use of Second Wind to roll 1d10 and add it to the check. If the check still fails, the use isn't expended.
+    effects:
+      - modify_roll: { dice: 1d10, mode: add, applies_to: skill_check }
+
+  - id: dnd2024.class.fighter.extra_attack
+    name: { zh: 额外攻击, en: Extra Attack }
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: 执行攻击动作时，可以攻击 2 次而不是 1 次。
+      en: You can attack twice, instead of once, whenever you take the Attack action.
+    effects:
+      - grant_modifier: { target: attack.count, value: 2, stack: max }
+
+  - id: dnd2024.class.fighter.tactical_shift
+    name: { zh: 战术转移, en: Tactical Shift }
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: 使用回气的附赠动作时，可以移动至多等于速度一半的距离，且不引发借机攻击。
+      en: Whenever you activate Second Wind with a Bonus Action, you can move up to half your Speed without provoking Opportunity Attacks.
+    effects:
+      - note:
+          zh: 移动结算属于战斗流程，P4 接入位置与借机攻击后再数值化。
+          en: Movement resolution lands with the combat engine in P4.
+
+  - id: dnd2024.class.fighter.indomitable
+    name: { zh: 不屈, en: Indomitable }
+    level: 9
+    kind: triggered
+    phase: on_fail_save
+    cost: { resource: dnd2024.resource.fighter.indomitable, label: 不屈 }
+    target: self
+    text:
+      zh: 豁免失败时，可以重掷该豁免并加上战士等级加值。次数按 9／13／17 级为 1／2／3 次，仅长休恢复。
+      en: When you fail a saving throw, you can reroll it with a bonus equal to your Fighter level. Uses are 1/2/3 at levels 9/13/17 and return on a Long Rest.
+    effects:
+      - modify_roll: { mode: reroll, plus: class_level, applies_to: save }
+
+  - id: dnd2024.class.fighter.tactical_master
+    name: { zh: 战术大师, en: Tactical Master }
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: 攻击时可以临时把武器专精属性替换为推、削或缓。
+      en: When you attack, you can replace the mastery property of a weapon with Push, Sap, or Slow.
+    effects:
+      - note:
+          zh: 需要武器专精数据；具体替换在攻击选项中做，不产生永久修改。
+          en: Needs weapon mastery data; the swap is per-attack, not permanent.
+
+  - id: dnd2024.class.fighter.extra_attack_2
+    name: { zh: 双重额外攻击, en: Two Extra Attacks }
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: 攻击动作可以攻击 3 次。
+      en: You can attack three times, instead of once, whenever you take the Attack action.
+    effects:
+      - grant_modifier: { target: attack.count, value: 3, stack: max }
+
+  - id: dnd2024.class.fighter.studied_attacks
+    name: { zh: 研究攻击, en: Studied Attacks }
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: 如果你的攻击检定对某生物未命中，则你对其的下一次攻击检定有优势。
+      en: If you miss a creature with an attack roll, you have Advantage on your next attack roll against that creature.
+    effects:
+      - note:
+          zh: 需要「上次是否失手」的战斗记录；P4 接 combat 上下文后自动判定。
+          en: Needs last-miss history; wired in P4 with the combat context.
+
+  - id: dnd2024.class.fighter.extra_attack_3
+    name: { zh: 三重额外攻击, en: Three Extra Attacks }
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: 攻击动作可以攻击 4 次。
+      en: You can attack four times, instead of once, whenever you take the Attack action.
+    effects:
+      - grant_modifier: { target: attack.count, value: 4, stack: max }
