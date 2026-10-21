@@ -1,0 +1,7 @@
+- id: demo.power.dup
+  name: {zh: 甲, en: Alpha}
+  text: {zh: 文本一, en: Text one}
+- id: demo.power.dup
+  name: {zh: 乙, en: Beta}
+  text:
+    zh: 只有中文

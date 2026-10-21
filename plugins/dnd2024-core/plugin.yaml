@@ -1,0 +1,14 @@
+id: dnd2024-core
+kind: content
+api: 1
+name:
+  zh: D&D 2024 核心内容
+  en: D&D 2024 Core Content
+version: 0.1.0
+requires: []
+provides:
+  classes: []
+  subclasses: []
+  species: []
+  feats: []
+  items: []

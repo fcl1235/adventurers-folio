@@ -1,0 +1,9 @@
+- id: demo.power.sample
+  name:
+    zh: 示例能力
+    en: Sample Power
+  level: 1
+  kind: activated
+  text:
+    zh: 恢复少量生命值。
+    en: Regain a small amount of hit points.

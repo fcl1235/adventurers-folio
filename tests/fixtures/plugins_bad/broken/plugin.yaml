@@ -1,0 +1,7 @@
+id: demo-broken
+kind: content
+api: 1
+name:
+  zh: 坏示例
+  en: Broken Demo
+version: 0.1.0

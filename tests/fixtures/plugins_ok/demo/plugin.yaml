@@ -1,0 +1,10 @@
+id: demo-core
+kind: content
+api: 1
+name:
+  zh: 示例核心
+  en: Demo Core
+version: 0.1.0
+requires: []
+provides:
+  classes: [demo.class_a]
