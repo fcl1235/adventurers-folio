@@ -199,11 +199,11 @@ powers:
       en: |-
         Your speed increases by 10 feet while you aren't wearing Heavy armor.
     effects:
-      - note:
-          zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
-          en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+      # 只禁重甲：轻甲/中甲/无甲都给。事实一条 `armor` 就够表达
+      - grant_modifier:
+          target: speed.walk
+          value: 10
+          when: { armor_ne: heavy }
 
   - id: dnd2024.class.barbarian.feral_instinct
     name: {zh: 野性本能, en: Feral Instinct}

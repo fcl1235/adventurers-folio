@@ -246,11 +246,15 @@ powers:
       en: |-
         Your Speed increases by 10 feet while you aren't wearing Heavy armor. You also have a Climb Speed and a Swim Speed equal to your Speed.
     effects:
+      - grant_modifier:
+          target: speed.walk
+          value: 10
+          when: { armor_ne: heavy }
       - note:
           zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
+            攀爬与游泳速度等于步行速度（速度表里没有分项，界面按步行速度显示）。
           en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+            You also have a Climb Speed and a Swim Speed equal to your Speed.
 
   - id: dnd2024.class.ranger.expertise
     name: {zh: 专精, en: Expertise}

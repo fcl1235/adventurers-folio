@@ -49,7 +49,8 @@ SCORES = {key.lower(): value for key, value in SCORES_UPPER.items()}
 ABILITY_UPPER = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
 ABILITY_LOWER = [key.lower() for key in ABILITY_UPPER]
 
-FIELDS = ("hp", "pb", "ac", "attack") + tuple("save.%s" % key for key in ABILITY_LOWER)
+FIELDS = ("hp", "pb", "ac", "attack", "speed") + tuple(
+    "save.%s" % key for key in ABILITY_LOWER)
 
 # 已知缺口白名单：**必须写清原因**，且一旦实现就要删掉（脚本会提示）。
 # P5b 把最后一类（属性加值通道）做完以后这里已经清空 —— 12 职业 × 1–20 级的
@@ -75,6 +76,7 @@ def legacy_snapshot() -> dict[str, dict[str, Any]]:
                 "pb": char.pb(),
                 "ac": char.ac_breakdown()[0],
                 "attack": char.attack_bonus(),
+                "speed": char.speed(),
             }
             for upper, lower in zip(ABILITY_UPPER, ABILITY_LOWER):
                 row["save.%s" % lower] = char.save_mod(upper)
@@ -103,6 +105,7 @@ def new_snapshot(bundle) -> tuple[dict[str, dict[str, Any]], list[str]]:
                 "pb": sheet["proficiency_bonus"],
                 "ac": sheet["ac"]["total"],
                 "attack": sheet["attack"]["total"],
+                "speed": sheet["speed"]["walk"],
             }
             for key in ABILITY_LOWER:
                 row["save.%s" % key] = sheet["saves"][key]["total"]

@@ -9,7 +9,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "barbarian:10": {
   "ac": 14,
@@ -21,7 +22,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:11": {
   "ac": 14,
@@ -33,7 +35,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:12": {
   "ac": 14,
@@ -45,7 +48,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:13": {
   "ac": 14,
@@ -57,7 +61,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:14": {
   "ac": 14,
@@ -69,7 +74,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:15": {
   "ac": 14,
@@ -81,7 +87,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:16": {
   "ac": 14,
@@ -93,7 +100,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:17": {
   "ac": 14,
@@ -105,7 +113,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:18": {
   "ac": 14,
@@ -117,7 +126,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:19": {
   "ac": 14,
@@ -129,7 +139,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:2": {
   "ac": 14,
@@ -141,7 +152,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "barbarian:20": {
   "ac": 16,
@@ -153,7 +165,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 11,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:3": {
   "ac": 14,
@@ -165,7 +178,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "barbarian:4": {
   "ac": 14,
@@ -177,7 +191,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "barbarian:5": {
   "ac": 14,
@@ -189,7 +204,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:6": {
   "ac": 14,
@@ -201,7 +217,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:7": {
   "ac": 14,
@@ -213,7 +230,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:8": {
   "ac": 14,
@@ -225,7 +243,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "barbarian:9": {
   "ac": 14,
@@ -237,7 +256,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "bard:1": {
   "ac": 12,
@@ -249,7 +269,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:10": {
   "ac": 12,
@@ -261,7 +282,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:11": {
   "ac": 12,
@@ -273,7 +295,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:12": {
   "ac": 12,
@@ -285,7 +308,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:13": {
   "ac": 12,
@@ -297,7 +321,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:14": {
   "ac": 12,
@@ -309,7 +334,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:15": {
   "ac": 12,
@@ -321,7 +347,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:16": {
   "ac": 12,
@@ -333,7 +360,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:17": {
   "ac": 12,
@@ -345,7 +373,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:18": {
   "ac": 12,
@@ -357,7 +386,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:19": {
   "ac": 12,
@@ -369,7 +399,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:2": {
   "ac": 12,
@@ -381,7 +412,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:20": {
   "ac": 12,
@@ -393,7 +425,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:3": {
   "ac": 12,
@@ -405,7 +438,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:4": {
   "ac": 12,
@@ -417,7 +451,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:5": {
   "ac": 12,
@@ -429,7 +464,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:6": {
   "ac": 12,
@@ -441,7 +477,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:7": {
   "ac": 12,
@@ -453,7 +490,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:8": {
   "ac": 12,
@@ -465,7 +503,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "bard:9": {
   "ac": 12,
@@ -477,7 +516,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "cleric:1": {
   "ac": 12,
@@ -489,7 +529,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "cleric:10": {
   "ac": 12,
@@ -501,7 +542,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "cleric:11": {
   "ac": 12,
@@ -513,7 +555,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "cleric:12": {
   "ac": 12,
@@ -525,7 +568,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "cleric:13": {
   "ac": 12,
@@ -537,7 +581,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "cleric:14": {
   "ac": 12,
@@ -549,7 +594,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "cleric:15": {
   "ac": 12,
@@ -561,7 +607,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "cleric:16": {
   "ac": 12,
@@ -573,7 +620,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "cleric:17": {
   "ac": 12,
@@ -585,7 +633,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "cleric:18": {
   "ac": 12,
@@ -597,7 +646,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "cleric:19": {
   "ac": 12,
@@ -609,7 +659,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "cleric:2": {
   "ac": 12,
@@ -621,7 +672,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "cleric:20": {
   "ac": 12,
@@ -633,7 +685,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "cleric:3": {
   "ac": 12,
@@ -645,7 +698,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "cleric:4": {
   "ac": 12,
@@ -657,7 +711,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "cleric:5": {
   "ac": 12,
@@ -669,7 +724,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "cleric:6": {
   "ac": 12,
@@ -681,7 +737,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "cleric:7": {
   "ac": 12,
@@ -693,7 +750,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "cleric:8": {
   "ac": 12,
@@ -705,7 +763,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "cleric:9": {
   "ac": 12,
@@ -717,7 +776,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "druid:1": {
   "ac": 12,
@@ -729,7 +789,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "druid:10": {
   "ac": 12,
@@ -741,7 +802,8 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "druid:11": {
   "ac": 12,
@@ -753,7 +815,8 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "druid:12": {
   "ac": 12,
@@ -765,7 +828,8 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "druid:13": {
   "ac": 12,
@@ -777,7 +841,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "druid:14": {
   "ac": 12,
@@ -789,7 +854,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "druid:15": {
   "ac": 12,
@@ -801,7 +867,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "druid:16": {
   "ac": 12,
@@ -813,7 +880,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "druid:17": {
   "ac": 12,
@@ -825,7 +893,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "druid:18": {
   "ac": 12,
@@ -837,7 +906,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "druid:19": {
   "ac": 12,
@@ -849,7 +919,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "druid:2": {
   "ac": 12,
@@ -861,7 +932,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "druid:20": {
   "ac": 12,
@@ -873,7 +945,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "druid:3": {
   "ac": 12,
@@ -885,7 +958,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "druid:4": {
   "ac": 12,
@@ -897,7 +971,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "druid:5": {
   "ac": 12,
@@ -909,7 +984,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "druid:6": {
   "ac": 12,
@@ -921,7 +997,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "druid:7": {
   "ac": 12,
@@ -933,7 +1010,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "druid:8": {
   "ac": 12,
@@ -945,7 +1023,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "druid:9": {
   "ac": 12,
@@ -957,7 +1036,8 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "fighter:1": {
   "ac": 12,
@@ -969,7 +1049,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:10": {
   "ac": 12,
@@ -981,7 +1062,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:11": {
   "ac": 12,
@@ -993,7 +1075,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:12": {
   "ac": 12,
@@ -1005,7 +1088,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:13": {
   "ac": 12,
@@ -1017,7 +1101,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:14": {
   "ac": 12,
@@ -1029,7 +1114,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:15": {
   "ac": 12,
@@ -1041,7 +1127,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:16": {
   "ac": 12,
@@ -1053,7 +1140,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:17": {
   "ac": 12,
@@ -1065,7 +1153,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:18": {
   "ac": 12,
@@ -1077,7 +1166,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:19": {
   "ac": 12,
@@ -1089,7 +1179,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:2": {
   "ac": 12,
@@ -1101,7 +1192,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:20": {
   "ac": 12,
@@ -1113,7 +1205,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:3": {
   "ac": 12,
@@ -1125,7 +1218,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:4": {
   "ac": 12,
@@ -1137,7 +1231,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:5": {
   "ac": 12,
@@ -1149,7 +1244,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:6": {
   "ac": 12,
@@ -1161,7 +1257,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:7": {
   "ac": 12,
@@ -1173,7 +1270,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:8": {
   "ac": 12,
@@ -1185,7 +1283,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "fighter:9": {
   "ac": 12,
@@ -1197,7 +1296,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "monk:1": {
   "ac": 13,
@@ -1209,7 +1309,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "monk:10": {
   "ac": 13,
@@ -1221,7 +1322,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 50
  },
  "monk:11": {
   "ac": 13,
@@ -1233,7 +1335,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 50
  },
  "monk:12": {
   "ac": 13,
@@ -1245,7 +1348,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 50
  },
  "monk:13": {
   "ac": 13,
@@ -1257,7 +1361,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 50
  },
  "monk:14": {
   "ac": 13,
@@ -1269,7 +1374,8 @@
   "save.dex": 7,
   "save.int": 5,
   "save.str": 8,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 55
  },
  "monk:15": {
   "ac": 13,
@@ -1281,7 +1387,8 @@
   "save.dex": 7,
   "save.int": 5,
   "save.str": 8,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 55
  },
  "monk:16": {
   "ac": 13,
@@ -1293,7 +1400,8 @@
   "save.dex": 7,
   "save.int": 5,
   "save.str": 8,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 55
  },
  "monk:17": {
   "ac": 13,
@@ -1305,7 +1413,8 @@
   "save.dex": 8,
   "save.int": 6,
   "save.str": 9,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 55
  },
  "monk:18": {
   "ac": 13,
@@ -1317,7 +1426,8 @@
   "save.dex": 8,
   "save.int": 6,
   "save.str": 9,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 60
  },
  "monk:19": {
   "ac": 13,
@@ -1329,7 +1439,8 @@
   "save.dex": 8,
   "save.int": 6,
   "save.str": 9,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 60
  },
  "monk:2": {
   "ac": 13,
@@ -1341,7 +1452,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "monk:20": {
   "ac": 17,
@@ -1353,7 +1465,8 @@
   "save.dex": 10,
   "save.int": 6,
   "save.str": 9,
-  "save.wis": 9
+  "save.wis": 9,
+  "speed": 60
  },
  "monk:3": {
   "ac": 13,
@@ -1365,7 +1478,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "monk:4": {
   "ac": 13,
@@ -1377,7 +1491,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "monk:5": {
   "ac": 13,
@@ -1389,7 +1504,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "monk:6": {
   "ac": 13,
@@ -1401,7 +1517,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 45
  },
  "monk:7": {
   "ac": 13,
@@ -1413,7 +1530,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 45
  },
  "monk:8": {
   "ac": 13,
@@ -1425,7 +1543,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 45
  },
  "monk:9": {
   "ac": 13,
@@ -1437,7 +1556,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 45
  },
  "paladin:1": {
   "ac": 12,
@@ -1449,7 +1569,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "paladin:10": {
   "ac": 12,
@@ -1461,7 +1582,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "paladin:11": {
   "ac": 12,
@@ -1473,7 +1595,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "paladin:12": {
   "ac": 12,
@@ -1485,7 +1608,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "paladin:13": {
   "ac": 12,
@@ -1497,7 +1621,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "paladin:14": {
   "ac": 12,
@@ -1509,7 +1634,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "paladin:15": {
   "ac": 12,
@@ -1521,7 +1647,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "paladin:16": {
   "ac": 12,
@@ -1533,7 +1660,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "paladin:17": {
   "ac": 12,
@@ -1545,7 +1673,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 8
+  "save.wis": 8,
+  "speed": 30
  },
  "paladin:18": {
   "ac": 12,
@@ -1557,7 +1686,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 8
+  "save.wis": 8,
+  "speed": 30
  },
  "paladin:19": {
   "ac": 12,
@@ -1569,7 +1699,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 8
+  "save.wis": 8,
+  "speed": 30
  },
  "paladin:2": {
   "ac": 12,
@@ -1581,7 +1712,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "paladin:20": {
   "ac": 12,
@@ -1593,7 +1725,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 8
+  "save.wis": 8,
+  "speed": 30
  },
  "paladin:3": {
   "ac": 12,
@@ -1605,7 +1738,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "paladin:4": {
   "ac": 12,
@@ -1617,7 +1751,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "paladin:5": {
   "ac": 12,
@@ -1629,7 +1764,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "paladin:6": {
   "ac": 12,
@@ -1641,7 +1777,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "paladin:7": {
   "ac": 12,
@@ -1653,7 +1790,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "paladin:8": {
   "ac": 12,
@@ -1665,7 +1803,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "paladin:9": {
   "ac": 12,
@@ -1677,7 +1816,8 @@
   "save.dex": 3,
   "save.int": 1,
   "save.str": 4,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "ranger:1": {
   "ac": 12,
@@ -1689,7 +1829,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "ranger:10": {
   "ac": 12,
@@ -1701,7 +1842,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:11": {
   "ac": 12,
@@ -1713,7 +1855,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:12": {
   "ac": 12,
@@ -1725,7 +1868,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:13": {
   "ac": 12,
@@ -1737,7 +1881,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:14": {
   "ac": 12,
@@ -1749,7 +1894,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:15": {
   "ac": 12,
@@ -1761,7 +1907,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:16": {
   "ac": 12,
@@ -1773,7 +1920,8 @@
   "save.dex": 7,
   "save.int": 0,
   "save.str": 8,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:17": {
   "ac": 12,
@@ -1785,7 +1933,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:18": {
   "ac": 12,
@@ -1797,7 +1946,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:19": {
   "ac": 12,
@@ -1809,7 +1959,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:2": {
   "ac": 12,
@@ -1821,7 +1972,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "ranger:20": {
   "ac": 12,
@@ -1833,7 +1985,8 @@
   "save.dex": 8,
   "save.int": 0,
   "save.str": 9,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:3": {
   "ac": 12,
@@ -1845,7 +1998,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "ranger:4": {
   "ac": 12,
@@ -1857,7 +2011,8 @@
   "save.dex": 4,
   "save.int": 0,
   "save.str": 5,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "ranger:5": {
   "ac": 12,
@@ -1869,7 +2024,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "ranger:6": {
   "ac": 12,
@@ -1881,7 +2037,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:7": {
   "ac": 12,
@@ -1893,7 +2050,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:8": {
   "ac": 12,
@@ -1905,7 +2063,8 @@
   "save.dex": 5,
   "save.int": 0,
   "save.str": 6,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "ranger:9": {
   "ac": 12,
@@ -1917,7 +2076,8 @@
   "save.dex": 6,
   "save.int": 0,
   "save.str": 7,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 40
  },
  "rogue:1": {
   "ac": 12,
@@ -1929,7 +2089,8 @@
   "save.dex": 4,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:10": {
   "ac": 12,
@@ -1941,7 +2102,8 @@
   "save.dex": 6,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:11": {
   "ac": 12,
@@ -1953,7 +2115,8 @@
   "save.dex": 6,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:12": {
   "ac": 12,
@@ -1965,7 +2128,8 @@
   "save.dex": 6,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:13": {
   "ac": 12,
@@ -1977,7 +2141,8 @@
   "save.dex": 7,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:14": {
   "ac": 12,
@@ -1989,7 +2154,8 @@
   "save.dex": 7,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:15": {
   "ac": 12,
@@ -2001,7 +2167,8 @@
   "save.dex": 7,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "rogue:16": {
   "ac": 12,
@@ -2013,7 +2180,8 @@
   "save.dex": 7,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "rogue:17": {
   "ac": 12,
@@ -2025,7 +2193,8 @@
   "save.dex": 8,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "rogue:18": {
   "ac": 12,
@@ -2037,7 +2206,8 @@
   "save.dex": 8,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "rogue:19": {
   "ac": 12,
@@ -2049,7 +2219,8 @@
   "save.dex": 8,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "rogue:2": {
   "ac": 12,
@@ -2061,7 +2232,8 @@
   "save.dex": 4,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:20": {
   "ac": 12,
@@ -2073,7 +2245,8 @@
   "save.dex": 8,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "rogue:3": {
   "ac": 12,
@@ -2085,7 +2258,8 @@
   "save.dex": 4,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:4": {
   "ac": 12,
@@ -2097,7 +2271,8 @@
   "save.dex": 4,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:5": {
   "ac": 12,
@@ -2109,7 +2284,8 @@
   "save.dex": 5,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:6": {
   "ac": 12,
@@ -2121,7 +2297,8 @@
   "save.dex": 5,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:7": {
   "ac": 12,
@@ -2133,7 +2310,8 @@
   "save.dex": 5,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:8": {
   "ac": 12,
@@ -2145,7 +2323,8 @@
   "save.dex": 5,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "rogue:9": {
   "ac": 12,
@@ -2157,7 +2336,8 @@
   "save.dex": 6,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:1": {
   "ac": 12,
@@ -2169,7 +2349,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:10": {
   "ac": 12,
@@ -2181,7 +2362,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:11": {
   "ac": 12,
@@ -2193,7 +2375,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:12": {
   "ac": 12,
@@ -2205,7 +2388,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:13": {
   "ac": 12,
@@ -2217,7 +2401,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:14": {
   "ac": 12,
@@ -2229,7 +2414,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:15": {
   "ac": 12,
@@ -2241,7 +2427,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:16": {
   "ac": 12,
@@ -2253,7 +2440,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:17": {
   "ac": 12,
@@ -2265,7 +2453,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:18": {
   "ac": 12,
@@ -2277,7 +2466,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:19": {
   "ac": 12,
@@ -2289,7 +2479,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:2": {
   "ac": 12,
@@ -2301,7 +2492,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:20": {
   "ac": 12,
@@ -2313,7 +2505,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:3": {
   "ac": 12,
@@ -2325,7 +2518,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:4": {
   "ac": 12,
@@ -2337,7 +2531,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:5": {
   "ac": 12,
@@ -2349,7 +2544,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:6": {
   "ac": 12,
@@ -2361,7 +2557,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:7": {
   "ac": 12,
@@ -2373,7 +2570,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:8": {
   "ac": 12,
@@ -2385,7 +2583,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "sorcerer:9": {
   "ac": 12,
@@ -2397,7 +2596,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 1
+  "save.wis": 1,
+  "speed": 30
  },
  "warlock:1": {
   "ac": 12,
@@ -2409,7 +2609,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "warlock:10": {
   "ac": 12,
@@ -2421,7 +2622,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "warlock:11": {
   "ac": 12,
@@ -2433,7 +2635,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "warlock:12": {
   "ac": 12,
@@ -2445,7 +2648,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "warlock:13": {
   "ac": 12,
@@ -2457,7 +2661,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "warlock:14": {
   "ac": 12,
@@ -2469,7 +2674,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "warlock:15": {
   "ac": 12,
@@ -2481,7 +2687,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "warlock:16": {
   "ac": 12,
@@ -2493,7 +2700,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "warlock:17": {
   "ac": 12,
@@ -2505,7 +2713,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "warlock:18": {
   "ac": 12,
@@ -2517,7 +2726,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "warlock:19": {
   "ac": 12,
@@ -2529,7 +2739,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "warlock:2": {
   "ac": 12,
@@ -2541,7 +2752,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "warlock:20": {
   "ac": 12,
@@ -2553,7 +2765,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "warlock:3": {
   "ac": 12,
@@ -2565,7 +2778,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "warlock:4": {
   "ac": 12,
@@ -2577,7 +2791,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "warlock:5": {
   "ac": 12,
@@ -2589,7 +2804,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "warlock:6": {
   "ac": 12,
@@ -2601,7 +2817,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "warlock:7": {
   "ac": 12,
@@ -2613,7 +2830,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "warlock:8": {
   "ac": 12,
@@ -2625,7 +2843,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "warlock:9": {
   "ac": 12,
@@ -2637,7 +2856,8 @@
   "save.dex": 2,
   "save.int": 0,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "wizard:1": {
   "ac": 12,
@@ -2649,7 +2869,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "wizard:10": {
   "ac": 12,
@@ -2661,7 +2882,8 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "wizard:11": {
   "ac": 12,
@@ -2673,7 +2895,8 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "wizard:12": {
   "ac": 12,
@@ -2685,7 +2908,8 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  },
  "wizard:13": {
   "ac": 12,
@@ -2697,7 +2921,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "wizard:14": {
   "ac": 12,
@@ -2709,7 +2934,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "wizard:15": {
   "ac": 12,
@@ -2721,7 +2947,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "wizard:16": {
   "ac": 12,
@@ -2733,7 +2960,8 @@
   "save.dex": 2,
   "save.int": 5,
   "save.str": 3,
-  "save.wis": 6
+  "save.wis": 6,
+  "speed": 30
  },
  "wizard:17": {
   "ac": 12,
@@ -2745,7 +2973,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "wizard:18": {
   "ac": 12,
@@ -2757,7 +2986,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "wizard:19": {
   "ac": 12,
@@ -2769,7 +2999,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "wizard:2": {
   "ac": 12,
@@ -2781,7 +3012,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "wizard:20": {
   "ac": 12,
@@ -2793,7 +3025,8 @@
   "save.dex": 2,
   "save.int": 6,
   "save.str": 3,
-  "save.wis": 7
+  "save.wis": 7,
+  "speed": 30
  },
  "wizard:3": {
   "ac": 12,
@@ -2805,7 +3038,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "wizard:4": {
   "ac": 12,
@@ -2817,7 +3051,8 @@
   "save.dex": 2,
   "save.int": 2,
   "save.str": 3,
-  "save.wis": 3
+  "save.wis": 3,
+  "speed": 30
  },
  "wizard:5": {
   "ac": 12,
@@ -2829,7 +3064,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "wizard:6": {
   "ac": 12,
@@ -2841,7 +3077,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "wizard:7": {
   "ac": 12,
@@ -2853,7 +3090,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "wizard:8": {
   "ac": 12,
@@ -2865,7 +3103,8 @@
   "save.dex": 2,
   "save.int": 3,
   "save.str": 3,
-  "save.wis": 4
+  "save.wis": 4,
+  "speed": 30
  },
  "wizard:9": {
   "ac": 12,
@@ -2877,6 +3116,7 @@
   "save.dex": 2,
   "save.int": 4,
   "save.str": 3,
-  "save.wis": 5
+  "save.wis": 5,
+  "speed": 30
  }
 }

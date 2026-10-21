@@ -256,11 +256,11 @@ class Session:
         profile = actor.profile
         loadout = loadout_for(actor, self.bundle.armors)
         base, gear_mods = ac_inputs(loadout, top.statblock, self.locale)
+        mods = passive_modifiers(self.bundle, actor, self.locale)
         ac = resolver.armor_class(
-            top,
-            list(modifiers_for(passive_modifiers(self.bundle, actor, self.locale), "ac")) + list(gear_mods),
-            base=base,
+            top, list(modifiers_for(mods, "ac")) + list(gear_mods), base=base,
         )
+        morphed = top.layer is not None
 
         classes: list[str] = []
         level = 1
@@ -280,7 +280,9 @@ class Session:
             temp_hp=actor.hp.temp,
             ac=ac.total,
             ac_detail=ac.describe(),
-            speed={mode: resolver.speed(top, mode).total for mode in top.statblock.speeds},
+            speed={mode: resolver.speed(
+                top, mode, () if morphed else modifiers_for(mods, "speed.%s" % mode)).total
+                for mode in top.statblock.speeds},
             proficiency_bonus=proficiency_bonus(profile.total if profile else TotalLevel(1)),
             conditions=actor.conditions.ids(),
         )

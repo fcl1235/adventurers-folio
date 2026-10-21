@@ -37,9 +37,10 @@ def facts_for(
 ) -> dict[str, Any]:
     """条件求值用的事实。少写一个事实 = 条件永远是 False，所以这里只放确定的。
 
-    `unarmored` 是「没穿护甲」，`shield` 是「拿着盾」——
-    野蛮人的无甲防御允许持盾，武僧的不允许，所以两条都得给，
-    让内容自己写 `when: {unarmored: true, shield: false}`，而不是在代码里判职业。
+    `unarmored` 是「没穿护甲」，`shield` 是「拿着盾」，`armor` 是护甲类别
+    （light / medium / heavy / None）——
+    野蛮人的无甲防御允许持盾、武僧的不允许；野蛮人与游侠的快速移动只禁**重型**护甲。
+    这些差别全靠这几条事实 + 内容里的 `when` 表达，代码里不出现职业判断。
     """
     pool = actor.root().hp
     top = actor.top()
@@ -51,6 +52,7 @@ def facts_for(
         "morphed": top.layer is not None,
         "unarmored": gear.unarmored,
         "shield": gear.shielded,
+        "armor": None if gear.armor is None else gear.armor.category,
         "conditions": set(actor.conditions.ids()),
     }
     if class_level is not None:

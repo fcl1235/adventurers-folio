@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 """效果数值：把「1d10 + 战士等级」「5 × 等级」这类写法收成一个值对象。
 
-内容里三种写法都合法：
-  3                      常量
-  "1d10"                 纯骰
+内容里四种写法都合法：
+  3                                          常量
+  "1d10"                                     纯骰
   {dice: 1d10, plus: class_level, times: 1}   骰式 + 引用 + 乘数
+  {table: {2: 10, 6: 15}, key: class_level}   按等级查表（取不超过等级的最大档）
 
-`plus` / `times` 是符号引用（Ref），到执行期才求值 —— 所以
+`plus` / `times` / `key` 是符号引用（Ref），到执行期才求值 —— 所以
 「回气加的是职业等级而不是总等级」这种事，在数据里就写死了，不靠代码判断。
+
+`table` 是给「10/15/20/25/30 这种没有公式、只有表」的能力用的
+（武僧无甲移动就是典型：五档，档与档之间不是等差）。查表规则与
+`ResourceDef.by_level` 一致：取**不超过当前值的最大档**，缺省档为 0。
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Any, Mapping, Tuple
 
 from ..kernel.dice import Dice, RollResult, parse as parse_dice
@@ -20,12 +26,21 @@ from ..kernel.errors import DiceError, RuleError
 from ..kernel.rng import Rng
 from .modifiers import Ref, resolve_ref
 
-# 允许出现在 plus / times 里的引用名（写错名字比算出错数更容易发现）
+# 允许出现在 plus / times / key 里的引用名（写错名字比算出错数更容易发现）
 _GENERIC_REFS = (
     "class_level", "total_level", "prof", "prof_half", "prof_double",
     "ability.str", "ability.dex", "ability.con",
     "ability.int", "ability.wis", "ability.cha",
 )
+_TABLE_KEYS = ("table", "key")
+
+
+def lookup(table: Mapping[int, int], value: int) -> int:
+    """等级表求值：取不超过 value 的最大档。低于最小档时返回 0。"""
+    usable = [int(key) for key in table if int(key) <= int(value)]
+    if not usable:
+        return 0
+    return int(table[max(usable)])
 
 
 @dataclass(frozen=True, slots=True)
@@ -38,12 +53,31 @@ class Amount:
     times: Ref | None = None
     # 下限：2024 大量写「最低 1 次」（诗人灵感 = 魅力调整值，最少 1）
     floor: int | None = None
+    # 按等级查表：table 是 门槛→值，key 是查表用的引用（缺省 class_level）
+    table: Mapping[int, int] | None = None
+    key: Ref | None = None
 
     def __post_init__(self) -> None:
-        if self.dice is None and self.flat == 0 and self.plus is None:
-            raise RuleError("Amount 至少要有一个来源（dice / flat / plus）")
+        if self.table is not None:
+            if not self.table:
+                raise RuleError("Amount.table 不能为空")
+            for level_key, value in self.table.items():
+                if int(level_key) < 1 or int(value) < 0:
+                    raise RuleError("Amount.table 条目不合法：%r=%r" % (level_key, value))
+            object.__setattr__(self, "table", MappingProxyType(
+                {int(k): int(v) for k, v in self.table.items()}))
+            if self.key is None:
+                object.__setattr__(self, "key", Ref("class_level"))
+        elif self.key is not None:
+            raise RuleError("Amount.key 只有在给了 table 时才有意义")
+        if self.dice is None and self.flat == 0 and self.plus is None and self.table is None:
+            raise RuleError("Amount 至少要有一个来源（dice / flat / plus / table）")
 
     # --- 求值 ---------------------------------------------------------
+    def _table_value(self, ctx: Mapping[str, Any]) -> int:
+        assert self.table is not None
+        return lookup(self.table, resolve_ref(self.key or Ref("class_level"), ctx))
+
     def roll(self, ctx: Mapping[str, Any], rng: Rng) -> tuple[int, RollResult | None]:
         """掷一次。返回 (总值, 掷骰明细)；纯数值时明细为 None。"""
         base = 0
@@ -54,6 +88,8 @@ class Amount:
         base += self.flat
         if self.plus is not None:
             base += resolve_ref(self.plus, ctx)
+        if self.table is not None:
+            base += self._table_value(ctx)
         if self.times is not None:
             base *= resolve_ref(self.times, ctx)
         if self.floor is not None:
@@ -66,6 +102,8 @@ class Amount:
         base += self.flat
         if self.plus is not None:
             base += resolve_ref(self.plus, ctx)
+        if self.table is not None:
+            base += self._table_value(ctx)
         if self.times is not None:
             base *= resolve_ref(self.times, ctx)
         if self.floor is not None:
@@ -78,7 +116,7 @@ class Amount:
         return base + self.flat
 
     def describe(self, ctx: Mapping[str, Any] | None = None) -> str:
-        """「1d10+3」「5×3」。ctx 缺失时引用部分按名字显示。"""
+        """「1d10+3」「5×3」「按等级查表(3)」。ctx 缺失时引用部分按名字显示。"""
         bits = []
         if self.dice is not None:
             bits.append(str(self.dice))
@@ -87,6 +125,11 @@ class Amount:
         if self.plus is not None:
             value = resolve_ref(self.plus, ctx) if ctx is not None else None
             bits.append(str(value) if value is not None else self.plus.path)
+        if self.table is not None:
+            if ctx is None:
+                bits.append("查表")
+            else:
+                bits.append(str(self._table_value(ctx)))
         text = "+".join(bits) if bits else "0"
         if self.times is not None:
             value = resolve_ref(self.times, ctx) if ctx is not None else None
@@ -107,6 +150,9 @@ class Amount:
             data["times"] = self.times.path
         if self.floor is not None:
             data["floor"] = self.floor
+        if self.table is not None:
+            data["table"] = dict(self.table)
+            data["key"] = (self.key or Ref("class_level")).path
         return data
 
 
@@ -125,7 +171,8 @@ def parse_amount(data: Any, where: str = "") -> Amount:
         raise RuleError("%s数量必须是整数、骰式字符串或映射，实际 %r" % (prefix, type(data).__name__))
 
     unknown = [key for key in data
-               if key not in ("dice", "flat", "value", "plus", "times", "floor", "min")]
+               if key not in ("dice", "flat", "value", "plus", "times", "floor", "min")
+               and key not in _TABLE_KEYS]
     if unknown:
         raise RuleError("%s数量里有未知字段：%s" % (prefix, ", ".join(sorted(unknown))))
 
@@ -153,7 +200,25 @@ def parse_amount(data: Any, where: str = "") -> Amount:
         plus=_parse_ref(data.get("plus"), prefix),
         times=_parse_ref(data.get("times"), prefix),
         floor=floor,
+        table=_parse_table(data.get("table"), prefix),
+        key=_parse_ref(data.get("key"), prefix),
     )
+
+
+def _parse_table(raw: Any, prefix: str) -> dict[int, int] | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping):
+        raise RuleError("%s table 必须是 等级→数值 的映射" % prefix)
+    rows: dict[int, int] = {}
+    for level_key, value in raw.items():
+        if isinstance(level_key, bool) or isinstance(value, bool):
+            raise RuleError("%s table 里不能有布尔值：%r" % (prefix, level_key))
+        try:
+            rows[int(level_key)] = int(value)
+        except (TypeError, ValueError):
+            raise RuleError("%s table 的条目必须是整数对：%r=%r" % (prefix, level_key, value))
+    return rows
 
 
 def _parse_ref(raw: Any, prefix: str) -> Ref | None:

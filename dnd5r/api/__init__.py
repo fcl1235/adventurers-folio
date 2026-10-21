@@ -188,6 +188,13 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
     ac = resolver.armor_class(
         top, list(modifiers_for(mods, "ac")) + list(gear_mods), base=base
     )
+    # 速度加值：变形期间形态的速度取代本体，一切加值都不算（快速移动也不例外）
+    speeds = {
+        mode: resolver.speed(
+            top, mode, () if morphed else modifiers_for(mods, "speed.%s" % mode)
+        ).total
+        for mode in top.statblock.speeds
+    }
     saves = {
         key: resolver.saving_throw(top, key, proficient=key in saves_prof,
                                    modifiers=save_modifiers(mods, key))
@@ -238,7 +245,7 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         },
         "ac": {"total": ac.total, "detail": ac.describe()},
         "initiative": resolver.ability_check(top, "dex").total,
-        "speed": {mode: resolver.speed(top, mode).total for mode in top.statblock.speeds},
+        "speed": speeds,
         "abilities": _ability_rows(actor, content, morphed),
         "gear": loadout.to_dict(locale),
         "saves": {key: {"total": value.total, "detail": value.describe(),

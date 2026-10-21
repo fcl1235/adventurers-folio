@@ -96,11 +96,14 @@ powers:
       en: |-
         Your speed increases by 10 feet while you aren't wearing armor or wielding a Shield. This bonus increases when you reach certain Monk levels, as shown on the Monk Features table.
     effects:
-      - note:
-          zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
-          en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+      # 五档不是等差（10/15/20/25/30），所以用查表而不是公式：
+      # `table` 取「不超过当前职业等级的最大档」，与资源表同一套规则。
+      # 条件与无甲防御一致：无甲且无盾。
+      - grant_modifier:
+          target: speed.walk
+          value:
+            table: { 2: 10, 6: 15, 10: 20, 14: 25, 18: 30 }
+          when: { unarmored: true, shield: false }
 
   - id: dnd2024.class.monk.uncanny_metabolism
     name: {zh: 奇异代谢, en: Uncanny Metabolism}
