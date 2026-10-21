@@ -366,8 +366,9 @@ powers:
       en: |-
         You embody primal power. Your Strength and Constitution scores increase by 4, to a maximum of 25.
     effects:
-      - note:
-          zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
-          en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+      # 属性加值通道：改的是属性值本身，HP / AC / 攻击 / 豁免跟着一起变。
+      # cap 写 25 而不是 30 —— 30 是传奇恩惠那条通道的上限。
+      - grant_modifier:
+          modifiers:
+            - {target: score.str, value: 4, cap: 25}
+            - {target: score.con, value: 4, cap: 25}

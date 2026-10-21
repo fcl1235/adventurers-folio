@@ -52,14 +52,9 @@ ABILITY_LOWER = [key.lower() for key in ABILITY_UPPER]
 FIELDS = ("hp", "pb", "ac", "attack") + tuple("save.%s" % key for key in ABILITY_LOWER)
 
 # 已知缺口白名单：**必须写清原因**，且一旦实现就要删掉（脚本会提示）。
-# 现在只剩「能力值上限提升」这一类：它改的是属性值本身，连带 HP / AC / 攻击 / 豁免
-# 全部变化，需要「属性加值通道 + HP 重算」，属于 P5b。
-KNOWN_GAPS: dict[tuple[str, int], tuple[str, ...]] = {
-    # 野蛮人 20 级「原始冠军」：力量与体质 +4（上限 30）
-    ("barbarian", 20): ("hp", "ac", "attack", "save.str", "save.con"),
-    # 武僧 20 级「身心合一」：敏捷与感知 +4（上限 30）
-    ("monk", 20): ("ac", "attack", "save.dex", "save.wis"),
-}
+# P5b 把最后一类（属性加值通道）做完以后这里已经清空 —— 12 职业 × 1–20 级的
+# 2400 项全部零差异。以后出现新差异只能靠实现补上，不能靠加白名单。
+KNOWN_GAPS: dict[tuple[str, int], tuple[str, ...]] = {}
 
 
 # --- 旧程序 -----------------------------------------------------------

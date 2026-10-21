@@ -22,7 +22,9 @@ from .model.actor import Actor
 from .model.levels import ClassLevel, TotalLevel
 from .model.profile import ClassEntry
 from .rules.actioneconomy import ActionEconomy, ActionType
+from .rules.armor import ac_inputs, loadout_for
 from .rules.build import available_powers, build_actor, eligible_forms_for, morph_class_of
+from .rules.contributions import facts_for, modifiers_for, passive_modifiers
 from .rules.effects import EffectContext
 from .rules.morph import FormSpec, is_morphed
 from .rules.powers import Power, can_use, phase_label, use_power
@@ -154,6 +156,7 @@ class Session:
             class_level=class_level,
             abilities=top.statblock.abilities,
             speeds=dict(top.statblock.speeds),
+            facts=facts_for(actor, class_level, loadout_for(actor, self.bundle.armors)),
         ))
 
     def context_for(self, power: Power | None = None) -> EffectContext:
@@ -247,7 +250,13 @@ class Session:
         resolver = self.resolver()
         top = actor.top()
         profile = actor.profile
-        ac = resolver.armor_class(top)
+        loadout = loadout_for(actor, self.bundle.armors)
+        base, gear_mods = ac_inputs(loadout, top.statblock, self.locale)
+        ac = resolver.armor_class(
+            top,
+            list(modifiers_for(passive_modifiers(self.bundle, actor, self.locale), "ac")) + list(gear_mods),
+            base=base,
+        )
 
         classes: list[str] = []
         level = 1

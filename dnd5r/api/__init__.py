@@ -23,6 +23,7 @@ from ..model.levels import ClassLevel, TotalLevel
 from ..model.profile import ClassEntry, Profile
 from ..model.statblock import Abilities, Statblock
 from ..rules.actioneconomy import ActionEconomy, ActionType
+from ..rules.armor import Loadout, ac_inputs, loadout_for
 from ..rules.build import (
     available_powers, build_actor, eligible_forms_for, morph_class_of,
 )
@@ -35,6 +36,7 @@ from ..rules.morph import reasons_for
 from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
 from ..rules.resolver import RefContext, Resolver
+from ..rules.scores import score_bonus_of
 from ..rules.powers import use_power as _use_power
 from ..session import LongRest, NewTurn, Regain, Session, ShortRest, TakeDamage, UsePower
 
@@ -106,20 +108,22 @@ def new_character(
 
 
 # --- 派生值 -----------------------------------------------------------
-def resolver_for(actor: Actor) -> Resolver:
+def resolver_for(actor: Actor, content: ContentBundle | None = None) -> Resolver:
+    """派生值求解器。给了内容包才会读装备（护甲 / 盾）与真实的无甲事实。"""
     profile = actor.profile
     total = profile.total if profile else TotalLevel(1)
     class_level = None
     if profile and len(profile.classes) == 1:
         class_level = ClassLevel(int(profile.classes[0].class_level))
     top = actor.top()
+    loadout = loadout_for(actor, content.armors) if content is not None else Loadout()
     ctx = RefContext(
         prof_bonus=proficiency_bonus(total),
         total_level=total,
         class_level=class_level,
         abilities=top.statblock.abilities,
         speeds=dict(top.statblock.speeds),
-        facts=facts_for(actor, class_level),
+        facts=facts_for(actor, class_level, loadout),
     )
     return Resolver(ctx)
 
@@ -145,27 +149,50 @@ def _ref_map(actor: Actor, resolver: Resolver) -> dict[str, Any]:
     return resolver.ctx.as_mapping()
 
 
+def _ability_rows(actor: Actor, content: ContentBundle, morphed: bool = False) -> dict:
+    """属性行：值 / 调整值 / 「白给了多少」。
+
+    变形期间力敏体已被形态换掉，本体的属性加值不再体现在这三项上，
+    所以变形时 `bonus` 一律报 0 —— 免得界面上出现「熊 19 力（+4 原始冠军）」。
+    """
+    top = actor.top()
+    bonus = {} if morphed else score_bonus_of(available_powers(content, actor))
+    return {
+        key: {
+            "score": top.statblock.abilities.score(key),
+            "mod": top.statblock.abilities.mod(key),
+            "bonus": int(bonus.get(key, 0)),
+        }
+        for key in ABILITY_KEYS
+    }
+
+
 def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") -> dict:
     """只读投影：卡片、派生值、能力列表。前端不判断任何规则。"""
-    resolver = resolver_for(actor)
+    resolver = resolver_for(actor, content)
     profile = actor.profile
     top = actor.top()
     root = actor.root()
+    loadout = loadout_for(actor, content.armors)
+    morphed = top.layer is not None
     saves_prof = _proficient_saves(actor) | {
         token.split(".", 1)[1]
         for token in passive_proficiencies(content, actor)
         if token.startswith("save.")
     }
     # 常驻贡献：被动能力的 modifier（无甲防御、守护灵光）必须每次都算进去
-    mods = passive_modifiers(content, actor)
+    mods = passive_modifiers(content, actor, locale)
 
-    ac = resolver.armor_class(top, modifiers_for(mods, "ac"))
+    base, gear_mods = ac_inputs(loadout, top.statblock, locale)
+    ac = resolver.armor_class(
+        top, list(modifiers_for(mods, "ac")) + list(gear_mods), base=base
+    )
     saves = {
         key: resolver.saving_throw(top, key, proficient=key in saves_prof,
                                    modifiers=save_modifiers(mods, key))
         for key in ABILITY_KEYS
     }
-    # 攻击：默认用最高的力量／敏捷，只看是否熟练（武器数据在 P5）
+    # 攻击：默认用最高的力量／敏捷，只看是否熟练（武器数据在 P5c）
     attack_ability = "str" if top.statblock.abilities.mod("str") >= top.statblock.abilities.mod("dex") else "dex"
     attack = resolver.attack_bonus(top, attack_ability, proficient=True,
                                    modifiers=modifiers_for(mods, "attack"))
@@ -205,11 +232,8 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "ac": {"total": ac.total, "detail": ac.describe()},
         "initiative": resolver.ability_check(top, "dex").total,
         "speed": {mode: resolver.speed(top, mode).total for mode in top.statblock.speeds},
-        "abilities": {
-            key: {"score": top.statblock.abilities.score(key),
-                  "mod": top.statblock.abilities.mod(key)}
-            for key in ABILITY_KEYS
-        },
+        "abilities": _ability_rows(actor, content, morphed),
+        "gear": loadout.to_dict(locale),
         "saves": {key: {"total": value.total, "detail": value.describe(),
                         "proficient": key in saves_prof}
                   for key, value in saves.items()},

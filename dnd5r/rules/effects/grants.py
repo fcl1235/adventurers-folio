@@ -58,6 +58,9 @@ def _modifier(data: Any, source: str, where: str) -> Modifier:
     except ValueError:
         raise PluginError("%s 未知作用域 %r" % (where, scope))
     when = data.get("when")
+    cap = data.get("cap")
+    if cap is not None and isinstance(cap, bool):
+        raise PluginError("%s modifier.cap 不能是布尔值" % where)
     return Modifier(
         target=str(target),
         value=value,
@@ -66,6 +69,7 @@ def _modifier(data: Any, source: str, where: str) -> Modifier:
         scope=scope_value,
         direction=direction_value,
         when=when,
+        cap=None if cap is None else int(cap),
     )
 
 
@@ -105,6 +109,7 @@ class GrantModifier(Effect):
             mod if mod.source else Modifier(
                 target=mod.target, value=mod.value, stack=mod.stack,
                 source=source, scope=mod.scope, direction=mod.direction, when=mod.when,
+                cap=mod.cap,
             )
             for mod in self.modifiers
         ]
@@ -122,10 +127,16 @@ class GrantModifier(Effect):
                  self.op)
 
     def to_dict(self) -> dict:
+        rows = []
+        for mod in self.modifiers:
+            row = {"target": mod.target, "value": mod.describe_value(),
+                   "stack": mod.stack.value}
+            if mod.cap is not None:
+                row["cap"] = mod.cap
+            rows.append(row)
         return {
             "op": self.op,
-            "modifiers": [{"target": m.target, "value": m.describe_value(),
-                           "stack": m.stack.value} for m in self.modifiers],
+            "modifiers": rows,
             "duration": {"kind": self.duration.kind.value, "value": self.duration.value},
         }
 

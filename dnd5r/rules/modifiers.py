@@ -61,6 +61,9 @@ class Modifier:
     scope: Scope = Scope.SELF
     direction: Direction = Direction.GIVEN
     when: Mapping[str, Any] | None = None
+    # 只对 `score.<属性>` 生效：属性加值能顶到的上限（原始冠军 / 身心合一写 25）。
+    # resolve() 不读它 —— 属性值不走 d20 管道，见 rules/contributions.py。
+    cap: int | None = None
 
     def __post_init__(self) -> None:
         if not self.target:
@@ -71,6 +74,15 @@ class Modifier:
             raise RuleError("scope 必须是 Scope：%r" % (self.scope,))
         if not isinstance(self.direction, Direction):
             raise RuleError("direction 必须是 Direction：%r" % (self.direction,))
+        if self.cap is not None:
+            if not isinstance(self.cap, int) or isinstance(self.cap, bool):
+                raise RuleError("Modifier.cap 必须是整数：%r" % (self.cap,))
+            if self.cap < 1:
+                raise RuleError("Modifier.cap 至少是 1：%r" % (self.cap,))
+            if not self.target.startswith("score."):
+                raise RuleError(
+                    "Modifier.cap 只对 score.<属性> 有意义，%r 请改用其他字段" % self.target
+                )
 
     def describe_value(self) -> str:
         if isinstance(self.value, Ref):

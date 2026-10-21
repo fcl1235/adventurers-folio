@@ -21,6 +21,7 @@ from ..model.statblock import Abilities, Statblock
 from .health import hit_dice_pool, hit_points_max
 from .morph import eligible_forms
 from .progression import proficiency_bonus
+from .scores import apply_score_bonuses, score_bonuses
 
 
 def _ref_map(
@@ -53,9 +54,14 @@ def build_actor(
     """建一个单职业角色。兼职在 P3 的 Session 里做（要合并位表与熟练来源）。"""
     class_def: ClassDef = bundle.class_def(class_id)
     level = as_class_level(class_level)
-    abilities = Abilities.of(**dict(scores))
     total = TotalLevel(int(level))
     prof = proficiency_bonus(total)
+
+    # 属性加值通道：原始冠军 / 身心合一这类「属性值 +4」的能力在这里落地。
+    # 必须在算 HP 之前：加值改了体质调整值，HP 上限跟着变，否则 20 级会少 40 点。
+    powers = class_def.powers_at(level)
+    bonuses = score_bonuses(powers)
+    abilities = apply_score_bonuses(Abilities.of(**dict(scores)), bonuses)
 
     con_mod = abilities.mod("con")
     hp_max = hit_points_max(class_def.hit_die, con_mod, level)

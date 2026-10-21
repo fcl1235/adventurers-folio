@@ -4,7 +4,7 @@ api: 1
 name:
   zh: D&D 2024 核心内容
   en: D&D 2024 Core Content
-version: 0.5.0
+version: 0.6.0
 requires: []
 provides:
   classes:
@@ -23,5 +23,18 @@ provides:
   subclasses: []
   species: []
   feats: []
-  items: []
+  items:
+    - dnd2024.item.armor.padded
+    - dnd2024.item.armor.leather
+    - dnd2024.item.armor.studded_leather
+    - dnd2024.item.armor.hide
+    - dnd2024.item.armor.chain_shirt
+    - dnd2024.item.armor.scale_mail
+    - dnd2024.item.armor.breastplate
+    - dnd2024.item.armor.half_plate
+    - dnd2024.item.armor.ring_mail
+    - dnd2024.item.armor.chain_mail
+    - dnd2024.item.armor.splint
+    - dnd2024.item.armor.plate
+    - dnd2024.item.armor.shield
   spells: []

@@ -19,6 +19,7 @@ import yaml
 from .kernel.errors import DndError, PluginError, RuleError
 from .kernel.ids import is_valid
 from .kernel.text import Text
+from .model.inventory import EquipSlot
 from .plugin import Manifest, load_manifest
 from .rules.amount import Amount, parse_amount
 from .rules.effects import parse_effects
@@ -130,6 +131,88 @@ def parse_resource(data: Any, owner_class: str = "") -> ResourceDef:
         label=label,
         owner_class=str(data.get("owner", owner_class)),
     )
+
+
+# --- 物品：护甲与盾 ---------------------------------------------------
+ARMOR_CATEGORIES = ("light", "medium", "heavy", "shield")
+
+
+@dataclass(frozen=True)
+class ArmorDef:
+    """一件护甲或一面盾。
+
+    只放「参与 AC 计算」的字段：类别、基础值、敏捷上限、盾牌加值。
+    力量需求与隐匿劣势是**展示用**的，规则层不用它们算数
+    （2024 的力量需求只影响速度，属于负重/装备整套接入时再算）。
+    """
+
+    id: str
+    name: Text
+    category: str = "light"
+    ac_base: int = 10
+    dex_cap: int | None = None
+    bonus: int = 0
+    str_req: int = 0
+    stealth: bool = False
+    weight: float = 0.0
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("护甲 id 不合规范：%r" % (self.id,))
+        if self.category not in ARMOR_CATEGORIES:
+            raise PluginError("%s 的护甲类别必须是 %s"
+                              % (self.id, "/".join(ARMOR_CATEGORIES)))
+        if self.category == "shield":
+            if self.bonus < 1:
+                raise PluginError("%s 是盾牌，bonus 至少是 1" % self.id)
+        else:
+            if self.ac_base < 1:
+                raise PluginError("%s 的 ac_base 至少是 1" % self.id)
+            if self.dex_cap is not None and self.dex_cap < 0:
+                raise PluginError("%s 的 dex_cap 不能为负：%r" % (self.id, self.dex_cap))
+        if self.bonus < 0:
+            raise PluginError("%s 的 bonus 不能为负" % self.id)
+
+    @property
+    def slot(self) -> EquipSlot:
+        return EquipSlot.SHIELD if self.category == "shield" else EquipSlot.ARMOR
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id, "name": self.name.to_dict(), "category": self.category,
+            "ac_base": self.ac_base, "dex_cap": self.dex_cap, "bonus": self.bonus,
+        }
+
+
+def parse_armor(data: Any, where: str = "") -> ArmorDef:
+    prefix = ("%s: " % where) if where else ""
+    if not isinstance(data, Mapping):
+        raise PluginError("%s护甲条目必须是映射" % prefix)
+    ident = data.get("id")
+    if not ident:
+        raise PluginError("%s护甲缺少 id" % prefix)
+    if "name" not in data:
+        raise PluginError("%s %s 缺少 name" % (prefix, ident))
+    dex_cap = data.get("dex_cap")
+    if dex_cap is not None:
+        try:
+            dex_cap = int(dex_cap)
+        except (TypeError, ValueError):
+            raise PluginError("%s %s 的 dex_cap 必须是整数：%r" % (prefix, ident, dex_cap))
+    try:
+        return ArmorDef(
+            id=str(ident),
+            name=Text.from_dict(data["name"], where="%s name" % ident),
+            category=str(data.get("category", "light")).lower(),
+            ac_base=int(data.get("ac_base", 10)),
+            dex_cap=dex_cap,
+            bonus=int(data.get("bonus", 0)),
+            str_req=int(data.get("str_req", 0)),
+            stealth=bool(data.get("stealth", False)),
+            weight=float(data.get("weight", 0)),
+        )
+    except (TypeError, ValueError) as exc:
+        raise PluginError("%s %s 的数值字段不合法：%s" % (prefix, ident, exc))
 
 
 # --- 职业 -------------------------------------------------------------
@@ -370,6 +453,7 @@ class PluginContent:
     classes: dict[str, ClassDef] = field(default_factory=dict)
     book: PowerBook = field(default_factory=PowerBook)
     forms: dict[str, FormSpec] = field(default_factory=dict)
+    armors: dict[str, ArmorDef] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -382,6 +466,7 @@ class ContentBundle:
     classes: dict[str, ClassDef] = field(default_factory=dict)
     book: PowerBook = field(default_factory=PowerBook)
     forms: dict[str, FormSpec] = field(default_factory=dict)
+    armors: dict[str, ArmorDef] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -395,11 +480,17 @@ class ContentBundle:
                               % (class_id, ", ".join(sorted(self.classes)) or "无"))
         return self.classes[class_id]
 
+    def armor(self, armor_id: str) -> ArmorDef:
+        if armor_id not in self.armors:
+            raise PluginError("没有这件护甲：%s" % armor_id)
+        return self.armors[armor_id]
+
     def stats(self) -> dict[str, Any]:
         return {
             "classes": len(self.classes),
             "powers": len(self.book.ids()),
             "forms": len(self.forms),
+            "armors": len(self.armors),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -460,8 +551,37 @@ def load_plugin(folder: str | Path) -> PluginContent:
                     continue
                 result.forms[form.id] = form
 
+    _load_items(base, result)
     result.book.validate_augments()
     return result
+
+
+def _load_items(base: Path, result: PluginContent) -> None:
+    """物品目录：按条目的 `kind` 分派。现在只有护甲，武器随 P5c 接入。"""
+    folder = base / "items"
+    if not folder.exists():
+        return
+    for path in sorted(folder.glob("*.yaml")):
+        rel = "%s/items/%s" % (base.name, path.name)
+        try:
+            rows = _read_yaml(path) or []
+        except PluginError as exc:
+            result.errors.append(str(exc))
+            continue
+        if isinstance(rows, Mapping):
+            rows = [rows]
+        for row in rows:
+            kind = str(row.get("kind", "armor")).lower() if isinstance(row, Mapping) else ""
+            try:
+                if kind == "armor":
+                    armor = parse_armor(row, where=rel)
+                    if armor.id in result.armors:
+                        raise PluginError("%s 的护甲 id 重复：%s" % (rel, armor.id))
+                    result.armors[armor.id] = armor
+                else:
+                    raise PluginError("%s 未知物品类型 %r（现在只支持 armor）" % (rel, kind))
+            except (PluginError, DndError) as exc:
+                result.errors.append(str(exc))
 
 
 def load_all(root: str | Path = "plugins") -> ContentBundle:
@@ -492,6 +612,11 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("形态 %s 重复提供" % form_id)
                 continue
             bundle.forms[form_id] = form
+        for armor_id, armor in content.armors.items():
+            if armor_id in bundle.armors:
+                bundle.errors.append("护甲 %s 重复提供" % armor_id)
+                continue
+            bundle.armors[armor_id] = armor
         for power in content.book.all():
             if bundle.book.has(power.id):
                 bundle.errors.append("能力 %s 重复提供" % power.id)
@@ -502,7 +627,7 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
 
 
 __all__ = [
-    "ResourceDef", "ClassDef", "PluginContent", "ContentBundle",
-    "parse_resource", "parse_class", "parse_cr_axis", "parse_form",
+    "ResourceDef", "ClassDef", "ArmorDef", "PluginContent", "ContentBundle",
+    "parse_resource", "parse_class", "parse_cr_axis", "parse_form", "parse_armor",
     "load_plugin", "load_all",
 ]

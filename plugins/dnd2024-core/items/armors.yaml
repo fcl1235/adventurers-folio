@@ -1,0 +1,111 @@
+# 2024 SRD 护甲与盾。AC 公式的系数写在数据里，规则层只按类别组合（rules/armor.py）。
+#
+# 字段：
+#   kind      固定 armor（文件里暂时只有护甲；武器随 P5c 进来）
+#   category  light / medium / heavy / shield
+#   ac_base   穿着时的基础 AC（「10 + 敏捷」被它顶掉）
+#   dex_cap   敏捷上限：null 表示无上限，0 表示完全不吃敏捷（重甲仍扣负敏捷）
+#   bonus     仅盾牌：加值
+#   str_req   力量需求（展示用；速度惩罚要等负重系统）
+#   stealth   隐匿检定劣势（展示用，由界面读）
+
+- id: dnd2024.item.armor.padded
+  kind: armor
+  name: {zh: 棉甲, en: Padded Armor}
+  category: light
+  ac_base: 11
+  dex_cap: null
+  stealth: true
+  weight: 8
+- id: dnd2024.item.armor.leather
+  kind: armor
+  name: {zh: 皮甲, en: Leather Armor}
+  category: light
+  ac_base: 11
+  dex_cap: null
+  weight: 10
+- id: dnd2024.item.armor.studded_leather
+  kind: armor
+  name: {zh: 镶钉皮甲, en: Studded Leather Armor}
+  category: light
+  ac_base: 12
+  dex_cap: null
+  weight: 13
+- id: dnd2024.item.armor.hide
+  kind: armor
+  name: {zh: 兽皮甲, en: Hide Armor}
+  category: medium
+  ac_base: 12
+  dex_cap: 2
+  weight: 12
+- id: dnd2024.item.armor.chain_shirt
+  kind: armor
+  name: {zh: 锁链衫, en: Chain Shirt}
+  category: medium
+  ac_base: 13
+  dex_cap: 2
+  weight: 20
+- id: dnd2024.item.armor.scale_mail
+  kind: armor
+  name: {zh: 鳞甲, en: Scale Mail}
+  category: medium
+  ac_base: 14
+  dex_cap: 2
+  stealth: true
+  weight: 45
+- id: dnd2024.item.armor.breastplate
+  kind: armor
+  name: {zh: 胸甲, en: Breastplate}
+  category: medium
+  ac_base: 14
+  dex_cap: 2
+  weight: 20
+- id: dnd2024.item.armor.half_plate
+  kind: armor
+  name: {zh: 半身板甲, en: Half Plate Armor}
+  category: medium
+  ac_base: 15
+  dex_cap: 2
+  stealth: true
+  weight: 40
+- id: dnd2024.item.armor.ring_mail
+  kind: armor
+  name: {zh: 环甲, en: Ring Mail}
+  category: heavy
+  ac_base: 14
+  dex_cap: 0
+  stealth: true
+  weight: 40
+- id: dnd2024.item.armor.chain_mail
+  kind: armor
+  name: {zh: 锁甲, en: Chain Mail}
+  category: heavy
+  ac_base: 16
+  dex_cap: 0
+  str_req: 13
+  stealth: true
+  weight: 55
+- id: dnd2024.item.armor.splint
+  kind: armor
+  name: {zh: 板条甲, en: Splint Armor}
+  category: heavy
+  ac_base: 17
+  dex_cap: 0
+  str_req: 15
+  stealth: true
+  weight: 60
+- id: dnd2024.item.armor.plate
+  kind: armor
+  name: {zh: 全身板甲, en: Plate Armor}
+  category: heavy
+  ac_base: 18
+  dex_cap: 0
+  str_req: 15
+  stealth: true
+  weight: 65
+- id: dnd2024.item.armor.shield
+  kind: armor
+  name: {zh: 盾牌, en: Shield}
+  category: shield
+  bonus: 2
+  weight: 6

@@ -45,9 +45,20 @@ class Resolver:
         self._ctx_map = ctx.as_mapping()
 
     # --- 防御 ---------------------------------------------------------
-    def armor_class(self, actor: Actor, modifiers: Iterable[Modifier] = ()) -> Resolution:
+    def armor_class(
+        self,
+        actor: Actor,
+        modifiers: Iterable[Modifier] = (),
+        base: int | None = None,
+    ) -> Resolution:
+        """`base` 缺省是「statblock 的 AC + 敏捷」；穿甲时由 `armor.ac_inputs()` 给。
+
+        护甲不走 base 而走 SET Modifier，是为了让明细读得出「14 环甲 + 1 敏捷 + 2 盾牌」，
+        而不是一句「基础 17」。
+        """
         stat = actor.top().statblock
-        base = stat.ac_base + stat.abilities.mod("dex")
+        if base is None:
+            base = stat.ac_base + stat.abilities.mod("dex")
         return resolve(modifiers, base=base, ctx=self._ctx_map)
 
     def saving_throw(

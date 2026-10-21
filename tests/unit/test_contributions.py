@@ -49,12 +49,31 @@ class ContributionTest(unittest.TestCase):
         self.assertEqual(sheet["ac"]["total"], 13)
 
     def test_unarmored_defense_only_when_unarmored(self):
-        """条件挂在 `unarmored` 上：接入护甲后会自动失效，不用改代码。"""
+        """条件挂在 `unarmored` 上，护甲通道接进来（P5b）以后它自动跟着失效。
+
+        「穿甲以后确实失效」由 test_armor.py 验证；这里只锁条件本身存在。
+        """
         actor, _ = self.sheet("barbarian", 1)
         mods = modifiers_for(passive_modifiers(self.bundle, actor), "ac")
         self.assertEqual(len(mods), 1)
         self.assertEqual(dict(mods[0].when or {}), {"unarmored": True})
         self.assertTrue(facts_for(actor)["unarmored"])
+
+    def test_armor_and_shield_are_separate_facts(self):
+        """野蛮人的无甲防御允许持盾，武僧的不允许 —— 差别必须写在内容里。
+
+        如果把两条合并成一句「unarmored」，武僧就得在代码里判职业，
+        野蛮人则会被误伤（持盾就掉 AC）。
+        """
+        barbarian, _ = self.sheet("barbarian", 1)
+        monk, _ = self.sheet("monk", 1)
+        when_barbarian = modifiers_for(passive_modifiers(self.bundle, barbarian), "ac")[0].when
+        when_monk = modifiers_for(passive_modifiers(self.bundle, monk), "ac")[0].when
+        self.assertEqual(dict(when_barbarian), {"unarmored": True})
+        self.assertEqual(dict(when_monk), {"unarmored": True, "shield": False})
+        facts = facts_for(monk)
+        self.assertIn("unarmored", facts)
+        self.assertIn("shield", facts)
 
     def test_average_defense_does_not_stack_across_classes(self):
         """同一个 ac target 上两条 SET 会互相冲突 —— 这里用加法，所以只验证不重复。"""
@@ -111,10 +130,17 @@ class ContributionTest(unittest.TestCase):
 
     # --- 明细 ---------------------------------------------------------
     def test_ac_detail_names_the_source(self):
-        """明细要能说出「+2 来自哪条特性」，否则玩家看到 14 不知道从哪来的。"""
+        """明细要能说出「+4 来自哪条特性」，否则玩家看到 16 不知道从哪来的。"""
         actor, sheet = self.sheet("barbarian", 1)
         mods = modifiers_for(passive_modifiers(self.bundle, actor), "ac")
-        self.assertIn(mods[0].source.split(".")[-1], ("unarmored_defense",))
+        self.assertEqual(mods[0].source, "无甲防御")
+        self.assertIn("无甲防御", sheet["ac"]["detail"])
+
+    def test_source_can_be_localized(self):
+        """明细用显示名而不是 id：英文界面不该看到 dnd2024.class... 。"""
+        actor, _ = self.sheet("barbarian", 1)
+        english = modifiers_for(passive_modifiers(self.bundle, actor, "en"), "ac")
+        self.assertEqual(english[0].source, "Unarmored Defense")
 
     def test_save_modifiers_are_filtered_by_ability(self):
         """resolve() 不按 target 过滤，调用方必须分开 —— 分开错了会 6 项豁免全加一遍。"""

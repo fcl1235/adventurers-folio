@@ -59,7 +59,7 @@ powers:
       - grant_modifier:
           target: ac
           value: ability.wis
-          when: { unarmored: true }
+          when: { unarmored: true, shield: false }
       - note:
           zh: |-
             未穿护甲且未持盾时 AC = 10 + 敏捷调整值 + 感知调整值。
@@ -400,8 +400,7 @@ powers:
       en: |-
         You have developed your body and mind to new heights. Your Dexterity and Wisdom scores increase by 4, to a maximum of 25.
     effects:
-      - note:
-          zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
-          en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+      - grant_modifier:
+          modifiers:
+            - {target: score.dex, value: 4, cap: 25}
+            - {target: score.wis, value: 4, cap: 25}
