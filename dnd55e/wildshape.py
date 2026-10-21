@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""野兽形态 —— 德鲁伊「荒野变形」的形态筛选。
+"""野兽形态 —— 德鲁伊「荒野变形」的形态筛选与面板换算。
 
 数据来自 dnd55e/data/monsters.json（SRD 野兽，CR 0–6）。
-变形后的数值不替换角色本体：本程序只提供形态数据与掷骰，
-角色属性/HP 仍按本体计算，避免一次变形把存档写坏。
+
+2024 规则「属性值替换」：变形后力量/敏捷/体质、AC、速度、感官、攻击
+全部改用形态数据；智力/感知/魅力、HP 与生命骰、熟练加值、熟练项、专长、
+职业特性保留本体的。这里的纯函数只负责「算」，写回角色的部分在
+Character 里（core/base.py 的 score 覆盖、core/derived.py 的 ac/speed）。
 """
 
 from . import consts
@@ -66,6 +69,54 @@ def suggested_ac(base_ac, wis_mod, level, subclass=None):
     if subclass == "Circle of the Moon" and level >= 3:
         return max(int(base_ac or 0), 13 + int(wis_mod))
     return int(base_ac or 0)
+
+
+def ac_for(m, wis_mod, level, subclass=None):
+    """变形后的 AC 与来源说明 (月环可被 13+感知 抬起来)"""
+    base = int(m.get("ac") or 10)
+    ac = suggested_ac(base, wis_mod, level, subclass)
+    note = m.get("ac_note") or "天生护甲"
+    if ac > base:
+        return ac, f"野兽形态 {base} → 大地结社 13+感知 = {ac}"
+    return ac, f"野兽形态 AC {ac}（{note}）"
+
+
+def speeds(m):
+    """形态的速度字典 {'walk': 40, 'fly': 0, ...}，0 值剔除"""
+    sp = m.get("speed") or {}
+    out = {}
+    for key in ("walk", "climb", "fly", "swim", "burrow"):
+        v = int(sp.get(key) or 0)
+        if v:
+            out[key] = v
+    out["hover"] = bool(sp.get("hover"))
+    return out
+
+
+def senses(m):
+    """形态的特殊感官 {'darkvision': 60, 'blindsight': 30, ...}"""
+    out = {}
+    for key in ("darkvision", "blindsight", "tremorsense", "truesight"):
+        v = int((m.get("senses") or {}).get(key) or 0)
+        if v:
+            out[key] = v
+    return out
+
+
+def attacks(m):
+    """形态里能掷的攻击动作 (剔除多重攻击这种纯说明项)"""
+    out = []
+    for a in (m.get("actions") or []):
+        if a.get("attack_bonus") is None and a.get("dc") is None:
+            continue
+        out.append(a)
+    return out
+
+
+def skill_note(m):
+    """形态自带的技能加值（只作参考: 2024 变形保留的是「你自己的」熟练项）"""
+    sk = m.get("skills") or {}
+    return "、".join(f"{k} +{v}" for k, v in sk.items())
 
 
 def shapes(level, subclass=None):

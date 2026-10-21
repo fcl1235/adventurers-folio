@@ -9,6 +9,8 @@ from tkinter import ttk
 from .. import summoning
 from ..theme import BG, DIM, GOLD2, TEXT_STYLE
 
+from ._fit import center_on, fit
+
 
 class SummonCardDialog(tk.Toplevel):
     """显示一个或多个召唤物 stat block。
@@ -28,7 +30,6 @@ class SummonCardDialog(tk.Toplevel):
             self._blocks = summoning.statblocks(spell)
         self._spell = spell or {}
         self.title(title or "召唤物")
-        self.geometry("720x580")
         self.transient(master)
         self.configure(bg=BG)
         if not selftest:
@@ -79,6 +80,8 @@ class SummonCardDialog(tk.Toplevel):
             if self._side:
                 self.lst.selection_set(0)
             self._show()
+        fit(self, 720, 580)
+        center_on(self, master)
 
     def _summary_line(self):
         n = len(self._blocks)

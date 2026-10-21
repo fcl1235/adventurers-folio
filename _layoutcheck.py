@@ -167,6 +167,114 @@ for k, v in targets.items():
         print(f"  ✓ {k} 尺寸不变 {after}")
 app.destroy()
 
+# ---- 弹窗: 内容不能被挤出可视区 ----
+# 历史 bug: 变形对话框写死 760x540, 内容要 674 高, 底部「变形」按钮整条被裁,
+# 用户表现为「德鲁伊不能变身」。所有弹窗改为 fit() 自适应, 这里逐个体检。
+from dnd55e.dialogs import (DiceDialog, FeatPickerDialog,  # noqa: E402
+                            InvocationDialog, ItemCardDialog, LevelUpDialog,
+                            MetamagicDialog, SpellbookDialog,
+                            SummonCardDialog, WildShapeDialog)
+
+print("\n弹窗尺寸 (内容 req 必须 <= 窗口):")
+
+
+def _mk(role, level, sub=None):
+    ch = cb.Character(r)
+    ch.class_id, ch.level = role, level
+    ch.subclass = sub
+    ch.background_id, ch.species_id = "sage", "human"
+    ch.hp_current = ch.hp_max()
+    return ch
+
+
+_d19 = _mk("druid", 19, "Circle of the Moon")
+_d2 = _mk("druid", 2)
+_w5 = _mk("wizard", 5, "Evoker")
+_s5 = _mk("sorcerer", 5)
+_s5.metamagic = ["empowered", "quickened"]
+_f2 = _mk("fighter", 2)
+_f18 = _mk("fighter", 18)
+_spell = {"name": "火球术", "level": 3, "school": "塑能", "id": "fireball"}
+_w12 = _mk("warlock", 12, "Fiend")
+_summon = next((s for s in r.spells.values() if s.get("summon")), None)
+
+_app2 = cb.App(selftest=True)
+_cases = [("骰子工具", lambda: DiceDialog(_app2)),
+          ("专长选择", lambda: FeatPickerDialog(_app2, _d19, selftest=True)),
+          ("荒野变形(19级月环)",
+           lambda: WildShapeDialog(_app2, _d19, selftest=True)),
+          ("法师法术书", lambda: SpellbookDialog(_app2, _w5, selftest=True)),
+          ("升级 2→3", lambda: LevelUpDialog(_app2, _f2)),
+          ("升级 18→19", lambda: LevelUpDialog(_app2, _f18)),
+          ("物品效果卡", lambda: ItemCardDialog(
+              _app2, next(iter(cb.ITEMS_BY_ID.values())), selftest=True)),
+          ("超魔法", lambda: MetamagicDialog(_app2, _s5, _spell)),
+          ("魔能祈唤", lambda: InvocationDialog(
+              _app2, _w12, selftest=True))]
+if _summon:
+    _cases.append(("召唤物卡",
+                   lambda: SummonCardDialog(_app2, _summon, selftest=True)))
+
+for _nm, _factory in _cases:
+    _d = _factory()
+    _d.update_idletasks()
+    _fw, _fh = getattr(_d, "_fit_size", (0, 0))
+    _rw, _rh = _d.winfo_reqwidth(), _d.winfo_reqheight()
+    _ok = _fw >= _rw and _fh >= _rh
+    print(f"  [{'OK ' if _ok else 'OVER'}] {_nm:16s} 内容 {_rw:4d}x{_rh:4d}"
+          f" 窗口 {_fw:4d}x{_fh:4d}")
+    if not _ok:
+        FAIL.append(f"弹窗「{_nm}」内容 {_rw}x{_rh} 超出窗口 {_fw}x{_fh}")
+    _d.destroy()
+
+# 主窗口: 全部角色下内容都装得下 (窗口会按 req 自动放大)
+for _role, _lv, _sub, _tag in (("druid", 19, "Circle of the Moon", "德鲁伊19"),
+                               ("druid", 3, "Circle of the Moon", "德鲁伊3"),
+                               ("sorcerer", 2, None, "术士2"),
+                               ("wizard", 20, "Evoker", "法师20")):
+    _ch = _mk(_role, _lv, _sub)
+    _app2.set_character(_ch)
+    _app2.update_idletasks()
+    _fw, _fh = getattr(_app2, "_fit_size", (1340, 860))
+    _rw, _rh = _app2.winfo_reqwidth(), _app2.winfo_reqheight()
+    _ok = _fw >= _rw and _fh >= _rh
+    print(f"  [{'OK ' if _ok else 'OVER'}] 主窗口 {_tag:8s} 内容 {_rw:4d}x{_rh:4d}"
+          f" 窗口 {_fw:4d}x{_fh:4d}")
+    if not _ok:
+        FAIL.append(f"主窗口({_tag}) 内容 {_rw}x{_rh} 超出 {_fw}x{_fh}")
+
+# 法术位: 9 个环位排成两行 (单行要 1008px, 中栏只有 610)
+_w20 = _mk("wizard", 20, "Evoker")   # 9 个环位才有说服力
+_app2.set_character(_w20)
+_app2.refresh()
+_app2.update_idletasks()
+_rows = {w.grid_info().get("row") for w in _app2.slots_frame.winfo_children()}
+_tab_w = _app2.tab_spells.winfo_reqwidth()
+print(f"  [{'OK ' if max(_rows, default=0) >= 1 else 'OVER'}] 法术位 9 环分 "
+      f"{max(_rows, default=0) + 1} 行 · 法术页需要宽 {_tab_w}")
+if max(_rows, default=0) < 1:
+    FAIL.append("法术位仍是单行 (会被中栏横向裁掉)")
+if _tab_w > 608:
+    FAIL.append(f"法术页需要宽 {_tab_w} > 608")
+# ---- 邪术师 10 个祈唤 / 野蛮人攻击选项: 职业页不能被撑宽 ----
+print("\n职业页新增块 (可用宽度 606):")
+for _role, _lv, _sub, _tag in (("warlock", 20, "Fiend", "邪术师20·10祈唤"),
+                               ("barbarian", 17, None, "野蛮人17·攻击选项")):
+    _ch = _mk(_role, _lv, _sub)
+    if _role == "warlock":
+        _ch.invocations = [x["id"] for x in cb.INVOCATIONS[:10]]
+    _app2.set_character(_ch)
+    _app2.refresh()
+    _app2.update_idletasks()
+    _bw = _app2.class_body.winfo_reqwidth()
+    _tw = _app2.tab_class.winfo_reqwidth()
+    _ok = _bw <= 600 and _tw <= 608
+    print(f"  [{'OK ' if _ok else 'OVER'}] {_tag:16s} 内容 {_bw:4d} · "
+          f"标签页 {_tw:4d}")
+    if not _ok:
+        FAIL.append(f"职业页({_tag}) 内容宽 {_bw} / 标签页 {_tw} 超出中栏")
+_app2.destroy()
+
 print("\n" + "=" * 50)
 if FAIL:
     for f in FAIL:

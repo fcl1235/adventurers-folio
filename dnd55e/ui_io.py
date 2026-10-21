@@ -62,6 +62,9 @@ class AppIO:
             return
         self._remember_last(path)
         self._log_roll(f"💾 已保存: {os.path.basename(path)}")
+        if self.char.in_wild_shape():
+            self._log_roll("ℹ 变形状态不写进存档：下次打开会回到本体，"
+                           "这次消耗的变形次数会退回。")
         self.status.config(text=f"💾 已保存到 {path}")
 
     def save_character_as(self):
@@ -91,6 +94,8 @@ class AppIO:
         self.set_character(char)
         self._remember_last(path)
         self._log_roll(f"📂 已载入: {char.name} ({os.path.basename(path)})")
+        if char.load_notice:
+            self._log_roll(char.load_notice)
 
     def load_character(self):
         os.makedirs(paths.CHAR_DIR, exist_ok=True)
@@ -211,6 +216,7 @@ class AppIO:
         c.hit_dice_used = 0            # 2024: 长休恢复全部生命骰
         c.death_success = c.death_fail = 0
         c.raging = False
+        c.wild_shape_exit()            # 长休结束荒野变形 (次数由 res_reset 回满)
         if c.exhaustion > 0:
             c.exhaustion -= 1
         self.refresh()

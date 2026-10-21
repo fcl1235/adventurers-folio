@@ -10,6 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from .. import consts
+from ._fit import center_on, fit
 from ..theme import BG, DIM, GOLD2, TEXT_STYLE
 
 # (字段, 标签, 格式化方式) —— 顺序即展示顺序
@@ -101,7 +102,6 @@ class ItemCardDialog(tk.Toplevel):
         self._on_toggle = on_toggle
         self.result = None
         self.title(title or "魔法物品")
-        self.geometry("660x560")
         self.transient(master)
         self.configure(bg=BG)
         if not selftest:
@@ -132,6 +132,8 @@ class ItemCardDialog(tk.Toplevel):
             self._sync_btn()
         ttk.Button(bar, text="关闭", command=self._close).pack(side="right",
                                                               padx=4)
+        fit(self, 660, 560)
+        center_on(self, master)
 
     # ---- 内部 ----
     def _meta_line(self):

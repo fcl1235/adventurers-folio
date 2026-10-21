@@ -1,0 +1,52 @@
+{
+ "_note": "攻击时勾选的增益（不是自动生效的，勾了才算）。classes/level 决定谁能看到；dice_by_level 是 [[等级, 骰数], ...] 取满足的最高档；damage_type 为「同武器」表示跟武器伤害同类型；requires 表示必须先勾另一个选项。",
+ "riders": [
+  {
+   "id": "reckless",
+   "name": "鲁莽攻击",
+   "classes": ["barbarian"],
+   "level": 2,
+   "attack": "advantage",
+   "self_exposed": true,
+   "desc": "本轮第一次用力量攻击时带优势；代价是直到你下回合开始，敌人对你的攻击也带优势。"
+  },
+  {
+   "id": "brutal_strike",
+   "name": "凶蛮打击",
+   "classes": ["barbarian"],
+   "level": 9,
+   "damage": "1d10",
+   "dice_by_level": [[9, 1], [13, 2], [17, 3]],
+   "damage_type": "同武器",
+   "requires": "reckless",
+   "desc": "鲁莽攻击时放弃其中一次攻击的优势：命中则额外 1d10 同类型伤害（13 级 2d10、17 级 3d10），还可以附带击退或减速效果。"
+  },
+  {
+   "id": "blessed_strikes",
+   "name": "祝福打击",
+   "classes": ["cleric"],
+   "level": 7,
+   "damage": "1d8",
+   "dice_by_level": [[7, 1], [14, 2]],
+   "damage_type": "光耀",
+   "desc": "武器命中时额外 1d8 光耀（或暗蚀）伤害，14 级起 2d8。另一个选项「强力施法」是戏法伤害加感知调整值，不在这里勾。"
+  },
+  {
+   "id": "radiant_strikes",
+   "name": "光耀打击",
+   "classes": ["paladin"],
+   "level": 11,
+   "damage": "1d8",
+   "damage_type": "光耀",
+   "desc": "近战武器或徒手打击命中时额外 1d8 光耀伤害。"
+  },
+  {
+   "id": "precise_hunter",
+   "name": "精准猎手",
+   "classes": ["ranger"],
+   "level": 17,
+   "attack": "advantage",
+   "desc": "对宿敌目标（已标记猎人印记/宿敌）的攻击带优势。"
+  }
+ ]
+}

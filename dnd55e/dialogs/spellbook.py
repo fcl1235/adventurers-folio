@@ -11,6 +11,8 @@ from ..theme import (BG, DIM, GOLD2, LISTBOX_STYLE, RED, TEXT, TEXT_STYLE,
 from ..util import (ab_from_display, ability_mod, mod_str,
                     proficiency_bonus, roll_dice)
 
+from ._fit import center_on, fit
+
 
 class SpellbookDialog(tk.Toplevel):
     """法师法术书 (2024 PHB): 左边书内、右边可抄录。
@@ -23,7 +25,6 @@ class SpellbookDialog(tk.Toplevel):
         self._left_ids = []
         self._right_ids = []
         self.title("法术书")
-        self.geometry("800x580")
         self.transient(master)
         self.configure(bg=BG)
         try:
@@ -83,6 +84,8 @@ class SpellbookDialog(tk.Toplevel):
                    command=self._do_remove).pack(side="left")
         ttk.Button(bar, text="关闭", command=self.destroy).pack(side="right")
         self._refresh()
+        fit(self, 800, 580)
+        center_on(self, master)
 
     # ---- 列表 ----
 

@@ -103,18 +103,19 @@ def build_spells(app, nb):
     app.spell_quota_lbl = ttk.Label(t2, text="", style="Dim.TLabel")
     app.spell_quota_lbl.pack(anchor="w", pady=(2, 0))
 
-    app.spell_list = tk.Listbox(t2, height=7, **LISTBOX_STYLE)
+    app.spell_list = tk.Listbox(t2, height=5, **LISTBOX_STYLE)
     app.spell_list.pack(fill="x", pady=2)
     app.spell_list.bind("<<ListboxSelect>>", app._spell_show)
-    ttk.Label(t2, text="法术详情", style="H2.TLabel").pack(
-        anchor="w", pady=(2, 0))
-    app.spell_detail = tk.Text(t2, height=7, wrap="word", state="disabled",
-                               **TEXT_STYLE, width=1)
-    app.spell_detail.pack(fill="both", expand=True, pady=2)
+    # 底部说明先占位, 否则详情框 expand 后会把它挤出去
     ttk.Label(t2, text="● 剩余环位 ○ 已用；戏法不耗环位；"
                        "专注法术同时只能维持一个。",
               style="Dim.TLabel", wraplength=520,
               justify="left").pack(anchor="w", side="bottom")
+    ttk.Label(t2, text="法术详情", style="H2.TLabel").pack(
+        anchor="w", pady=(2, 0))
+    app.spell_detail = tk.Text(t2, height=5, wrap="word", state="disabled",
+                               **TEXT_STYLE, width=1)
+    app.spell_detail.pack(fill="both", expand=True, pady=2)
     return t2
 
 
@@ -174,6 +175,10 @@ def build_gear(app, nb):
                       lambda e: app._style_changed())
     app.style_note = ttk.Label(r2, text="", style="Dim.TLabel")
     app.style_note.pack(side="left", padx=6)
+    app.style_row = r2
+    # 荒野变形期间武器/副手/战斗风格都不生效: 用同样的高度换成野兽动作,
+    # 不额外占位 (装备页本来就只剩 20px 余量)。默认不显示。
+    app.wild_row = ttk.Frame(wf)
 
     mf = ttk.LabelFrame(t3, text="魔法物品 / 饰品 (勾选即自动计入)", padding=4)
     mf.pack(fill="x", pady=(4, 0))

@@ -11,6 +11,8 @@ from ..theme import (BG, DIM, GOLD2, LISTBOX_STYLE, RED, TEXT, TEXT_STYLE,
 from ..util import (ab_from_display, ability_mod, mod_str,
                     proficiency_bonus, roll_dice)
 
+from ._fit import center_on, fit
+
 
 class LevelUpDialog(tk.Toplevel):
 
@@ -31,7 +33,6 @@ class LevelUpDialog(tk.Toplevel):
         self.char = char
         self.result = None
         self.title(f"升级: {char.level} → {char.level + 1} 级")
-        self.geometry("640x640" if char.level + 1 == 3 else "560x560")
         self.transient(master)
         self.configure(bg=BG)
         try:
@@ -123,6 +124,9 @@ class LevelUpDialog(tk.Toplevel):
                                         justify="left", foreground=DIM)
             self._boon_hint.pack(anchor="w", pady=(4, 0))
             self._render_boon_ability()
+
+        fit(self, 640 if new_lv == 3 else 560, 640 if new_lv == 3 else 560)
+        center_on(self, master)
 
     def _boon_info(self):
         """当前选中的恩惠条目 (手输的未知名字返回 None)"""

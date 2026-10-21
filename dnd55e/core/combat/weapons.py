@@ -16,10 +16,16 @@ class WeaponsMixin:
         return None
 
     def weapon_ability(self):
-        """武器用哪个属性: 远程用敏捷; 灵巧武器取高者; 其余力量"""
+        """武器用哪个属性: 远程用敏捷; 灵巧武器取高者; 其余力量
+
+        契刃 (Pact of the Blade) 一律改成魅力。
+        """
         w = self.weapon_entry()
         if not w:
             return "STR"
+        if self.invocation_effects().get("pact_blade") \
+                and "ranged" not in self.weapon_props(w[0]):
+            return "CHA"
         name = w[0]
         props = self.weapon_props(name)
         if "ranged" in props:
@@ -174,7 +180,9 @@ class WeaponsMixin:
             ab = self.cls_module().unarmed_ability(self) or "STR"
             return (ability_mod(self.score(ab)) + self.pb()
                     - self.exh_penalty())
-        pb = self.pb() if self.has_weapon_prof(w[0]) else 0   # 未熟练不加熟练加值
+        pact = (self.invocation_effects().get("pact_blade")
+                and "ranged" not in self.weapon_props(w[0]))
+        pb = self.pb() if (self.has_weapon_prof(w[0]) or pact) else 0
         atk_item, _ = self._weapon_item_bonus()               # 魔法武器/弹药
         m = (ability_mod(self.score(self.weapon_ability())) + pb
              + max(self.weapon_magic, atk_item))
@@ -252,4 +260,9 @@ class WeaponsMixin:
         # 狂暴伤害只加在「用力量」的攻击上 (2024 Rage)
         m += self.cls_module().damage_bonus_extra(
             self, self.weapon_ability(), self.two_handed_grip)
+        # 饮命者: 契约武器命中额外 +魅力 的暗蚀伤害
+        inv = self.invocation_effects()
+        if inv.get("lifedrinker") and inv.get("pact_blade") \
+                and not self.is_ranged_weapon():
+            m += ability_mod(self.score("CHA"))
         return m

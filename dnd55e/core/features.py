@@ -247,3 +247,74 @@ class FeaturesMixin:
 
     def rage_damage(self):
         return self.class_stat("rage_damage_bonus", 0) or 0
+
+    # ---- 邪术师·魔能祈唤 (2024) ----
+    def invocation_cap(self):
+        """2024 邪术师逐级已知数: 1,3,3,3,5,5,6,6,7,7,7,8,8,8,9,9,9,10,10,10"""
+        TBL = (1, 3, 3, 3, 5, 5, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10)
+        if self.class_id != "warlock":
+            return 0
+        return TBL[max(1, min(20, int(self.level))) - 1]
+
+    def invocation_options(self):
+        """当前等级能选的祈唤 (含已选的, 弹窗要回显)"""
+        lv = int(self.level)
+        return [inv for inv in consts.INVOCATIONS
+                if int(inv.get("level", 1)) <= lv]
+
+    def invocation_known(self):
+        return [i for i in (getattr(self, "invocations", None) or [])
+                if i in consts.INVOCATIONS_BY_ID]
+
+    def has_invocation(self, iid):
+        return iid in (getattr(self, "invocations", None) or [])
+
+    def invocation_effects(self):
+        """汇总数值效果 (键见 dnd55e/data/invocations.json 的 _note)"""
+        out = {}
+        for iid in (getattr(self, "invocations", None) or []):
+            inv = consts.INVOCATIONS_BY_ID.get(iid) or {}
+            for k, v in (inv.get("effects") or {}).items():
+                if isinstance(v, bool):
+                    out[k] = bool(out.get(k)) or v
+                elif isinstance(v, int):
+                    out[k] = max(int(out.get(k) or 0), v)
+                else:
+                    out[k] = v
+        return out
+
+    def invocation_count_text(self):
+        return f"{len(self.invocation_known())}/{self.invocation_cap()}"
+
+    # ---- 攻击选项 (勾选才算, 数据在 data/attack_riders.json) ----
+    def attack_riders(self):
+        """本职业当前等级可勾的攻击选项 (含按等级算好的骰数)"""
+        lv = int(self.level)
+        out = []
+        for r in consts.ATTACK_RIDERS:
+            if self.class_id not in (r.get("classes") or []):
+                continue
+            if lv < int(r.get("level", 1)):
+                continue
+            row = dict(r)
+            n = 1
+            for need, cnt in (r.get("dice_by_level") or []):
+                if lv >= int(need):
+                    n = int(cnt)
+            row["count"] = n
+            dmg = str(r.get("damage") or "")
+            row["dice"] = f"{n}{dmg[dmg.find('d'):]}" if "d" in dmg else ""
+            out.append(row)
+        return out
+
+    def rider_damage(self, ids):
+        """勾选的攻击选项合计伤害: (骰式, [伤害类型], [名称])"""
+        parts, types, names = [], [], []
+        for r in self.attack_riders():
+            if r["id"] not in (ids or []) or not r.get("dice"):
+                continue
+            parts.append(r["dice"])
+            t = r.get("damage_type") or ""
+            types.append(self.damage_type() if t == "同武器" else t)
+            names.append(r["name"])
+        return " + ".join(parts), types, names

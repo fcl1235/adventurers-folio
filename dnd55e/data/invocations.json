@@ -1,0 +1,202 @@
+{
+ "_note": "2024 邪术师·魔能祈唤。effects 只允许 dnd55e/core/features.py 里 invocation_effects() 认识的键：pact_blade / blast_cha / blast_range / blast_push / armor_of_shadows / devils_sight / conc_adv / temp_hp / extra_attack / lifedrinker / swim_speed。没有数值可自动结算的条目 effects 留空，desc 里写清怎么用手动处理。repeat=true 表示可以重复学（不同戏法各一次）。",
+ "invocations": [
+  {
+   "id": "pact-of-the-blade",
+   "name": "契刃 Pact of the Blade",
+   "level": 1,
+   "effects": {"pact_blade": true},
+   "desc": "附赠动作召唤或绑定一把近战武器（简易或军用）。用它攻击时可以用魅力代替力量/敏捷做攻击与伤害检定，并且始终视为熟练。绑定武器算作施法法器。"
+  },
+  {
+   "id": "pact-of-the-chain",
+   "name": "契锁 Pact of the Chain",
+   "level": 1,
+   "effects": {},
+   "desc": "学会「寻获魔宠」，且魔宠可以选特殊形态（小恶魔、伪龙、夸塞魔、精灵等），可以用附赠动作让魔宠攻击。魔宠数值需手动查怪物数据。"
+  },
+  {
+   "id": "pact-of-the-tome",
+   "name": "契书 Pact of the Tome",
+   "level": 1,
+   "effects": {},
+   "desc": "获得一本影之书：额外学 3 个任意职业的戏法 + 2 个带「仪式」标签的 1 环法术（不占准备数，只能以仪式施放）。这 3 个戏法与 2 个仪式法术请手动加进戏法/法术列表。"
+  },
+  {
+   "id": "pact-of-the-talisman",
+   "name": "契符 Pact of the Talisman",
+   "level": 1,
+   "effects": {},
+   "desc": "获得一枚护符。佩戴者做属性检定时可以加 1d4，次数等于熟练加值，长休恢复。"
+  },
+  {
+   "id": "agonizing-blast",
+   "name": "苦痛爆击 Agonizing Blast",
+   "level": 2,
+   "repeat": true,
+   "effects": {"blast_cha": true},
+   "desc": "选一个造成伤害的邪术师戏法：该戏法每次造成伤害时再加魅力调整值。本程序按魔能爆（Eldritch Blast）处理，加值已并入魔能爆伤害。"
+  },
+  {
+   "id": "armor-of-shadows",
+   "name": "暗影护甲 Armor of Shadows",
+   "level": 2,
+   "effects": {"armor_of_shadows": true},
+   "desc": "可以随意对自己施放「法师护甲」，不需要法术位。无甲时 AC 变为 13 + 敏捷调整值（与无甲防御等取高，不叠加）。"
+  },
+  {
+   "id": "devils-sight",
+   "name": "魔鬼视界 Devil's Sight",
+   "level": 2,
+   "effects": {"devils_sight": true},
+   "desc": "在 120 尺内，无论明亮还是黑暗（含魔法黑暗）都能正常视物。角色卡感官栏会自动加上「黑暗视觉 120（可穿魔法黑暗）」。"
+  },
+  {
+   "id": "eldritch-mind",
+   "name": "魔能心智 Eldritch Mind",
+   "level": 2,
+   "effects": {"conc_adv": true},
+   "desc": "维持专注的体质豁免有优势。"
+  },
+  {
+   "id": "eldritch-spear",
+   "name": "魔能长矛 Eldritch Spear",
+   "level": 2,
+   "effects": {"blast_range": true},
+   "desc": "魔能爆的射程变成 300 尺。"
+  },
+  {
+   "id": "fiendish-vigor",
+   "name": "魔性活力 Fiendish Vigor",
+   "level": 2,
+   "effects": {"temp_hp": "1d4+4"},
+   "desc": "可以随意对自己施放「虚假生命」，不需要法术位，获得 1d4+4 临时生命。战斗前可反复重掷直到满意（规则允许，DM 一般按最后一次算）。"
+  },
+  {
+   "id": "mask-of-many-faces",
+   "name": "千面假面 Mask of Many Faces",
+   "level": 2,
+   "effects": {},
+   "desc": "可以随意施放「易容术」，不需要法术位。"
+  },
+  {
+   "id": "misty-visions",
+   "name": "迷雾幻象 Misty Visions",
+   "level": 2,
+   "effects": {},
+   "desc": "可以随意施放「无声幻影」，不需要法术位。"
+  },
+  {
+   "id": "otherworldly-leap",
+   "name": "异界跃迁 Otherworldly Leap",
+   "level": 2,
+   "effects": {},
+   "desc": "可以随意对自己施放「跳跃术」，不需要法术位。"
+  },
+  {
+   "id": "repelling-blast",
+   "name": "斥退爆击 Repelling Blast",
+   "level": 2,
+   "effects": {"blast_push": true},
+   "desc": "魔能爆命中时可以把目标推开最多 10 尺（每道光束各算一次）。"
+  },
+  {
+   "id": "lessons-of-the-first-ones",
+   "name": "前辈之训 Lessons of the First Ones",
+   "level": 2,
+   "effects": {},
+   "desc": "获得一个起源专长（Origin Feat）。请到「专长」里手动加上并把效果填进建卡。"
+  },
+  {
+   "id": "thirsting-blade",
+   "name": "渴血之刃 Thirsting Blade",
+   "level": 5,
+   "effects": {"extra_attack": 2},
+   "desc": "用契约武器执行攻击动作时，可以攻击两次（等同额外攻击）。角色卡的攻击次数已自动变成 2。"
+  },
+  {
+   "id": "ascendant-step",
+   "name": "登天步 Ascendant Step",
+   "level": 5,
+   "effects": {},
+   "desc": "可以随意对自己施放「浮空术」，不需要法术位。"
+  },
+  {
+   "id": "eldritch-smite",
+   "name": "魔能打击 Eldritch Smite",
+   "level": 5,
+   "effects": {},
+   "desc": "用契约武器命中时，可以消耗一个契约法术位造成额外 1d8 力场伤害（每环 +1d8，最多 5d8），大型或更小目标还会倒地。请手动扣契约位并在掷骰记录里加骰。"
+  },
+  {
+   "id": "gift-of-the-depths",
+   "name": "深海馈赠 Gift of the Depths",
+   "level": 5,
+   "effects": {"swim_speed": true},
+   "desc": "可以在水下呼吸，并获得等于步行速度的游泳速度。角色卡速度栏会自动显示游泳速度。"
+  },
+  {
+   "id": "one-with-shadows",
+   "name": "影中一体 One with Shadows",
+   "level": 5,
+   "effects": {},
+   "desc": "在微光或黑暗里可以用动作进入隐形，直到移动或使用动作/反应。"
+  },
+  {
+   "id": "undying-servitude",
+   "name": "不朽奴仆 Undying Servitude",
+   "level": 5,
+   "effects": {},
+   "desc": "可以随意施放「活化死尸」，不需要法术位，但目标只能是一具骸骨或尸体，且同时只能有一个奴仆。"
+  },
+  {
+   "id": "gift-of-the-protectors",
+   "name": "守护者之礼 Gift of the Protectors",
+   "level": 9,
+   "effects": {},
+   "desc": "在影之书里写一个名字。该生物生命值降到 0 但未死亡时，改为降到 1 点，之后这个效果失效直到长休。"
+  },
+  {
+   "id": "devouring-blade",
+   "name": "吞噬之刃 Devouring Blade",
+   "level": 12,
+   "effects": {"extra_attack": 3},
+   "desc": "渴血之刃的攻击次数再 +1（用契约武器一次攻击动作打 3 下）。需要先有渴血之刃。"
+  },
+  {
+   "id": "lifedrinker",
+   "name": "饮命者 Lifedrinker",
+   "level": 12,
+   "effects": {"lifedrinker": true},
+   "desc": "用契约武器命中时额外造成魅力调整值的暗蚀伤害（已并入契约武器的伤害加值）。"
+  },
+  {
+   "id": "chains-of-carceri",
+   "name": "卡塞里之链 Chains of Carceri",
+   "level": 15,
+   "effects": {},
+   "desc": "可以随意施放「禁锢术」的一个变体，目标只能是天界生物、邪魔或元素生物，且同时只能有一个目标。"
+  },
+  {
+   "id": "shroud-of-shadow",
+   "name": "暗影裹尸 Shroud of Shadow",
+   "level": 15,
+   "effects": {},
+   "desc": "可以随意施放「隐形术」，不需要法术位。"
+  },
+  {
+   "id": "visions-of-distant-realms",
+   "name": "远境视界 Visions of Distant Realms",
+   "level": 15,
+   "effects": {},
+   "desc": "可以随意施放「秘法眼」，不需要法术位。"
+  },
+  {
+   "id": "witch-sight",
+   "name": "女巫视界 Witch Sight",
+   "level": 15,
+   "effects": {},
+   "desc": "30 尺内可以看到变形生物或幻术伪装下的真实形态。"
+  }
+ ]
+}

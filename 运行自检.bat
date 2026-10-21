@@ -18,51 +18,56 @@ if not exist "%PY%" (
     set "PY=python"
 )
 
-echo ================ 0/9 local data check ================
+echo ================ 0/10 local data check ================
 "%PY%" _data_sync.py --check
 if errorlevel 1 echo [warn] some local data missing - run _data_sync.py when online
 
-echo ================ 1/9 rules + wizard selftest ================
+echo ================ 1/10 rules + wizard selftest ================
 "%PY%" dnd55e_character_builder.py --selftest
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 2/9 full flow (18 sections) ================
+echo ================ 2/10 full flow (19 sections) ================
 "%PY%" _flowtest.py
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 3/9 per-level number check (vs SRD 5.2) ================
+echo ================ 3/10 per-level number check (vs SRD 5.2) ================
 "%PY%" _resourcecheck.py
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 4/9 layout audit ================
+echo ================ 4/10 layout audit ================
 "%PY%" _layoutcheck.py
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 5/9 text audit ================
+echo ================ 5/10 text audit ================
 "%PY%" _textcheck.py
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 6/9 hint clipping check ================
+echo ================ 6/10 hint clipping check ================
 "%PY%" _hintcheck.py
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 7/9 summon stat block check ================
+echo ================ 7/10 summon stat block check ================
 "%PY%" _summoncheck.py
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 8/9 module dependency check ================
+echo ================ 8/10 module dependency check ================
 "%PY%" _namecheck.py
 if errorlevel 1 goto fail
 
 echo.
-echo ================ 9/9 done ================
+echo ================ 9/10 invocation / attack rider data check ================
+"%PY%" _invocheck.py
+if errorlevel 1 goto fail
+
+echo.
+echo ================ 10/10 done ================
 echo ALL CHECKS PASSED
 if not defined DND_NO_PAUSE pause
 exit /b 0

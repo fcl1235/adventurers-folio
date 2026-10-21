@@ -11,6 +11,8 @@ from ..theme import (BG, DIM, GOLD2, LISTBOX_STYLE, RED, TEXT, TEXT_STYLE,
 from ..util import (ab_from_display, ability_mod, mod_str,
                     proficiency_bonus, roll_dice)
 
+from ._fit import center_on, fit
+
 
 class DiceDialog(tk.Toplevel):
 
@@ -19,7 +21,6 @@ class DiceDialog(tk.Toplevel):
         if not master.winfo_viewable():   # 后台测试: 父窗口不可见时不弹出
             self.withdraw()
         self.title("骰子工具")
-        self.geometry("420x300")
         self.transient(master)
         self.configure(bg=BG)
         f = ttk.Frame(self, padding=12)
@@ -41,6 +42,8 @@ class DiceDialog(tk.Toplevel):
         self.out = tk.Text(f, height=8, state="disabled", background=TXT_BG, foreground=TEXT, insertbackground=TEXT, relief="flat", width=1)
         self.out.pack(fill="both", expand=True)
         self.e.bind("<Return>", lambda e: self.roll())
+        fit(self, 420, 300)
+        center_on(self, master)
 
     def roll(self):
         try:

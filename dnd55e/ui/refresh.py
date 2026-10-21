@@ -13,8 +13,10 @@ from ..util import ability_mod, mod_str
 class RefreshMixin():
     def set_character(self, char):
         self.char = char
+        self.rider_vars = {}          # 攻击选项是「这一轮」的状态, 换角色即清空
         self._show_view()
         self.refresh()
+        self._fit_window()
         # 建卡完成后立即写入固定目录, 下次启动可直接读到
         if not getattr(self, "_selftest", False) and char is not None:
             try:
@@ -23,6 +25,28 @@ class RefreshMixin():
                 self._remember_last(path)
             except OSError:
                 pass
+
+    def _fit_window(self):
+        """按内容实际需要放大窗口 (只放大不缩小, 且不超过屏幕)。
+
+        写死 1340x860 时, 德鲁伊/术士这类内容更高的角色会把右栏底部
+        (掷骰记录、清空按钮) 挤出可视区 —— 这里统一按 reqsize 兜住。
+        """
+        try:
+            self.update_idletasks()
+            need_w = max(1340, self.winfo_reqwidth() + 6)
+            need_h = max(860, self.winfo_reqheight() + 6)
+            if self.winfo_width() >= need_w and self.winfo_height() >= need_h:
+                return
+            need_w = min(need_w, self.winfo_screenwidth() - 40)
+            need_h = min(need_h, self.winfo_screenheight() - 100)
+            self._fit_size = (need_w, need_h)   # 退出/测试可查, 别当缓存用
+            if (self.winfo_width(), self.winfo_height()) >= (need_w, need_h):
+                return
+            self.geometry(f"{need_w}x{need_h}")
+            self.minsize(need_w, need_h)
+        except tk.TclError:
+            pass
 
     def refresh(self):
         c = self.char
@@ -39,7 +63,9 @@ class RefreshMixin():
         ordtxt = f"{c.order_label()} · " if c.order_label() else ""
         self.hero_sub.config(
             text=f"{cls['name']} {c.level} 级 · {ordtxt}{sub}   ｜   "
-                 f"{sp['name']} · {bg['name']}")
+                 f"{sp['name']} · {bg['name']}"
+                 + (f"   ｜   🐺 {c.wild_shape()['name']}"
+                    if c.wild_shape() else ""))
         self.chip_ac.config(text=str(c.ac()))
         self.chip_init.config(text=mod_str(c.initiative()))
         self.chip_speed.config(text=f"{c.speed()}尺")
@@ -55,15 +81,39 @@ class RefreshMixin():
         self.hp_bar.config(maximum=mx, value=hp)
         self.hp_temp_var.set(c.hp_temp)
 
+        # 荒野变形状态 (状态栏常驻提示 + 恢复本体按钮)
+        form = c.wild_shape()
+        ws_lbl = getattr(self, "ws_status", None)
+        ws_btn = getattr(self, "ws_revert_btn", None)
+        if ws_lbl is not None:
+            if form:
+                from .. import wildshape as _ws
+                ws_lbl.config(text=f"🐺 {form['name']} · "
+                                   + _ws.summary(form)
+                                   + f" · 变形临时HP "
+                                     f"{_ws.temp_hp(c.level, c.subclass)}")
+                if ws_btn is not None:
+                    ws_btn.pack(side="right", padx=(0, 6))
+            else:
+                ws_lbl.config(text="")
+                if ws_btn is not None:
+                    ws_btn.pack_forget()
+
         # XP
         self.xp_var.set(c.xp)
         self._xp_changed()
 
         # 属性卡
+        wild = c.in_wild_shape()
         for a in ABILITIES:
             self.ab_entries[a].set(c.score(a))
+            beast = wild and a in ("STR", "DEX", "CON")
             self.ab_modlbls[a].config(
-                text=mod_str(ability_mod(c.score(a))))
+                text=mod_str(ability_mod(c.score(a))),
+                foreground=(GOLD2 if beast else TEXT))
+            sp_ = getattr(self, "ab_spins", {}).get(a)
+            if sp_ is not None:
+                sp_.config(state=("disabled" if beast else "normal"))
             prof = a in c.save_profs()
             self.ab_savelbls[a].config(
                 text=f"豁免 {mod_str(c.save_mod(a))}",
@@ -100,12 +150,19 @@ class RefreshMixin():
                    "pact": "契约魔法", "third": "1/3 施法"}.get(cast["type"], "")
             self.slots_head.config(
                 text=f"{tag} · 施法属性 {cast['ability']} · "
-                     f"法术DC {c.spell_dc()} · 法术命中 {mod_str(c.spell_attack())}")
+                     f"法术DC {c.spell_dc()} · 法术命中 {mod_str(c.spell_attack())}"
+                     + (f"　🐺 {form['name']} 变形中：不能施法"
+                        if form and not (c.class_id == "druid"
+                                         and c.level >= 18)
+                        else (f"　🐺 {form['name']} 变形中：18 级野兽法术，可施法"
+                              if form else "")))
+            per_row = 5          # 9 个环位排 5+4, 单行要 1008px 会被中栏裁掉
             for i, (lv, mx2) in enumerate(sorted(slots.items())):
                 used = c.spell_slots_used.get(lv, 0)
                 box = ttk.Frame(self.slots_frame, style="Card.TFrame",
-                                padding=8)
-                box.grid(row=0, column=i, padx=4, pady=4)
+                                padding=5)
+                box.grid(row=i // per_row, column=i % per_row, padx=3, pady=3,
+                         sticky="nw")
                 arc = lv in c.arcanum_levels()
                 ttk.Label(box, text=(f"秘契 {lv} 环" if arc else f"{lv} 环"),
                           style="DimCard.TLabel").pack()
@@ -115,11 +172,11 @@ class RefreshMixin():
                 lbl.pack()
                 self.slots_widgets[lv] = lbl
                 brow = ttk.Frame(box, style="Card.TFrame")
-                brow.pack(pady=(3, 0))
-                ttk.Button(brow, text="施法", width=4, style="Mini.TButton",
+                brow.pack(pady=(2, 0))
+                ttk.Button(brow, text="施法", width=3, style="Mini.TButton",
                            command=lambda l=lv: self._slot_spend(l)
                            ).pack(side="left", padx=1)
-                ttk.Button(brow, text="恢复", width=4, style="Mini.TButton",
+                ttk.Button(brow, text="恢复", width=3, style="Mini.TButton",
                            command=lambda l=lv: self._slot_restore(l)
                            ).pack(side="left", padx=1)
 
@@ -192,6 +249,20 @@ class RefreshMixin():
                                  values=["（本职业没有战斗风格）"])
             self.style_cb.set("（本职业没有战斗风格）")
             self.style_note.config(text=why)
+
+        # ---- 荒野变形: 武器/副手/双手/风格全部不生效, 换成野兽面板 ----
+        if form:
+            from .. import wildshape as _ws
+            for w in (self.weapon_cb, self.offhand_cb, self.grip_chk,
+                      self.style_cb):
+                try:
+                    w.config(state="disabled")
+                except tk.TclError:
+                    pass
+            self.atk_lbl.config(
+                text=f"🐺 {form['name']} · {_ws.summary(form)}　"
+                     f"｜　攻击/伤害/AC/速度均取形态数据")
+        self._render_wild_actions(form)
         for iid, v in self.item_vars.items():
             v.set(iid in c.items)
         self.bonus_text.config(state="normal")
@@ -260,6 +331,40 @@ class RefreshMixin():
             text=(f"专注: {conc['name']} (体质 {mod_str(c.save_mod('CON'))})"
                   if conc else "专注: 无"))
         self._status()
+
+    def _render_wild_actions(self, form):
+        """装备页: 变形期间用野兽动作按钮顶替「战斗风格」那一行。
+
+        高度不变 (原行 pack_forget), 否则 554px 的装备页会溢出。
+        """
+        row = getattr(self, "wild_row", None)
+        if row is None:
+            return
+        for w in row.winfo_children():
+            w.destroy()
+        srow = getattr(self, "style_row", None)
+        if not form:
+            if row.winfo_manager():
+                row.pack_forget()
+            if srow is not None and not srow.winfo_manager():
+                srow.pack(fill="x", pady=(2, 0))
+            return
+        from .. import wildshape as _ws
+        if srow is not None and srow.winfo_manager():
+            srow.pack_forget()
+        ttk.Label(row, text=f"🐺 {form['name'].split(' ')[0]} 动作:",
+                  foreground=GOLD2).pack(side="left")
+        for i, a in enumerate(_ws.attacks(form)):
+            nm = (a.get("name") or "").split(" ")[0]
+            if a.get("attack_bonus") is not None:
+                txt = f"{nm} +{a['attack_bonus']} · {a.get('damage') or ''}"
+            else:
+                txt = f"{nm} DC {a.get('dc')}"
+            ttk.Button(row, text=txt.strip(" ·"), style="Mini.TButton",
+                       command=lambda k=i: self._wild_attack(k)
+                       ).pack(side="left", padx=2)
+        if not row.winfo_manager():
+            row.pack(fill="x", pady=(2, 0))
 
     def _defense_line(self, c):
         """抗性 / 免疫 / 状态免疫 / 真实视觉 一行汇总 (没内容就返回空串)"""

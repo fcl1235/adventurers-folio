@@ -114,15 +114,41 @@ class ClassOptsMixin:
         self.refresh()
 
     def _wild_shape_open(self):
-        """荒野变形: 选野兽形态 (只记录形态, 不动本体数值)"""
+        """荒野变形: 选形态 → 扣 1 次 + 给临时 HP + 整套数值切换"""
         c = self.char
         if not c or c.class_id != "druid":
             return
+        if not c.wild_shapes():
+            messagebox.showinfo(
+                "还不能荒野变形",
+                "德鲁伊 2 级起才能使用荒野变形（荒野变形次数见职业页）。",
+                parent=self)
+            return
+        before = c.wild_shape_id
         dlg = WildShapeDialog(self, c, selftest=self._selftest)
         if not self._selftest:
             self.wait_window(dlg)
         if dlg.result is not None:
+            if dlg.result and dlg.result != before:
+                f = c.wild_shape()
+                self._log_roll(
+                    f"🐺 变为 {f['name']}（消耗 1 次荒野变形，剩 "
+                    f"{c.wild_shape_left()} 次）：AC {c.ac()} · 速度 "
+                    f"{c.speed()} 尺 · 力量 {c.score('STR')} / 敏捷 "
+                    f"{c.score('DEX')} / 体质 {c.score('CON')} · "
+                    f"临时HP {c.hp_temp}")
+            elif dlg.result == "":
+                self._log_roll("🐾 恢复本体形态（临时 HP 消失）")
             self.refresh()
+
+    def _wild_revert(self):
+        """恢复本体: 清掉当前形态 (次数不返还, 形态给的临时 HP 收回)"""
+        c = self.char
+        if not c or not c.wild_shape_id:
+            return
+        c.wild_shape_exit()
+        self._log_roll("🐾 恢复本体形态（形态给的临时 HP 消失）")
+        self.refresh()
 
     def _mm_toggle(self, mid, var):
         c = self.char

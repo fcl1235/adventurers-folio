@@ -11,7 +11,8 @@ class DerivedMixin:
     def hp_max(self):
         c = self.cls()
         hd = c["hit_die"]
-        con = ability_mod(self.score("CON"))
+        # 2024 荒野变形保留自己的 HP 上限 → 必须用本体体质
+        con = ability_mod(self.base_score("CON"))
         hp = hd + con + (self.level - 1) * max(1, hd // 2 + 1 + con)
         if self.species_id == "dwarf":       # 矮人韧性 Dwarven Toughness
             hp += self.level
@@ -34,8 +35,43 @@ class DerivedMixin:
     def ac(self):
         return self.ac_breakdown()[0]
 
+    # ---- 荒野变形: 变形期间的数值全部改用形态数据 ----
+    def in_wild_shape(self):
+        return self.wild_shape() is not None
+
+    def speeds(self):
+        """当前速度集合 {'walk':30,'fly':60,...} —— 变形时用野兽速度"""
+        m = self.wild_shape()
+        if m is None:
+            out = {"walk": self.speed(), "hover": False}
+            # 祈唤·深海馈赠: 获得等于步行速度的游泳速度
+            if self.invocation_effects().get("swim_speed") and out["walk"]:
+                out["swim"] = out["walk"]
+            return out
+        from .. import wildshape
+        sp = wildshape.speeds(m)
+        pen = 5 * self.exhaustion            # 力竭是角色状态, 变形后照样扣
+        for k in ("walk", "climb", "fly", "swim", "burrow"):
+            if k in sp:
+                sp[k] = max(0, sp[k] - pen)
+        if self.conditions & {"擒抱", "束缚", "麻痹", "震慑", "昏迷", "石化"}:
+            return {"walk": 0, "hover": False}
+        return sp
+
     def speed(self):
-        """速度 = 种族基础 + 职业/物品加值 - 力竭(5×级) ；束缚类状态归零"""
+        """速度 = 种族基础 + 职业/物品加值 - 力竭(5×级) ；束缚类状态归零
+
+        变形期间改用野兽形态的步行速度 (兽形态没有装备加成)。
+        """
+        m = self.wild_shape()
+        if m is not None:
+            from .. import wildshape
+            sp = wildshape.speeds(m).get("walk", 0)
+            sp -= 5 * self.exhaustion
+            for cond in ("擒抱", "束缚", "麻痹", "震慑", "昏迷", "石化"):
+                if cond in self.conditions:
+                    return 0
+            return max(0, sp)
         sp = 30
         if self.species_id:
             sp = self.r.sp(self.species_id).get("speed", 30)
@@ -119,6 +155,10 @@ class DerivedMixin:
         for lv, name, _d, unlocked in self.subclass_features():
             if unlocked and "额外攻击" in name:
                 n = max(n, 2)
+        # 邪术师: 渴血之刃 2 次 / 吞噬之刃 3 次 (契约武器)
+        inv = self.invocation_effects().get("extra_attack")
+        if isinstance(inv, int) and inv > n:
+            n = inv
         return n
 
     def _shield_item_bonus(self):
@@ -148,6 +188,16 @@ class DerivedMixin:
 
     def ac_breakdown(self):
         """返回 (AC, [来源说明...])"""
+        m = self.wild_shape()
+        if m is not None:
+            # 2024: 变形期间 game statistics 被形态替换, 护甲/盾/物品 AC 不生效
+            from .. import wildshape
+            ac, note = wildshape.ac_for(
+                m, ability_mod(self.score("WIS")), self.level, self.subclass)
+            notes = [note]
+            if self.armor_cat() is not None or self.shield:
+                notes.append("变形期间护甲/盾牌不提供 AC")
+            return ac, notes
         name, base, cap = consts.ARMORS[self.armor_index]
         dex = ability_mod(self.score("DEX"))
         notes = []
@@ -170,6 +220,11 @@ class DerivedMixin:
                 else:
                     ac = 10 + dex
                     notes.append(f"无甲 10+敏捷({mod_str(dex)})")
+            # 祈唤·暗影护甲: 无甲时 AC 至少 13+敏捷 (与无甲防御取高)
+            if self.invocation_effects().get("armor_of_shadows") \
+                    and ac < 13 + dex:
+                ac = 13 + dex
+                notes.append(f"祈唤·暗影护甲 13+敏捷({mod_str(dex)})")
         else:
             used = dex if cap is None else min(dex, cap)
             ac = base + used
@@ -199,10 +254,26 @@ class DerivedMixin:
         return ac, notes
 
     def senses(self):
-        """特殊感官 {'blindsight': 10, 'darkvision': 60} —— 来源: 盲斗风格 / 物品"""
+        """特殊感官 {'blindsight': 10, 'darkvision': 60} —— 来源: 盲斗风格 / 物品
+
+        变形期间形态自带感官生效, 物品不生效 (装备被形态替换),
+        盲斗是专长, 保留。
+        """
         out = {}
+        m = self.wild_shape()
+        if m is not None:
+            from .. import wildshape
+            out.update(wildshape.senses(m))
+            if self.fighting_style == "blind_fighting":
+                out["blindsight"] = max(out.get("blindsight", 0), 10)
+            if self.invocation_effects().get("devils_sight"):
+                out["darkvision"] = max(out.get("darkvision", 0), 120)
+            return out
         if self.fighting_style == "blind_fighting":
             out["blindsight"] = 10
+        # 祈唤·魔鬼视界: 120 尺黑暗视觉 (可穿魔法黑暗)
+        if self.invocation_effects().get("devils_sight"):
+            out["darkvision"] = max(out.get("darkvision", 0), 120)
         for iid in self.items:
             it = consts.ITEMS_BY_ID.get(iid, {})
             for key in ("blindsight", "darkvision"):
@@ -220,6 +291,37 @@ class DerivedMixin:
         if not self.cls_module().wild_shape_allowed(self):
             return []
         return wildshape.shapes(self.level, self.subclass)
+
+    # ---- 荒野变形的次数 (职业资源池 wildshape: 2级2次/6级3次/17级4次) ----
+    def wild_shape_res(self):
+        return next((r for r in self.resources() if r["id"] == "wildshape"),
+                    None)
+
+    def wild_shape_left(self):
+        r = self.wild_shape_res()
+        return r["left"] if r else 0
+
+    def wild_shape_exit(self):
+        """结束变形: 清形态 + 收回形态给的临时 HP (自己原有的临时 HP 保留)。
+
+        恢复本体本身不返还次数 (规则如此); 读档时的退还是另一回事,
+        见 load_dict 里的 ws_refund。
+        """
+        grant = int(self.ws_temp_granted or 0)
+        was = self.wild_shape_id is not None
+        self.wild_shape_id = None
+        self.ws_temp_granted = 0
+        if grant:
+            self.hp_temp = max(0, int(self.hp_temp or 0) - grant)
+        return was
+
+    def wild_shape_use(self, n=1):
+        """消耗 n 次荒野变形; 次数不足返回 False (恢复本体不返还)"""
+        r = self.wild_shape_res()
+        if r is None or r["left"] < n:
+            return False
+        self.res_spend("wildshape", n)
+        return True
 
     def wild_shape(self):
         """当前变身形态的野兽数据 (由 monsters.json 提供)"""

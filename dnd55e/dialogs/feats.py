@@ -11,6 +11,8 @@ from ..theme import (BG, DIM, GOLD2, LISTBOX_STYLE, RED, TEXT, TEXT_STYLE,
 from ..util import (ab_from_display, ability_mod, mod_str,
                     proficiency_bonus, roll_dice)
 
+from ._fit import center_on, fit
+
 
 class FeatPickerDialog(tk.Toplevel):
     """从专长表里选一个：通用 / 战斗风格 / 传奇恩惠。
@@ -26,7 +28,6 @@ class FeatPickerDialog(tk.Toplevel):
         self.result = None
         self._rows = []
         self.title("选择专长")
-        self.geometry("720x520")
         self.transient(master)
         self.configure(bg=BG)
         if not selftest:
@@ -83,6 +84,8 @@ class FeatPickerDialog(tk.Toplevel):
             side="right", padx=4)
         ttk.Button(bar, text="手动输入…", command=self._manual).pack(
             side="left", padx=4)
+        fit(self, 720, 520)
+        center_on(self, master)
 
     def _sel(self):
         cur = self.lst.curselection()

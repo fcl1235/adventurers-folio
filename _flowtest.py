@@ -16,7 +16,7 @@ import os
 import sys
 import traceback
 
-from dnd55e.util import roll_dice
+from dnd55e.util import ability_mod as _am, roll_dice
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 spec = importlib.util.spec_from_file_location(
@@ -804,7 +804,10 @@ for _lv, _n in ((1, 2), (5, 3), (9, 4), (13, 5), (17, 6)):
     check(rmax(mk("ranger", _lv), "favored_enemy") == _n,
           f"游侠 {_lv} 级宿敌次数应为 {_n}: "
           f"{rmax(mk('ranger', _lv), 'favored_enemy')}")
-check(rmax(mk("wizard", 9), "arcane_recovery") == 5, "法师 9 级奥术回想应为 5")
+# 奥术回想: 每天 1 次 (per_day); 可恢复的环级总量 = ceil(等级/2)
+check(rmax(mk("wizard", 9), "arcane_recovery") == 1,
+      "法师 9 级奥术回想应为每天 1 次")
+check((9 + 1) // 2 == 5, "法师 9 级奥术回想可恢复 5 点环级")
 check(rmax(mk("warlock", 5), "pact_slots") == 2, "邪术师 5 级契约位应为 2")
 cha16 = {"STR": 10, "DEX": 14, "CON": 12, "INT": 10, "WIS": 10, "CHA": 16}
 check(rmax(mk("bard", 5, cha16), "inspiration") == 3, "诗人灵感次数应为魅力调整值")
@@ -2148,10 +2151,15 @@ check(max(wildshape.cr_num(m) for m in _moon.wild_shapes()) >
       max(wildshape.cr_num(m) for m in mk("druid", 6).wild_shapes()),
       "月环形态 CR 比普通高")
 
+_moon.wild_shape_use()                  # 真的花掉 1 次
 _moon.wild_shape_id = "wolf"
+_ws_left = _moon.wild_shape_left()
 _mr = cb.Character(r)
 _mr.load_dict(_moon.to_dict())
-check(_mr.wild_shape_id == "wolf", "形态存档往返")
+check(_mr.wild_shape_id is None, "变形是场景状态: 读档一律回到本体")
+check(_mr.wild_shape_left() == _ws_left + 1,
+      f"存盘时正变形应退回 1 次 ({_ws_left}→{_mr.wild_shape_left()})")
+check(bool(_mr.load_notice), "读档时应给出「变形已结束、次数已退回」提示")
 _bad = _moon.to_dict()
 _bad["wild_shape_id"] = "tarrasque"
 _mb = cb.Character(r)
@@ -2204,7 +2212,131 @@ check(len(_fd.lst.get(0, "end")) >= 40, "专长选择框条目充足")
 _fd.destroy()
 _wd = WildShapeDialog(app, _d8, selftest=True)
 check(len(_wd._rows) == len(_d8.wild_shapes()), "形态对话框列出全部可选形态")
+# 曾经写死 760x540, 内容 674 高, 底部「变形」按钮整条被裁 → 表现为「不能变身」
+_fw, _fh = getattr(_wd, "_fit_size", (0, 0))
+check(_fh >= _wd.winfo_reqheight() and _fw >= _wd.winfo_reqwidth(),
+      f"变形对话框要装得下内容: 窗口 {_fw}x{_fh} vs 内容 "
+      f"{_wd.winfo_reqwidth()}x{_wd.winfo_reqheight()}")
+check(_wd.bar.pack_info().get("side") == "bottom",
+      "变形/恢复本体按钮栏必须固定在底部 (否则会被内容挤掉)")
+check(len([w for w in _wd.bar.winfo_children()
+           if w.winfo_class() == "TButton"]) == 3, "按钮栏应有 3 个按钮")
+_wd.lst.selection_clear(0, "end")
+_wd.lst.selection_set(0)
+_wd._show()
+# 变形前的本体数值 (用于确认切换真的发生); 力量压到 8 才有明显落差
+_d8.base_scores["STR"] = 8
+_own_ac, _own_str = _d8.ac(), _d8.score("STR")
+_own_hp, _own_int = _d8.hp_max(), _d8.score("INT")
+_own_ath = _d8.skill_mod("athletics")
+_left0 = _d8.wild_shape_left()
+_wd._take()
+check(_d8.wild_shape_id is not None, "点「变形」后应记录形态")
+check(_d8.wild_shape_left() == _left0 - 1,
+      f"变形应扣 1 次荒野变形: {_left0}→{_d8.wild_shape_left()}")
+_fm = _d8.wild_shape()
+check(_d8.score("STR") == int(_fm["abilities"]["STR"]),
+      f"变形后力量应改用形态值: {_d8.score('STR')} vs {_fm['abilities']['STR']}")
+check(_d8.score("DEX") == int(_fm["abilities"]["DEX"]), "变形后敏捷改用形态值")
+check(_d8.score("CON") == int(_fm["abilities"]["CON"]), "变形后体质改用形态值")
+check(_d8.score("INT") == _own_int, "变形后智力保留本体")
+check(_d8.hp_max() == _own_hp, "变形不改变 HP 上限 (2024 保留本体 HP)")
+check(_d8.ac() == int(_fm["ac"]) or _d8.ac() > _own_ac,
+      f"变形后 AC 应取形态值: {_d8.ac()} (本体 {_own_ac})")
+check(_d8.speed() == wildshape.speeds(_fm).get("walk", 0),
+      f"变形后速度应用形态步行速度: {_d8.speed()}")
+check(_d8.skill_mod("athletics") - _own_ath ==
+      _am(_d8.score("STR")) - _am(_own_str),
+      f"力量类技能应随形态力量重算: {_own_ath}→{_d8.skill_mod('athletics')}")
+check(_d8.hp_temp >= 8, f"变形应给临时 HP: {_d8.hp_temp}")
+check(_d8.base_scores["STR"] != int(_fm["abilities"]["STR"]) or
+      _own_str == int(_fm["abilities"]["STR"]),
+      "变形不能改写本体基础属性")
 _wd.destroy()
+
+# 次数用尽 → 不能再变形
+_saved_used = dict(_d8.res_used)
+_d8.res_used["wildshape"] = _d8.wild_shape_res()["max"]
+check(_d8.wild_shape_use() is False, "次数用尽时 wild_shape_use 应返回 False")
+_wd2 = WildShapeDialog(app, _d8, selftest=True)
+_old_id = _d8.wild_shape_id
+_wd2.lst.selection_clear(0, "end")
+_wd2.lst.selection_set(0)
+_wd2._take()
+check(_d8.wild_shape_id == _old_id, "次数用尽时点「变形」不应改变形态")
+_wd2.destroy()
+
+# ---- 职业技能: 资源「用」了要真的出效果 (不能只是数字减 1) ----
+_f13 = mk("fighter", 13)
+_f13.hp_current = 5
+_uses = [u["label"] for u in _f13.res_uses("second_wind")]
+check(len(_uses) == 3 and "战术思维" in _uses[1], f"回气 13 级应有 3 种用途: {_uses}")
+_ok, _msg = _f13.res_use("second_wind", 1, 0)
+check(_ok and _f13.hp_current > 5, f"回气应真的回血: {_msg}")
+_before = _f13.hp_current
+_ok, _msg = _f13.res_use("second_wind", 1, 1)
+check(_ok and _f13.hp_current == _before, "战术思维只掷 d10, 不应回血")
+check("1d10" in _msg, f"战术思维应掷 1d10: {_msg}")
+check(_f13.res_uses("second_wind") and
+      len(mk("fighter", 4).res_uses("second_wind")) == 1,
+      "4 级战士还没有战术思维/研究攻击")
+check(len(mk("fighter", 13).res_uses("second_wind")) == 3, "13 级解锁研究攻击")
+_ok, _ = mk("fighter", 20).res_use("second_wind", 99, 0)
+check(not _ok, "超出剩余次数应拒绝")
+
+# 圣疗: 池子按点数花, 花 5 点回 5 HP
+_p6 = mk("paladin", 6)
+_p6.hp_current = 3
+_ok, _msg = _p6.res_use("lay_on_hands", 5, 0)
+check(_ok and _p6.hp_current == 8, f"圣疗花 5 点应回 5 HP: {_msg}")
+check(_p6.res_used.get("lay_on_hands") == 5, "圣疗应按点数记账")
+
+# 诗人激励: 掷灵感骰 (5 级 d8)
+_b5 = mk("bard", 5, {"STR": 10, "DEX": 12, "CON": 12,
+                     "INT": 10, "WIS": 10, "CHA": 16})
+_ok, _msg = _b5.res_use("inspiration", 1, 0)
+check(_ok and "1d8" in _msg, f"5 级灵感骰应为 d8: {_msg}")
+
+# 奥术回想: 每天 1 次, 自动回填法术位
+_w5 = mk("wizard", 5)
+_w5.spell_slots_used = {1: 2, 2: 1}
+_ok, _msg = _w5.res_use("arcane_recovery", 1, 0)
+check(_ok and sum(_w5.spell_slots_used.values()) < 3,
+      f"奥术回想应真的恢复法术位: {_msg}")
+check(rmax(_w5, "arcane_recovery") == 1, "奥术回想每天 1 次")
+_d8.res_used = _saved_used
+
+# ---- 变形状态可见 + 恢复本体 ----
+app.set_character(_d8)
+app.refresh()
+app.update_idletasks()
+check(_d8.wild_shape() is not None, "角色应处于变形状态")
+check("🐺" in app.ws_status.cget("text"), "状态栏应常驻显示变形中")
+check(app.ws_revert_btn.winfo_manager() == "pack", "变形中应出现恢复本体按钮")
+# 装备页要换成野兽动作, 且不许把页面撑高 (装备页只剩 20px 余量)
+check(app.style_row.winfo_manager() == "" and
+      app.wild_row.winfo_manager() == "pack",
+      "变形时装备页应把战斗风格行换成野兽动作行")
+check(len([w for w in app.wild_row.winfo_children()
+           if w.winfo_class() == "TButton"]) >= 1,
+      "变形时应出现可点的野兽动作按钮")
+check(str(app.ab_spins["STR"].cget("state")) == "disabled",
+      "变形时力量显示野兽值, 不允许手改")
+check(str(app.ab_spins["INT"].cget("state")) == "normal", "变形不影响智力输入")
+_gear_h_wild = app.wild_row.master.winfo_reqheight()
+app._wild_revert()
+_gear_h_own = app.wild_row.master.winfo_reqheight()
+check(_gear_h_wild <= _gear_h_own + 4,
+      f"变形不应把装备页撑高: {_gear_h_wild} vs {_gear_h_own}")
+check(app.style_row.winfo_manager() == "pack", "恢复后战斗风格行应回来")
+check(app.wild_row.winfo_manager() == "", "恢复后野兽动作行应隐藏")
+app._wild_revert()
+check(_d8.wild_shape_id is None, "恢复本体应清空形态")
+check(_d8.hp_temp == 0, "恢复本体后形态临时 HP 应消失")
+check(_d8.score("STR") == _own_str, "恢复本体后力量应回到本体值")
+check(_d8.hp_max() == _own_hp, "恢复本体后 HP 上限不变")
+check(app.ws_status.cget("text") == "", "恢复后状态栏提示应清空")
+check(app.ws_revert_btn.winfo_manager() == "", "恢复后按钮应隐藏")
 
 # ---- 物品分类筛选 ----
 app.set_character(_inv)
@@ -2223,9 +2355,83 @@ check(app.item_count_lbl.cget("text") == f"{len(cb.consts.MAGIC_ITEMS)} 件",
       "切回全部恢复全量")
 
 
-app.destroy()
+# ---------------------------------------------------------------- [19]
+print("\n[19] 邪术师·魔能祈唤 / 攻击选项 / 变形存档")
+check(mk("warlock", 1).invocation_cap() == 1, "邪术师 1 级 1 个祈唤")
+check(mk("warlock", 5).invocation_cap() == 5, "邪术师 5 级 5 个祈唤")
+check(mk("warlock", 12).invocation_cap() == 8, "邪术师 12 级 8 个祈唤")
+check(mk("warlock", 20).invocation_cap() == 10, "邪术师 20 级 10 个祈唤")
+check(mk("fighter", 20).invocation_cap() == 0, "非邪术师没有魔能祈唤")
 
-# ---------------------------------------------------------------- 结果
+_w = mk("warlock", 12, {"STR": 8, "DEX": 14, "CON": 14,
+                        "INT": 10, "WIS": 12, "CHA": 18})
+_w.weapon = cb.consts.WEAPONS[3][0]
+_atk0 = _w.attack_bonus()
+_w.invocations = ["pact-of-the-blade"]
+check(_w.weapon_ability() == "CHA", "契刃: 契约武器改用魅力")
+check(_w.attack_bonus() - _atk0 == _am(18) - _am(8), "契刃攻击加值 = 魅力 - 力量")
+_w.invocations = ["pact-of-the-blade", "thirsting-blade"]
+check(_w.attacks_per_action() == 2, "渴血之刃: 攻击动作 2 下")
+_w.invocations = ["pact-of-the-blade", "thirsting-blade", "devouring-blade"]
+check(_w.attacks_per_action() == 3, "吞噬之刃: 攻击动作 3 下")
+_w.invocations = ["pact-of-the-blade", "lifedrinker"]
+check(_w.damage_bonus() == _am(18) * 2, "饮命者: 伤害再叠一次魅力")
+_w.invocations = ["armor-of-shadows"]
+_w.armor_index, _w.shield = 0, False
+check(_w.ac() >= 13 + _am(_w.score("DEX")), "暗影护甲: 无甲 AC 13+敏捷")
+_w.invocations = ["devils-sight"]
+check(_w.senses().get("darkvision") == 120, "魔鬼视界: 黑暗视觉 120")
+_w.invocations = ["gift-of-the-depths"]
+check(_w.speeds().get("swim", 0) > 0, "深海馈赠: 获得游泳速度")
+
+# 存档白名单 + 数量上限
+_w.invocations = ["pact-of-the-blade"]
+_dw = _w.to_dict()
+_dw["invocations"] = ["pact-of-the-blade", "bogus-id"]
+_w2 = cb.Character(r)
+_w2.load_dict(_dw)
+check(_w2.invocations == ["pact-of-the-blade"], "祈唤读档过滤未知 id")
+_w3 = mk("fighter", 10)
+_w3.invocations = ["pact-of-the-blade"]
+_w4 = cb.Character(r)
+_w4.load_dict(_w3.to_dict())
+check(_w4.invocations == [], "非邪术师读档清空祈唤")
+
+# ---- 攻击选项 ----
+_b9 = mk("barbarian", 9)
+check([x["id"] for x in _b9.attack_riders()] == ["reckless", "brutal_strike"],
+      "野蛮人 9 级解锁鲁莽攻击 + 凶蛮打击")
+check(_b9.rider_damage(["brutal_strike"])[0] == "1d10", "9 级凶蛮打击 1d10")
+check(mk("barbarian", 17).rider_damage(["brutal_strike"])[0] == "3d10",
+      "17 级凶蛮打击 3d10")
+check(mk("barbarian", 1).attack_riders() == [], "1 级野蛮人还没有攻击选项")
+check(mk("cleric", 14).rider_damage(["blessed_strikes"])[0] == "2d8",
+      "牧师 14 级祝福打击 2d8")
+check(mk("paladin", 11).rider_damage(["radiant_strikes"])[0] == "1d8",
+      "圣武士 11 级光耀打击 1d8")
+check(mk("fighter", 20).attack_riders() == [], "战士没有这些攻击选项")
+
+_b17 = mk("barbarian", 17)
+app.set_character(_b17)
+app.refresh()
+app.update_idletasks()
+check("reckless" in getattr(app, "rider_vars", {}), "职业页应出现攻击选项勾选框")
+check(app._rider_advantage(["reckless"]) is True, "鲁莽攻击给优势")
+check(app._rider_advantage(["reckless", "brutal_strike"]) is False,
+      "凶蛮打击会放弃那次优势")
+app.rider_vars["brutal_strike"].set(True)
+app._damage_roll()
+check("凶蛮打击" in app.roll_log.get(0), "伤害记录要带出凶蛮打击的骰")
+
+# ---- 结束变形只收回形态给的临时 HP ----
+_lr = mk("druid", 8)
+_lr.wild_shape_id = "wolf"
+_lr.hp_temp, _lr.ws_temp_granted = 20, 8
+_lr.wild_shape_exit()
+check(_lr.wild_shape_id is None, "结束变形应清空形态")
+check(_lr.hp_temp == 12, f"只收回形态给的 8 点临时 HP: {_lr.hp_temp}")
+
+app.destroy()
 print("\n" + "=" * 60)
 if FAIL:
     print(f"失败 {len(FAIL)} 项:")

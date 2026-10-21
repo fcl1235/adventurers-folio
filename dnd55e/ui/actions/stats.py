@@ -22,7 +22,11 @@ class StatsMixin:
         if not c:
             return
         capped = False
+        wild = c.in_wild_shape()
         for a in ABILITIES:
+            # 变形期间 STR/DEX/CON 显示的是野兽值: 防止把它写进本体存档
+            if wild and a in ("STR", "DEX", "CON"):
+                continue
             try:
                 val = self.ab_entries[a].get()
             except tk.TclError:
@@ -159,6 +163,18 @@ class StatsMixin:
     def _slot_spend(self, lv):
         c = self.char
         if not c:
+            return
+        if c.wild_shape() and not (c.class_id == "druid" and c.level >= 18):
+            f = c.wild_shape()
+            self._log_roll(f"⚠ 处于 {f['name']} 形态：变形期间不能施法"
+                           "（德鲁伊 18 级「野兽法术」例外），未消耗环位")
+            if not getattr(self, "_selftest", False):
+                messagebox.showinfo(
+                    "变形期间不能施法",
+                    f"当前是 {f['name']} 形态。\n"
+                    "2024 规则：荒野变形期间不能施法；"
+                    "德鲁伊 18 级「野兽法术」起可在形态中施放德鲁伊法术。",
+                    parent=self)
             return
         mx = c.spell_slots().get(lv, 0)
         used = c.spell_slots_used.get(lv, 0)

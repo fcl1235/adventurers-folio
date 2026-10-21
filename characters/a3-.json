@@ -7,7 +7,7 @@
   "subclass": "Circle of the Moon",
   "order": "magician",
   "land": "temperate",
-  "wild_shape_id": null,
+  "wild_shape_id": "lion",
   "companion_id": null,
   "metamagic": [],
   "innate_active": false,

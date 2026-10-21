@@ -22,9 +22,15 @@ class DiceMixin:
             self.roll_log.delete(60, "end")
         self.status.config(text="🎲 " + text)
 
-    def _d20_log(self, label, mod, floor_value=None):
+    def _d20_log(self, label, mod, floor_value=None, adv=False):
         c = self.char
-        raw = random.randint(1, 20)
+        r1 = random.randint(1, 20)
+        rolls = f"d20={r1}"
+        raw = r1
+        if adv:                      # 优势: 掷两个取高
+            r2 = random.randint(1, 20)
+            raw = max(r1, r2)
+            rolls = f"d20={r1}/{r2} 取 {raw}"
         total = raw + c.d20_mod_total(mod)
         floor = ""
         if floor_value is not None and total < floor_value:
@@ -34,7 +40,7 @@ class DiceMixin:
               if c.exhaustion else "")
         crit = " 🎯大成功!" if raw == 20 else (" 💀大失败" if raw == 1 else "")
         self._log_roll(
-            f"{label}: d20={raw} {mod_str(mod)}{ex} ⇒ {total}{floor}{crit}")
+            f"{label}: {rolls} {mod_str(mod)}{ex} ⇒ {total}{floor}{crit}")
 
     def _roll_check(self, ab):
         if not self.char:
@@ -78,9 +84,46 @@ class DiceMixin:
     def _quick_die(self, n):
         self._log_roll(f"d{n} ⇒ {random.randint(1, n)}")
 
+    def _wild_attack(self, idx=0, hit=True, dmg=True):
+        """野兽形态的攻击: 命中用形态的加值, 伤害用形态的骰 (不叠本体加成)"""
+        c = self.char
+        m = c.wild_shape()
+        if not m:
+            return
+        from ... import wildshape as _ws
+        acts = _ws.attacks(m)
+        if not acts:
+            return
+        a = acts[idx] if idx < len(acts) else acts[0]
+        nm = (a.get("name") or "").split(" ")[0]
+        if a.get("attack_bonus") is None and a.get("dc") is not None:
+            self._log_roll(f"🐺 {nm}: {a.get('save')} 豁免 DC {a.get('dc')} · "
+                           f"{a.get('desc', '')}")
+            return
+        if hit and dmg and a.get("damage"):
+            # 命中与伤害写进同一条, 免得 insert(0) 让顺序看着像先掷伤害
+            mod = int(a.get("attack_bonus") or 0)
+            raw = random.randint(1, 20)
+            tot = raw + mod
+            crit = " 🎯大成功!" if raw == 20 else (" 💀大失败" if raw == 1 else "")
+            d_total, d_detail = roll_dice(a["damage"])
+            self._log_roll(f"🐺 野兽攻击·{nm}: d20={raw} {mod_str(mod)} ⇒ "
+                           f"{tot}{crit} ｜ 伤害 {d_detail} "
+                           f"{a.get('damage_type') or ''}")
+            return
+        if hit:
+            self._d20_log(f"🐺 野兽攻击·{nm}", int(a.get("attack_bonus") or 0))
+        if dmg and a.get("damage"):
+            total, detail = roll_dice(a["damage"])
+            self._log_roll(f"🐺 野兽伤害·{nm}: {detail} "
+                           f"{a.get('damage_type') or ''}")
+
     def _attack_roll(self):
         c = self.char
         if not c:
+            return
+        if c.wild_shape():
+            self._wild_attack(0, hit=True, dmg=False)
             return
         label = c.weapon or "徒手打击"
         note = ""
@@ -89,24 +132,46 @@ class DiceMixin:
         elif c.is_ranged_weapon():
             note = "　（5 尺内有敌人 / 超出常规射程时带劣势）"
         n = c.attacks_per_action()
+        ids = self._rider_ids() if hasattr(self, "_rider_ids") else []
+        adv = self._rider_advantage(ids)
+        if adv:
+            note += "　⚡ 攻击选项给了优势"
         if n <= 1:
-            self._d20_log(f"攻击·{label}{note}", c.attack_bonus())
+            self._d20_log(f"攻击·{label}{note}", c.attack_bonus(), adv=adv)
             return
         # 额外攻击: 一次投 n 个 d20, 分别结算命中
         mod = c.attack_bonus()
         parts, crit = [], 0
         for i in range(n):
             raw = random.randint(1, 20)
+            shown = f"d20={raw}"
+            if adv:
+                raw2 = random.randint(1, 20)
+                shown = f"d20={raw}/{raw2}"
+                raw = max(raw, raw2)
             tot = raw + c.d20_mod_total(mod)
             crit += 1 if raw == 20 else 0
-            parts.append(f"#{i + 1} d20={raw}⇒{tot}")
+            parts.append(f"#{i + 1} {shown}⇒{tot}")
         self._log_roll(
             f"攻击·{label} ×{n} 次 (命中 {mod_str(mod)}){note}: "
             + " | ".join(parts) + (f" · 🎯暴击 {crit}" if crit else ""))
 
+    def _rider_advantage(self, ids):
+        """勾选的攻击选项是否给优势（凶蛮打击会放弃那次优势换伤害）"""
+        if not self.char:
+            return False
+        rows = [r for r in self.char.attack_riders() if r["id"] in (ids or [])]
+        adv = any(r.get("attack") == "advantage" for r in rows)
+        if "brutal_strike" in (ids or []):
+            adv = False
+        return adv
+
     def _damage_roll(self):
         c = self.char
         if not c:
+            return
+        if c.wild_shape():
+            self._wild_attack(0, hit=False, dmg=True)
             return
         label = c.weapon or "徒手打击"
         dice = c.damage_dice()
@@ -121,18 +186,32 @@ class DiceMixin:
         else:
             total, detail = roll_dice(expr)
         extra = ""
+        extra_type = ""
+        ids = self._rider_ids() if hasattr(self, "_rider_ids") else []
+        rid_dice, rid_types, rid_names = c.rider_damage(ids)
+        if rid_dice:
+            r_total, r_detail = roll_dice(rid_dice)
+            total += r_total
+            extra += f" + {'/'.join(rid_names)} {r_detail}"
+            extra_type = "/".join(t for t in rid_types if t)
         if c.class_id == "rogue" and self.sneak_var.get():
             n = c.sneak_dice()
             s_total, s_detail = roll_dice(f"{n}d6")
             total += s_total
-            extra = f" + 偷袭 {s_detail}"
+            extra += f" + 偷袭 {s_detail}"
         self._log_roll(f"⚔ 伤害·{label}: {detail}{extra} "
-                       f"= {total} {c.damage_type()}")
+                       f"= {total} {c.damage_type()}"
+                       + (f"（另 {extra_type}）" if extra_type else ""))
 
     def _offhand_attack(self):
         """双武器战斗: 附赠动作, 用另一把轻型武器再打一下"""
         c = self.char
         if not c:
+            return
+        if c.wild_shape():
+            messagebox.showinfo("提示", "野兽形态没有副手武器，"
+                                       "请用装备页的「野兽动作」按钮。",
+                                parent=self)
             return
         if not c.offhand_weapon:
             messagebox.showinfo("提示", "先在「副手」里选一把武器。", parent=self)

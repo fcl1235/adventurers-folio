@@ -55,6 +55,21 @@ class ClassTabMixin():
             ttk.Checkbutton(hd, text=f"含偷袭 (+{c.sneak_dice()}d6)",
                             variable=self.sneak_var
                             ).pack(side="left", padx=8)
+        # 攻击时勾选的增益 (鲁莽攻击 / 凶蛮打击 / 祝福打击 / 光耀打击 …)
+        riders = c.attack_riders()
+        if riders:
+            rrow = ttk.Frame(body)
+            rrow.pack(fill="x", pady=(2, 0))
+            ttk.Label(rrow, text="攻击选项:", foreground=DIM).pack(side="left")
+            for rd in riders:
+                txt = rd["name"]
+                if rd.get("dice"):
+                    txt += f" +{rd['dice']}"
+                if rd.get("attack") == "advantage":
+                    txt += "（优势）"
+                ttk.Checkbutton(rrow, text=txt,
+                                variable=self._rider_var(rd["id"])
+                                ).pack(side="left", padx=6)
         dice = c.class_dice_text()
         if dice:
             ttk.Label(body, text="关键数值: " + dice, foreground=GOLD2,
@@ -74,19 +89,44 @@ class ClassTabMixin():
                       font=(UI_FONT, 12, "bold")).pack(side="right")
             bar = ttk.Frame(card, style="Card.TFrame")
             bar.pack(fill="x", pady=(4, 0))
-            for label, act, n in (("用 1", "spend", 1), ("回 1", "restore", 1)):
-                ttk.Button(bar, text=label, width=5, style="Mini.TButton",
-                           command=lambda rid=r["id"], a=act, k=n:
-                           self._res_act(rid, a, k)).pack(side="left", padx=2)
-            if r["max"] >= 10:      # 圣疗池这类大池子, 一次 5 点更常用
-                ttk.Button(bar, text="用 5", width=5, style="Mini.TButton",
+            uses = r.get("uses") or []
+            if uses:
+                # 有明确用途的资源: 每个用途一个按钮, 点了直接结算
+                for k, u in enumerate(uses):
+                    ttk.Button(
+                        bar, text=u["label"], style="Mini.TButton",
+                        command=lambda rid=r["id"], x=k:
+                        self._res_act(rid, "use", 1, x)
+                    ).pack(side="left", padx=2)
+                if any(u.get("type") == "heal_pool" for u in uses) \
+                        and r["max"] >= 10:
+                    ttk.Button(
+                        bar, text="用 5", width=5, style="Mini.TButton",
+                        command=lambda rid=r["id"]:
+                        self._res_act(rid, "use", 5, 0)
+                    ).pack(side="left", padx=2)
+                ttk.Button(bar, text="回满", width=5, style="Mini.TButton",
                            command=lambda rid=r["id"]:
-                           self._res_act(rid, "spend", 5)).pack(side="left", padx=2)
-            ttk.Button(bar, text="回满", width=5, style="Mini.TButton",
-                       command=lambda rid=r["id"]:
-                       self._res_act(rid, "full")).pack(side="left", padx=2)
+                           self._res_act(rid, "full")).pack(side="left", padx=2)
+            else:
+                for label, act, n in (("用 1", "spend", 1), ("回 1", "restore", 1)):
+                    ttk.Button(bar, text=label, width=5, style="Mini.TButton",
+                               command=lambda rid=r["id"], a=act, k=n:
+                               self._res_act(rid, a, k)).pack(side="left", padx=2)
+                if r["max"] >= 10:      # 圣疗池这类大池子, 一次 5 点更常用
+                    ttk.Button(bar, text="用 5", width=5, style="Mini.TButton",
+                               command=lambda rid=r["id"]:
+                               self._res_act(rid, "spend", 5)).pack(side="left", padx=2)
+                ttk.Button(bar, text="回满", width=5, style="Mini.TButton",
+                           command=lambda rid=r["id"]:
+                           self._res_act(rid, "full")).pack(side="left", padx=2)
             ttk.Label(bar, text=self._reset_text(r), style="Card.TLabel",
                       foreground=DIM).pack(side="right")
+            if r.get("uses"):
+                ttk.Label(card, text="↑ 按钮会直接结算效果并写进掷骰记录",
+                          style="Card.TLabel", foreground=GOLD2,
+                          wraplength=520, justify="left"
+                          ).pack(anchor="w", pady=(2, 0))
             ttk.Label(card, text=r["note"], style="Card.TLabel",
                       foreground=DIM, wraplength=520, justify="left"
                       ).pack(anchor="w", pady=(4, 0))
@@ -172,6 +212,44 @@ class ClassTabMixin():
         if c.boon_names():
             self._render_boons(body, c)
 
+        # ===== 1.48 邪术师·魔能祈唤 =====
+        if c.invocation_cap():
+            iw = ttk.Frame(body)
+            iw.pack(fill="x", pady=(8, 0))
+            head = ttk.Frame(iw)
+            head.pack(fill="x")
+            ttk.Label(head, text=f"魔能祈唤（{c.invocation_count_text()}）",
+                      style="H2.TLabel").pack(side="left")
+            ttk.Button(head, text="选择祈唤", style="Mini.TButton",
+                       command=self._invocation_edit
+                       ).pack(side="left", padx=6)
+            for iid in c.invocation_known():
+                inv = consts.INVOCATIONS_BY_ID.get(iid) or {}
+                ttk.Label(iw, text=f"· {inv.get('name', '')}："
+                                   f"{inv.get('desc', '')}",
+                          style="Dim.TLabel", wraplength=540,
+                          justify="left").pack(anchor="w")
+            eff = c.invocation_effects()
+            tips = []
+            if eff.get("pact_blade"):
+                tips.append(f"契刃：攻击/伤害改用魅力（{c.weapon_ability()}）")
+            if eff.get("lifedrinker"):
+                tips.append("饮命者：伤害已加魅力")
+            if eff.get("extra_attack"):
+                tips.append(f"契约武器每动作 {c.attacks_per_action()} 下")
+            if eff.get("armor_of_shadows"):
+                tips.append("暗影护甲：无甲 AC 13+敏捷")
+            if eff.get("devils_sight"):
+                tips.append("魔鬼视界：黑暗视觉 120")
+            if eff.get("conc_adv"):
+                tips.append("魔能心智：专注豁免有优势")
+            if eff.get("swim_speed"):
+                tips.append("深海馈赠：获得游泳速度")
+            if tips:
+                ttk.Label(iw, text="已并入数值: " + "；".join(tips),
+                          foreground=GOLD2, wraplength=540,
+                          justify="left").pack(anchor="w", pady=(2, 0))
+
         # ===== 1.5 1 级职阶 (牧师 神圣职阶 / 德鲁伊 原始职阶) =====
         opts = c.order_options()
         if opts:
@@ -199,16 +277,22 @@ class ClassTabMixin():
             wrow.pack(fill="x")
             cur = c.wild_shape()
             ttk.Label(wrow, foreground=GOLD2,
-                      text=f"可选 {len(c.wild_shapes())} 种"
+                      text=f"剩余次数 {c.wild_shape_left()} 次"
+                           f" · 可选 {len(c.wild_shapes())} 种"
                            f" · 已知形态 {_ws.known_forms(c.level)} 种"
                            f" · 临时 HP {_ws.temp_hp(c.level, c.subclass)}"
                            + (f" · 当前：{cur['name']}" if cur
                               else " · 当前：本体")).pack(side="left")
             ttk.Button(wrow, text="形态", style="Mini.TButton",
                        command=self._wild_shape_open).pack(side="left", padx=6)
+            if cur:
+                ttk.Button(wrow, text="恢复本体", style="Mini.TButton",
+                           command=self._wild_revert).pack(side="left")
             ttk.Label(wsf, text="2024 规则：2 级不可带飞行/游泳，4 级解游泳、"
                                 "8 级解飞行（大地结社只放宽 CR）。"
-                                "此处按 CR 列出全部符合条件形态供参考。",
+                                "每次变形消耗 1 次（短休回 1、长休全回），"
+                                "变形期间力量/敏捷/体质、AC、速度、感官、攻击"
+                                "改用形态数据，智力/感知/魅力与 HP 保留本体。",
                       style="Dim.TLabel", wraplength=540,
                       justify="left").pack(anchor="w")
             if cur:
@@ -457,23 +541,31 @@ class ClassTabMixin():
             self._log_roll("◯ 结束狂暴")
         self.refresh()
 
-    def _res_act(self, rid, act, n=1):
+    def _res_act(self, rid, act, n=1, idx=0):
         c = self.char
         if not c:
             return
         pos = self.class_scroll.canvas.yview()[0]
+        msg = ""
         if act == "full":
             if rid is None:
                 c.res_used = {}
             else:
                 c.res_spend(rid, -999)
-        elif act == "spend":
-            c.res_spend(rid, n)
+        elif act in ("spend", "use"):
+            ok, msg = c.res_use(rid, n, idx)
+            if not ok:
+                if not getattr(self, "_selftest", False):
+                    messagebox.showinfo("提示", msg or "无法使用该资源。",
+                                        parent=self)
+                return
         else:
             c.res_spend(rid, -n)
         self._render_class_tab()
         self.class_scroll.canvas.yview_moveto(pos)
         self._status()
+        if msg:
+            self._log_roll("✦ " + msg)
 
     def _font_create(self):
         """术士·术法源泉: 术法点 → 临时法术位"""
@@ -511,3 +603,34 @@ class ClassTabMixin():
         self._render_class_tab()
         self._status()
         self._log_roll(("✨ " if ok else "⚠ ") + msg)
+
+    # ---- 攻击选项 / 魔能祈唤 ----
+    def _rider_var(self, rid):
+        """攻击选项的勾选状态 (跨重绘保留; 换角色时在 set_character 里清空)"""
+        if not hasattr(self, "rider_vars"):
+            self.rider_vars = {}
+        if rid not in self.rider_vars:
+            self.rider_vars[rid] = tk.BooleanVar(value=False)
+        return self.rider_vars[rid]
+
+    def _rider_ids(self):
+        return [rid for rid, v in getattr(self, "rider_vars", {}).items()
+                if v.get()]
+
+    def _invocation_edit(self):
+        """邪术师: 选择魔能祈唤 (数量上限 / 等级前提在模型里再校验一次)"""
+        from ..dialogs import InvocationDialog
+        c = self.char
+        if not c or not c.invocation_cap():
+            return
+        pos = self.class_scroll.canvas.yview()[0]
+        dlg = InvocationDialog(self, c, selftest=getattr(self, "_selftest", False))
+        if not getattr(self, "_selftest", False):
+            self.wait_window(dlg)
+        if dlg.result is not None:
+            c.invocations = list(dlg.result)[:c.invocation_cap()]
+            self._render_class_tab()
+            self.class_scroll.canvas.yview_moveto(pos)
+            self._status()
+        else:
+            dlg.destroy()

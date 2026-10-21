@@ -178,6 +178,24 @@ def summons_by_id():
     return {s["id"]: s for s in summons()}
 
 
+# ---- 邪术师·魔能祈唤 ----
+def invocations():
+    return [dict(v) for v in _load("invocations")["invocations"]]
+
+
+def invocations_by_id():
+    return {v["id"]: v for v in invocations()}
+
+
+# ---- 攻击时勾选的增益 (鲁莽攻击 / 凶蛮打击 / 祝福打击 ...) ----
+def attack_riders():
+    return [dict(v) for v in _load("attack_riders")["riders"]]
+
+
+def attack_riders_by_id():
+    return {v["id"]: v for v in attack_riders()}
+
+
 # ---- 职业相关文案 ----
 def subclass_cn():
     return dict(_load("classes_ui")["subclass_cn"])

@@ -11,6 +11,8 @@ from ..theme import (BG, DIM, GOLD2, LISTBOX_STYLE, RED, TEXT, TEXT_STYLE,
 from ..util import (ab_from_display, ability_mod, mod_str,
                     proficiency_bonus, roll_dice)
 
+from ._fit import center_on, fit
+
 
 class MetamagicDialog(tk.Toplevel):
     """2024 超魔法: 施法时选 1 个 (强化/探秘可与其他叠加)。
@@ -22,7 +24,6 @@ class MetamagicDialog(tk.Toplevel):
         self.spell = spell
         self.result = None
         self.title("超魔法")
-        self.geometry("480x400")
         self.transient(master)
         self.configure(bg=BG)
         try:
@@ -61,6 +62,8 @@ class MetamagicDialog(tk.Toplevel):
         ttk.Button(bar, text="不用超魔法",
                    command=self._none).pack(side="left")
         self._sync()
+        fit(self, 480, 400)
+        center_on(self, master)
 
     def _picked(self):
         return [m for m, v in self.vars.items() if v.get()]

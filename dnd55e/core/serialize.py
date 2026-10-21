@@ -8,13 +8,20 @@ class SerializeMixin:
     """SerializeMixin"""
 
     def to_dict(self):
+        # 荒野变形是「场景状态」, 不跨存档保留:
+        # 形态清空、形态给的临时 HP 扣掉, 并把这次消耗掉的那 1 次记成
+        # ws_refund, 读档时退回 —— 免得「下次打开形态没了、次数还白花」。
+        in_ws = self.wild_shape() is not None
+        hp_temp = max(0, int(self.hp_temp or 0)
+                      - (int(self.ws_temp_granted or 0) if in_ws else 0))
         return {
             "system": "dnd55e-character v1",
             "name": self.name, "level": self.level, "xp": self.xp,
             "class_id": self.class_id, "subclass": self.subclass,
             "order": self.order,
             "land": self.land,
-            "wild_shape_id": self.wild_shape_id,
+            "wild_shape_id": None,
+            "ws_refund": 1 if in_ws else 0,
             "companion_id": self.companion_id,
             "metamagic": list(self.metamagic),
             "innate_active": self.innate_active,
@@ -33,7 +40,7 @@ class SerializeMixin:
             "weapon_mastery": self.weapon_mastery,
             "armor_index": self.armor_index, "shield": self.shield,
             "tough_feat": self.tough_feat,
-            "hp_current": self.hp_current, "hp_temp": self.hp_temp,
+            "hp_current": self.hp_current, "hp_temp": hp_temp,
             "spell_slots_used": self.spell_slots_used,
             "feats": self.feats, "languages": self.languages,
             "equipment": self.equipment, "notes": self.notes,
@@ -41,6 +48,7 @@ class SerializeMixin:
             "conditions": sorted(self.conditions),
             "spells": self.spells,
             "spellbook": list(self.spellbook),
+            "invocations": list(getattr(self, "invocations", None) or []),
             "book_pending": self.book_pending,
             "weapon": self.weapon, "weapon_magic": self.weapon_magic,
             "two_handed_grip": self.two_handed_grip,
@@ -90,9 +98,14 @@ class SerializeMixin:
         landv = d.get("land")
         ok_lands = {k for k, _ in self.land_options()}
         self.land = landv if landv in ok_lands else "temperate"
-        # 荒野变形形态: 必须是当前等级允许的野兽, 否则清空
+        # 荒野变形形态: 读档一律从本体开始 (变形是场景状态, 不跨存档)。
+        # 旧档里 if 还存着 wild_shape_id, 说明存盘时正在变形 → 同样收起来,
+        # 并把那次消耗的次数退回, 不让玩家白花。ws_refund 显式写了就按写的。
         ws = d.get("wild_shape_id")
-        self.wild_shape_id = ws if ws in {m["id"] for m in self.wild_shapes()} else None
+        ws_was_shaped = bool(ws) and ws in {m["id"] for m in self.wild_shapes()}
+        self.wild_shape_id = None
+        self.ws_temp_granted = 0
+        ws_refund = _int(d.get("ws_refund"), 1 if ws_was_shaped else 0, 0, 1)
         bid = d.get("background_id")
         self.background_id = bid if bid in known_bg else self.r.d["backgrounds"][0]["id"]
         sid = d.get("species_id")
@@ -191,6 +204,14 @@ class SerializeMixin:
         self.spellbook = self.spellbook[:220]
         # 法师 1→20 级最多可攒 2+2*19=40 次免费抄录
         self.book_pending = _int(d.get("book_pending"), 0, 0, 40)
+        # 邪术师·魔能祈唤: 白名单 + 等级前提 + 数量上限 (超出的按顺序截断)
+        cap = self.invocation_cap()
+        opts = {inv["id"] for inv in self.invocation_options()}
+        self.invocations = []
+        for iid in (d.get("invocations") or []):
+            if iid in opts and iid not in self.invocations:
+                self.invocations.append(iid)
+        self.invocations = self.invocations[:cap]
         # 超魔法 / 先天魔法 / 法师精通与招牌法术 / 副手武器
         self.metamagic = [m for m in (d.get("metamagic") or [])
                           if m in consts.METAMAGIC][:self.metamagic_cap()]
@@ -232,6 +253,14 @@ class SerializeMixin:
                 if rid in raw_res:
                     mx = self.resource_max(res)
                     self.res_used[rid] = _int(raw_res.get(rid), 0, 0, mx)
+        # 变形次数退还 (存盘时正在变形 / 旧档带形态), 读档后不能白耗这一次
+        if ws_refund and "wildshape" in self.res_used:
+            self.res_used["wildshape"] = max(0, self.res_used["wildshape"]
+                                             - ws_refund)
+        if ws_refund:
+            self.load_notice = ("※ 存档时正在荒野变形：读档后已回到本体，"
+                                "并把那 1 次变形次数退回（变形属于场景状态，"
+                                "不跨存档保留）。")
         self.skill_prof |= set(self.auto_skills())
         # 休息 / 濒死 / 姿态
         self.hit_dice_used = _int(d.get("hit_dice_used"), 0,
@@ -263,6 +292,11 @@ class SerializeMixin:
                                and s not in self.boon_expertise][:1]
         # 最后钳制 HP (依赖上面的 level/scores/species/tough)
         self.hp_temp = _int(d.get("hp_temp"), 0, 0, 999)
+        if ws_was_shaped:
+            # 旧档把形态给的临时 HP 混进了 hp_temp, 形态既然收起就一并扣掉
+            from .. import wildshape as _ws
+            self.hp_temp = max(0, self.hp_temp
+                               - _ws.temp_hp(self.level, self.subclass))
         self.hp_current = _int(d.get("hp_current"), self.hp_max(),
                                0, self.hp_max())
         # 特性授予的法术不再占用手动列表 (旧存档里可能存过)

@@ -19,7 +19,7 @@ from .tabs import ITEM_KINDS
 
 class PanelsMixin():
     def _chip(self, parent, title, cmd=None):
-        f = ttk.Frame(parent, style="Card.TFrame", padding=(10, 6))
+        f = ttk.Frame(parent, style="Card.TFrame", padding=(7, 5))
         f.pack(side="left", padx=4)
         ttk.Label(f, text=title, style="DimCard.TLabel").pack()
         val = ttk.Label(f, text="—", style="Card.TLabel",
@@ -61,7 +61,7 @@ class PanelsMixin():
 
         # 中: HP 大面板
         hpf = ttk.Frame(hero, style="Panel.TFrame")
-        hpf.pack(side="left", padx=30)
+        hpf.pack(side="left", padx=14)
         ttk.Label(hpf, text="❤ 生命值", style="DimPanel.TLabel").pack(anchor="w")
         self.hp_big = ttk.Label(hpf, text="0 / 0", background=PANEL,
                                 foreground="#ff8a75", font=(F, 20, "bold"))
@@ -74,16 +74,16 @@ class PanelsMixin():
         for txt, n, sty in [("−5", -5, "Red.TButton"), ("−1", -1, "Red.TButton"),
                             ("+1", 1, "Green.TButton"),
                             ("+5", 5, "Green.TButton")]:
-            ttk.Button(row, text=txt, width=4, style=sty,
+            ttk.Button(row, text=txt, width=3, style=sty,
                        command=lambda v=n: self._hp_add(v)).pack(side="left",
                                                                  padx=2)
-        ttk.Button(row, text="回满", width=5,
+        ttk.Button(row, text="回满", width=4,
                    command=lambda: self._hp_add(99999)).pack(side="left",
                                                              padx=(8, 2))
         ttk.Label(row, text="临时HP", style="DimPanel.TLabel").pack(
-            side="left", padx=(10, 2))
+            side="left", padx=(8, 2))
         self.hp_temp_var = tk.IntVar()
-        tsp = ttk.Spinbox(row, from_=0, to=99, width=4,
+        tsp = ttk.Spinbox(row, from_=0, to=99, width=3,
                           textvariable=self.hp_temp_var,
                           command=self._hp_temp_changed)
         tsp.pack(side="left")
@@ -96,7 +96,7 @@ class PanelsMixin():
         self.chip_init = self._chip(chips, "⚡ 先攻", cmd=self._roll_init)
         self.chip_speed = self._chip(chips, "👣 速度")
         self.chip_pb = self._chip(chips, "✦ 熟练")
-        self.chip_pp = self._chip(chips, "👁 被动察觉")
+        self.chip_pp = self._chip(chips, "👁 察觉")
 
     def _build_left(self):
         F = UI_FONT
@@ -104,6 +104,7 @@ class PanelsMixin():
                             text=" 属性 (卡片内一键掷检定/豁免) ", padding=8)
         ab.pack(fill="x")
         self.ab_entries, self.ab_modlbls, self.ab_savelbls = {}, {}, {}
+        self.ab_spins = {}
         for i, a in enumerate(ABILITIES):
             card = ttk.Frame(ab, style="Card.TFrame", padding=8)
             card.grid(row=i // 2, column=i % 2, padx=4, pady=4, sticky="nsew")
@@ -128,6 +129,7 @@ class PanelsMixin():
             sb.pack(side="left")
             sb.bind("<FocusOut>", lambda e: self._score_edited())
             self.ab_entries[a] = v
+            self.ab_spins[a] = sb
             ttk.Button(bot, text="检🎲", style="Mini.TButton", width=5,
                        command=lambda x=a: self._roll_check(x)
                        ).pack(side="left", padx=(4, 1))
@@ -215,14 +217,24 @@ class PanelsMixin():
         # 掷骰记录
         lg = ttk.LabelFrame(self.col_right, text=" 掷骰记录 ", padding=8)
         lg.pack(fill="both", expand=True, pady=(8, 0))
-        self.roll_log = tk.Listbox(lg, **LISTBOX_STYLE)
-        self.roll_log.pack(fill="both", expand=True)
+        # 按钮先 pack 到最底部: 记录框 expand 后不会把「清空记录」挤出去
         ttk.Button(lg, text="清空记录", style="Mini.TButton",
                    command=lambda: self.roll_log.delete(0, "end")
-                   ).pack(anchor="e", pady=(4, 0))
+                   ).pack(side="bottom", anchor="e", pady=(4, 0))
+        self.roll_log = tk.Listbox(lg, height=5, **LISTBOX_STYLE)
+        self.roll_log.pack(fill="both", expand=True)
 
     def _build_status(self):
+        bar = ttk.Frame(self)
+        bar.pack(fill="x", side="bottom")
         self.status = ttk.Label(
-            self, text="欢迎来到 D&D 5.5e 人物卡 —— 点击工具栏「✦ 新建角色」开始冒险",
+            bar, text="欢迎来到 D&D 5.5e 人物卡 —— 点击工具栏「✦ 新建角色」开始冒险",
             style="Dim.TLabel", anchor="w", padding=(12, 5))
-        self.status.pack(fill="x", side="bottom")
+        self.status.pack(side="left", fill="x", expand=True)
+        # 荒野变形的当前状态: 变身中在状态栏右侧常驻提示, 随时可恢复本体
+        self.ws_revert_btn = ttk.Button(bar, text="🐾 恢复本体",
+                                        style="Mini.TButton",
+                                        command=self._wild_revert)
+        self.ws_status = ttk.Label(bar, text="", style="Dim.TLabel",
+                                   padding=(0, 5))
+        self.ws_status.pack(side="right", padx=(0, 8))

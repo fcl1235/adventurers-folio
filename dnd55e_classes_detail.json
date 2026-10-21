@@ -391,7 +391,13 @@
      "short_after_level": 5,
      "short_after": "all",
      "table": null,
-     "formula": "cha_mod_min1"
+     "formula": "cha_mod_min1",
+     "uses": [
+      {
+       "label": "掷灵感骰",
+       "type": "die"
+      }
+     ]
     }
    ],
    "dice_note": "",
@@ -967,7 +973,28 @@
       "19": 4,
       "20": 4
      },
-     "formula": null
+     "formula": null,
+     "uses": [
+      {
+       "label": "回气回血",
+       "type": "heal",
+       "dice": "1d10+level"
+      },
+      {
+       "label": "战术思维 +1d10",
+       "type": "bonus_die",
+       "dice": "1d10",
+       "min_level": 5,
+       "note": "属性检定失败时加在结果上"
+      },
+      {
+       "label": "研究攻击 +1d10",
+       "type": "bonus_die",
+       "dice": "1d10",
+       "min_level": 13,
+       "note": "未命中时加在攻击检定上"
+      }
+     ]
     },
     {
      "id": "action_surge",
@@ -1524,7 +1551,20 @@
      "icon": "🕊",
      "note": "治疗池 = 5 × 圣武士等级（长休回满）。附赠动作治疗，或花 5 点解除中毒。",
      "table": null,
-     "formula": "5*level"
+     "formula": "5*level",
+     "uses": [
+      {
+       "label": "疗伤（每点 1 HP）",
+       "type": "heal_pool",
+       "per_point": 1
+      },
+      {
+       "label": "解毒（5 点）",
+       "type": "note",
+       "cost": 5,
+       "text": "花 5 点解除一项中毒"
+      }
+     ]
     },
     {
      "id": "channel",
@@ -2471,9 +2511,16 @@
      "short": 0,
      "long": "all",
      "icon": "📖",
-     "note": "每天 1 次（长休重置）：短休时恢复总环级 ≤ 一半法师等级（向上取整）的法术位，不含 6 环以上。这里的数字是可恢复的环级总量。",
+     "note": "每天 1 次（长休重置）：短休时恢复总环级 ≤ 一半法师等级（向上取整）的法术位，不含 6 环以上。用「用 1」会按高环优先自动回填。",
      "table": null,
-     "formula": "half_level_ceil"
+     "formula": "half_level_ceil",
+     "per_day": 1,
+     "uses": [
+      {
+       "label": "恢复法术位",
+       "type": "recover_slots"
+      }
+     ]
     }
    ],
    "dice_note": "",

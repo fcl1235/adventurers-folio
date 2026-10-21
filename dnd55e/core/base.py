@@ -50,8 +50,12 @@ class BaseMixin:
         self.order = None             # 1级职阶: cleric protector/thaumaturge, druid warden/magician
         self.land = "temperate"       # 大地结社: 长休时选的地形 arid/polar/temperate/tropical
         self.wild_shape_id = None     # 荒野变形当前形态 (monsters.json 的 id)
+        # 变形时形态给的那部分临时 HP (收回去时只减这部分, 不吞自己的临时 HP)
+        self.ws_temp_granted = 0
+        self.load_notice = ""         # 读档时产生的提示 (如「变形已结束」)
         self.companion_id = None      # 游侠·驯兽师: 当前伙伴形态 (长休可换)
         self.metamagic = []           # 术士已知超魔法 id (2级2个, 10/17级各+2)
+        self.invocations = []         # 邪术师已知魔能祈唤 id (1/3/5/7/9/12/15/18 级递增)
         self.innate_active = False    # 先天魔法生效中 (20级时让 1 个超魔法免费)
         self.innate_used = 0          # 先天魔法已用次数 (2 次/长休)
         self.sorcerous_rest_used = False   # 术士 5 级「魔法恢复」本长休是否用过
@@ -87,6 +91,20 @@ class BaseMixin:
         return self.cls_module().capstone_bonus(self, ab)
 
     def score(self, ab):
+        """当前生效属性值。
+
+        2024 荒野变形: 力量/敏捷/体质 换成野兽的, 智力/感知/魅力 保留本体的
+        (HP 与生命骰也保留, 所以 hp_max 必须用 base_score)。
+        """
+        m = self.wild_shape()
+        if m and ab in ("STR", "DEX", "CON"):
+            v = int((m.get("abilities") or {}).get(ab) or 0)
+            if v:
+                return v
+        return self.base_score(ab)
+
+    def base_score(self, ab):
+        """本体属性值 (含背景/ASI/恩惠/物品), 不受变形影响"""
         s = self.base_scores[ab]
         b = self.bg_bonus
         if b:
