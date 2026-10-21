@@ -39,6 +39,8 @@ class Pool:
     used: int = 0
     owner_class: str | None = None
     refresh: Refresh = Refresh.LONG_REST
+    # 2024 的「短休恢复 1 次」不能靠 refresh 表达：回气是短休回 1、长休全回
+    recover_on_short_rest: int = 0
 
     def __post_init__(self) -> None:
         if self.capacity < 0:
@@ -83,6 +85,7 @@ class Pool:
             "id": self.id, "kind": self.kind.value, "capacity": self.capacity,
             "used": self.used, "owner_class": self.owner_class,
             "refresh": self.refresh.value,
+            "recover_on_short_rest": self.recover_on_short_rest,
         }
 
 
@@ -122,6 +125,40 @@ class ResourcePool:
                 touched.append(pool)
         return touched
 
+    def refill_all(self, include_encounter: bool = False) -> list[tuple["Pool", int]]:
+        """长休：除 NONE 之外全部回满。生命骰另有规则，这里跳过。"""
+        touched: list[tuple[Pool, int]] = []
+        for pool in self.pools.values():
+            if pool.refresh is Refresh.NONE:
+                continue
+            if pool.refresh is Refresh.ENCOUNTER and not include_encounter:
+                continue
+            if pool.id.startswith("hit_dice."):
+                continue
+            delta = pool.used
+            if not delta:
+                continue
+            pool.refill()
+            touched.append((pool, delta))
+        return touched
+
+    def short_rest_recover(self) -> list[tuple["Pool", int]]:
+        """短休：SHORT_REST 池回满，其余按 recover_on_short_rest 回几次。"""
+        touched: list[tuple[Pool, int]] = []
+        for pool in self.pools.values():
+            if pool.refresh is Refresh.SHORT_REST:
+                delta = pool.used
+                if delta:
+                    pool.refill()
+                    touched.append((pool, delta))
+            elif pool.recover_on_short_rest:
+                before = pool.used
+                pool.recover(pool.recover_on_short_rest)
+                delta = before - pool.used
+                if delta:
+                    touched.append((pool, delta))
+        return touched
+
     def of_class(self, class_id: str) -> list[Pool]:
         return [pool for pool in self.pools.values() if pool.owner_class == class_id]
 
@@ -142,5 +179,6 @@ class ResourcePool:
                 used=int(row.get("used", 0)),
                 owner_class=row.get("owner_class"),
                 refresh=Refresh(row.get("refresh", "long_rest")),
+                recover_on_short_rest=int(row.get("recover_on_short_rest", 0)),
             ))
         return pool

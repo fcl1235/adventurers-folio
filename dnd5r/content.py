@@ -79,6 +79,7 @@ class ResourceDef:
             label=self.label,
             owner_class=self.owner_class or None,
             refresh=self.refresh,
+            recover_on_short_rest=self.recover_on_short_rest,
         )
 
     def to_dict(self) -> dict:

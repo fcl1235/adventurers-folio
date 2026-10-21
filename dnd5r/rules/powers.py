@@ -100,9 +100,9 @@ class Cost:
 
     def describe(self) -> str:
         bits = []
-        if self.action is not ActionType.NONE:
-            bits.append({"action": "动作", "bonus": "附赠动作", "reaction": "反应",
-                         "free": "不耗动作", "none": ""}[self.action.value])
+        if self.action is not ActionType.NONE and self.action is not ActionType.FREE:
+            bits.append({"action": "动作", "bonus": "附赠动作", "reaction": "反应"}.get(
+                self.action.value, self.action.value))
         if self.resource:
             name = self.label or self.resource.split(".")[-1]
             bits.append("%s ×%d" % (name, self.amount))
@@ -327,6 +327,31 @@ def _patch_fields(target: Power, augment: Power) -> dict[str, Any]:
 
 
 # --- 执行 -------------------------------------------------------------
+_ACTION_ZH = {
+    ActionType.ACTION: "动作",
+    ActionType.BONUS: "附赠动作",
+    ActionType.REACTION: "反应",
+    ActionType.FREE: "额外动作",
+    ActionType.NONE: "动作",
+}
+
+_PHASE_ZH = {
+    Phase.ON_INITIATIVE: "先攻时",
+    Phase.ON_TURN_START: "回合开始时",
+    Phase.ON_TURN_END: "回合结束时",
+    Phase.ON_HIT: "命中后",
+    Phase.ON_DAMAGED: "受伤后",
+    Phase.ON_ZERO_HP: "生命归零时",
+    Phase.ON_FAIL_SAVE: "豁免失败后",
+    Phase.ON_FAIL_CHECK: "检定失败后",
+    Phase.ON_USE_POWER: "使用能力时",
+}
+
+
+def phase_label(phase: Phase | None) -> str:
+    return _PHASE_ZH.get(phase, phase.value if phase else "—")
+
+
 def can_use(
     power: Power,
     ctx: EffectContext,
@@ -340,7 +365,7 @@ def can_use(
     cost = power.cost
     if cost is not None:
         if economy is not None and not economy.can_pay(cost.action):
-            reasons.append("没有可用的%s" % cost.action.value)
+            reasons.append("本回合没有可用的%s" % _ACTION_ZH.get(cost.action, cost.action.value))
         if cost.resource:
             root = ctx.actor.root()
             if not root.resources.has(cost.resource):

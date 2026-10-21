@@ -98,6 +98,61 @@ def cmd_golden(args) -> int:
     return golden_main(argv)
 
 
+def _print_view(view) -> None:
+    header = view.header
+    print("%s  %s  等级 %d" % (header.name, "、".join(header.classes), header.level))
+    print("HP %d/%d%s  AC %d  熟练 +%d"
+          % (header.hp, header.hp_max,
+             "（临时 %d）" % header.temp_hp if header.temp_hp else "",
+             header.ac, header.proficiency_bonus))
+    if header.conditions:
+        print("状态：%s" % "、".join(header.conditions))
+    print("--- 卡片 ---")
+    for card in view.cards:
+        mark = "▶" if card.actions else "·"
+        value = (" [%s]" % card.value) if card.value else ""
+        print(" %s %-14s %-22s%s  %s" % (mark, card.title, card.subtitle, value, card.tone))
+        for line in card.detail:
+            print("      %s" % line)
+    for card in view.attacks:
+        print(" · %-14s %-22s [%s]" % (card.title, card.subtitle, card.value))
+
+
+def cmd_play(args) -> int:
+    """无头剧本：掉血 → 用能力 → 短休 → 长休。每一步都真的跑一遍。"""
+    session = api.Session.open(args.root, locale=args.lang, seed=args.seed)
+    actor = session.create_character(args.cls, args.level, _scores(args),
+                                     name_zh=args.zh, name_en=args.en)
+    print("=== 初始 ===")
+    _print_view(session.view())
+
+    hit = max(1, actor.hp.maximum // 2)
+    print("\n=== 受伤 %d ===" % hit)
+    _, report = session.dispatch(api.TakeDamage(hit))
+    print(report.message, "→ HP %d/%d" % (actor.hp.current, actor.hp.maximum))
+
+    print("\n=== 使用 %s ===" % args.power)
+    view, report = session.dispatch(api.UsePower(args.power))
+    print(report.message or "（无输出）")
+    print("→ HP %d/%d" % (actor.hp.current, actor.hp.maximum))
+
+    print("\n=== 短休 ===")
+    _, report = session.dispatch(api.ShortRest(dice=0))
+    print(report.message)
+
+    print("\n=== 新回合后再次使用 ===")
+    session.dispatch(api.NewTurn())
+    _, report = session.dispatch(api.UsePower(args.power))
+    print(("成功：" if report.ok else "被拒绝：") + (report.message or "（无输出）"))
+
+    print("\n=== 长休 ===")
+    _, report = session.dispatch(api.LongRest())
+    print(report.message)
+    print("\n=== 结束 ===")
+    _print_view(session.view())
+    return 0
+
+
 def _add_character_args(parser) -> None:
     parser.add_argument("--class", dest="cls", default="dnd2024.class.fighter")
     parser.add_argument("--level", type=int, default=1)
@@ -131,6 +186,12 @@ def main(argv=None) -> int:
     use.add_argument("--power", required=True)
     use.add_argument("--seed", type=int, default=None)
     use.set_defaults(func=cmd_use)
+
+    play = sub.add_parser("play", help="无头剧本：掉血 → 用能力 → 短休 → 长休")
+    _add_character_args(play)
+    play.add_argument("--power", default="dnd2024.class.fighter.second_wind")
+    play.add_argument("--seed", type=int, default=7)
+    play.set_defaults(func=cmd_play)
 
     plugins = sub.add_parser("plugins", help="列出插件")
     plugins.add_argument("--root", default="plugins")

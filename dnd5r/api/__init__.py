@@ -30,6 +30,7 @@ from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
 from ..rules.resolver import RefContext, Resolver
 from ..rules.powers import use_power as _use_power
+from ..session import LongRest, NewTurn, Regain, Session, ShortRest, TakeDamage, UsePower
 
 VERSION = "0.2.0"
 
@@ -349,4 +350,5 @@ __all__ = [
     "character_sheet", "actor_view",
     "find_power", "use_power", "plugin_summary",
     "ActionEconomy", "ActionType",
+    "Session", "UsePower", "ShortRest", "LongRest", "NewTurn", "TakeDamage", "Regain",
 ]
