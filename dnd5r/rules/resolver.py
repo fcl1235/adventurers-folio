@@ -7,8 +7,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Iterable, Mapping
+from dataclasses import dataclass, field
+from typing import Any, Iterable, Mapping
 
 from ..model.actor import Actor
 from ..model.levels import ClassLevel, TotalLevel
@@ -23,15 +23,18 @@ class RefContext:
     class_level: ClassLevel | None
     abilities: Abilities
     speeds: Mapping[str, int]
+    facts: Mapping[str, Any] = field(default_factory=dict)
 
     def as_mapping(self) -> dict:
-        return {
+        base = {
             "prof_bonus": self.prof_bonus,
             "total_level": int(self.total_level),
             "class_level": None if self.class_level is None else int(self.class_level),
             "abilities": self.abilities,
             "speeds": dict(self.speeds),
         }
+        base.update(dict(self.facts))
+        return base
 
 
 class Resolver:

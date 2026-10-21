@@ -26,6 +26,9 @@ from ..rules.actioneconomy import ActionEconomy, ActionType
 from ..rules.build import (
     available_powers, build_actor, eligible_forms_for, morph_class_of,
 )
+from ..rules.contributions import (
+    facts_for, modifiers_for, passive_modifiers, passive_proficiencies, save_modifiers,
+)
 from ..rules.effects import EffectContext
 from ..rules.health import hit_dice_average
 from ..rules.morph import reasons_for
@@ -109,12 +112,14 @@ def resolver_for(actor: Actor) -> Resolver:
     class_level = None
     if profile and len(profile.classes) == 1:
         class_level = ClassLevel(int(profile.classes[0].class_level))
+    top = actor.top()
     ctx = RefContext(
         prof_bonus=proficiency_bonus(total),
         total_level=total,
         class_level=class_level,
-        abilities=actor.statblock.abilities,
-        speeds=dict(actor.statblock.speeds),
+        abilities=top.statblock.abilities,
+        speeds=dict(top.statblock.speeds),
+        facts=facts_for(actor, class_level),
     )
     return Resolver(ctx)
 
@@ -146,16 +151,24 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
     profile = actor.profile
     top = actor.top()
     root = actor.root()
-    saves_prof = _proficient_saves(actor)
+    saves_prof = _proficient_saves(actor) | {
+        token.split(".", 1)[1]
+        for token in passive_proficiencies(content, actor)
+        if token.startswith("save.")
+    }
+    # 常驻贡献：被动能力的 modifier（无甲防御、守护灵光）必须每次都算进去
+    mods = passive_modifiers(content, actor)
 
-    ac = resolver.armor_class(top)
+    ac = resolver.armor_class(top, modifiers_for(mods, "ac"))
     saves = {
-        key: resolver.saving_throw(top, key, proficient=key in saves_prof)
+        key: resolver.saving_throw(top, key, proficient=key in saves_prof,
+                                   modifiers=save_modifiers(mods, key))
         for key in ABILITY_KEYS
     }
     # 攻击：默认用最高的力量／敏捷，只看是否熟练（武器数据在 P5）
     attack_ability = "str" if top.statblock.abilities.mod("str") >= top.statblock.abilities.mod("dex") else "dex"
-    attack = resolver.attack_bonus(top, attack_ability, proficient=True)
+    attack = resolver.attack_bonus(top, attack_ability, proficient=True,
+                                   modifiers=modifiers_for(mods, "attack"))
 
     attacks_per_action = 1
     for class_def in _class_defs(actor, content):

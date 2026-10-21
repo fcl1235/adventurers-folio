@@ -1,0 +1,333 @@
+# hand-edited: 部分特性已手写真实机制（生成器不覆盖本文件）
+# 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
+
+id: dnd2024.class.rogue
+name: {zh: 游荡者, en: Rogue}
+hit_die: 8
+primary: [dex]
+saves: [dex, int]
+caster: none
+subclass_level: 3
+skill_choices: 4
+skill_list:
+  - acrobatics
+  - athletics
+  - deception
+  - insight
+  - intimidation
+  - investigation
+  - perception
+  - performance
+  - persuasion
+  - sleight-of-hand
+  - stealth
+
+powers:
+  - id: dnd2024.class.rogue.expertise
+    name: {zh: 专精, en: Expertise}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选 2 项已熟练技能，熟练加值翻倍。
+      en: |-
+        You gain Expertise in two of your skill proficiencies of your choice. Sleight of Hand and Stealth are recommended if you have proficiency in them. At Rogue level 6, you gain Expertise in two more of your skill proficiencies of your choice.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.sneak_attack
+    name: {zh: 偷袭, en: Sneak Attack}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        每回合 1 次：有优势或目标旁边有你的盟友时，额外造成伤害（见职业表）。
+      en: |-
+        You know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack roll if you have Advantage on the roll and the attack uses a Finesse or a Ranged weapon. The extra damage's type is the same as the weapon's type. You don't need Advantage on the attack roll if at least one of your allies is within 5 feet of the target, the ally doesn't have the Incapacitated condition, and you don't have Disadvantage on the attack roll. The extra damage increases as you gain Rogue levels, as shown in the Sneak Attack column of the Rogue Features table.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.thieves_cant
+    name: {zh: 盗贼黑话, en: Thieves' Cant}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        掌握盗贼暗语与暗号。
+      en: |-
+        You picked up various languages in the communities where you plied your roguish talents. You know Thieves' Cant and one other language of your choice, which you choose from the language tables in "Character Creation."
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.weapon_mastery
+    name: {zh: 武器专精, en: Weapon Mastery}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选 2 件熟练武器启用其专精属性。
+      en: |-
+        Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Daggers and Shortbows. Whenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Scimitars and Shortswords.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.cunning_action
+    name: {zh: 灵巧动作, en: Cunning Action}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作执行 疾行 / 撤离 / 躲藏。
+      en: |-
+        Your quick thinking and agility allow you to move and act quickly. On your turn, you can take one of the following actions as a Bonus Action: Dash, Disengage, or Hide.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.subclass
+    name: {zh: 子职, en: Rogue Subclass}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        3 级选择一个子职。
+      en: |-
+        You gain a Rogue subclass of your choice. A subclass is a specialization that grants you features at certain Rogue levels. For the rest of your career, you gain each of your subclass's features that are of your Rogue level or lower.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.steady_aim
+    name: {zh: 稳定瞄准, en: Steady Aim}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作：本回合攻击有优势，但速度归 0（不能移动）。
+      en: |-
+        As a Bonus Action, you give yourself Advantage on your next attack roll on the current turn. You can use this feature only if you haven't moved during this turn, and after you use it, your Speed is 0 until the end of the current turn.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.ability_score_improvement
+    name: {zh: 属性提升 / 专长, en: Ability Score Improvement}
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（上限 20），或换 1 个专长。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Rogue levels 8, 10, 12, and 16.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.cunning_strike
+    name: {zh: 灵巧打击, en: Cunning Strike}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可牺牲 1d6 偷袭骰换取效果：中毒、绊倒、撤离等。
+      en: |-
+        You've developed cunning ways to use your Sneak Attack. When you deal Sneak Attack damage, you can add one of the following Cunning Strike effects. Each effect has a die cost, which is the number of Sneak Attack damage dice you must forgo to add the effect. You remove the die before rolling, and the effect occurs immediately after the attack's damage is dealt. For example, if you add the Poison effect, remove 1d6 from the Sneak Attack's damage before rolling. If a Cunning Strike effect requires a saving throw, the DC equals 8 plus your Dexterity modifier and Proficiency Bonus. Poison (Cost: 1d6). You add a toxin to your strike, forcing the target to make a Constitution saving throw. On a failed save, the target has the Poisoned condition for 1 minute. At the end of each of its turns, the Poisoned target repeats the save, ending the effect on itself on a success. To use this effect, you must have a Poisoner's Kit on your person. Trip (Cost: 1d6). If the target is Large or smaller, it must succeed on a Dexterity saving throw or have the Prone condition. Withdraw (Cost: 1d6). Immediately after the attack, you move up to half your Speed without provoking Opportunity Attacks.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.uncanny_dodge
+    name: {zh: 直觉闪避, en: Uncanny Dodge}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：把一次攻击的伤害减半。
+      en: |-
+        When an attacker that you can see hits you with an attack roll, you can take a Reaction to halve the attack's damage against you (round down).
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.evasion
+    name: {zh: 闪避, en: Evasion}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        敏捷豁免成功不受伤害，失败只受一半。
+      en: |-
+        You can nimbly dodge out of the way of certain dangers. When you're subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw and only half damage if you fail. You can't use this feature if you have the Incapacitated condition.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.reliable_talent
+    name: {zh: 可靠天赋, en: Reliable Talent}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        熟练技能的检定，d20 掷出 9 或以下按 10 计算。
+      en: |-
+        Whenever you make an ability check that uses one of your skill or tool proficiencies, you can treat a d20 roll of 9 or lower as a 10.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.improved_cunning_strike
+    name: {zh: 强化灵巧打击, en: Improved Cunning Strike}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        灵巧打击可同时施加 2 种效果（多付偷袭骰）。
+      en: |-
+        You can use up to two Cunning Strike effects when you deal Sneak Attack damage, paying the die cost for each effect.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.devious_strikes
+    name: {zh: 诡诈打击, en: Devious Strikes}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        灵巧打击新增高阶选项：眩晕(2d6)、遮蔽(3d6)、击昏(6d6)，代价从偷袭骰里扣。
+      en: |-
+        You've practiced new ways to use your Sneak Attack deviously. The following effects are now among your Cunning Strike options. Daze (Cost: 2d6). The target must succeed on a Constitution saving throw, or on its next turn, it can do only one of the following: move or take an action or a Bonus Action. Knock Out (Cost: 6d6). The target must succeed on a Constitution saving throw, or it has the Unconscious condition for 1 minute or until it takes any damage. The Unconscious target repeats the save at the end of each of its turns, ending the effect on itself on a success. Obscure (Cost: 3d6). The target must succeed on a Dexterity saving throw, or it has the Blinded condition until the end of its next turn.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.slippery_mind
+    name: {zh: 滑溜心智, en: Slippery Mind}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得感知与魅力豁免熟练。
+      en: |-
+        Your cunning mind is exceptionally difficult to control. You gain proficiency in Wisdom and Charisma saving throws.
+    effects:
+      - grant_proficiency:
+          save: [wis, cha]
+      - note:
+          zh: |-
+            获得感知与魅力豁免熟练。
+          en: |-
+            You gain proficiency in Wisdom and Charisma saving throws.
+  - id: dnd2024.class.rogue.elusive
+    name: {zh: 飘忽不定, en: Elusive}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        未被失能时，任何攻击对你都没有优势。
+      en: |-
+        You're so evasive that attackers rarely gain the upper hand against you. No attack roll can have Advantage against you unless you have the Incapacitated condition.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.epic_boon
+    name: {zh: 传奇恩惠, en: Epic Boon}
+    level: 19
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 个传奇恩惠专长（19 级）。
+      en: |-
+        You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify. Boon of the Night Spirit is recommended.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.rogue.stroke_of_luck
+    name: {zh: 幸运一击, en: Stroke of Luck}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        检定失败可改为 20，或攻击失手改为命中（1 次/短休）。
+      en: |-
+        You have a marvelous knack for succeeding when you need to. If you fail a D20 Test, you can turn the roll into a 20. Once you use this feature, you can't use it again until you finish a Short or Long Rest.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.

@@ -36,6 +36,8 @@ class Amount:
     flat: int = 0
     plus: Ref | None = None
     times: Ref | None = None
+    # 下限：2024 大量写「最低 1 次」（诗人灵感 = 魅力调整值，最少 1）
+    floor: int | None = None
 
     def __post_init__(self) -> None:
         if self.dice is None and self.flat == 0 and self.plus is None:
@@ -54,6 +56,8 @@ class Amount:
             base += resolve_ref(self.plus, ctx)
         if self.times is not None:
             base *= resolve_ref(self.times, ctx)
+        if self.floor is not None:
+            base = max(base, self.floor)
         return base, result
 
     def evaluate(self, ctx: Mapping[str, Any]) -> int:
@@ -64,6 +68,8 @@ class Amount:
             base += resolve_ref(self.plus, ctx)
         if self.times is not None:
             base *= resolve_ref(self.times, ctx)
+        if self.floor is not None:
+            base = max(base, self.floor)
         return base
 
     @property
@@ -85,6 +91,8 @@ class Amount:
         if self.times is not None:
             value = resolve_ref(self.times, ctx) if ctx is not None else None
             text += "×%s" % (value if value is not None else self.times.path)
+        if self.floor is not None:
+            text = "max(%s, %d)" % (text, self.floor)
         return text
 
     def to_dict(self) -> dict:
@@ -97,6 +105,8 @@ class Amount:
             data["plus"] = self.plus.path
         if self.times is not None:
             data["times"] = self.times.path
+        if self.floor is not None:
+            data["floor"] = self.floor
         return data
 
 
@@ -114,7 +124,8 @@ def parse_amount(data: Any, where: str = "") -> Amount:
     if not isinstance(data, Mapping):
         raise RuleError("%s数量必须是整数、骰式字符串或映射，实际 %r" % (prefix, type(data).__name__))
 
-    unknown = [key for key in data if key not in ("dice", "flat", "value", "plus", "times")]
+    unknown = [key for key in data
+               if key not in ("dice", "flat", "value", "plus", "times", "floor", "min")]
     if unknown:
         raise RuleError("%s数量里有未知字段：%s" % (prefix, ", ".join(sorted(unknown))))
 
@@ -132,11 +143,16 @@ def parse_amount(data: Any, where: str = "") -> Amount:
     if isinstance(flat, bool) or not isinstance(flat, int):
         raise RuleError("%s flat 必须是整数：%r" % (prefix, flat))
 
+    floor = data.get("floor", data.get("min"))
+    if floor is not None and (isinstance(floor, bool) or not isinstance(floor, int)):
+        raise RuleError("%s floor 必须是整数：%r" % (prefix, floor))
+
     return Amount(
         dice=dice,
         flat=flat,
         plus=_parse_ref(data.get("plus"), prefix),
         times=_parse_ref(data.get("times"), prefix),
+        floor=floor,
     )
 
 

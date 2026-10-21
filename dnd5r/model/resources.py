@@ -19,6 +19,7 @@ from ..kernel.text import Text
 class PoolKind(str, Enum):
     CHARGE = "charge"           # 固定次数：狂暴、荒野变形
     POINT = "point"             # 点数池：气、圣疗、术法点
+    SLOT = "slot"               # 单个法术位：1 环 4 个就是 4 次
     SLOT_LEVEL = "slot_level"   # 环级预算：奥术回想
     DICE = "dice"               # 骰池：偷袭骰、灵感骰
 

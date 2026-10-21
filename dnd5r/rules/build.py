@@ -16,6 +16,7 @@ from ..model.actor import Actor, ActorKind, HpPool
 from ..model.inventory import Inventory
 from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
+from ..model.resources import Pool, PoolKind, Refresh
 from ..model.statblock import Abilities, Statblock
 from .health import hit_dice_pool, hit_points_max
 from .morph import eligible_forms
@@ -84,6 +85,17 @@ def build_actor(
         if pool.capacity <= 0:
             continue  # 未解锁的资源不建池，避免界面上出现 0/0
         actor.resources.add(pool)
+    for index_, capacity in enumerate(class_def.slots_at(level), start=1):
+        if capacity <= 0:
+            continue
+        actor.resources.add(Pool(
+            id="dnd2024.slot.%s.%d" % (class_id.split(".")[-1], index_),
+            kind=PoolKind.SLOT,
+            capacity=capacity,
+            label=Text.of("%d 环法术位" % index_, "Level %d Spell Slots" % index_),
+            owner_class=class_id,
+            refresh=class_def.slot_refresh,
+        ))
     actor.resources.add(hit_dice_pool(class_id, class_def.hit_die, level))
     return actor
 

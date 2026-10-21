@@ -1,0 +1,373 @@
+# hand-edited: 部分特性已手写真实机制（生成器不覆盖本文件）
+# 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
+
+id: dnd2024.class.barbarian
+name: {zh: 野蛮人, en: Barbarian}
+hit_die: 12
+primary: [str]
+saves: [str, con]
+caster: none
+subclass_level: 3
+skill_choices: 2
+skill_list:
+  - animal-handling
+  - athletics
+  - intimidation
+  - nature
+  - perception
+  - survival
+
+resources:
+  - id: dnd2024.resource.barbarian.rage
+    kind: charge
+    refresh: long_rest
+    recover_on_short_rest: 1
+    label: {zh: 狂暴, en: Rage}
+    by_level: { 1: 2, 2: 2, 3: 3, 4: 3, 5: 3, 6: 4, 7: 4, 8: 4, 9: 4, 10: 4, 11: 4, 12: 5, 13: 5, 14: 5, 15: 5, 16: 5, 17: 6, 18: 6, 19: 6, 20: 6 }
+
+
+powers:
+  - id: dnd2024.class.barbarian.rage
+    name: {zh: 狂暴, en: Rage}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作进入狂暴（不穿重甲）：钝击/穿刺/挥砍抗性、力量攻击伤害加值、力量检定与豁免优势。次数见「职业资源」。
+      en: |-
+        You can imbue yourself with a primal power called Rage, a force that grants you extraordinary might and resilience. You can enter it as a Bonus Action if you aren't wearing Heavy armor. You can enter your Rage the number of times shown for your Barbarian level in the Rages column of the Barbarian Features table. You regain one expended use when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest. While active, your Rage follows the rules below. Damage Resistance. You have Resistance to Bludgeoning, Piercing, and Slashing damage. Rage Damage. When you make an attack using Strength-with either a weapon or an Unarmed Strike-and deal damage to the target, you gain a bonus to the damage that increases as you gain levels as a Barbarian, as shown in the Rage Damage column of the Barbarian Features table. Strength Advantage. You have Advantage on Strength checks and Strength saving throws. No Concentration or Spells. You can't maintain Concentration, and you can't cast spells. Duration. The Rage lasts until the end of your next turn, and it ends early if you don Heavy armor or have the Incapacitated condition. If your Rage is still active on your next turn, you can extend the Rage for another round by doing one of the following: - Make an attack roll against an enemy. - Force an enemy to make a saving throw. - Take a Bonus Action to extend your Rage. Each time the Rage is extended, it lasts until the end of your next turn. You can maintain a Rage for up to 10 minutes.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.unarmored_defense
+    name: {zh: 无甲防御, en: Unarmored Defense}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        未穿护甲时 AC = 10 + 敏捷调整值 + 体质调整值（可用盾牌）。
+      en: |-
+        While you aren't wearing any armor, your base Armor Class equals 10 plus your Dexterity and Constitution modifiers. You can use a Shield and still gain this benefit.
+    effects:
+      - grant_modifier:
+          target: ac
+          value: ability.con
+          when: { unarmored: true }
+      - note:
+          zh: |-
+            未穿护甲时 AC = 10 + 敏捷调整值 + 体质调整值（可用盾牌）。
+          en: |-
+            While you aren't wearing armor, your AC equals 10 plus your Dex modifier plus your Con modifier. You can use a Shield and still gain this benefit.
+  - id: dnd2024.class.barbarian.weapon_mastery
+    name: {zh: 武器专精, en: Weapon Mastery}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选 2 件熟练武器启用其专精属性（数量随等级提升）。
+      en: |-
+        Your training with weapons allows you to use the mastery properties of two kinds of Simple or Martial Melee weapons of your choice, such as Greataxes and Handaxes. Whenever you finish a Long Rest, you can practice weapon drills and change one of those weapon choices. When you reach certain Barbarian levels, you gain the ability to use the mastery properties of more kinds of weapons, as shown in the Weapon Mastery column of the Barbarian Features table.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.danger_sense
+    name: {zh: 危险感知, en: Danger Sense}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        未失能时，对可见危险（陷阱、法术等）的敏捷豁免有优势。
+      en: |-
+        You gain an uncanny sense of when things aren't as they should be, giving you an edge when you dodge perils. You have Advantage on Dexterity saving throws unless you have the Incapacitated condition.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.reckless_attack
+    name: {zh: 鲁莽攻击, en: Reckless Attack}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        本回合首次力量攻击可选择优势；代价是到你下回合开始前，对你也全部有优势。
+      en: |-
+        You can throw aside all concern for defense to attack with increased ferocity. When you make your first attack roll on your turn, you can decide to attack recklessly. Doing so gives you Advantage on attack rolls using Strength until the start of your next turn, but attack rolls against you have Advantage during that time.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.subclass
+    name: {zh: 子职：道途, en: Barbarian Subclass}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        3 级选择一个道途（子职），获得其 3 级特性。
+      en: |-
+        You gain a Barbarian subclass of your choice. A subclass is a specialization that grants you features at certain Barbarian levels. For the rest of your career, you gain each of your subclass's features that are of your Barbarian level or lower.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.primal_knowledge
+    name: {zh: 原始知识, en: Primal Knowledge}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        额外获得 1 项技能熟练（驯兽/威吓/自然/察觉/生存）；狂暴时可用力量代替该检定的属性。
+      en: |-
+        You gain proficiency in another skill of your choice from the skill list available to Barbarians at level 1. In addition, while your Rage is active, you can channel primal power when you attempt certain tasks; whenever you make an ability check using one of the following skills, you can make it as a Strength check even if it normally uses a different ability: Acrobatics, Intimidation, Perception, Stealth, or Survival. When you use this ability, your Strength represents primal power coursing through you, honing your agility, bearing, and senses.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.ability_score_improvement
+    name: {zh: 属性提升 / 专长, en: Ability Score Improvement}
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（或 +1/+1/+1，上限 20），或换 1 个专长。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Barbarian levels 8, 12, and 16.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.extra_attack
+    name: {zh: 额外攻击, en: Extra Attack}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        执行攻击动作时可攻击 2 次。
+      en: |-
+        You can attack twice instead of once whenever you take the Attack action on your turn.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.fast_movement
+    name: {zh: 快速移动, en: Fast Movement}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        不穿重甲时速度 +10 尺。
+      en: |-
+        Your speed increases by 10 feet while you aren't wearing Heavy armor.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.feral_instinct
+    name: {zh: 野性本能, en: Feral Instinct}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        先攻有优势；若先攻掷出时未狂暴，可立即免费进入狂暴。
+      en: |-
+        Your instincts are so honed that you have Advantage on Initiative rolls.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.instinctive_pounce
+    name: {zh: 本能扑击, en: Instinctive Pounce}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        进入狂暴时，可作为该附赠动作的一部分移动至多半速。
+      en: |-
+        As part of the Bonus Action you take to enter your Rage, you can move up to half your Speed.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.brutal_strike
+    name: {zh: 凶蛮打击, en: Brutal Strike}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可放弃攻击优势，换取 +1d10 伤害并附加击退 15 尺或击倒等效果。
+      en: |-
+        If you use Reckless Attack, you can forgo any Advantage on one Strength-based attack roll of your choice on your turn. The chosen attack roll mustn't have Disadvantage. If the chosen attack roll hits, the target takes an extra 1d10 damage of the same type dealt by the weapon or Unarmed Strike, and you can cause one Brutal Strike effect of your choice. You have the following effect options. Forceful Blow. The target is pushed 15 feet straight away from you. You can then move up to half your Speed straight toward the target without provoking Opportunity Attacks. Hamstring Blow. The target's Speed is reduced by 15 feet until the start of your next turn. A target can be affected by only one Hamstring Blow at a timethe most recent one.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.relentless_rage
+    name: {zh: 不屈狂怒, en: Relentless Rage}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴中降到 0 HP 时，可做 DC 10 体质豁免（每次递增 5），成功则保持 1 HP。
+      en: |-
+        Your Rage can keep you fighting despite grievous wounds. If you drop to 0 Hit Points while your Rage is active and don't die outright, you can make a DC 10 Constitution saving throw. If you succeed, your Hit Points instead change to a number equal to twice your Barbarian level. Each time you use this feature after the first, the DC increases by 5. When you finish a Short or Long Rest, the DC resets to 10.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.improved_brutal_strike_1
+    name: {zh: 强化凶蛮打击, en: Improved Brutal Strike}
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        凶蛮打击可再选一种效果（削弱目标的下次豁免等）。
+      en: |-
+        You have honed new ways to attack furiously. The following effects are now among your Brutal Strike options. Staggering Blow. The target has Disadvantage on the next saving throw it makes, and it can't make Opportunity Attacks until the start of your next turn. Sundering Blow. Before the start of your next turn, the next attack roll made by another creature against the target gains a +5 bonus to the roll. An attack roll can gain only one Sundering Blow bonus.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.persistent_rage
+    name: {zh: 持久狂暴, en: Persistent Rage}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        狂暴不再需要每回合维持；长休时直接恢复全部狂暴次数。
+      en: |-
+        When you roll Initiative, you can regain all expended uses of Rage. After you regain uses of Rage in this way, you can't do so again until you finish a Long Rest. In addition, your Rage is so fierce that it now lasts for 10 minutes without you needing to do anything to extend it from round to round. Your Rage ends early if you have the Unconscious condition (not just the Incapacitated condition) or don Heavy armor.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.improved_brutal_strike_2
+    name: {zh: 强化凶蛮打击（17 级）, en: Improved Brutal Strike}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        凶蛮打击的额外伤害提升到 2d10。
+      en: |-
+        The extra damage of your Brutal Strike increases to 2d10. In addition, you can use two different Brutal Strike effects whenever you use your Brutal Strike feature.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.indomitable_might
+    name: {zh: 不屈之力, en: Indomitable Might}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        力量检定可把 d20 结果视为你的力量值（不掷骰）。
+      en: |-
+        If your total for a Strength check or Strength saving throw is less than your Strength score, you can use that score in place of the total.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.epic_boon
+    name: {zh: 传奇恩惠, en: Epic Boon}
+    level: 19
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 个传奇恩惠专长（19 级）。
+      en: |-
+        You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify. Boon of Irresistible Offense is recommended.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.barbarian.primal_champion
+    name: {zh: 原始冠军, en: Primal Champion}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        力量与体质各 +4，上限提升到 25。
+      en: |-
+        You embody primal power. Your Strength and Constitution scores increase by 4, to a maximum of 25.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.

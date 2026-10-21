@@ -1,0 +1,415 @@
+# hand-edited: 部分特性已手写真实机制（生成器不覆盖本文件）
+# 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
+
+id: dnd2024.class.paladin
+name: {zh: 圣武士, en: Paladin}
+hit_die: 10
+primary: [str, cha]
+saves: [wis, cha]
+caster: half
+subclass_level: 3
+skill_choices: 2
+skill_list:
+  - athletics
+  - insight
+  - intimidation
+  - medicine
+  - persuasion
+  - religion
+
+resources:
+  - id: dnd2024.resource.paladin.lay_on_hands
+    kind: point
+    refresh: long_rest
+    label: {zh: 圣疗, en: Lay On Hands}
+    capacity: { flat: 5, times: class_level }
+
+  - id: dnd2024.resource.paladin.channel
+    kind: charge
+    refresh: long_rest
+    recover_on_short_rest: 1
+    label: {zh: 引导神力, en: Channel Divinity}
+    by_level: { 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2, 11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3, 19: 3, 20: 3 }
+
+
+# 法术位表：等级 → 1..9 环容量（内核只查表，不写公式）
+slots:
+  1: [2, 0, 0, 0, 0, 0, 0, 0, 0]
+  2: [2, 0, 0, 0, 0, 0, 0, 0, 0]
+  3: [3, 0, 0, 0, 0, 0, 0, 0, 0]
+  4: [3, 0, 0, 0, 0, 0, 0, 0, 0]
+  5: [4, 2, 0, 0, 0, 0, 0, 0, 0]
+  6: [4, 2, 0, 0, 0, 0, 0, 0, 0]
+  7: [4, 3, 0, 0, 0, 0, 0, 0, 0]
+  8: [4, 3, 0, 0, 0, 0, 0, 0, 0]
+  9: [4, 3, 2, 0, 0, 0, 0, 0, 0]
+  10: [4, 3, 2, 0, 0, 0, 0, 0, 0]
+  11: [4, 3, 3, 0, 0, 0, 0, 0, 0]
+  12: [4, 3, 3, 0, 0, 0, 0, 0, 0]
+  13: [4, 3, 3, 1, 0, 0, 0, 0, 0]
+  14: [4, 3, 3, 1, 0, 0, 0, 0, 0]
+  15: [4, 3, 3, 2, 0, 0, 0, 0, 0]
+  16: [4, 3, 3, 2, 0, 0, 0, 0, 0]
+  17: [4, 3, 3, 3, 1, 0, 0, 0, 0]
+  18: [4, 3, 3, 3, 1, 0, 0, 0, 0]
+  19: [4, 3, 3, 3, 2, 0, 0, 0, 0]
+  20: [4, 3, 3, 3, 2, 0, 0, 0, 0]
+
+cantrips:
+  1: 0
+  2: 0
+  3: 0
+  4: 0
+  5: 0
+  6: 0
+  7: 0
+  8: 0
+  9: 0
+  10: 0
+  11: 0
+  12: 0
+  13: 0
+  14: 0
+  15: 0
+  16: 0
+  17: 0
+  18: 0
+  19: 0
+  20: 0
+
+prepared:
+  1: 2
+  2: 3
+  3: 4
+  4: 5
+  5: 6
+  6: 6
+  7: 7
+  8: 7
+  9: 9
+  10: 9
+  11: 10
+  12: 10
+  13: 11
+  14: 11
+  15: 12
+  16: 12
+  17: 14
+  18: 14
+  19: 15
+  20: 15
+
+powers:
+  - id: dnd2024.class.paladin.lay_on_hands
+    name: {zh: 圣疗, en: Lay On Hands}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        治疗池 = 5 × 圣武士等级（长休回满）；附赠动作治疗，或花 5 点解除中毒。
+      en: |-
+        Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you finish a Long Rest. With that pool, you can restore a total number of Hit Points equal to five times your Paladin level. As a Bonus Action, you can touch a creature (which could be yourself) and draw power from the pool of healing to restore a number of Hit Points to that creature, up to the maximum amount remaining in the pool. You can also expend 5 Hit Points from the pool of healing power to remove the Poisoned condition from the creature; those points don't also restore Hit Points to the creature.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.spellcasting
+    name: {zh: 施法, en: Spellcasting}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以魅力施法（1 级起即有法术位）。
+      en: |-
+        You have learned to cast spells through prayer and meditation. See "Spells" for the rules on spellcasting. The information below details how you use those rules with Paladin spells, which appear in the Paladin spell list later in the class's description. Spell Slots. The Paladin Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest. Prepared Spells of Level 1+. You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose two level 1 Paladin spells. Heroism and Searing Smite are recommended. The number of spells on your list increases as you gain Paladin levels, as shown in the Prepared Spells column of the Paladin Features table. Whenever that number increases, choose additional Paladin spells until the number of spells on your list matches the number in the Paladin Features table. The chosen spells must be of a level for which you have spell slots. For example, if you're a level 5 Paladin, your list of prepared spells can include six Paladin spells of level 1 or 2 in any combination. If another Paladin feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Paladin spells for you. Changing Your Prepared Spells. Whenever you finish a Long Rest, you can replace one spell on your list with another Paladin spell for which you have spell slots. Spellcasting Ability. Charisma is your spellcasting ability for your Paladin spells. Spellcasting Focus. You can use a Holy Symbol as a Spellcasting Focus for your Paladin spells.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.weapon_mastery
+    name: {zh: 武器专精, en: Weapon Mastery}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选 2 件熟练武器启用其专精属性。
+      en: |-
+        Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longswords and Javelins. Whenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Halberds and Flails.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.fighting_style
+    name: {zh: 战斗风格, en: Fighting Style}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        2 级：从战斗风格专长中选 1 个。
+      en: |-
+        You gain a Fighting Style feat of your choice (see "Feats" for feats). Instead of choosing one of those feats, you can choose the option below. Blessed Warrior. You learn two Cleric cantrips of your choice (see the Cleric class's section for a list of Cleric spells). Guidance and Sacred Flame are recommended. The chosen cantrips count as Paladin spells for you, and Charisma is your spellcasting ability for them. Whenever you gain a Paladin level, you can replace one of these cantrips with another Cleric cantrip.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.paladins_smite
+    name: {zh: 圣武士斩击, en: Paladin's Smite}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        命中后可消耗 1 个法术位追加 2d8 光耀伤害（每回合 1 次）。
+      en: |-
+        You always have the Divine Smite spell prepared. In addition, you can cast it without expending a spell slot, but you must finish a Long Rest before you can cast it in this way again.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.channel_divinity
+    name: {zh: 引导神力, en: Channel Divinity}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        神圣感知与子职效果；3 级 2 次、11 级 3 次，短休恢复 1 次。
+      en: |-
+        You can channel divine energy directly from the Outer Planes, using it to fuel magical effects. You start with one such effect: Divine Sense, which is described below. Other Paladin features give additional Channel Divinity effect options. Each time you use this class's Channel Divinity, you choose which effect from this class to create. You can use this class's Channel Divinity twice. You regain one of its expended uses when you finish a Short Rest, and you regain all expended uses when you finish a Long Rest. You gain an additional use when you reach Paladin level 11. If a Channel Divinity effect requires a saving throw, the DC equals the spell save DC from this class's Spellcasting feature. Divine Sense. As a Bonus Action, you can open your awareness to detect Celestials, Fiends, and Undead. For the next 10 minutes or until you have the Incapacitated condition, you know the location of any creature of those types within 60 feet of yourself, and you know its creature type. Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the Hallow spell.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.subclass
+    name: {zh: 子职：誓约, en: Paladin Subclass}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        3 级选择一个誓约（子职）。
+      en: |-
+        You gain a Paladin subclass of your choice. A subclass is a specialization that grants you features at certain Paladin levels. For the rest of your career, you gain each of your subclass's features that are of your Paladin level or lower.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.ability_score_improvement
+    name: {zh: 属性提升 / 专长, en: Ability Score Improvement}
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（上限 20），或换 1 个专长。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Paladin levels 8, 12, and 16.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.extra_attack
+    name: {zh: 额外攻击, en: Extra Attack}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        攻击动作可攻击 2 次。
+      en: |-
+        You can attack twice instead of once whenever you take the Attack action on your turn.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.faithful_steed
+    name: {zh: 忠诚坐骑, en: Faithful Steed}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可免费施放 Find Steed（1 次/长休，无需材料）。
+      en: |-
+        You can call on the aid of an otherworldly steed. You always have the Find Steed spell prepared. You can also cast the spell once without expending a spell slot, and you regain the ability to do so when you finish a Long Rest.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.aura_of_protection
+    name: {zh: 守护灵光, en: Aura of Protection}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        10 尺灵光内，你与友军的豁免 + 魅力调整值。
+      en: |-
+        You radiate a protective, unseeable aura in a 10-foot Emanation that originates from you. The aura is inactive while you have the Incapacitated condition. You and your allies in the aura gain a bonus to saving throws equal to your Charisma modifier (minimum bonus of +1). If another Paladin is present, a creature can benefit from only one Aura of Protection at a time; the creature chooses which aura while in them.
+    effects:
+      - grant_modifier:
+          target: save.str
+          value: { plus: ability.cha, floor: 1 }
+          scope: aura
+      - grant_modifier:
+          target: save.dex
+          value: { plus: ability.cha, floor: 1 }
+          scope: aura
+      - grant_modifier:
+          target: save.con
+          value: { plus: ability.cha, floor: 1 }
+          scope: aura
+      - grant_modifier:
+          target: save.int
+          value: { plus: ability.cha, floor: 1 }
+          scope: aura
+      - grant_modifier:
+          target: save.wis
+          value: { plus: ability.cha, floor: 1 }
+          scope: aura
+      - grant_modifier:
+          target: save.cha
+          value: { plus: ability.cha, floor: 1 }
+          scope: aura
+      - note:
+          zh: |-
+            你和 10 尺内友军的豁免获得等于你魅力调整值的加值（最低 +1）。18 级扩到 30 尺。
+          en: |-
+            You and friendly creatures within 10 feet gain a bonus to saving throws equal to your Charisma modifier (minimum +1). At level 18 the range becomes 30 feet.
+  - id: dnd2024.class.paladin.abjure_foes
+    name: {zh: 斥退敌人, en: Abjure Foes}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        引导神力：30 尺内敌人感知豁免，失败则恐慌 1 分钟。
+      en: |-
+        As a Magic action, you can expend one use of this class's Channel Divinity to overwhelm foes with awe. As you present your Holy Symbol or weapon, you can target a number of creatures equal to your Charisma modifier (minimum of one creature) that you can see within 60 feet of yourself. Each target must succeed on a Wisdom saving throw or have the Frightened condition for 1 minute or until it takes any damage. While Frightened in this way, a target can do only one of the following on its turns: move, take an action, or take a Bonus Action.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.aura_of_courage
+    name: {zh: 勇气灵光, en: Aura of Courage}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        灵光内友军免疫恐慌。
+      en: |-
+        You and your allies have Immunity to the Frightened condition while in your Aura of Protection. If a Frightened ally enters the aura, that condition has no effect on that ally while there.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.radiant_strikes
+    name: {zh: 光耀打击, en: Radiant Strikes}
+    level: 11
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        武器或徒手命中额外 +1d8 光耀伤害。
+      en: |-
+        Your strikes now carry supernatural power. When you hit a target with an attack roll using a Melee weapon or an Unarmed Strike, the target takes an extra 1d8 Radiant damage.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.restoring_touch
+    name: {zh: 恢复之触, en: Restoring Touch}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        圣疗可额外解除中毒、疾病、麻痹、目盲、失聪等。
+      en: |-
+        When you use Lay On Hands on a creature, you can also remove one or more of the following conditions from the creature: Blinded, Charmed, Deafened, Frightened, Paralyzed, or Stunned. You must expend 5 Hit Points from the healing pool of Lay On Hands for each of these conditions you remove; those points don't also restore Hit Points to the creature.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.aura_expansion
+    name: {zh: 灵光扩张, en: Aura Expansion}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        守护灵光 / 勇气灵光范围扩大到 30 尺。
+      en: |-
+        Your Aura of Protection is now a 30-foot Emanation.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.paladin.epic_boon
+    name: {zh: 传奇恩惠, en: Epic Boon}
+    level: 19
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 个传奇恩惠专长（19 级）。
+      en: |-
+        You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify. Boon of Truesight is recommended.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.

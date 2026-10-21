@@ -1,0 +1,407 @@
+# hand-edited: 部分特性已手写真实机制（生成器不覆盖本文件）
+# 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
+
+id: dnd2024.class.monk
+name: {zh: 武僧, en: Monk}
+hit_die: 8
+primary: [dex, wis]
+saves: [str, dex]
+caster: none
+subclass_level: 3
+skill_choices: 2
+skill_list:
+  - acrobatics
+  - athletics
+  - history
+  - insight
+  - religion
+  - stealth
+
+resources:
+  - id: dnd2024.resource.monk.focus
+    kind: point
+    refresh: short_rest
+    label: {zh: 气, en: Focus Points}
+    capacity: { plus: class_level }
+
+
+powers:
+  - id: dnd2024.class.monk.martial_arts
+    name: {zh: 武艺, en: Martial Arts}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        徒手与武僧武器可用敏捷代替力量，伤害骰随等级提升；攻击动作后可附赠动作再打 1 次。
+      en: |-
+        Your practice of martial arts gives you mastery of combat styles that use your Unarmed Strike and Monk weapons, which are the following: • Simple Melee weapons • Martial Melee weapons that have the Light property You gain the following benefits while you are unarmed or wielding only Monk weapons and you aren't wearing armor or wielding a Shield. Bonus Unarmed Strike. You can make an Unarmed Strike as a Bonus Action. Martial Arts Die. You can roll 1d6 in place of the normal damage of your Unarmed Strike or Monk weapons. This die changes as you gain Monk levels, as shown in the Martial Arts column of the Monk Features table. Dexterous Attacks. You can use your Dexterity modifier instead of your Strength modifier for the attack and damage rolls of your Unarmed Strikes and Monk weapons. In addition, when you use the Grapple or Shove option of your Unarmed Strike, you can use your Dexterity modifier instead of your Strength modifier to determine the save DC.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.unarmored_defense
+    name: {zh: 无甲防御, en: Unarmored Defense}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        无甲且无盾时 AC = 10 + 敏捷 + 感知调整值。
+      en: |-
+        While you aren't wearing armor or wielding a Shield, your base Armor Class equals 10 plus your Dexterity and Wisdom modifiers.
+    effects:
+      - grant_modifier:
+          target: ac
+          value: ability.wis
+          when: { unarmored: true }
+      - note:
+          zh: |-
+            未穿护甲且未持盾时 AC = 10 + 敏捷调整值 + 感知调整值。
+          en: |-
+            While you aren't wearing armor or wielding a Shield, your AC equals 10 plus your Dex modifier plus your Wis modifier.
+  - id: dnd2024.class.monk.monks_focus
+    name: {zh: 气, en: Monk's Focus}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        气点数量 = 武僧等级；可用于 疾风连击 /  Patient Defense / Step of the Wind。短休或长休全部恢复。
+      en: |-
+        Your focus and martial training allow you to harness a well of extraordinary energy within yourself. This energy is represented by Focus Points. Your Monk level determines the number of points you have, as shown in the Focus Points column of the Monk Features table. You can expend these points to enhance or fuel certain Monk features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind, each of which is detailed below. When you expend a Focus Point, it is unavailable until you finish a Short or Long Rest, at the end of which you regain all your expended points. Some features that use Focus Points require your target to make a saving throw. The save DC equals 8 plus your Wisdom modifier and Proficiency Bonus. Flurry of Blows. You can expend 1 Focus Point to make two Unarmed Strikes as a Bonus Action. Patient Defense. You can take the Disengage action as a Bonus Action. Alternatively, you can expend 1 Focus Point to take both the Disengage and the Dodge actions as a Bonus Action. Step of the Wind. You can take the Dash action as a Bonus Action. Alternatively, you can expend 1 Focus Point to take both the Disengage and Dash actions as a Bonus Action, and your jump distance is doubled for the turn.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.unarmored_movement
+    name: {zh: 无甲移动, en: Unarmored Movement}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        无甲且无盾时速度提升（数值见职业表，10 级起可垂直移动）。
+      en: |-
+        Your speed increases by 10 feet while you aren't wearing armor or wielding a Shield. This bonus increases when you reach certain Monk levels, as shown on the Monk Features table.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.uncanny_metabolism
+    name: {zh: 奇异代谢, en: Uncanny Metabolism}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        掷先攻时回满气点并回复 1 个生命骰（1 次/长休）。
+      en: |-
+        When you roll Initiative, you can regain all expended Focus Points. When you do so, roll your Martial Arts die, and regain a number of Hit Points equal to your Monk level plus the number rolled. Once you use this feature, you can't use it again until you finish a Long Rest.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.subclass
+    name: {zh: 子职：宗派, en: Monk Subclass}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        3 级选择一个宗派（子职）。
+      en: |-
+        You gain a Monk subclass of your choice. A subclass is a specialization that grants you features at certain Monk levels. For the rest of your career, you gain each of your subclass's features that are of your Monk level or lower.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.deflect_attacks
+    name: {zh: 拨挡攻击, en: Deflect Attacks}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：减免 1d10+敏捷+等级 的钝/穿/砍伤害；减至 0 可花 1 气点反掷。
+      en: |-
+        When an attack roll hits you and its damage includes Bludgeoning, Piercing, or Slashing damage, you can take a Reaction to reduce the attack's total damage against you. The reduction equals 1d10 plus your Dexterity modifier and Monk level. If you reduce the damage to 0, you can expend 1 Focus Point to redirect some of the attack's force. If you do so, choose a creature you can see within 5 feet of yourself if the attack was a melee attack or a creature you can see within 60 feet of yourself that isn't behind Total Cover if the attack was a ranged attack. That creature must succeed on a Dexterity saving throw or take damage equal to two rolls of your Martial Arts die plus your Dexterity modifier. The damage is the same type dealt by the attack.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.ability_score_improvement
+    name: {zh: 属性提升 / 专长, en: Ability Score Improvement}
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（上限 20），或换 1 个专长。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Monk levels 8, 12, and 16.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.slow_fall
+    name: {zh: 轻身坠, en: Slow Fall}
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        反应：减少 5 × 武僧等级 的坠落伤害。
+      en: |-
+        You can take a Reaction when you fall to reduce any damage you take from the fall by an amount equal to five times your Monk level.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.extra_attack
+    name: {zh: 额外攻击, en: Extra Attack}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        攻击动作可攻击 2 次。
+      en: |-
+        You can attack twice instead of once whenever you take the Attack action on your turn.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.stunning_strike
+    name: {zh: 震慑打击, en: Stunning Strike}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        命中后花 1 气点：目标体质豁免，失败则被震慑到你的下回合。
+      en: |-
+        Once per turn when you hit a creature with a Monk weapon or an Unarmed Strike, you can expend 1 Focus Point to attempt a stunning strike. The target must make a Constitution saving throw. On a failed save, the target has the Stunned condition until the start of your next turn. On a successful save, the target's Speed is halved until the start of your next turn, and the next attack roll made against the target before then has Advantage.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.empowered_strikes
+    name: {zh: 强化打击, en: Empowered Strikes}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        徒手打击可造成力场伤害，无视对钝击的抵抗。
+      en: |-
+        Whenever you deal damage with your Unarmed Strike, it can deal your choice of Force damage or its normal damage type.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.evasion
+    name: {zh: 闪避, en: Evasion}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        敏捷豁免成功则不受伤害，失败只受一半。
+      en: |-
+        When you're subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw and only half damage if you fail. You don't benefit from this feature if you have the Incapacitated condition.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.acrobatic_movement
+    name: {zh: 杂技移动, en: Acrobatic Movement}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        战斗中可在垂直面或液面上移动而不坠落。
+      en: |-
+        While you aren't wearing armor or wielding a Shield, you gain the ability to move along vertical surfaces and across liquids on your turn without falling during the movement.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.heightened_focus
+    name: {zh: 专注强化, en: Heightened Focus}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        疾风连击 3 次攻击、闪避附带移动、疾行可带一名同伴。
+      en: |-
+        Your Flurry of Blows, Patient Defense, and Step of the Wind gain the following benefits. Flurry of Blows. You can expend 1 Focus Point to use Flurry of Blows and make three Unarmed Strikes with it instead of two. Patient Defense. When you expend a Focus Point to use Patient Defense, you gain a number of Temporary Hit Points equal to two rolls of your Martial Arts die. Step of the Wind. When you expend a Focus Point to use Step of the Wind, you can choose a willing creature within 5 feet of yourself that is Large or smaller. You move the creature with you until the end of your turn. The creature's movement doesn't provoke Opportunity Attacks.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.self_restoration
+    name: {zh: 自我恢复, en: Self-Restoration}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        每回合结束自动解除 1 项：魅惑、恐慌、中毒。
+      en: |-
+        Through sheer force of will, you can remove one of the following conditions from yourself at the end of each of your turns: Charmed, Frightened, or Poisoned. In addition, forgoing food and drink doesn't give you levels of Exhaustion.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.deflect_energy
+    name: {zh: 拨挡能量, en: Deflect Energy}
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        拨挡攻击可用于任意伤害类型（含火焰、力场）。
+      en: |-
+        You can now use your Deflect Attacks feature against attacks that deal any damage type, not just Bludgeoning, Piercing, or Slashing.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.disciplined_survivor
+    name: {zh: 自律生还者, en: Disciplined Survivor}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得全部豁免的熟练；豁免失败时可花 1 气点重掷（必须采用新结果）。
+      en: |-
+        Your physical and mental discipline grant you proficiency in all saving throws. Additionally, whenever you make a saving throw and fail, you can expend 1 Focus Point to reroll it, and you must use the new roll.
+    effects:
+      - grant_proficiency:
+          save: [str, dex, con, int, wis, cha]
+      - note:
+          zh: |-
+            所有豁免获得熟练；此外重掷豁免失败时可花费 1 点专注重掷。
+          en: |-
+            You gain proficiency in all saving throws. Additionally, whenever you fail a saving throw, you can spend 1 Focus Point to reroll it.
+  - id: dnd2024.class.monk.perfect_focus
+    name: {zh: 完美专注, en: Perfect Focus}
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        掷先攻时若气点为 0，立刻恢复 4 点。
+      en: |-
+        When you roll Initiative and don't use Uncanny Metabolism, you regain expended Focus Points until you have 4 if you have 3 or fewer.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.superior_defense
+    name: {zh: 卓越防御, en: Superior Defense}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作花 3 气点：1 分钟内对所有伤害有抗性。
+      en: |-
+        At the start of your turn, you can expend 3 Focus Points to bolster yourself against harm for 1 minute or until you have the Incapacitated condition. During that time, you have Resistance to all damage except Force damage.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.epic_boon
+    name: {zh: 传奇恩惠, en: Epic Boon}
+    level: 19
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 个传奇恩惠专长（19 级）。
+      en: |-
+        You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify. Boon of Irresistible Offense is recommended.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.monk.body_and_mind
+    name: {zh: 身心合一, en: Body and Mind}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        敏捷与感知各 +4，上限提升到 25。
+      en: |-
+        You have developed your body and mind to new heights. Your Dexterity and Wisdom scores increase by 4, to a maximum of 25.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.

@@ -1,0 +1,265 @@
+# 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
+
+id: dnd2024.class.sorcerer
+name: {zh: 术士, en: Sorcerer}
+hit_die: 6
+primary: [cha]
+saves: [con, cha]
+caster: full
+subclass_level: 3
+skill_choices: 2
+skill_list:
+  - arcana
+  - deception
+  - insight
+  - intimidation
+  - persuasion
+  - religion
+
+resources:
+  - id: dnd2024.resource.sorcerer.sorcery
+    kind: point
+    refresh: long_rest
+    label: {zh: 术法点, en: Sorcery Points}
+    capacity: { plus: class_level }
+
+
+# 法术位表：等级 → 1..9 环容量（内核只查表，不写公式）
+slots:
+  1: [2, 0, 0, 0, 0, 0, 0, 0, 0]
+  2: [3, 0, 0, 0, 0, 0, 0, 0, 0]
+  3: [4, 2, 0, 0, 0, 0, 0, 0, 0]
+  4: [4, 3, 0, 0, 0, 0, 0, 0, 0]
+  5: [4, 3, 2, 0, 0, 0, 0, 0, 0]
+  6: [4, 3, 3, 0, 0, 0, 0, 0, 0]
+  7: [4, 3, 3, 1, 0, 0, 0, 0, 0]
+  8: [4, 3, 3, 2, 0, 0, 0, 0, 0]
+  9: [4, 3, 3, 3, 1, 0, 0, 0, 0]
+  10: [4, 3, 3, 3, 2, 0, 0, 0, 0]
+  11: [4, 3, 3, 3, 2, 1, 0, 0, 0]
+  12: [4, 3, 3, 3, 2, 1, 0, 0, 0]
+  13: [4, 3, 3, 3, 2, 1, 1, 0, 0]
+  14: [4, 3, 3, 3, 2, 1, 1, 0, 0]
+  15: [4, 3, 3, 3, 2, 1, 1, 1, 0]
+  16: [4, 3, 3, 3, 2, 1, 1, 1, 0]
+  17: [4, 3, 3, 3, 2, 1, 1, 1, 1]
+  18: [4, 3, 3, 3, 3, 1, 1, 1, 1]
+  19: [4, 3, 3, 3, 3, 2, 1, 1, 1]
+  20: [4, 3, 3, 3, 3, 2, 2, 1, 1]
+
+cantrips:
+  1: 4
+  2: 4
+  3: 4
+  4: 5
+  5: 5
+  6: 5
+  7: 5
+  8: 5
+  9: 5
+  10: 6
+  11: 6
+  12: 6
+  13: 6
+  14: 6
+  15: 6
+  16: 6
+  17: 6
+  18: 6
+  19: 6
+  20: 6
+
+prepared:
+  1: 2
+  2: 4
+  3: 6
+  4: 7
+  5: 9
+  6: 10
+  7: 11
+  8: 12
+  9: 14
+  10: 15
+  11: 16
+  12: 16
+  13: 17
+  14: 17
+  15: 18
+  16: 18
+  17: 19
+  18: 20
+  19: 21
+  20: 22
+
+powers:
+  - id: dnd2024.class.sorcerer.innate_sorcery
+    name: {zh: 先天魔法, en: Innate Sorcery}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作，1 分钟内术士法术豁免 DC +1、法术攻击掷骰有优势（2 次/长休，全部次数随长休恢复）。
+      en: |-
+        An event in your past left an indelible mark on you, infusing you with simmering magic. As a Bonus Action, you can unleash that magic for 1 minute, during which you gain the following benefits: - The spell save DC of your Sorcerer spells increases by 1. - You have Advantage on the attack rolls of Sorcerer spells you cast. You can use this feature twice, and you regain all expended uses of it when you finish a Long Rest.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.spellcasting
+    name: {zh: 施法, en: Spellcasting}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以魅力施法，已知法术。
+      en: |-
+        Drawing from your innate magic, you can cast spells. See "Spells" for the rules on spellcasting. The information below details how you use those rules with Sorcerer spells, which appear in the Sorcerer spell list later in the class’s description. Cantrips. You know four Sorcerer cantrips of your choice. Light, Prestidigitation, Shocking Grasp, and Sorcerous Burst are recommended. Whenever you gain a Sorcerer level, you can replace one of your cantrips from this feature with another Sorcerer cantrip of your choice. When you reach Sorcerer levels 4 and 10, you learn another Sorcerer cantrip of your choice, as shown in the Cantrips column of the Sorcerer Features table. Spell Slots. The Sorcerer Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest. Prepared Spells of Level 1+. You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose two level 1 Sorcerer spells. Burning Hands and Detect Magic are recommended. The number of spells on your list increases as you gain Sorcerer levels, as shown in the Prepared Spells column of the Sorcerer Features table. Whenever that number increases, choose additional Sorcerer spells until the number of spells on your list matches the number in the Sorcerer Features table. The chosen spells must be of a level for which you have spell slots. For example, if you’re a level 3 Sorcerer, your list of prepared spells can include six Sorcerer spells of level 1 or 2 in any combination. If another Sorcerer feature gives you spells that you always have prepared, those spells don’t count against the number of spells you can prepare with this feature, but those spells otherwise count as Sorcerer spells for you. Changing Your Prepared Spells. Whenever you gain a Sorcerer level, you can replace one spell on your list with another Sorcerer spell for which you have spell slots. Spellcasting Ability. Charisma is your spellcasting ability for your Sorcerer spells. Spellcasting Focus. You can use an Arcane Focus as a Spellcasting Focus for your Sorcerer spells.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.font_of_magic
+    name: {zh: 魔法源泉, en: Font of Magic}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        术法点数量 = 术士等级；可在法术位与术法点之间互换。
+      en: |-
+        You can tap into the wellspring of magic within yourself. This wellspring is represented by Sorcery Points, which allow you to create a variety of magical effects. You have 2 Sorcery Points, and you gain more as you reach higher levels, as shown in the Sorcery Points column of the Sorcerer Features table. You can’t have more Sorcery Points than the number shown in the table for your level. You regain all expended Sorcery Points when you finish a Long Rest. You can use your Sorcery Points to fuel the options below, along with other features, such as Metamagic, that use those points. Converting Spell Slots to Sorcery Points. You can expend a spell slot to gain a number of Sorcery Points equal to the slot’s level (no action required). Creating Spell Slots. As a Bonus Action, you can transform unexpended Sorcery Points into one spell slot. The Creating Spell Slots table shows the cost of creating a spell slot of a given level, and it lists the minimum Sorcerer level you must be to create a slot. You can create a spell slot no higher than level 5. Any spell slot you create with this feature vanishes when you finish a Long Rest. Creating Spell Slots Spell Slot Level | Sorcery Point Cost | Min. Sorcerer Level 1 | 2 | 2 2 | 3 | 3 3 | 5 | 5 4 | 6 | 7 5 | 7 | 9
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.metamagic
+    name: {zh: 超魔法, en: Metamagic}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        2 级选 2 个超魔法选项（法术强化、孪生、瞬发等），10 级与 17 级各再 +2；使用需付术法点，每个法术只能用 1 个。
+      en: |-
+        Because your magic flows from within, you can alter your spells to suit your needs; you gain two Metamagic options of your choice from "Metamagic Options" later in this class’s description. You use the chosen options to temporarily modify spells you cast. To use an option, you must spend the number of Sorcery Points that it costs. You can use only one Metamagic option on a spell when you cast it unless otherwise noted in one of those options. Whenever you gain a Sorcerer level, you can replace one of your Metamagic options with one you don’t know. You gain two more options at Sorcerer level 10 and two more at Sorcerer level 17.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.subclass
+    name: {zh: 子职：血脉, en: Sorcerer Subclass}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        3 级选择一个血脉（子职）。
+      en: |-
+        You gain a Sorcerer subclass of your choice. The Draconic Sorcery subclass is detailed after this class’s description. A subclass is a specialization that grants you features at certain Sorcerer levels. For the rest of your career, you gain each of your subclass’s features that are of your Sorcerer level or lower.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.ability_score_improvement
+    name: {zh: 属性提升 / 专长, en: Ability Score Improvement}
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（上限 20），或换 1 个专长。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Sorcerer levels 8, 12, and 16.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.sorcerous_restoration
+    name: {zh: 魔法恢复, en: Sorcerous Restoration}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        短休时恢复不超过「术士等级一半(向下取整)」点术法点，1 次/长休。
+      en: |-
+        When you finish a Short Rest, you can regain expended Sorcery Points, but no more than a number equal to half your Sorcerer level (round down). Once you use this feature, you can’t do so again until you finish a Long Rest.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.sorcery_incarnate
+    name: {zh: 魔法化身, en: Sorcery Incarnate}
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        先天魔法次数用完时，可花 2 点术法点激活；先天魔法期间每个法术可同时应用 2 个超魔法。
+      en: |-
+        If you have no uses of Innate Sorcery left, you can use it if you spend 2 Sorcery Points when you take the Bonus Action to activate it. In addition, while your Innate Sorcery feature is active, you can use up to two of your Metamagic options on each spell you cast.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.epic_boon
+    name: {zh: 传奇恩惠, en: Epic Boon}
+    level: 19
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 个传奇恩惠专长（19 级）。
+      en: |-
+        You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify. Boon of Dimensional Travel is recommended.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.arcane_apotheosis
+    name: {zh: 奥术神化, en: Arcane Apotheosis}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        先天魔法期间，每回合可免费使用 1 个超魔法（不消耗术法点）。
+      en: |-
+        While your Innate Sorcery feature is active, you can use one Metamagic option on each of your turns without spending Sorcery Points on it.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.

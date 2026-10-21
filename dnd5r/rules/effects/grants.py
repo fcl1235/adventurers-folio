@@ -33,6 +33,11 @@ def _modifier(data: Any, source: str, where: str) -> Modifier:
         from ..modifiers import Ref  # 延迟导入避免环
 
         value: Any = Ref(raw_value)
+    elif isinstance(raw_value, Mapping):
+        # {plus: ability.cha, floor: 1} ——「魅力调整值，最低 +1」靠这个表达
+        from ..amount import parse_amount
+
+        value = parse_amount(raw_value, where="%s modifier.value" % where)
     elif isinstance(raw_value, bool):
         raise PluginError("%s modifier.value 不能是布尔值" % where)
     else:

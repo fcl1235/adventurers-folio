@@ -1,0 +1,386 @@
+# 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
+# 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
+
+id: dnd2024.class.ranger
+name: {zh: 游侠, en: Ranger}
+hit_die: 10
+primary: [dex, wis]
+saves: [str, dex]
+caster: half
+subclass_level: 3
+skill_choices: 3
+skill_list:
+  - animal-handling
+  - athletics
+  - insight
+  - investigation
+  - nature
+  - perception
+  - stealth
+  - survival
+
+resources:
+  - id: dnd2024.resource.ranger.favored_enemy
+    kind: charge
+    refresh: long_rest
+    label: {zh: 宿敌（免环 Hunter's Mark）, en: Favored Enemy}
+    by_level: { 1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 3, 8: 3, 9: 4, 10: 4, 11: 4, 12: 4, 13: 5, 14: 5, 15: 5, 16: 5, 17: 6, 18: 6, 19: 6, 20: 6 }
+
+
+# 法术位表：等级 → 1..9 环容量（内核只查表，不写公式）
+slots:
+  1: [2, 0, 0, 0, 0, 0, 0, 0, 0]
+  2: [2, 0, 0, 0, 0, 0, 0, 0, 0]
+  3: [3, 0, 0, 0, 0, 0, 0, 0, 0]
+  4: [3, 0, 0, 0, 0, 0, 0, 0, 0]
+  5: [4, 2, 0, 0, 0, 0, 0, 0, 0]
+  6: [4, 2, 0, 0, 0, 0, 0, 0, 0]
+  7: [4, 3, 0, 0, 0, 0, 0, 0, 0]
+  8: [4, 3, 0, 0, 0, 0, 0, 0, 0]
+  9: [4, 3, 2, 0, 0, 0, 0, 0, 0]
+  10: [4, 3, 2, 0, 0, 0, 0, 0, 0]
+  11: [4, 3, 3, 0, 0, 0, 0, 0, 0]
+  12: [4, 3, 3, 0, 0, 0, 0, 0, 0]
+  13: [4, 3, 3, 1, 0, 0, 0, 0, 0]
+  14: [4, 3, 3, 1, 0, 0, 0, 0, 0]
+  15: [4, 3, 3, 2, 0, 0, 0, 0, 0]
+  16: [4, 3, 3, 2, 0, 0, 0, 0, 0]
+  17: [4, 3, 3, 3, 1, 0, 0, 0, 0]
+  18: [4, 3, 3, 3, 1, 0, 0, 0, 0]
+  19: [4, 3, 3, 3, 2, 0, 0, 0, 0]
+  20: [4, 3, 3, 3, 2, 0, 0, 0, 0]
+
+cantrips:
+  1: 0
+  2: 0
+  3: 0
+  4: 0
+  5: 0
+  6: 0
+  7: 0
+  8: 0
+  9: 0
+  10: 0
+  11: 0
+  12: 0
+  13: 0
+  14: 0
+  15: 0
+  16: 0
+  17: 0
+  18: 0
+  19: 0
+  20: 0
+
+prepared:
+  1: 2
+  2: 3
+  3: 4
+  4: 5
+  5: 6
+  6: 6
+  7: 7
+  8: 7
+  9: 9
+  10: 9
+  11: 10
+  12: 10
+  13: 11
+  14: 11
+  15: 12
+  16: 12
+  17: 14
+  18: 14
+  19: 15
+  20: 15
+
+powers:
+  - id: dnd2024.class.ranger.favored_enemy
+    name: {zh: 宿敌, en: Favored Enemy}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        始终准备 Hunter's Mark，可不耗法术位施放 2 次；5/9/13/17 级增至 3/4/5/6 次，长休全部恢复。
+      en: |-
+        You always have the Hunter's Mark spell prepared. You can cast it twice without expending a spell slot, and you regain all expended uses of this ability when you finish a Long Rest. The number of times you can cast the spell without a spell slot increases when you reach certain Ranger levels, as shown in the Favored Enemy column of the Ranger Features table.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.spellcasting
+    name: {zh: 施法, en: Spellcasting}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以感知施法。
+      en: |-
+        You have learned to channel the magical essence of nature to cast spells. See "Spells" for the rules on spellcasting. The information below details how you use those rules with Ranger spells, which appear in the Ranger spell list later in the class's description. Spell Slots. The Ranger Features table shows how many spell slots you have to cast your level 1+ spells. You regain all expended slots when you finish a Long Rest. Prepared Spells of Level 1+. You prepare the list of level 1+ spells that are available for you to cast with this feature. To start, choose two level 1 Ranger spells. Cure Wounds and Ensnaring Strike are recommended. The number of spells on your list increases as you gain Ranger levels, as shown in the Prepared Spells column of the Ranger Features table. Whenever that number increases, choose additional Ranger spells until the number of spells on your list matches the number in the Ranger Features table. The chosen spells must be of a level for which you have spell slots. For example, if you're a level 5 Ranger, your list of prepared spells can include six Ranger spells of level 1 or 2 in any combination. If another Ranger feature gives you spells that you always have prepared, those spells don't count against the number of spells you can prepare with this feature, but those spells otherwise count as Ranger spells for you. Changing Your Prepared Spells. Whenever you finish a Long Rest, you can replace one spell on your list with another Ranger spell for which you have spell slots. Spellcasting Ability. Wisdom is your spellcasting ability for your Ranger spells. Spellcasting Focus. You can use a Druidic Focus as a Spellcasting Focus for your Ranger spells.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.weapon_mastery
+    name: {zh: 武器专精, en: Weapon Mastery}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选 2 件熟练武器启用其专精属性。
+      en: |-
+        Your training with weapons allows you to use the mastery properties of two kinds of weapons of your choice with which you have proficiency, such as Longbows and Shortswords. Whenever you finish a Long Rest, you can change the kinds of weapons you chose. For example, you could switch to using the mastery properties of Scimitars and Longswords.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.deft_explorer
+    name: {zh: 灵巧探索者, en: Deft Explorer}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        1 项技能专精，并额外掌握 2 门语言。
+      en: |-
+        Thanks to your travels, you gain the following benefits. Expertise. Choose one of your skill proficiencies with which you lack Expertise. You gain Expertise in that skill. Languages. You know two languages of your choice from the language tables in "Character Creation."
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.fighting_style
+    name: {zh: 战斗风格, en: Fighting Style}
+    level: 2
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        2 级：从战斗风格专长中选 1 个。
+      en: |-
+        You gain a Fighting Style feat of your choice (see "Feats"). Instead of choosing one of those feats, you can choose the option below. Druidic Warrior. You learn two Druid cantrips of your choice (see the Druid class's section for a list of Druid spells). Guidance and Starry Wisp are recommended. The chosen cantrips count as Ranger spells for you, and Wisdom is your spellcasting ability for them. Whenever you gain a Ranger level, you can replace one of these cantrips with another Druid cantrip.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.subclass
+    name: {zh: 子职, en: Ranger Subclass}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        3 级选择一个子职。
+      en: |-
+        You gain a Ranger subclass of your choice. A subclass is a specialization that grants you features at certain Ranger levels. For the rest of your career, you gain each of your subclass's features that are of your Ranger level or lower.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.ability_score_improvement
+    name: {zh: 属性提升 / 专长, en: Ability Score Improvement}
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（上限 20），或换 1 个专长。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Ranger levels 8, 12, and 16.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.extra_attack
+    name: {zh: 额外攻击, en: Extra Attack}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        攻击动作可攻击 2 次。
+      en: |-
+        You can attack twice instead of once whenever you take the Attack action on your turn.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.roving
+    name: {zh: 游荡, en: Roving}
+    level: 6
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        不穿重甲时速度 +10 尺；攀爬与游泳速度等于你的速度。
+      en: |-
+        Your Speed increases by 10 feet while you aren't wearing Heavy armor. You also have a Climb Speed and a Swim Speed equal to your Speed.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.expertise
+    name: {zh: 专精, en: Expertise}
+    level: 9
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        再选 2 项已熟练技能，熟练加值翻倍。
+      en: |-
+        Choose two of your skill proficiencies with which you lack Expertise. You gain Expertise in those skills.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.tireless
+    name: {zh: 不倦, en: Tireless}
+    level: 10
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作给自己 1d8 + 感知调整值 的临时 HP；短休可减 1 级力竭。
+      en: |-
+        Primal forces now help fuel you on your journeys, granting you the following benefits. Temporary Hit Points. As a Magic action, you can give yourself a number of Temporary Hit Points equal to 1d8 plus your Wisdom modifier (minimum of 1). You can use this action a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest. Decrease Exhaustion. Whenever you finish a Short Rest, your Exhaustion level, if any, decreases by 1.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.relentless_hunter
+    name: {zh: 无情猎手, en: Relentless Hunter}
+    level: 13
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        受到伤害时，为维持 Hunter's Mark 的专注豁免自动成功。
+      en: |-
+        Taking damage can't break your Concentration on Hunter's Mark.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.natures_veil
+    name: {zh: 自然面纱, en: Nature's Veil}
+    level: 14
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        附赠动作变为隐形，持续到你的下回合结束。
+      en: |-
+        You invoke spirits of nature to magically hide yourself. As a Bonus Action, you can give yourself the Invisible condition until the end of your next turn. You can use this feature a number of times equal to your Wisdom modifier (minimum of once), and you regain all expended uses when you finish a Long Rest.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.precise_hunter
+    name: {zh: 精准猎手, en: Precise Hunter}
+    level: 17
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        对 Hunter's Mark 目标的攻击有优势。
+      en: |-
+        You have Advantage on attack rolls against the creature currently marked by your Hunter's Mark.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.feral_senses
+    name: {zh: 野性感官, en: Feral Senses}
+    level: 18
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        可察觉 30 尺内的隐形生物，且看不见时攻击不再有劣势。
+      en: |-
+        Your connection to the forces of nature grants you Blindsight with a range of 30 feet.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.epic_boon
+    name: {zh: 传奇恩惠, en: Epic Boon}
+    level: 19
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 1 个传奇恩惠专长（19 级）。
+      en: |-
+        You gain an Epic Boon feat (see "Feats") or another feat of your choice for which you qualify. Boon of Dimensional Travel is recommended.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.ranger.foe_slayer
+    name: {zh: 灭敌者, en: Foe Slayer}
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        Hunter's Mark 的额外伤害骰从 d6 提升为 d10。
+      en: |-
+        The damage die of your Hunter's Mark is a d10 rather than a d6.
+    effects:
+      - note:
+          zh: |-
+            数值结算见 P5 后续：本条先登记规则原文。
+          en: |-
+            Number resolution lands later in P5; the rule text is registered here.

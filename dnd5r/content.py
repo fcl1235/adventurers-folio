@@ -147,6 +147,11 @@ class ClassDef:
     resources: tuple[ResourceDef, ...] = ()
     powers: tuple[Power, ...] = ()
     morph: CrAxis | None = None
+    # 法术位表：等级 → (1 环, 2 环, …, 9 环)。内核只查表，不写公式
+    slots: Mapping[int, tuple[int, ...]] = field(default_factory=dict)
+    cantrips: Mapping[int, int] = field(default_factory=dict)
+    prepared: Mapping[int, int] = field(default_factory=dict)
+    slot_refresh: Refresh = Refresh.LONG_REST   # 邪术师契约位是短休恢复
     source: str = ""
 
     def __post_init__(self) -> None:
@@ -185,6 +190,16 @@ class ClassDef:
                 if target_id in index:      # 目标也解锁了才叠，跨职业的交由校验期报错
                     index[target_id] = apply_patch(index[target_id], power)
         return tuple(index[power.id] for power in picked)
+
+    def slots_at(self, class_level: ClassLevel) -> tuple[int, ...]:
+        """这一级的 9 个环位容量。没有该级条目时按最近的下界（与资源表同规则）。"""
+        if not self.slots:
+            return (0,) * 9
+        usable = [int(key) for key in self.slots if int(key) <= int(class_level)]
+        if not usable:
+            return (0,) * 9
+        row = tuple(self.slots[max(usable)])
+        return row + (0,) * (9 - len(row))
 
     def total_attacks(self, class_level: ClassLevel) -> int:
         """额外攻击取最大不叠加（Extra Attack 的 Stack.MAX 语义）。
@@ -258,6 +273,49 @@ def parse_form(data: Any, source: str = "") -> FormSpec:
     )
 
 
+def _parse_refresh(data: Any, where: str) -> Refresh:
+    if data is None:
+        return Refresh.LONG_REST
+    key = str(data).strip().lower()
+    if key not in REFRESH_KINDS:
+        raise PluginError("%s 的 slot_refresh 必须是 %s"
+                          % (where, "/".join(sorted(REFRESH_KINDS))))
+    return REFRESH_KINDS[key]
+
+
+def _parse_level_table(data: Any, where: str) -> dict[int, int]:
+    if not data:
+        return {}
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 必须是 等级→数值 的映射" % where)
+    try:
+        return {int(key): int(value) for key, value in data.items()}
+    except (TypeError, ValueError):
+        raise PluginError("%s 必须是 等级→数值 的映射" % where)
+
+
+def parse_slots(data: Any) -> dict[int, tuple[int, ...]]:
+    """法术位表：`{5: [4,3,2,0,0,0,0,0,0]}`。多写或写错环数都要当场报错。"""
+    if not data:
+        return {}
+    if not isinstance(data, Mapping):
+        raise PluginError("slots 必须是 等级→9 个环位 的映射")
+    rows: dict[int, tuple[int, ...]] = {}
+    for key, value in data.items():
+        if not isinstance(value, (list, tuple)):
+            raise PluginError("slots 的 %r 必须是 9 个整数的列表" % (key,))
+        if len(value) > 9:
+            raise PluginError("slots 的 %r 超过 9 环：%r" % (key, value))
+        try:
+            row = tuple(int(item) for item in value)
+        except (TypeError, ValueError):
+            raise PluginError("slots 的 %r 必须是整数：%r" % (key, value))
+        if any(item < 0 for item in row):
+            raise PluginError("slots 的 %r 出现负环位：%r" % (key, value))
+        rows[int(key)] = row
+    return rows
+
+
 def parse_class(data: Any, source: str = "") -> ClassDef:
     if not isinstance(data, Mapping):
         raise PluginError("%s 的职业定义必须是映射" % source)
@@ -297,6 +355,10 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
         resources=resources,
         powers=powers,
         morph=parse_cr_axis(data.get("morph")),
+        slots=parse_slots(data.get("slots")),
+        cantrips=_parse_level_table(data.get("cantrips"), "%s cantrips" % ident),
+        prepared=_parse_level_table(data.get("prepared"), "%s prepared" % ident),
+        slot_refresh=_parse_refresh(data.get("slot_refresh"), ident),
         source=source,
     )
 

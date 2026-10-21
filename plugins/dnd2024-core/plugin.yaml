@@ -4,12 +4,22 @@ api: 1
 name:
   zh: D&D 2024 核心内容
   en: D&D 2024 Core Content
-version: 0.3.0
+version: 0.5.0
 requires: []
 provides:
   classes:
-    - dnd2024.class.fighter
+    - dnd2024.class.barbarian
+    - dnd2024.class.bard
+    - dnd2024.class.cleric
     - dnd2024.class.druid
+    - dnd2024.class.fighter
+    - dnd2024.class.monk
+    - dnd2024.class.paladin
+    - dnd2024.class.ranger
+    - dnd2024.class.rogue
+    - dnd2024.class.sorcerer
+    - dnd2024.class.warlock
+    - dnd2024.class.wizard
   subclasses: []
   species: []
   feats: []

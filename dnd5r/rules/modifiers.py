@@ -54,7 +54,8 @@ class Ref:
 @dataclass(frozen=True, slots=True)
 class Modifier:
     target: str
-    value: int | Dice | Ref
+    # 整数 / 骰 / 符号引用 / Amount（「魅力调整值，最低 +1」这类带下限的值）
+    value: Any
     stack: Stack = Stack.ADD
     source: str = ""
     scope: Scope = Scope.SELF
@@ -72,7 +73,12 @@ class Modifier:
             raise RuleError("direction 必须是 Direction：%r" % (self.direction,))
 
     def describe_value(self) -> str:
-        return self.value.path if isinstance(self.value, Ref) else str(self.value)
+        if isinstance(self.value, Ref):
+            return self.value.path
+        describe = getattr(self.value, "describe", None)
+        if callable(describe) and not isinstance(self.value, (int, Dice)):
+            return describe()
+        return str(self.value)
 
 
 @dataclass(frozen=True, slots=True)
@@ -112,9 +118,14 @@ def _numeric(mod: Modifier, ctx: Mapping[str, Any] | None) -> int:
         return resolve_ref(value, ctx)
     if isinstance(value, Dice):
         raise RuleError("骰值不能进入数值合计：%s（伤害骰请走 damage 管道）" % mod.target)
-    if isinstance(value, bool) or not isinstance(value, int):
-        raise RuleError("Modifier 值必须是整数、Dice 或 Ref：%r" % (value,))
-    return value
+    if isinstance(value, bool):
+        raise RuleError("Modifier 值不能是布尔：%r" % (value,))
+    if isinstance(value, int):
+        return value
+    evaluate = getattr(value, "evaluate", None)
+    if callable(evaluate):          # Amount：带骰/引用/下限的数量
+        return int(evaluate(ctx or {}))
+    raise RuleError("Modifier 值必须是整数、Dice、Ref 或 Amount：%r" % (value,))
 
 
 def resolve(
