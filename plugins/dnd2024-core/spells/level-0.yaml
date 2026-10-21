@@ -1,0 +1,417 @@
+# 由 tools/gen_spells.py 从 data/raw/spells.json + dnd55e_spells.json 生成。
+# 第 0 环，共 27 条。重跑生成器会覆盖；要长期改动请改数据源。
+# 没有结构化伤害的法术（控制类）只登记规则原文，damage 留空 —— 不猜。
+  - id: dnd2024.spell.acid_splash
+    name: {zh: 酸液飞溅, en: Acid Splash}
+    level: 0
+    school: evocation
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: instant
+    save: dex
+    area: {shape: sphere, feet: 5}
+    damage: {type: acid, 0: 1d6}
+    text:
+      zh: |-
+        对 60 尺内 1 个生物或 2 个相邻生物造成 1d6 强酸伤害(敏捷豁免免伤)。
+      en: |-
+        You create an acidic bubble at a point within range, where it explodes in a 5-foot-radius Sphere. Each creature in that Sphere must succeed on a Dexterity saving throw or take 1d6 Acid damage. Cantrip Upgrade. The damage increases by 1d6 when you reach levels 5 (2d6), 11 (3d6), and 17 (4d6).
+
+  - id: dnd2024.spell.chill_touch
+    name: {zh: 寒颤之触, en: Chill Touch}
+    level: 0
+    school: necromancy
+    casting: action
+    range: touch
+    components: [v, s]
+    duration: instant
+    attack: melee
+    damage: {type: necrotic, 0: 1d10}
+    text:
+      zh: |-
+        触碰造成 1d10 黯蚀伤害, 目标无法恢复 HP 至你下回合结束。
+      en: |-
+        Channeling the chill of the grave, make a melee spell attack against a target within reach. On a hit, the target takes 1d10 Necrotic damage, and it can't regain Hit Points until the end of your next turn. Cantrip Upgrade. The damage increases by 1d10 when you reach levels 5 (2d10), 11 (3d10), and 17 (4d10).
+
+  - id: dnd2024.spell.dancing_lights
+    name: {zh: 舞光术, en: Dancing Lights}
+    level: 0
+    school: illusion
+    casting: action
+    range: {feet: 120}
+    components: [v, s, m]
+    material: "a bit of phosphorus"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    text:
+      zh: |-
+        造出至多 4 个光源, 可随意移动, 照亮 10 尺。
+      en: |-
+        You create up to four torch-size lights within range, making them appear as torches, lanterns, or glowing orbs that hover for the duration. Alternatively, you combine the four lights into one glowing Medium form that is vaguely humanlike. Whichever form you choose, each light sheds Dim Light in a 10foot radius. As a Bonus Action, you can move the lights up to 60 feet to a space within range. A light must be within 20 feet of another light created by this spell, and a light vanishes if it exceeds the spell's range.
+
+  - id: dnd2024.spell.druidcraft
+    name: {zh: 德鲁伊伎俩, en: Druidcraft}
+    level: 0
+    school: transmutation
+    casting: action
+    range: {feet: 30}
+    components: [v, s]
+    duration: instant
+    area: {shape: cube, feet: 5}
+    text:
+      zh: |-
+        小型自然效果: 预测天气、催开花蕾、点燃/熄灭小火焰等。
+      en: |-
+        Whispering to the spirits of nature, you create one of the following effects within range. Weather Sensor. You create a Tiny, harmless sensory effect that predicts what the weather will be at your location for the next 24 hours. The effect might manifest as a golden orb for clear skies, a cloud for rain, falling snowflakes for snow, and so on. This effect persists for 1 round. Bloom. You instantly make a flower blossom, a seed pod open, or a leaf bud bloom. Sensory Effect. You create a harmless sensory effect, such as falling leaves, spectral dancing fairies, a gentle breeze, the sound of an animal, or the faint odor of skunk. The effect must fit in a 5-foot Cube. Fire Play. You light or snuff out a candle, a torch, or a campfire.
+
+  - id: dnd2024.spell.eldritch_blast
+    name: {zh: 魔能爆, en: Eldritch Blast}
+    level: 0
+    school: evocation
+    casting: action
+    range: {feet: 120}
+    components: [v, s]
+    duration: instant
+    attack: ranged
+    damage: {type: force, 0: 1d10}
+    text:
+      zh: |-
+        射程 120 尺, 1 道 1d10 力场伤害光束; 5 级起 2 道, 11 级 3 道, 17 级 4 道。
+      en: |-
+        You hurl a beam of crackling energy. Make a ranged spell attack against one creature or object in range. On a hit, the target takes 1d10 Force damage. Cantrip Upgrade. The spell creates two beams at level 5, three beams at level 11, and four beams at level 17. You can direct the beams at the same target or at different ones. Make a separate attack roll for each beam.
+
+  - id: dnd2024.spell.elementalism
+    name: {zh: 元素伎俩, en: Elementalism}
+    level: 0
+    school: transmutation
+    casting: action
+    range: {feet: 30}
+    components: [v, s]
+    duration: instant
+    area: {shape: cube, feet: 5}
+    text:
+      zh: |-
+        操控少量元素: 造风、点火、塑水、弄土等小型效果。
+      en: |-
+        You exert control over the elements, creating one of the following effects within range. Beckon Air. You create a breeze strong enough to ripple cloth, stir dust, rustle leaves, and close open doors and shutters, all in a 5-foot Cube. Doors and shutters being held open by someone or something aren't affected. Beckon Earth. You create a thin shroud of dust or sand that covers surfaces in a 5-foot-square area, or you cause a single word to appear in your handwriting in a patch of dirt or sand. Beckon Fire. You create a thin cloud of harmless embers and colored, scented smoke in a 5-foot Cube. You choose the color and scent, and the embers can light candles, torches, or lamps in that area. The smoke's scent lingers for 1 minute. Beckon Water. You create a spray of cool mist that lightly dampens creatures and objects in a 5-foot Cube. Alternatively, you create 1 cup of clean water either in an open container or on a surface, and the water evaporates in 1 minute. Sculpt Element. You cause dirt, sand, fire, smoke, mist, or water that can fit in a 1-foot Cube to assume a crude shape (such as that of a creature) for 1 hour.
+
+  - id: dnd2024.spell.fire_bolt
+    name: {zh: 火焰箭, en: Fire Bolt}
+    level: 0
+    school: evocation
+    casting: action
+    range: {feet: 120}
+    components: [v, s]
+    duration: instant
+    attack: ranged
+    damage: {type: fire, 0: 1d10}
+    text:
+      zh: |-
+        远程法术攻击, 命中造成 1d10 火焰伤害(5 级起递增)。
+      en: |-
+        You hurl a mote of fire at a creature or an object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 Fire damage. A flammable object hit by this spell starts burning if it isn't being worn or carried. Cantrip Upgrade. The damage increases by 1d10 when you reach levels 5 (2d10), 11 (3d10), and 17 (4d10).
+
+  - id: dnd2024.spell.guidance
+    name: {zh: 神导术, en: Guidance}
+    level: 0
+    school: divination
+    casting: action
+    range: touch
+    components: []
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    text:
+      zh: |-
+        专注 1 分钟, 目标下一次属性检定 +1d4。
+      en: |-
+        You touch a willing creature and choose a skill. Until the spell ends, the creature adds 1d4 to any ability check using the chosen skill.
+
+  - id: dnd2024.spell.light
+    name: {zh: 光亮术, en: Light}
+    level: 0
+    school: evocation
+    casting: action
+    range: touch
+    components: [v, m]
+    material: "a firefly or phosphorescent moss"
+    duration: {kind: time, zh: 1 小时, en: 1 hour}
+    text:
+      zh: |-
+        让一件物品发出 20 尺明亮/20 尺微光, 持续 1 小时。
+      en: |-
+        You touch one Large or smaller object that isn't being worn or carried by someone else. Until the spell ends, the object sheds Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. The light can be colored as you like. Covering the object with something opaque blocks the light. The spell ends if you cast it again.
+
+  - id: dnd2024.spell.mage_hand
+    name: {zh: 法师之手, en: Mage Hand}
+    level: 0
+    school: conjuration
+    casting: action
+    range: {feet: 30}
+    components: [v, s]
+    duration: {kind: time, zh: 1 分钟, en: 1 minute}
+    text:
+      zh: |-
+        造出一只幽灵手, 可隔 30 尺操作物件、开门、取物(不能攻击)。
+      en: |-
+        A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration. The hand vanishes if it is ever more than 30 feet away from you or if you cast this spell again. When you cast the spell, you can use the hand to manipulate an object, open an unlocked door or container, stow or retrieve an item from an open container, or pour the contents out of a vial. As a Magic action on your later turns, you can control the hand thus again. As part of that action, you can move the hand up to 30 feet. The hand can't attack, activate magic items, or carry more than 10 pounds.
+
+  - id: dnd2024.spell.mending
+    name: {zh: 修复术, en: Mending}
+    level: 0
+    school: transmutation
+    casting: {kind: time, zh: 1 分钟, en: 1 minute}
+    range: touch
+    components: [v, s, m]
+    material: "two lodestones"
+    duration: instant
+    text:
+      zh: |-
+        修复物件上一处破损或裂缝(1 尺以内)。
+      en: |-
+        This spell repairs a single break or tear in an object you touch, such as a broken chain link, two halves of a broken key, a torn cloak, or a leaking wineskin. As long as the break or tear is no larger than 1 foot in any dimension, you mend it, leaving no trace of the former damage. This spell can physically repair a magic item, but it can't restore magic to such an object.
+
+  - id: dnd2024.spell.message
+    name: {zh: 传讯术, en: Message}
+    level: 0
+    school: transmutation
+    casting: action
+    range: {feet: 120}
+    components: [s, m]
+    material: "a copper wire"
+    duration: {kind: time, zh: 1 轮, en: 1 round}
+    text:
+      zh: |-
+        对 120 尺内目标耳语, 只有它能听见, 可悄悄回话。
+      en: |-
+        You point toward a creature within range and whisper a message. The target (and only the target) hears the message and can reply in a whisper that only you can hear. You can cast this spell through solid objects if you are familiar with the target and know it is beyond the barrier. Magical silence; 1 foot of stone, metal, or wood; or a thin sheet of lead blocks the spell.
+
+  - id: dnd2024.spell.minor_illusion
+    name: {zh: 次级幻影, en: Minor Illusion}
+    level: 0
+    school: illusion
+    casting: action
+    range: {feet: 30}
+    components: [s, m]
+    material: "a bit of fleece"
+    duration: {kind: time, zh: 1 分钟, en: 1 minute}
+    area: {shape: cube, feet: 5}
+    text:
+      zh: |-
+        造出声音或一个 5 尺见方的静态幻影, 持续 1 分钟。
+      en: |-
+        You create a sound or an image of an object within range that lasts for the duration. See the descriptions below for the effects of each. The illusion ends if you cast this spell again. If a creature takes a Study action to examine the sound or image, the creature can determine that it is an illusion with a successful Intelligence (Investigation) check against your spell save DC. If a creature discerns the illusion for what it is, the illusion becomes faint to the creature. Sound. If you create a sound, its volume can range from a whisper to a scream. It can be your voice, someone else's voice, a lion's roar, a beating of drums, or any other sound you choose. The sound continues unabated throughout the duration, or you can make discrete sounds at different times before the spell ends. Image. If you create an image of an object-such as a chair, muddy footprints, or a small chest-it must be no larger than a 5-foot Cube. The image can't create sound, light, smell, or any other sensory effect. Physical interaction with the image reveals it to be an illusion, since things can pass through it.
+
+  - id: dnd2024.spell.poison_spray
+    name: {zh: 毒液喷溅, en: Poison Spray}
+    level: 0
+    school: necromancy
+    casting: action
+    range: {feet: 30}
+    components: [v, s]
+    duration: instant
+    attack: ranged
+    damage: {type: poison, 0: 1d12}
+    text:
+      zh: |-
+        对 30 尺内目标造成 1d12 毒素伤害(体质豁免免伤)。
+      en: |-
+        You spray toxic mist at a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d12 Poison damage. Cantrip Upgrade. The damage increases by 1d12 when you reach levels 5 (2d12), 11 (3d12), and 17 (4d12).
+
+  - id: dnd2024.spell.prestidigitation
+    name: {zh: 魔法伎俩, en: Prestidigitation}
+    level: 0
+    school: transmutation
+    casting: action
+    range: {feet: 10}
+    components: [v, s]
+    duration: {kind: time, zh: 专注，最多 1 小时, en: Up to 1 hour}
+    text:
+      zh: |-
+        小型魔法戏法: 点燃、清洁、调味、造出小物件等。
+      en: |-
+        You create a magical effect within range. Choose the effect from the options below. If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time. Sensory Effect. You create an instantaneous, harmless sensory effect, such as a shower of sparks, a puff of wind, faint musical notes, or an odd odor. Fire Play. You instantaneously light or snuff out a candle, a torch, or a small campfire. Clean or Soil. You instantaneously clean or soil an object no larger than 1 cubic foot. Minor Sensation. You chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour. Magic Mark. You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour. Minor Creation. You create a nonmagical trinket or an illusory image that can fit in your hand. It lasts until the end of your next turn. A trinket can deal no damage and has no monetary worth.
+
+  - id: dnd2024.spell.produce_flame
+    name: {zh: 燃火术, en: Produce Flame}
+    level: 0
+    school: conjuration
+    casting: bonus
+    range: self
+    components: [v, s]
+    duration: {kind: time, zh: 10 分钟, en: 10 minutes}
+    attack: ranged
+    damage: {type: fire, 0: 1d8}
+    text:
+      zh: |-
+        手中生出火焰, 可照明, 也可投掷造成 1d8 火焰伤害。
+      en: |-
+        A flickering flame appears in your hand and remains there for the duration. While there, the flame emits no heat and ignites nothing, and it sheds Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. The spell ends if you cast it again. Until the spell ends, you can take a Magic action to hurl fire at a creature or an object within 60 feet of you. Make a ranged spell attack. On a hit, the target takes 1d8 Fire damage. Cantrip Upgrade. The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8).
+
+  - id: dnd2024.spell.ray_of_frost
+    name: {zh: 冻寒之触, en: Ray of Frost}
+    level: 0
+    school: evocation
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: instant
+    attack: ranged
+    damage: {type: cold, 0: 1d8}
+    text:
+      zh: |-
+        远程法术攻击, 1d8 寒冷伤害并使目标速度 -10 尺。
+      en: |-
+        A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 1d8 Cold damage, and its Speed is reduced by 10 feet until the start of your next turn. Cantrip Upgrade. The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8).
+
+  - id: dnd2024.spell.resistance
+    name: {zh: 抗性术, en: Resistance}
+    level: 0
+    school: abjuration
+    casting: action
+    range: touch
+    components: []
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    text:
+      zh: |-
+        专注 1 分钟, 目标下一次豁免 +1d4。
+      en: |-
+        You touch a willing creature and choose a damage type: Acid, Bludgeoning, Cold, Fire, Lightning, Necrotic, Piercing, Poison, Radiant, Slashing, or Thunder. When the creature takes damage of the chosen type before the spell ends, the creature reduces the total damage taken by 1d4. A creature can benefit from this spell only once per turn.
+
+  - id: dnd2024.spell.sacred_flame
+    name: {zh: 圣火术, en: Sacred Flame}
+    level: 0
+    school: evocation
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: instant
+    save: dex
+    damage: {type: radiant, 0: 1d8}
+    text:
+      zh: |-
+        目标 60 尺内, 敏捷豁免失败受 1d8 光耀伤害(无掩体加成)。
+      en: |-
+        Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 Radiant damage. The target gains no benefit from Half Cover or Three-Quarters Cover for this save. Cantrip Upgrade. The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8).
+
+  - id: dnd2024.spell.shillelagh
+    name: {zh: 橡棍术, en: Shillelagh}
+    level: 0
+    school: transmutation
+    casting: bonus
+    range: self
+    components: [v, s, m]
+    material: "mistletoe"
+    duration: {kind: time, zh: 1 分钟, en: 1 minute}
+    text:
+      zh: |-
+        让木棍/长棍以施法属性攻击, 伤害变 1d8+施法属性, 持续 1 分钟。
+      en: |-
+        A Club or Quarterstaff you are holding is imbued with nature's power. For the duration, you can use your spellcasting ability instead of Strength for the attack and damage rolls of melee attacks using that weapon, and the weapon's damage die becomes a d8. If the attack deals damage, it can be Force damage or the weapon's normal damage type (your choice). The spell ends early if you cast it again or if you let go of the weapon. Cantrip Upgrade. The damage die changes when you reach levels 5 (d10), 11 (d12), and 17 (2d6).
+
+  - id: dnd2024.spell.shocking_grasp
+    name: {zh: 电爪, en: Shocking Grasp}
+    level: 0
+    school: evocation
+    casting: action
+    range: touch
+    components: [v, s]
+    duration: instant
+    attack: melee
+    damage: {type: lightning, 0: 1d8}
+    text:
+      zh: |-
+        近战法术攻击, 1d8 闪电伤害, 目标无法借机攻击。
+      en: |-
+        Lightning springs from you to a creature that you try to touch. Make a melee spell attack against the target. On a hit, the target takes 1d8 Lightning damage, and it can't make Opportunity Attacks until the start of its next turn. Cantrip Upgrade. The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8).
+
+  - id: dnd2024.spell.sorcerous_burst
+    name: {zh: 术法爆发, en: Sorcerous Burst}
+    level: 0
+    school: evocation
+    casting: action
+    range: {feet: 120}
+    components: []
+    duration: instant
+    attack: ranged
+    text:
+      zh: |-
+        远程法术攻击, 1d8 伤害(类型自选), 掷出 8 可追加骰。
+      en: |-
+        You cast sorcerous energy at one creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d8 damage of a type you choose: Acid, Cold, Fire, Lightning, Poison, Psychic, or Thunder. If you roll an 8 on a d8 for this spell, you can roll another d8, and add it to the damage. When you cast this spell, the maximum number of these d8s you can add to the spell's damage equals your spellcasting ability modifier. Cantrip Upgrade. The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8).
+
+  - id: dnd2024.spell.spare_the_dying
+    name: {zh: 维生术, en: Spare the Dying}
+    level: 0
+    school: necromancy
+    casting: action
+    range: {feet: 15}
+    components: [v, s]
+    duration: instant
+    text:
+      zh: |-
+        触碰一个 0 HP 生物, 使其稳定(不再做死亡豁免)。
+      en: |-
+        Choose a creature within range that has 0 Hit Points and isn't dead. The creature becomes Stable. Cantrip Upgrade. The range doubles when you reach levels 5 (30 feet), 11 (60 feet), and 17 (120 feet).
+
+  - id: dnd2024.spell.starry_wisp
+    name: {zh: 星辉之光, en: Starry Wisp}
+    level: 0
+    school: evocation
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: instant
+    attack: ranged
+    damage: {type: radiant, 0: 1d8}
+    text:
+      zh: |-
+        发出星辉, 造成 1d8 光耀伤害, 并让目标显形(防隐形)。
+      en: |-
+        You launch a mote of light at one creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d8 Radiant damage, and until the end of your next turn, it emits Dim Light in a 10-foot radius and can't benefit from the Invisible condition. Cantrip Upgrade. The damage increases by 1d8 when you reach levels 5 (2d8), 11 (3d8), and 17 (4d8).
+
+  - id: dnd2024.spell.thaumaturgy
+    name: {zh: 奇术, en: Thaumaturgy}
+    level: 0
+    school: transmutation
+    casting: action
+    range: {feet: 30}
+    components: [v]
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: Up to 1 minute}
+    text:
+      zh: |-
+        小型奇迹: 声音放大、火焰摇曳、地面震动等。
+      en: |-
+        You manifest a minor wonder within range. You create one of the effects below within range. If you cast this spell multiple times, you can have up to three of its 1-minute effects active at a time. Altered Eyes. You alter the appearance of your eyes for 1 minute. Booming Voice. Your voice booms up to three times as loud as normal for 1 minute. For the duration, you have Advantage on Charisma (Intimidation) checks. Fire Play. You cause flames to flicker, brighten, dim, or change color for 1 minute. Invisible Hand. You instantaneously cause an unlocked door or window to fly open or slam shut. Phantom Sound. You create an instantaneous sound that originates from a point of your choice within range, such as a rumble of thunder, the cry of a raven, or ominous whispers. Tremors. You cause harmless tremors in the ground for 1 minute.
+
+  - id: dnd2024.spell.true_strike
+    name: {zh: 克敌先击, en: True Strike}
+    level: 0
+    school: divination
+    casting: action
+    range: self
+    components: [s, m]
+    material: "a weapon with which you have proficiency and that is worth 1+ CP"
+    duration: instant
+    text:
+      zh: |-
+        用施法属性做一次武器攻击, 伤害类型改为光耀, 可附加 1d6。
+      en: |-
+        Guided by a flash of magical insight, you make one attack with the weapon used in the spell's casting. The attack uses your spellcasting ability for the attack and damage rolls instead of using Strength or Dexterity. If the attack deals damage, it can be Radiant damage or the weapon's normal damage type (your choice). Cantrip Upgrade. Whether you deal Radiant damage or the weapon's normal damage type, the attack deals extra Radiant damage when you reach levels 5 (1d6), 11 (2d6), and 17 (3d6).
+
+  - id: dnd2024.spell.vicious_mockery
+    name: {zh: 恶言相加, en: Vicious Mockery}
+    level: 0
+    school: enchantment
+    casting: action
+    range: {feet: 60}
+    components: [v]
+    duration: instant
+    save: wis
+    damage: {type: psychic, 0: 1d6}
+    text:
+      zh: |-
+        目标感知豁免失败: 1d6 心灵伤害, 且下次攻击劣势。
+      en: |-
+        You unleash a string of insults laced with subtle enchantments at one creature you can see or hear within range. The target must succeed on a Wisdom saving throw or take 1d6 Psychic damage and have Disadvantage on the next attack roll it makes before the end of its next turn. Cantrip Upgrade. The damage increases by 1d6 when you reach levels 5 (2d6), 11 (3d6), and 17 (4d6).

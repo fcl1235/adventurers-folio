@@ -17,7 +17,7 @@ from typing import Any, Mapping
 import yaml
 
 from .kernel.dice import parse as parse_dice
-from .kernel.errors import DndError, PluginError, RuleError
+from .kernel.errors import DiceError, DndError, PluginError, RuleError
 from .kernel.ids import is_valid
 from .kernel.text import Text
 from .model.inventory import EquipSlot
@@ -334,6 +334,8 @@ class ClassDef:
     primary: tuple[str, ...] = ()
     saves: tuple[str, ...] = ()
     caster: CasterKind = CasterKind.NONE
+    # 施法属性（cha/wis/int）：。caster 只说是全/半/契约施法者，不说用哪个属性
+    casting_ability: str = ""
     subclass_level: ClassLevel = ClassLevel(3)
     skill_choices: int = 2
     skill_list: tuple[str, ...] = ()
@@ -357,6 +359,13 @@ class ClassDef:
         for key in self.saves:
             if key not in ("str", "dex", "con", "int", "wis", "cha"):
                 raise PluginError("%s 的豁免熟练含未知属性：%r" % (self.id, key))
+        if self.casting_ability and self.casting_ability not in (
+                "str", "dex", "con", "int", "wis", "cha"):
+            raise PluginError("%s 的施法属性不合法：%r" % (self.id, self.casting_ability))
+        if self.caster is not CasterKind.NONE and not self.casting_ability:
+            raise PluginError("%s 是施法职业，必须声明 casting_ability" % self.id)
+        if self.caster is CasterKind.NONE and self.casting_ability:
+            raise PluginError("%s 不是施法职业，却声明了 casting_ability" % self.id)
         seen = set()
         for resource in self.resources:
             if resource.id in seen:
@@ -401,7 +410,8 @@ class ClassDef:
         return {
             "id": self.id, "name": self.name.to_dict(), "hit_die": self.hit_die,
             "primary": list(self.primary), "saves": list(self.saves),
-            "caster": self.caster.value, "subclass_level": int(self.subclass_level),
+            "caster": self.caster.value, "casting_ability": self.casting_ability,
+            "subclass_level": int(self.subclass_level),
             "resources": [item.to_dict() for item in self.resources],
             "powers": len(self.powers),
         }
@@ -629,6 +639,7 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
         primary=tuple(str(item).lower() for item in (data.get("primary") or ())),
         saves=tuple(str(item).lower() for item in (data.get("saves") or ())),
         caster=caster,
+        casting_ability=str(data.get("casting_ability", "")).lower(),
         subclass_level=subclass_level,
         skill_choices=int(data.get("skill_choices", 2)),
         skill_list=tuple(str(item) for item in (data.get("skill_list") or ())),
@@ -644,6 +655,307 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
     )
 
 
+# --- 法术 -------------------------------------------------------------
+SPELL_SCHOOLS = (
+    "abjuration", "conjuration", "divination", "enchantment",
+    "evocation", "illusion", "necromancy", "transmutation",
+)
+CAST_KINDS = ("action", "bonus", "reaction", "time", "special")
+DURATION_KINDS = ("instant", "time", "permanent", "special")
+AREA_SHAPES = ("sphere", "cube", "cone", "cylinder", "line", "emanation")
+
+
+def _parse_cast_kind(data: Any, where: str) -> tuple[str, str, str]:
+    """施法时间 → (kind, 中文, 英文)。字符串就是 action/bonus/reaction。
+
+    「1 分钟」这类不占动作的施法时间统一记 `time`，具体多久放在 text 里 ——
+    内核不需要知道「1 分钟」是多少秒，它只需要知道「这不是一个动作」。
+    """
+    if data is None:
+        return "action", "1 动作", "Action"
+    if isinstance(data, str):
+        key = data.strip().lower()
+        fixed = {
+            "action": ("action", "1 动作", "Action"),
+            "bonus": ("bonus", "1 附赠动作", "Bonus Action"),
+            "reaction": ("reaction", "1 反应", "Reaction"),
+            "instant": ("special", "特殊", "Special"),
+        }
+        if key in fixed:
+            return fixed[key]
+        if key in CAST_KINDS:
+            return key, key, key
+        raise PluginError("%s 的施法时间 %r 无法识别" % (where, data))
+    if isinstance(data, Mapping):
+        kind = str(data.get("kind", "time")).lower()
+        if kind not in CAST_KINDS:
+            raise PluginError("%s 的施法时间类别必须是 %s"
+                              % (where, "/".join(CAST_KINDS)))
+        return (kind, str(data.get("zh", data.get("text", ""))),
+                str(data.get("en", data.get("text", ""))))
+    raise PluginError("%s 的施法时间必须是字符串或映射" % where)
+
+
+def _parse_area(data: Any, where: str) -> tuple[str, int] | None:
+    """作用范围：`{shape: sphere, feet: 20}`。没写就是单体/无范围。"""
+    if not data:
+        return None
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的 area 必须是映射" % where)
+    shape = str(data.get("shape", "")).lower()
+    if shape not in AREA_SHAPES:
+        raise PluginError("%s 的 area.shape 必须是 %s"
+                          % (where, "/".join(AREA_SHAPES)))
+    feet = int(data.get("feet", 0))
+    if feet <= 0:
+        raise PluginError("%s 的 area.feet 必须大于 0" % where)
+    return shape, feet
+
+
+def _parse_damage_table(data: Any, where: str) -> tuple[dict[int, str], str, str]:
+    """伤害：`{3: 8d6, type: fire, upcast: 每环 +1d6}` → (环级表, 类型, 升环说明)。
+
+    表里放的是「在该环位施放时的骰式」—— 戏法只有 0 档，靠角色等级成长；
+    升环就是查表，内核不写「每环 +1d6」这种公式。
+    """
+    if not data:
+        return {}, "", ""
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的 damage 必须是映射" % where)
+    table: dict[int, str] = {}
+    for key, value in data.items():
+        if key in ("type", "damage_type", "upcast"):
+            continue
+        try:
+            level = int(key)
+        except (TypeError, ValueError):
+            raise PluginError("%s 的 damage 键必须是环级：%r" % (where, key))
+        if level < 0:
+            raise PluginError("%s 的 damage 环级不能为负：%r" % (where, key))
+        dice = str(value)
+        try:
+            parse_dice(dice)                   # 骰式当场校验，坏数据不等到施法才炸
+        except DiceError as exc:
+            raise PluginError("%s 的伤害骰式不合法：%r（%s）" % (where, dice, exc))
+        table[level] = dice
+    kind = str(data.get("type") or data.get("damage_type") or "").lower()
+    return table, kind, str(data.get("upcast", ""))
+
+
+@dataclass(frozen=True)
+class SpellDef:
+    """一个法术。**只管规则，不管界面**：能算的都解析成字段，算不了的留在 text 里。
+
+    `damage` 是「环位 → 骰式」的表而不是公式：升环、戏法成长都变成查表，
+    内核里没有「每提升一环 +1d6」这种逻辑。查表规则与资源表一致（取不超过的最大档）。
+    """
+
+    id: str
+    name: Text
+    level: int
+    school: str
+    text: Text
+    cast_kind: str = "action"
+    cast_zh: str = ""
+    cast_en: str = ""
+    range_feet: int | None = None
+    range_zh: str = ""
+    range_en: str = ""
+    components: tuple[str, ...] = ()
+    material: str = ""
+    duration_kind: str = "instant"
+    duration_zh: str = ""
+    duration_en: str = ""
+    concentration: bool = False
+    ritual: bool = False
+    save: str = ""
+    attack: str = ""
+    area: tuple[str, int] | None = None
+    damage: Mapping[int, str] = field(default_factory=dict)
+    damage_type: str = ""
+    upcast: str = ""
+    source: str = ""
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("法术 id 不合规范：%r" % (self.id,))
+        if not 0 <= int(self.level) <= 9:
+            raise PluginError("%s 的法术环级必须在 0–9：%r" % (self.id, self.level))
+        if self.school not in SPELL_SCHOOLS:
+            raise PluginError("%s 的法术学派必须是 %s"
+                              % (self.id, "/".join(SPELL_SCHOOLS)))
+        if self.cast_kind not in CAST_KINDS:
+            raise PluginError("%s 的施法时间类别必须是 %s"
+                              % (self.id, "/".join(CAST_KINDS)))
+        if self.duration_kind not in DURATION_KINDS:
+            raise PluginError("%s 的持续时间类别必须是 %s"
+                              % (self.id, "/".join(DURATION_KINDS)))
+        if self.save and self.save not in ("str", "dex", "con", "int", "wis", "cha"):
+            raise PluginError("%s 的豁免属性不合法：%r" % (self.id, self.save))
+        for token in self.components:
+            if token not in ("v", "s", "m"):
+                raise PluginError("%s 的成分只能是 v/s/m：%r" % (self.id, token))
+        if self.level == 0 and self.damage and 0 not in self.damage:
+            raise PluginError("%s 是戏法，damage 表必须从 0 档开始" % self.id)
+
+    @property
+    def is_cantrip(self) -> bool:
+        return int(self.level) == 0
+
+    @property
+    def is_button(self) -> bool:
+        """反应与「1 分钟」类法术不该在战斗回合里当按钮按 —— 界面上仍要列出。"""
+        return self.cast_kind in ("action", "bonus")
+
+    def damage_at(self, slot_level: int) -> str:
+        """在该环位施放时的伤害骰式；查不到就返回空串（不是 0）。"""
+        return lookup_dice(self.damage, int(slot_level))
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {
+            "id": self.id,
+            "name": self.name.get(locale),
+            "level": int(self.level),
+            "school": self.school,
+            "text": self.text.get(locale),
+            "cast": {"kind": self.cast_kind,
+                     "text": self.cast_zh if locale == "zh" else self.cast_en},
+            "range": {"feet": self.range_feet,
+                      "text": self.range_zh if locale == "zh" else self.range_en},
+            "components": list(self.components),
+            "material": self.material,
+            "duration": {"kind": self.duration_kind,
+                         "text": self.duration_zh if locale == "zh" else self.duration_en},
+            "concentration": self.concentration,
+            "ritual": self.ritual,
+            "save": self.save,
+            "attack": self.attack,
+            "area": None if self.area is None else {"shape": self.area[0], "feet": self.area[1]},
+            "damage": {int(key): value for key, value in self.damage.items()},
+            "damage_type": self.damage_type,
+            "upcast": self.upcast,
+        }
+
+
+def lookup_dice(table: Mapping[int, str], level: int) -> str:
+    """取不超过 level 的最大档（与资源表、Amount.table 同一条规则）。"""
+    usable = [int(key) for key in table if int(key) <= int(level)]
+    return "" if not usable else str(table[max(usable)])
+
+
+def _parse_spell_range(data: Any, where: str) -> tuple[int | None, str, str]:
+    if data is None:
+        return None, "自身", "Self"
+    if isinstance(data, (int, float)) and not isinstance(data, bool):
+        return int(data), "%d 尺" % int(data), "%d feet" % int(data)
+    if isinstance(data, str):
+        key = data.strip().lower()
+        fixed = {
+            "self": (None, "自身", "Self"),
+            "touch": (None, "触碰", "Touch"),
+            "sight": (None, "视线", "Sight"),
+            "unlimited": (None, "无限", "Unlimited"),
+            "special": (None, "特殊", "Special"),
+        }
+        if key in fixed:
+            return fixed[key]
+        raise PluginError("%s 的施法距离 %r 无法识别（自己写 {feet: N}）" % (where, data))
+    if isinstance(data, Mapping):
+        if "feet" in data:
+            feet = int(data["feet"])
+            if feet <= 0:
+                raise PluginError("%s 的施法距离必须大于 0" % where)
+            return feet, "%d 尺" % feet, "%d feet" % feet
+        kind = str(data.get("kind", "")).lower()
+        return _parse_spell_range(kind or "self", where)
+    raise PluginError("%s 的施法距离必须是数字、字符串或映射" % where)
+
+
+def _parse_duration_kind(data: Any, where: str) -> tuple[str, str, str]:
+    if data is None:
+        return "instant", "立即", "Instantaneous"
+    if isinstance(data, str):
+        key = data.strip().lower()
+        if key in DURATION_KINDS:
+            return key, {"instant": "立即", "time": "持续", "permanent": "永久",
+                         "special": "特殊"}[key], key.title()
+        raise PluginError("%s 的持续时间 %r 无法识别" % (where, data))
+    if isinstance(data, Mapping):
+        kind = str(data.get("kind", "time")).lower()
+        if kind not in DURATION_KINDS:
+            raise PluginError("%s 的持续时间类别必须是 %s"
+                              % (where, "/".join(DURATION_KINDS)))
+        return (kind, str(data.get("zh", data.get("text", ""))),
+                str(data.get("en", data.get("text", ""))))
+    raise PluginError("%s 的持续时间必须是字符串或映射" % where)
+
+
+def parse_spell(data: Any, source: str = "") -> SpellDef:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的法术定义必须是映射" % source)
+    for key in ("id", "name", "level", "school", "text"):
+        if key not in data:
+            raise PluginError("%s 的法术定义缺少 %s（%s）" % (source, key, data.get("id", "?")))
+
+    ident = str(data["id"])
+    cast_kind, cast_zh, cast_en = _parse_cast_kind(data.get("casting"), ident)
+    duration_kind, dur_zh, dur_en = _parse_duration_kind(data.get("duration"), ident)
+    range_feet, range_zh, range_en = _parse_spell_range(data.get("range"), ident)
+    damage, damage_type, upcast = _parse_damage_table(data.get("damage"), ident)
+    components = tuple(str(item).lower() for item in (data.get("components") or ()))
+
+    return SpellDef(
+        id=ident,
+        name=Text.from_dict(data["name"], where="%s name" % ident),
+        level=int(data["level"]),
+        school=str(data["school"]).lower(),
+        text=Text.from_dict(data["text"], where="%s text" % ident),
+        cast_kind=cast_kind,
+        cast_zh=cast_zh,
+        cast_en=cast_en,
+        range_feet=range_feet,
+        range_zh=range_zh,
+        range_en=range_en,
+        components=components,
+        material=str(data.get("material", "")),
+        duration_kind=duration_kind,
+        duration_zh=dur_zh,
+        duration_en=dur_en,
+        concentration=bool(data.get("concentration", False)),
+        ritual=bool(data.get("ritual", False)),
+        save=str(data.get("save", "")).lower(),
+        attack=str(data.get("attack", "")).lower(),
+        area=_parse_area(data.get("area"), ident),
+        damage=damage,
+        damage_type=damage_type,
+        upcast=upcast,
+        source=source,
+    )
+
+
+def parse_spell_list(data: Any, source: str = "") -> tuple[str, tuple[str, ...]]:
+    """职业法术表：`{class: ..., spells: [id...]}` → (职业 id, 法术 id 元组)。"""
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的法术表必须是映射" % source)
+    for key in ("class", "spells"):
+        if key not in data:
+            raise PluginError("%s 的法术表缺少 %s" % (source, key))
+    class_id = str(data["class"])
+    if not is_valid(class_id):
+        raise PluginError("%s 的法术表 class 不合规范：%r" % (source, class_id))
+    spells: list[str] = []
+    for item in data.get("spells") or ():
+        ident = str(item)
+        if not is_valid(ident):
+            raise PluginError("%s 的法术表里有非法 id：%r" % (source, ident))
+        if ident in spells:
+            raise PluginError("%s 的法术表里 %s 重复" % (source, ident))
+        spells.append(ident)
+    if not spells:
+        raise PluginError("%s 的法术表是空的" % source)
+    return class_id, tuple(spells)
+
+
 # --- 插件与汇总 -------------------------------------------------------
 @dataclass
 class PluginContent:
@@ -654,6 +966,8 @@ class PluginContent:
     forms: dict[str, FormSpec] = field(default_factory=dict)
     armors: dict[str, ArmorDef] = field(default_factory=dict)
     weapons: dict[str, WeaponDef] = field(default_factory=dict)
+    spells: dict[str, SpellDef] = field(default_factory=dict)
+    spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -669,6 +983,8 @@ class ContentBundle:
     forms: dict[str, FormSpec] = field(default_factory=dict)
     armors: dict[str, ArmorDef] = field(default_factory=dict)
     weapons: dict[str, WeaponDef] = field(default_factory=dict)
+    spells: dict[str, SpellDef] = field(default_factory=dict)
+    spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -692,6 +1008,33 @@ class ContentBundle:
             raise PluginError("没有这件武器：%s" % weapon_id)
         return self.weapons[weapon_id]
 
+    def spell(self, spell_id: str) -> SpellDef:
+        if spell_id not in self.spells:
+            raise PluginError("没有这个法术：%s" % spell_id)
+        return self.spells[spell_id]
+
+    def spell_list(self, class_id: str) -> tuple[str, ...]:
+        return self.spell_lists.get(class_id, ())
+
+    def classes_for_spell(self, spell_id: str) -> tuple[str, ...]:
+        """哪些职业能施放这个法术 —— 从法术表反查，法术本身不存这份信息。
+
+        存两份必然漂移：法术表是**权威**（第三方插件加一行就能给某个职业补法术），
+        法术条目只描述法术自己。
+        """
+        return tuple(sorted(class_id for class_id, spells in self.spell_lists.items()
+                            if spell_id in spells))
+
+    def spells_of_level(self, level: int, class_id: str | None = None) -> tuple[SpellDef, ...]:
+        """某一环的法术（可按职业过滤），按 id 排序保证界面稳定。"""
+        allowed = set(self.spell_list(class_id)) if class_id else None
+        return tuple(sorted(
+            (spell for spell in self.spells.values()
+             if int(spell.level) == int(level)
+             and (allowed is None or spell.id in allowed)),
+            key=lambda item: item.id,
+        ))
+
     def subclass(self, subclass_id: str) -> SubclassDef:
         if subclass_id not in self.subclasses:
             raise PluginError("没有这个子职：%s（已加载：%s）"
@@ -713,6 +1056,8 @@ class ContentBundle:
             "forms": len(self.forms),
             "armors": len(self.armors),
             "weapons": len(self.weapons),
+            "spells": len(self.spells),
+            "spell_lists": len(self.spell_lists),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -792,8 +1137,48 @@ def load_plugin(folder: str | Path) -> PluginContent:
                 result.forms[form.id] = form
 
     _load_items(base, result)
+    _load_spells(base, result)
     result.book.validate_augments()
     return result
+
+
+def _load_spells(base: Path, result: PluginContent) -> None:
+    """法术与职业法术表。法术按环一文件（`spells/level-3.yaml`）。"""
+    folder = base / "spells"
+    if folder.exists():
+        for path in sorted(folder.glob("*.yaml")):
+            rel = "%s/spells/%s" % (base.name, path.name)
+            try:
+                rows = _read_yaml(path) or []
+            except PluginError as exc:
+                result.errors.append(str(exc))
+                continue
+            if isinstance(rows, Mapping):
+                rows = [rows]
+            for row in rows:
+                try:
+                    spell = parse_spell(row, source=rel)
+                except (PluginError, DndError) as exc:
+                    result.errors.append(str(exc))
+                    continue
+                if spell.id in result.spells:
+                    result.errors.append("%s 的法术 id 重复：%s" % (rel, spell.id))
+                    continue
+                result.spells[spell.id] = spell
+
+    lists = base / "spell-lists"
+    if lists.exists():
+        for path in sorted(lists.glob("*.yaml")):
+            rel = "%s/spell-lists/%s" % (base.name, path.name)
+            try:
+                class_id, spells = parse_spell_list(_read_yaml(path), source=rel)
+            except (PluginError, DndError) as exc:
+                result.errors.append(str(exc))
+                continue
+            if class_id in result.spell_lists:
+                result.errors.append("%s 的法术表职业重复：%s" % (rel, class_id))
+                continue
+            result.spell_lists[class_id] = spells
 
 
 def _load_items(base: Path, result: PluginContent) -> None:
@@ -877,9 +1262,34 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("子职 %s 重复提供" % subclass_id)
                 continue
             bundle.subclasses[subclass_id] = subclass
+        for spell_id, spell in content.spells.items():
+            if spell_id in bundle.spells:
+                bundle.errors.append("法术 %s 重复提供" % spell_id)
+                continue
+            bundle.spells[spell_id] = spell
+        for class_id, spells in content.spell_lists.items():
+            if class_id in bundle.spell_lists:
+                bundle.errors.append("法术表 %s 重复提供" % class_id)
+                continue
+            bundle.spell_lists[class_id] = spells
     _check_subclass_classes(bundle)
+    _check_spell_lists(bundle)
     bundle.book.validate_augments()
     return bundle
+
+
+def _check_spell_lists(bundle: ContentBundle) -> None:
+    """法术表里引用的 id 必须存在；表里也不能把不同环级的法术混在一起。
+
+    同样只能在合并之后查：法术与法术表可以来自不同插件。
+    """
+    for class_id, spells in bundle.spell_lists.items():
+        if class_id not in bundle.classes:
+            bundle.errors.append("法术表挂在未知职业上：%s" % class_id)
+        missing = [ident for ident in spells if ident not in bundle.spells]
+        if missing:
+            bundle.errors.append("法术表 %s 引用了不存在的法术：%s"
+                                 % (class_id, ", ".join(missing[:5])))
 
 
 def _check_subclass_classes(bundle: ContentBundle) -> None:
@@ -901,5 +1311,6 @@ __all__ = [
     "PluginContent", "ContentBundle",
     "parse_resource", "parse_class", "parse_subclass", "parse_cr_axis", "parse_form",
     "parse_armor", "parse_weapon", "powers_at_level",
+    "SpellDef", "parse_spell", "parse_spell_list", "lookup_dice",
     "load_plugin", "load_all",
 ]

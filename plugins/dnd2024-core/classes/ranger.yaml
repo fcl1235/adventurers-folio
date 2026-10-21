@@ -11,6 +11,7 @@ proficiencies:
   weapons: [simple, martial]
   armor: [light, medium, shield]
 caster: half
+casting_ability: wis
 subclass_level: 3
 skill_choices: 3
 skill_list:

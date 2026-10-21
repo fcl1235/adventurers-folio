@@ -11,6 +11,7 @@ proficiencies:
   weapons: [simple]
   armor: [light]
 caster: full
+casting_ability: cha
 subclass_level: 3
 skill_choices: 3
 skill_list:

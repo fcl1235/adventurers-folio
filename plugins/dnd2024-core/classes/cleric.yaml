@@ -11,6 +11,7 @@ proficiencies:
   weapons: [simple]
   armor: [light, medium, shield]
 caster: full
+casting_ability: wis
 subclass_level: 3
 skill_choices: 2
 skill_list:

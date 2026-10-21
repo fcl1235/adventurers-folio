@@ -12,6 +12,7 @@ proficiencies:
   weapons: [simple, martial]
   armor: [light, medium, heavy, shield]
 caster: half
+casting_ability: cha
 subclass_level: 3
 skill_choices: 2
 skill_list:

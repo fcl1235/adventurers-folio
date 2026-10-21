@@ -1,0 +1,934 @@
+# 由 tools/gen_spells.py 从 data/raw/spells.json + dnd55e_spells.json 生成。
+# 第 2 环，共 57 条。重跑生成器会覆盖；要长期改动请改数据源。
+# 没有结构化伤害的法术（控制类）只登记规则原文，damage 留空 —— 不猜。
+  - id: dnd2024.spell.acid_arrow
+    name: {zh: 强酸箭, en: Acid Arrow}
+    level: 2
+    school: evocation
+    casting: action
+    range: {feet: 90}
+    components: [v, s, m]
+    material: "powdered rhubarb leaf"
+    duration: instant
+    attack: ranged
+    damage: {type: acid, 2: 4d4}
+    upcast: "The damage (both initial and later) increases by 1d4 for each spell slot level above 2."
+    text:
+      zh: |-
+        远程法术攻击, 4d4 强酸, 下回合再受 2d4。
+      en: |-
+        A shimmering green arrow streaks toward a target within range and bursts in a spray of acid. Make a ranged spell attack against the target. On a hit, the target takes 4d4 Acid damage and 2d4 Acid damage at the end of its next turn. On a miss, the arrow splashes the target with acid for half as much of the initial damage only.
+
+  - id: dnd2024.spell.aid
+    name: {zh: 援助术, en: Aid}
+    level: 2
+    school: abjuration
+    casting: action
+    range: {feet: 30}
+    components: [v, s, m]
+    material: "a strip of white cloth"
+    duration: {kind: time, zh: 8 小时, en: 8 hours}
+    upcast: "Each target's Hit Points increase by 5 for each spell slot level above 2."
+    text:
+      zh: |-
+        至多 3 个生物 HP 上限 +5, 持续 8 小时。
+      en: |-
+        Choose up to three creatures within range. Each target's Hit Point maximum and current Hit Points increase by 5 for the duration.
+
+  - id: dnd2024.spell.alter_self
+    name: {zh: 变身术, en: Alter Self}
+    level: 2
+    school: transmutation
+    casting: action
+    range: self
+    components: [v, s]
+    duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
+    concentration: true
+    text:
+      zh: |-
+        专注 1 小时, 改变外貌、获得水下呼吸或天生武器。
+      en: |-
+        You alter your physical form. Choose one of the following options. Its effects last for the duration, during which you can take a Magic action to replace the option you chose with a different one. Aquatic Adaptation. You sprout gills and grow webs between your fingers. You can breathe underwater and gain a Swim Speed equal to your Speed. Change Appearance. You alter your appearance. You decide what you look like, including your height, weight, facial features, sound of your voice, hair length, coloration, and other distinguishing characteristics. You can make yourself appear as a member of another species, though none of your statistics change. You can't appear as a creature of a different size, and your basic shape stays the same; if you're bipedal, you can't use this spell to become quadrupedal, for instance. For the duration, you can take a Magic action to change your appearance in this way again. Natural Weapons. You grow claws (Slashing), fangs (Piercing), horns (Piercing), or hooves (Bludgeoning). When you use your Unarmed Strike to deal damage with that new growth, it deals 1d6 damage of the type in parentheses instead of dealing the normal damage for your Unarmed Strike, and you use your spellcasting ability modifier for the attack and damage rolls rather than using Strength.
+
+  - id: dnd2024.spell.animal_messenger
+    name: {zh: 动物信使, en: Animal Messenger}
+    level: 2
+    school: enchantment
+    casting: action
+    range: {feet: 30}
+    components: [v, s, m]
+    material: "a morsel of food"
+    duration: {kind: time, zh: 24 小时, en: 24 hours}
+    ritual: true
+    save: cha
+    upcast: "The spell's duration increases by 48 hours for each spell slot level above 2."
+    text:
+      zh: |-
+        让一只小动物替你送一条 25 字以内的讯息。
+      en: |-
+        A Tiny Beast of your choice that you can see within range must succeed on a Charisma saving throw, or it attempts to deliver a message for you (if the target's Challenge Rating isn't 0, it automatically succeeds). You specify a location you have visited and a recipient who matches a general description, such as "a person dressed in the uniform of the town guard" or "a red-haired dwarf wearing a pointed hat." You also communicate a message of up to twenty-five words. The Beast travels for the duration toward the specified location, covering about 25 miles per 24 hours or 50 miles if the Beast can fly. When the Beast arrives, it delivers your message to the creature that you described, mimicking your communication. If the Beast doesn't reach its destination before the spell ends, the message is lost, and the Beast returns to where you cast the spell.
+
+  - id: dnd2024.spell.arcane_lock
+    name: {zh: 秘法锁, en: Arcane Lock}
+    level: 2
+    school: abjuration
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "(gold dust worth 25+ GP, which the spell consumes"
+    duration: {kind: special, zh: 直到被驱散, en: Until dispelled}
+    text:
+      zh: |-
+        魔法锁住门/箱, 直至被解除。
+      en: |-
+        You touch a closed door, window, gate, container, or hatch and magically lock it for the duration. This lock can't be unlocked by any nonmagical means. You and any creatures you designate when you cast the spell can open and close the object despite the lock. You can also set a password that, when spoken within 5 feet of the object, unlocks it for 1 minute.
+
+  - id: dnd2024.spell.arcanists_magic_aura
+    name: {zh: 奥术魔法灵光, en: Arcanist's Magic Aura}
+    level: 2
+    school: illusion
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "a small square of silk"
+    duration: {kind: time, zh: 24 小时, en: 24 hours}
+    text:
+      zh: |-
+        伪造或掩盖目标的魔法灵光, 持续 24 小时。
+      en: |-
+        With a touch, you place an illusion on a willing creature or an object that isn't being worn or carried. A creature gains the Mask effect below, and an object gains the False Aura effect below. The effect lasts for the duration. If you cast the spell on the same target every day for 30 days, the illusion lasts until dispelled. Mask (Creature). Choose a creature type other than the target's actual type. Spells and other magical effects treat the target as if it were a creature of the chosen type. False Aura (Object). You change the way the target appears to spells and magical effects that detect magical auras, such as Detect Magic. You can make a nonmagical object appear magical, make a magic item appear nonmagical, or change the object's aura so that it appears to belong to a school of magic you choose.
+
+  - id: dnd2024.spell.augury
+    name: {zh: 占卜术, en: Augury}
+    level: 2
+    school: divination
+    casting: {kind: time, zh: 1 分钟, en: 1 minute}
+    range: self
+    components: [v, s, m]
+    material: "(specially marked sticks, bones, cards, or other divinatory tokens worth 25+ GP"
+    duration: instant
+    ritual: true
+    text:
+      zh: |-
+        询问一次 30 分钟内行动的吉凶, 得到预兆。
+      en: |-
+        You receive an omen from an otherworldly entity about the results of a course of action that you plan to take within the next 30 minutes. The GM chooses the omen from the Omens table. Omens Omen For Results That Will Be ... Woe Bad Weal and woe Good and bad Indifference Neither good nor bad The spell doesn't account for circumstances, such as other spells, that might change the results. If you cast the spell more than once before finishing a Long Rest, there is a cumulative 25 percent chance for each casting after the first that you get no answer.
+
+  - id: dnd2024.spell.barkskin
+    name: {zh: 树皮术, en: Barkskin}
+    level: 2
+    school: transmutation
+    casting: bonus
+    range: touch
+    components: [v, s, m]
+    material: "a handful of bark"
+    duration: {kind: time, zh: 1 小时, en: 1 hour}
+    text:
+      zh: |-
+        目标皮肤变树皮, AC 不低于 16(专注 1 小时)。
+      en: |-
+        You touch a willing creature. Until the spell ends, the target's skin assumes a bark-like appearance, and the target has an Armor Class of 17 if its AC is lower than that.
+
+  - id: dnd2024.spell.blindness_deafness
+    name: {zh: 目盲/失聪术, en: Blindness/Deafness}
+    level: 2
+    school: transmutation
+    casting: action
+    range: {feet: 120}
+    components: [v]
+    duration: {kind: time, zh: 1 分钟, en: 1 minute}
+    save: con
+    upcast: "You can target one additional creature for each spell slot level above 2."
+    text:
+      zh: |-
+        目标体质豁免失败则目盲或失聪(专注 1 分钟)。
+      en: |-
+        One creature that you can see within range must succeed on a Constitution saving throw, or it has the Blinded or Deafened condition (your choice) for the duration. At the end of each of its turns, the target repeats the save, ending the spell on itself on a success.
+
+  - id: dnd2024.spell.blur
+    name: {zh: 朦胧术, en: Blur}
+    level: 2
+    school: illusion
+    casting: action
+    range: self
+    components: [v]
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    text:
+      zh: |-
+        专注 1 分钟, 对你的攻击劣势。
+      en: |-
+        Your body becomes blurred. For the duration, any creature has Disadvantage on attack rolls against you. An attacker is immune to this effect if it perceives you with Blindsight or Truesight.
+
+  - id: dnd2024.spell.calm_emotions
+    name: {zh: 安定心神, en: Calm Emotions}
+    level: 2
+    school: enchantment
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: cha
+    area: {shape: sphere, feet: 20}
+    text:
+      zh: |-
+        平息 20 尺内人形生物的敌意或情绪(专注 1 分钟)。
+      en: |-
+        Each Humanoid in a 20-foot-radius Sphere centered on a point you choose within range must succeed on a Charisma saving throw or be affected by one of the following effects (choose for each creature): • The creature has Immunity to the Charmed and Frightened conditions until the spell ends. If the creature was already Charmed or Frightened, those conditions are suppressed for the duration. • The creature becomes Indifferent about creatures of your choice that it's Hostile toward. This indifference ends if the target takes damage or witnesses its allies taking damage. When the spell ends, the creature's attitude returns to normal.
+
+  - id: dnd2024.spell.continual_flame
+    name: {zh: 恒久火焰, en: Continual Flame}
+    level: 2
+    school: evocation
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "ruby dust worth 50+ GP, which, the spell consumes"
+    duration: {kind: special, zh: 直到被驱散, en: Until dispelled}
+    text:
+      zh: |-
+        造出一支永不熄灭的火焰(等同火炬, 可遮蔽)。
+      en: |-
+        A flame springs from an object that you touch. The effect casts Bright Light in a 20-foot radius and Dim Light for an additional 20 feet. It looks like a regular flame, but it creates no heat and consumes no fuel. The flame can be covered or hidden but not smothered or quenched.
+
+  - id: dnd2024.spell.darkness
+    name: {zh: 黑暗术, en: Darkness}
+    level: 2
+    school: evocation
+    casting: action
+    range: {feet: 60}
+    components: [v, m]
+    material: "bat fur and a piece of coal"
+    duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
+    concentration: true
+    area: {shape: sphere, feet: 15}
+    text:
+      zh: |-
+        15 尺半径魔法黑暗, 黑暗视觉也无法看穿(专注 10 分钟)。
+      en: |-
+        For the duration, magical Darkness spreads from a point within range and fills a 15-foot-radius Sphere. Darkvision can't see through it, and nonmagical light can't illuminate it. Alternatively, you cast the spell on an object that isn't being worn or carried, causing the Darkness to fill a 15-foot Emanation originating from that object. Covering that object with something opaque, such as a bowl or helm, blocks the Darkness. If any of this spell's area overlaps with an area of Bright Light or Dim Light created by a spell of level 2 or lower, that other spell is dispelled.
+
+  - id: dnd2024.spell.darkvision
+    name: {zh: 黑暗视觉, en: Darkvision}
+    level: 2
+    school: transmutation
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "a dried carrot"
+    duration: {kind: time, zh: 8 小时, en: 8 hours}
+    text:
+      zh: |-
+        目标获得 150 尺黑暗视觉, 持续 8 小时。
+      en: |-
+        For the duration, a willing creature you touch has Darkvision with a range of 150 feet.
+
+  - id: dnd2024.spell.detect_thoughts
+    name: {zh: 侦测思想, en: Detect Thoughts}
+    level: 2
+    school: divination
+    casting: action
+    range: self
+    components: [v, s, m]
+    material: "1 Copper Piece"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: wis
+    text:
+      zh: |-
+        专注 1 分钟, 读取 30 尺内生物表层思想。
+      en: |-
+        You activate one of the effects below. Until the spell ends, you can activate either effect as a Magic action on your later turns. Sense Thoughts. You sense the presence of thoughts within 30 feet of yourself that belong to creatures that know languages or are telepathic. You don't read the thoughts, but you know that a thinking creature is present. The spell is blocked by 1 foot of stone, dirt, or wood; 1 inch of metal; or a thin sheet of lead. Read Thoughts. Target one creature you can see within 30 feet of yourself or one creature within 30 feet of yourself that you detected with the Sense Thoughts option. You learn what is most on the target's mind right now. If the target doesn't know any languages and isn't telepathic, you learn nothing. As a Magic action on your next turn, you can try to probe deeper into the target's mind. If you probe deeper, the target makes a Wisdom saving throw. On a failed save, you discern the target's reasoning, emotions, and something that looms large in its mind (such as a worry, love, or hate). On a successful save, the spell ends. Either way, the target knows that you are probing into its mind, and until you shift your attention away from the target's mind, the target can take an action on its turn to make an Intelligence (Arcana) check against your spell save DC, ending the spell on a success.
+
+  - id: dnd2024.spell.dragons_breath
+    name: {zh: 龙息术, en: Dragon's Breath}
+    level: 2
+    school: transmutation
+    casting: bonus
+    range: touch
+    components: [v, s, m]
+    material: "a hot pepper"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: dex
+    area: {shape: cone, feet: 15}
+    text:
+      zh: |-
+        触碰目标获得吐息武器(2d6 元素伤害, 专注 1 分钟)。
+      en: |-
+        You touch one willing creature, and choose Acid, Cold, Fire, Lightning, or Poison. Until the spell ends, the target can take a Magic action to exhale a 15-foot Cone. Each creature in that area makes a Dexterity saving throw, taking 3d6 damage of the chosen type on a failed save or half as much damage on a successful one. Using a Higher-Level Spell Slot. The damage increases by 1d6 for each spell slot level above 2.
+
+  - id: dnd2024.spell.enhance_ability
+    name: {zh: 强化属性, en: Enhance Ability}
+    level: 2
+    school: transmutation
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "fur or a feather"
+    duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
+    concentration: true
+    upcast: "You can target one additional creature for each spell slot level above 2. You can choose a different ability for each target."
+    text:
+      zh: |-
+        专注 1 小时, 目标某项属性检定优势, 并附加对应增益。
+      en: |-
+        You touch a creature and choose Strength, Dexterity, Intelligence, Wisdom, or Charisma. For the duration, the target has Advantage on ability checks using the chosen ability.
+
+  - id: dnd2024.spell.enlarge_reduce
+    name: {zh: 变巨/缩小术, en: Enlarge/Reduce}
+    level: 2
+    school: transmutation
+    casting: action
+    range: {feet: 30}
+    components: [v, s, m]
+    material: "a pinch of powdered iron"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: con
+    text:
+      zh: |-
+        使目标变大(伤害 +1d4)或变小, 持续 1 分钟(专注)。
+      en: |-
+        For the duration, the spell enlarges or reduces a creature or an object you can see within range (see the chosen effect below). A targeted object must be neither worn nor carried. If the target is an unwilling creature, it can make a Constitution saving throw. On a successful save, the spell has no effect. Everything that a targeted creature is wearing and carrying changes size with it. Any item it drops returns to normal size at once. A thrown weapon or piece of ammunition returns to normal size immediately after it hits or misses a target. Enlarge. The target's size increases by one category-from Medium to Large, for example. The target also has Advantage on Strength checks and Strength saving throws. The target's attacks with its enlarged weapons or Unarmed Strikes deal an extra 1d4 damage on a hit. Reduce. The target's size decreases by one category-from Medium to Small, for example. The target also has Disadvantage on Strength checks and Strength saving throws. The target's attacks with its reduced weapons or Unarmed Strikes deal 1d4 less damage on a hit (this can't reduce the damage below 1).
+
+  - id: dnd2024.spell.enthrall
+    name: {zh: 迷魂术, en: Enthrall}
+    level: 2
+    school: enchantment
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: wis
+    text:
+      zh: |-
+        专注 1 分钟, 听众感知豁免失败则注意力被你吸引。
+      en: |-
+        You weave a distracting string of words, causing creatures of your choice that you can see within range to make a Wisdom saving throw. Any creature you or your companions are fighting automatically succeeds on this save. On a failed save, a target has a -10 penalty to Wisdom (Perception) checks and Passive Perception until the spell ends.
+
+  - id: dnd2024.spell.find_steed
+    name: {zh: 寻获坐骑, en: Find Steed}
+    level: 2
+    school: conjuration
+    casting: action
+    range: {feet: 30}
+    components: []
+    duration: instant
+    upcast: "Use the spell slot's level for the spell's level in the stat block. Large Celestial, Fey, or Fiend (Your Choice), Neutral AC 10 + 1 per spell level HP 5 + 10 per spell level (the steed has a number of Hit Dice [d10s] equal to the spell's level) Speed 60 ft., Fly 60 ft. (requires level 4+ spell) MOD SAVE MOD SAVE MOD SAVE Str 18 +4 +4 dex 12 +1 +1 con 14 +2 +2 int 6 -2 -2 WiS 12 +1 +1 chA 8 -1 -1 Senses Passive Perception 11 Languages Telepathy 1 mile (works only with you) CR None (XP 0; PB equals your Proficiency Bonus) Traits Life Bond. When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you're within 5 feet of it. Actions Otherworldly Slam. Melee Attack Roll: Bonus equals your spell attack modifier, reach 5 ft. Hit: 1d8 plus the spell's level of Radiant (Celestial), Psychic (Fey), or Necrotic (Fiend) damage. Bonus Actions Fell Glare (Fiend Only; Recharges after a Long Rest). Wisdom Saving Throw: DC equals your spell save DC, one creature within 60 feet the steed can see. Failure: The target has the Frightened condition until the end of your next turn. Fey Step (Fey Only; Recharges after a Long Rest). The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself. Healing Touch (Celestial Only; Recharges after a Long Rest). One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 plus the spell's level."
+    text:
+      zh: |-
+        召唤一匹精魂坐骑, 持续至你再次施法。
+      en: |-
+        You summon an otherworldly being that appears as a loyal steed in an unoccupied space of your choice within range. This creature uses the Otherworldly Steed stat block. If you already have a steed from this spell, the steed is replaced by the new one. The steed resembles a Large, rideable animal of your choice, such as a horse, a camel, a dire wolf, or an elk. Whenever you cast the spell, choose the steed's creature type-Celestial, Fey, or Fiendwhich determines certain traits in the stat block. Combat. The steed is an ally to you and your allies. In combat, it shares your Initiative count, and it functions as a controlled mount while you ride it (as defined in the rules on mounted combat). If you have the Incapacitated condition, the steed takes its turn immediately after yours and acts independently, focusing on protecting you. Disappearance of the Steed. The steed disappears if it drops to 0 Hit Points or if you die. When it disappears, it leaves behind anything it was wearing or carrying. If you cast this spell again, you decide whether you summon the steed that disappeared or a different one.
+
+  - id: dnd2024.spell.find_traps
+    name: {zh: 寻找陷阱, en: Find Traps}
+    level: 2
+    school: divination
+    casting: action
+    range: {feet: 120}
+    components: [v, s]
+    duration: instant
+    text:
+      zh: |-
+        感知 120 尺内陷阱的位置与性质。
+      en: |-
+        You sense any trap within range that is within line of sight. A trap, for the purpose of this spell, includes any object or mechanism that was created to cause damage or other danger. Thus, the spell would sense the Alarm or Glyph of Warding spell or a mechanical pit trap, but it wouldn't reveal a natural weakness in the floor, an unstable ceiling, or a hidden sinkhole. This spell reveals that a trap is present but not its location. You do learn the general nature of the danger posed by a trap you sense.
+
+  - id: dnd2024.spell.flame_blade
+    name: {zh: 火焰刀, en: Flame Blade}
+    level: 2
+    school: evocation
+    casting: bonus
+    range: self
+    components: [v, s, m]
+    material: "a sumac leaf"
+    duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
+    concentration: true
+    attack: melee
+    upcast: "The damage increases by 1d6 for each spell slot level above 2."
+    text:
+      zh: |-
+        造出一把火焰弯刀, 造成 3d6 火焰伤害(专注 10 分钟)。
+      en: |-
+        You evoke a fiery blade in your free hand. The blade is similar in size and shape to a scimitar, and it lasts for the duration. If you let go of the blade, it disappears, but you can evoke it again as a Bonus Action. As a Magic action, you can make a melee spell attack with the fiery blade. On a hit, the target takes Fire damage equal to 3d6 plus your spellcasting ability modifier. The flaming blade sheds Bright Light in a 10-foot radius and Dim Light for an additional 10 feet.
+
+  - id: dnd2024.spell.flaming_sphere
+    name: {zh: 烈焰球, en: Flaming Sphere}
+    level: 2
+    school: conjuration
+    casting: action
+    range: {feet: 60}
+    components: [v, s, m]
+    material: "a ball of wax"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: dex
+    damage: {type: fire, 2: 2d6}
+    upcast: "The damage increases by 1d6 for each spell slot level above 2."
+    text:
+      zh: |-
+        滚动的火球, 2d6 火焰伤害(敏捷豁免, 专注 1 分钟)。
+      en: |-
+        You create a 5-foot-diameter sphere of fire in an unoccupied space on the ground within range. It lasts for the duration. Any creature that ends its turn within 5 feet of the sphere makes a Dexterity saving throw, taking 2d6 Fire damage on a failed save or half as much damage on a successful one. As a Bonus Action, you can move the sphere up to 30 feet, rolling it along the ground. If you move the sphere into a creature's space, that creature makes the save against the sphere, and the sphere stops moving for the turn. When you move the sphere, you can direct it over barriers up to 5 feet tall and jump it across pits up to 10 feet wide. Flammable objects that aren't being worn or carried start burning if touched by the sphere, and it sheds Bright Light in a 20-foot radius and Dim Light for an additional 20 feet.
+
+  - id: dnd2024.spell.gentle_repose
+    name: {zh: 遗体防腐, en: Gentle Repose}
+    level: 2
+    school: necromancy
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "2 Copper Pieces, which the spell consumes"
+    duration: {kind: time, zh: 10 天, en: 10 days}
+    ritual: true
+    text:
+      zh: |-
+        保护尸体 10 天不腐, 延长复活时限。
+      en: |-
+        You touch a corpse or other remains. For the duration, the target is protected from decay and can't become Undead. The spell also effectively extends the time limit on raising the target from the dead, since days spent under the influence of this spell don't count against the time limit of spells such as Raise Dead.
+
+  - id: dnd2024.spell.gust_of_wind
+    name: {zh: 造风术, en: Gust of Wind}
+    level: 2
+    school: evocation
+    casting: action
+    range: self
+    components: [v, s, m]
+    material: "a legume seed"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: str
+    text:
+      zh: |-
+        60 尺直线强风, 推退生物并吹散雾气(专注 1 分钟)。
+      en: |-
+        A Line of strong wind 60 feet long and 10 feet wide blasts from you in a direction you choose for the duration. Each creature in the Line must succeed on a Strength saving throw or be pushed 15 feet away from you in a direction following the Line. A creature that ends its turn in the Line must make the same save. Any creature in the Line must spend 2 feet of movement for every 1 foot it moves when moving closer to you. The gust disperses gas or vapor, and it extinguishes candles and similar unprotected flames in the area. It causes protected flames, such as those of lanterns, to dance wildly and has a 50 percent chance to extinguish them. As a Bonus Action on your later turns, you can change the direction in which the Line blasts from you.
+
+  - id: dnd2024.spell.heat_metal
+    name: {zh: 灼热金属, en: Heat Metal}
+    level: 2
+    school: transmutation
+    casting: action
+    range: {feet: 60}
+    components: [v, s, m]
+    material: "a piece of iron and a flame"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: con
+    damage: {type: fire, 2: 2d8}
+    upcast: "The damage increases by 1d8 for each spell slot level above 2."
+    text:
+      zh: |-
+        加热金属物件, 触碰者受 2d8 火焰伤害(专注 1 分钟)。
+      en: |-
+        Choose a manufactured metal object, such as a metal weapon or a suit of Heavy or Medium metal armor, that you can see within range. You cause the object to glow red-hot. Any creature in physical contact with the object takes 2d8 Fire damage when you cast the spell. Until the spell ends, you can take a Bonus Action on each of your later turns to deal this damage again if the object is within range. If a creature is holding or wearing the object and takes the damage from it, the creature must succeed on a Constitution saving throw or drop the object if it can. If it doesn't drop the object, it has Disadvantage on attack rolls and ability checks until the start of your next turn.
+
+  - id: dnd2024.spell.hold_person
+    name: {zh: 人类定身术, en: Hold Person}
+    level: 2
+    school: enchantment
+    casting: action
+    range: {feet: 60}
+    components: [v, s, m]
+    material: "a straight piece of iron"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: wis
+    upcast: "You can target one additional Humanoid for each spell slot level above 2."
+    text:
+      zh: |-
+        人形生物感知豁免失败则麻痹(专注 1 分钟)。
+      en: |-
+        Choose a Humanoid that you can see within range. The target must succeed on a Wisdom saving throw or have the Paralyzed condition for the duration. At the end of each of its turns, the target repeats the save, ending the spell on itself on a success.
+
+  - id: dnd2024.spell.invisibility
+    name: {zh: 隐形术, en: Invisibility}
+    level: 2
+    school: illusion
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "an eyelash in gum arabic"
+    duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
+    concentration: true
+    upcast: "You can target one additional creature for each spell slot level above 2."
+    text:
+      zh: |-
+        目标隐形 1 小时(攻击或施法即结束)。
+      en: |-
+        A creature you touch has the Invisible condition until the spell ends. The spell ends early immediately after the target makes an attack roll, deals damage, or casts a spell.
+
+  - id: dnd2024.spell.knock
+    name: {zh: 敲击术, en: Knock}
+    level: 2
+    school: transmutation
+    casting: action
+    range: {feet: 60}
+    components: [v]
+    duration: instant
+    text:
+      zh: |-
+        打开一扇被锁/卡住的门或解除一个魔法锁。
+      en: |-
+        Choose an object that you can see within range. The object can be a door, a box, a chest, a set of manacles, a padlock, or another object that contains a mundane or magical means that prevents access. A target that is held shut by a mundane lock or that is stuck or barred becomes unlocked, unstuck, or unbarred. If the object has multiple locks, only one of them is unlocked. If the target is held shut by Arcane Lock, that spell is suppressed for 10 minutes, during which time the target can be opened and closed. When you cast the spell, a loud knock, audible up to 300 feet away, emanates from the target.
+
+  - id: dnd2024.spell.lesser_restoration
+    name: {zh: 次等复原术, en: Lesser Restoration}
+    level: 2
+    school: abjuration
+    casting: bonus
+    range: touch
+    components: [v, s]
+    duration: instant
+    text:
+      zh: |-
+        结束目标的目盲/失聪/中毒/麻痹或一种疾病。
+      en: |-
+        You touch a creature and end one condition on it: Blinded, Deafened, Paralyzed, or Poisoned.
+
+  - id: dnd2024.spell.levitate
+    name: {zh: 浮空术, en: Levitate}
+    level: 2
+    school: transmutation
+    casting: action
+    range: {feet: 60}
+    components: [v, s, m]
+    material: "a metal spring"
+    duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
+    concentration: true
+    save: con
+    text:
+      zh: |-
+        使一个生物或物件垂直升降 20 尺(专注 10 分钟)。
+      en: |-
+        One creature or loose object of your choice that you can see within range rises vertically up to 20 feet and remains suspended there for the duration. The spell can levitate an object that weighs up to 500 pounds. An unwilling creature that succeeds on a Constitution saving throw is unaffected. The target can move only by pushing or pulling against a fixed object or surface within reach (such as a wall or a ceiling), which allows it to move as if it were climbing. You can change the target's altitude by up to 20 feet in either direction on your turn. If you are the target, you can move up or down as part of your move. Otherwise, you can take a Magic action to move the target, which must remain within the spell's range. When the spell ends, the target floats gently to the ground if it is still aloft.
+
+  - id: dnd2024.spell.locate_animals_or_plants
+    name: {zh: 动植物定位术, en: Locate Animals or Plants}
+    level: 2
+    school: divination
+    casting: action
+    range: self
+    components: [v, s, m]
+    material: "fur from a bloodhound"
+    duration: instant
+    ritual: true
+    text:
+      zh: |-
+        得知 5 里内某类动植物的大致方位。
+      en: |-
+        Describe or name a specific kind of Beast, Plant creature, or nonmagical plant. You learn the direction and distance to the closest creature or plant of that kind within 5 miles, if any are present.
+
+  - id: dnd2024.spell.locate_object
+    name: {zh: 物品定位术, en: Locate Object}
+    level: 2
+    school: divination
+    casting: action
+    range: self
+    components: [v, s, m]
+    material: "a forked twig"
+    duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
+    concentration: true
+    text:
+      zh: |-
+        得知 1000 尺内某件熟悉物品的方位(专注 10 分钟)。
+      en: |-
+        Describe or name an object that is familiar to you. You sense the direction to the object's location if that object is within 1,000 feet of you. If the object is in motion, you know the direction of its movement. The spell can locate a specific object known to you if you have seen it up close-within 30 feet-at least once. Alternatively, the spell can locate the nearest object of a particular kind, such as a certain kind of apparel, jewelry, furniture, tool, or weapon. This spell can't locate an object if any thickness of lead blocks a direct path between you and the object.
+
+  - id: dnd2024.spell.magic_mouth
+    name: {zh: 魔嘴术, en: Magic Mouth}
+    level: 2
+    school: illusion
+    casting: {kind: time, zh: 1 分钟, en: 1 minute}
+    range: {feet: 30}
+    components: [v, s, m]
+    material: "jade dust worth 10+ GP, which the spell consumes"
+    duration: {kind: special, zh: 直到被驱散, en: Until dispelled}
+    ritual: true
+    text:
+      zh: |-
+        让一个物件在触发条件满足时播放你预设的 25 字讯息。
+      en: |-
+        You implant a message within an object in range-a message that is uttered when a trigger condition is met. Choose an object that you can see and that isn't being worn or carried by another creature. Then speak the message, which must be 25 words or fewer, though it can be delivered over as long as 10 minutes. Finally, determine the circumstance that will trigger the spell to deliver your message. When that trigger occurs, a magical mouth appears on the object and recites the message in your voice and at the same volume you spoke. If the object you chose has a mouth or something that looks like a mouth (for example, the mouth of a statue), the magical mouth appears there, so the words appear to come from the object's mouth. When you cast this spell, you can have the spell end after it delivers its message, or it can remain and repeat its message whenever the trigger occurs. The trigger can be as general or as detailed as you like, though it must be based on visual or audible conditions that occur within 30 feet of the object. For example, you could instruct the mouth to speak when any creature moves within 30 feet of the object or when a silver bell rings within 30 feet of it.
+
+  - id: dnd2024.spell.magic_weapon
+    name: {zh: 魔化武器, en: Magic Weapon}
+    level: 2
+    school: transmutation
+    casting: bonus
+    range: touch
+    components: [v, s]
+    duration: {kind: time, zh: 1 小时, en: 1 hour}
+    upcast: "The bonus increases to +2 with a level 3-5 spell slot. The bonus increases to +3 with a level 6+ spell slot."
+    text:
+      zh: |-
+        武器变为魔法武器, 攻击与伤害 +1(专注 1 小时)。
+      en: |-
+        You touch a nonmagical weapon. Until the spell ends, that weapon becomes a magic weapon with a +1 bonus to attack rolls and damage rolls. The spell ends early if you cast it again.
+
+  - id: dnd2024.spell.mind_spike
+    name: {zh: 心灵尖刺, en: Mind Spike}
+    level: 2
+    school: divination
+    casting: action
+    range: {feet: 120}
+    components: [s]
+    duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
+    concentration: true
+    save: wis
+    damage: {type: psychic, 2: 3d8}
+    upcast: "The damage increases by 1d8 for each spell slot level above 2."
+    text:
+      zh: |-
+        目标感知豁免失败受 3d8 心灵伤害, 且你能感知其位置。
+      en: |-
+        You drive a spike of psionic energy into the mind of one creature you can see within range. The target makes a Wisdom saving throw, taking 3d8 Psychic damage on a failed save or half as much damage on a successful one. On a failed save, you also always know the target's location until the spell ends, but only while the two of you are on the same plane of existence. While you have this knowledge, the target can't become hidden from you, and if it has the Invisible condition, it gains no benefit from that condition against you.
+
+  - id: dnd2024.spell.mirror_image
+    name: {zh: 镜影术, en: Mirror Image}
+    level: 2
+    school: illusion
+    casting: action
+    range: self
+    components: [v, s]
+    duration: {kind: time, zh: 1 分钟, en: 1 minute}
+    text:
+      zh: |-
+        造出 3 个镜像, 使攻击可能打空, 持续 1 分钟。
+      en: |-
+        Three illusory duplicates of yourself appear in your space. Until the spell ends, the duplicates move with you and mimic your actions, shifting position so it's impossible to track which image is real. Each time a creature hits you with an attack roll during the spell's duration, roll a d6 for each of your remaining duplicates. If any of the d6s rolls a 3 or higher, one of the duplicates is hit instead of you, and the duplicate is destroyed. The duplicates otherwise ignore all other damage and effects. The spell ends when all three duplicates are destroyed. A creature is unaffected by this spell if it has the Blinded condition, Blindsight, or Truesight.
+
+  - id: dnd2024.spell.misty_step
+    name: {zh: 迷踪步, en: Misty Step}
+    level: 2
+    school: conjuration
+    casting: bonus
+    range: self
+    components: [v]
+    duration: instant
+    text:
+      zh: |-
+        附赠动作, 传送至 30 尺内可见空地。
+      en: |-
+        Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space you can see.
+
+  - id: dnd2024.spell.moonbeam
+    name: {zh: 月华之光, en: Moonbeam}
+    level: 2
+    school: evocation
+    casting: action
+    range: {feet: 120}
+    components: [v, s, m]
+    material: "a moonseed leaf"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: con
+    damage: {type: radiant, 2: 2d10}
+    upcast: "The damage increases by 1d10 for each spell slot level above 2."
+    text:
+      zh: |-
+        5 尺半径光柱, 2d10 光耀伤害(体质豁免, 专注 1 分钟)。
+      en: |-
+        A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high Cylinder centered on a point within range. Until the spell ends, Dim Light fills the Cylinder, and you can take a Magic action on later turns to move the Cylinder up to 60 feet. When the Cylinder appears, each creature in it makes a Constitution saving throw. On a failed save, a creature takes 2d10 Radiant damage, and if the creature is shape-shifted (as a result of the Polymorph spell, for example), it reverts to its true form and can't shape-shift until it leaves the Cylinder. On a successful save, a creature takes half as much damage only. A creature also makes this save when the spell's area moves into its space and when it enters the spell's area or ends its turn there. A creature makes this save only once per turn.
+
+  - id: dnd2024.spell.pass_without_trace
+    name: {zh: 行踪无痕, en: Pass without Trace}
+    level: 2
+    school: abjuration
+    casting: action
+    range: self
+    components: [v, s, m]
+    material: "ashes from burned mistletoe"
+    duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
+    concentration: true
+    area: {shape: emanation, feet: 30}
+    text:
+      zh: |-
+        专注 1 小时, 你与同伴隐匿 +10, 不留痕迹。
+      en: |-
+        You radiate a concealing aura in a 30-foot Emanation for the duration. While in the aura, you and each creature you choose have a +10 bonus to Dexterity (Stealth) checks and leave no tracks.
+
+  - id: dnd2024.spell.phantasmal_force
+    name: {zh: 幻影之力, en: Phantasmal Force}
+    level: 2
+    school: illusion
+    casting: action
+    range: {feet: 60}
+    components: [v, s, m]
+    material: "a bit of fleece"
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: int
+    area: {shape: cube, feet: 10}
+    damage: {type: psychic, 2: 2d8}
+    text:
+      zh: |-
+        目标智力豁免失败则相信一个幻影为真(专注 1 分钟)。
+      en: |-
+        You attempt to craft an illusion in the mind of a creature you can see within range. The target makes an Intelligence saving throw. On a failed save, you create a phantasmal object, creature, or other phenomenon that is no larger than a 10-foot Cube and that is perceivable only to the target for the duration. The phantasm includes sound, temperature, and other stimuli. The target can take a Study action to examine the phantasm with an Intelligence (Investigation) check against your spell save DC. If the check succeeds, the target realizes that the phantasm is an illusion, and the spell ends. While affected by the spell, the target treats the phantasm as if it were real and rationalizes any illogical outcomes from interacting with it. For example, if the target steps through a phantasmal bridge and survives the fall, it believes the bridge exists and something else caused it to fall. An affected target can even take damage from the illusion if the phantasm represents a dangerous creature or hazard. On each of your turns, such a phantasm can deal 2d8 Psychic damage to the target if it is in the phantasm's area or within 5 feet of the phantasm. The target perceives the damage as a type appropriate to the illusion.
+
+  - id: dnd2024.spell.prayer_of_healing
+    name: {zh: 治疗祷言, en: Prayer of Healing}
+    level: 2
+    school: abjuration
+    casting: {kind: time, zh: 10 分钟, en: 10 minutes}
+    range: {feet: 30}
+    components: [v]
+    duration: instant
+    text:
+      zh: |-
+        10 分钟内治疗至多 6 个生物各 2d8+施法属性 HP。
+      en: |-
+        Up to five creatures of your choice who remain within range for the spell's entire casting gain the benefits of a Short Rest and also regain 2d8 Hit Points. A creature can't be affected by this spell again until that creature finishes a Long Rest. Using a Higher-Level Spell Slot. The healing increases by 1d8 for each spell slot level above 2.
+
+  - id: dnd2024.spell.protection_from_poison
+    name: {zh: 防护毒素, en: Protection from Poison}
+    level: 2
+    school: abjuration
+    casting: action
+    range: touch
+    components: [v, s]
+    duration: {kind: time, zh: 1 小时, en: 1 hour}
+    text:
+      zh: |-
+        目标中毒状态结束, 毒素豁免优势, 毒素伤害抗性。
+      en: |-
+        You touch a creature and end the Poisoned condition on it. For the duration, the target has Advantage on saving throws to avoid or end the Poisoned condition, and it has Resistance to Poison damage.
+
+  - id: dnd2024.spell.ray_of_enfeeblement
+    name: {zh: 衰弱射线, en: Ray of Enfeeblement}
+    level: 2
+    school: necromancy
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    save: con
+    text:
+      zh: |-
+        目标力量豁免失败则力量检定与攻击 -1d4(专注 1 分钟)。
+      en: |-
+        A beam of enervating energy shoots from you toward a creature within range. The target must make a Constitution saving throw. On a successful save, the target has Disadvantage on the next attack roll it makes until the start of your next turn. On a failed save, the target has Disadvantage on Strength-based D20 Tests for the duration. During that time, it also subtracts 1d8 from all its damage rolls. The target repeats the save at the end of each of its turns, ending the spell on a success.
+
+  - id: dnd2024.spell.rope_trick
+    name: {zh: 绳技, en: Rope Trick}
+    level: 2
+    school: transmutation
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "a segment of rope"
+    duration: {kind: time, zh: 1 小时, en: 1 hour}
+    text:
+      zh: |-
+        绳子立起通往异次元空间, 可容纳 8 人, 持续 1 小时。
+      en: |-
+        You touch a rope. One end of it hovers upward until the rope hangs perpendicular to the ground or the rope reaches a ceiling. At the rope's upper end, an Invisible 3-foot-by-5-foot portal opens to an extradimensional space that lasts until the spell ends. That space can be reached by climbing the rope, which can be pulled into or dropped out of it. The space can hold up to eight Medium or smaller creatures. Attacks, spells, and other effects can't pass into or out of the space, but creatures inside it can see through the portal. Anything inside the space drops out when the spell ends.
+
+  - id: dnd2024.spell.scorching_ray
+    name: {zh: 灼热射线, en: Scorching Ray}
+    level: 2
+    school: evocation
+    casting: action
+    range: {feet: 120}
+    components: [v, s]
+    duration: instant
+    attack: ranged
+    damage: {type: fire, 2: 2d6}
+    upcast: "You create one additional ray for each spell slot level above 2."
+    text:
+      zh: |-
+        3 道火焰射线, 每道 2d6 火焰(远程法术攻击)。
+      en: |-
+        You hurl three fiery rays. You can hurl them at one target within range or at several. Make a ranged spell attack for each ray. On a hit, the target takes 2d6 Fire damage.
+
+  - id: dnd2024.spell.see_invisibility
+    name: {zh: 识破隐形, en: See Invisibility}
+    level: 2
+    school: divination
+    casting: action
+    range: self
+    components: [v, s, m]
+    material: "a pinch of talc"
+    duration: {kind: time, zh: 1 小时, en: 1 hour}
+    text:
+      zh: |-
+        1 小时内看见隐形生物与以太生物。
+      en: |-
+        For the duration, you see creatures and objects that have the Invisible condition as if they were visible, and you can see into the Ethereal Plane. Creatures and objects there appear ghostly.
+
+  - id: dnd2024.spell.shatter
+    name: {zh: 粉碎音波, en: Shatter}
+    level: 2
+    school: evocation
+    casting: action
+    range: {feet: 60}
+    components: [v, s, m]
+    material: "a chip of mica"
+    duration: instant
+    save: con
+    area: {shape: sphere, feet: 10}
+    damage: {type: thunder, 2: 3d8}
+    text:
+      zh: |-
+        10 尺半径巨响, 3d8 雷鸣伤害(体质豁免减半, 构装劣势)。
+      en: |-
+        A loud noise erupts from a point of your choice within range. Each creature in a 10-foot-radius Sphere centered there makes a Constitution saving throw, taking 3d8 Thunder damage on a failed save or half as much damage on a successful one. A Construct has Disadvantage on the save. A nonmagical object that isn't being worn or carried also takes the damage if it's in the spell's area. Using a Higher-Level Spell Slot. The damage increases by 1d8 for each spell slot level above 2.
+
+  - id: dnd2024.spell.shining_smite
+    name: {zh: 闪耀斩, en: Shining Smite}
+    level: 2
+    school: transmutation
+    casting: bonus
+    range: self
+    components: [v]
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    damage: {type: radiant, 2: 2d6}
+    upcast: "The damage increases by 1d6 for each spell slot level above 2."
+    text:
+      zh: |-
+        命中后目标被光标记, 下次攻击对其优势(专注 1 分钟)。
+      en: |-
+        The target hit by the strike takes an extra 2d6 Radiant damage from the attack. Until the spell ends, the target sheds Bright Light in a 5-foot radius, attack rolls against it have Advantage, and it can't benefit from the Invisible condition.
+
+  - id: dnd2024.spell.silence
+    name: {zh: 沉默术, en: Silence}
+    level: 2
+    school: illusion
+    casting: action
+    range: {feet: 120}
+    components: [v, s]
+    duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
+    concentration: true
+    ritual: true
+    area: {shape: sphere, feet: 20}
+    text:
+      zh: |-
+        20 尺半径无声, 无法施放有言语成分的法术(专注 10 分钟)。
+      en: |-
+        For the duration, no sound can be created within or pass through a 20-foot-radius Sphere centered on a point you choose within range. Any creature or object entirely inside the Sphere has Immunity to Thunder damage, and creatures have the Deafened condition while entirely inside it. Casting a spell that includes a Verbal component is impossible there.
+
+  - id: dnd2024.spell.spider_climb
+    name: {zh: 蛛行术, en: Spider Climb}
+    level: 2
+    school: transmutation
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "a drop of bitumen and a spider"
+    duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
+    concentration: true
+    upcast: "You can target one additional creature for each spell slot level above 2."
+    text:
+      zh: |-
+        目标获得攀爬速度, 可倒挂行走(专注 1 小时)。
+      en: |-
+        Until the spell ends, one willing creature you touch gains the ability to move up, down, and across vertical surfaces and along ceilings, while leaving its hands free. The target also gains a Climb Speed equal to its Speed.
+
+  - id: dnd2024.spell.spike_growth
+    name: {zh: 荆棘丛生, en: Spike Growth}
+    level: 2
+    school: transmutation
+    casting: action
+    range: {feet: 150}
+    components: [v, s, m]
+    material: "seven thorns"
+    duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
+    concentration: true
+    area: {shape: sphere, feet: 20}
+    damage: {type: piercing, 2: 2d4}
+    text:
+      zh: |-
+        20 尺半径地面布满尖刺, 移动受 2d4 穿刺伤害。
+      en: |-
+        The ground in a 20-foot-radius Sphere centered on a point within range sprouts hard spikes and thorns. The area becomes Difficult Terrain for the duration. When a creature moves into or within the area, it takes 2d4 Piercing damage for every 5 feet it travels. The transformation of the ground is camouflaged to look natural. Any creature that can't see the area when the spell is cast must take a Search action and succeed on a Wisdom (Perception or Survival) check against your spell save DC to recognize the terrain as hazardous before entering it.
+
+  - id: dnd2024.spell.spiritual_weapon
+    name: {zh: 灵体武器, en: Spiritual Weapon}
+    level: 2
+    school: evocation
+    casting: bonus
+    range: {feet: 60}
+    components: [v, s]
+    duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
+    concentration: true
+    attack: melee
+    upcast: "The damage increases by 1d8 for every slot level above 2."
+    text:
+      zh: |-
+        造出浮动武器, 附赠动作攻击, 1d8+施法属性力场伤害。
+      en: |-
+        You create a floating, spectral force that resembles a weapon of your choice and lasts for the duration. The force appears within range in a space of your choice, and you can immediately make one melee spell attack against one creature within 5 feet of the force. On a hit, the target takes Force damage equal to 1d8 plus your spellcasting ability modifier. As a Bonus Action on your later turns, you can move the force up to 20 feet and repeat the attack against a creature within 5 feet of it.
+
+  - id: dnd2024.spell.suggestion
+    name: {zh: 暗示术, en: Suggestion}
+    level: 2
+    school: enchantment
+    casting: action
+    range: {feet: 30}
+    components: [v, m]
+    material: "a drop of honey"
+    duration: {kind: time, zh: 专注，最多 8 小时, en: up to 8 hours}
+    concentration: true
+    save: wis
+    text:
+      zh: |-
+        专注 8 小时, 目标感知豁免失败则执行一个合理建议。
+      en: |-
+        You suggest a course of activity-described in no more than 25 words-to one creature you can see within range that can hear and understand you. The suggestion must sound achievable and not involve anything that would obviously deal damage to the target or its allies. For example, you could say, "Fetch the key to the cult's treasure vault, and give the key to me." Or you could say, "Stop fighting, leave this library peacefully, and don't return." The target must succeed on a Wisdom saving throw or have the Charmed condition for the duration or until you or your allies deal damage to the target. The Charmed target pursues the suggestion to the best of its ability. The suggested activity can continue for the entire duration, but if the suggested activity can be completed in a shorter time, the spell ends for the target upon completing it.
+
+  - id: dnd2024.spell.warding_bond
+    name: {zh: 守护之链, en: Warding Bond}
+    level: 2
+    school: abjuration
+    casting: action
+    range: touch
+    components: [v, s, m]
+    material: "a pair of platinum rings worth 50+ GP each, which you and the target must wear for the duration"
+    duration: {kind: time, zh: 1 小时, en: 1 hour}
+    text:
+      zh: |-
+        目标 AC 与豁免 +1, 并分担其受到的伤害(需佩戴配对戒指)。
+      en: |-
+        You touch another creature that is willing and create a mystic connection between you and the target until the spell ends. While the target is within 60 feet of you, it gains a +1 bonus to AC and saving throws, and it has Resistance to all damage. Also, each time it takes damage, you take the same amount of damage. The spell ends if you drop to 0 Hit Points or if you and the target become separated by more than 60 feet. It also ends if the spell is cast again on either of the connected creatures.
+
+  - id: dnd2024.spell.web
+    name: {zh: 蛛网术, en: Web}
+    level: 2
+    school: conjuration
+    casting: action
+    range: {feet: 60}
+    components: [v, s, m]
+    material: "a bit of spiderweb"
+    duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
+    concentration: true
+    save: dex
+    area: {shape: cube, feet: 20}
+    damage: {type: fire, 2: 2d4}
+    text:
+      zh: |-
+        20 尺立方蛛网, 敏捷豁免失败被束缚(专注 1 小时)。
+      en: |-
+        You conjure a mass of sticky webbing at a point within range. The webs fill a 20-foot Cube there for the duration. The webs are Difficult Terrain, and the area within them is Lightly Obscured. If the webs aren't anchored between two solid masses (such as walls or trees) or layered across a floor, wall, or ceiling, the web collapses on itself, and the spell ends at the start of your next turn. Webs layered over a flat surface have a depth of 5 feet. The first time a creature enters the webs on a turn or starts its turn there, it must succeed on a Dexterity saving throw or have the Restrained condition while in the webs or until it breaks free. A creature Restrained by the webs can take an action to make a Strength (Athletics) check against your spell save DC. If it succeeds, it is no longer Restrained. The webs are flammable. Any 5-foot Cube of webs exposed to fire burns away in 1 round, dealing 2d4 Fire damage to any creature that starts its turn in the fire.
+
+  - id: dnd2024.spell.zone_of_truth
+    name: {zh: 诚实之域, en: Zone of Truth}
+    level: 2
+    school: enchantment
+    casting: action
+    range: {feet: 60}
+    components: [v, s]
+    duration: {kind: time, zh: 10 分钟, en: 10 minutes}
+    save: cha
+    area: {shape: sphere, feet: 15}
+    text:
+      zh: |-
+        15 尺半径内生物不能说谎(魅力豁免否定, 专注 10 分钟)。
+      en: |-
+        You create a magical zone that guards against deception in a 15-foot-radius Sphere centered on a point within range. Until the spell ends, a creature that enters the spell's area for the first time on a turn or starts its turn there makes a Charisma saving throw. On a failed save, a creature can't speak a deliberate lie while in the radius. You know whether a creature succeeds or fails on this save. An affected creature is aware of the spell and can avoid answering questions to which it would normally respond with a lie. Such a creature can be evasive yet must be truthful.

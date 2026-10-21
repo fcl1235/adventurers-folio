@@ -108,6 +108,41 @@ def cmd_forms(args) -> int:
     return 0
 
 
+def cmd_spells(args) -> int:
+    """法术目录：默认只列一个职业一档环，免得刷屏。"""
+    bundle = api.load_content(args.root)
+    catalog = api.spell_catalog(bundle, args.cls or None, args.level, locale=args.lang)
+    print("%s 共 %d 条" % (
+        "%s 第 %s 环" % (args.cls or "全部职业", "全部" if args.level is None else args.level),
+        catalog["count"]))
+    for row in catalog["spells"]:
+        marks = "".join(["C" if row["concentration"] else "", "R" if row["ritual"] else ""])
+        print("  %d %-12s %-42s %-28s %s"
+              % (row["level"], row["school"], row["id"], row["name"], marks))
+    return 0
+
+
+def cmd_spell(args) -> int:
+    bundle = api.load_content(args.root)
+    data = api.spell_info(bundle, args.spell, locale=args.lang)
+    print("%s（%s）" % (data["name"], data["id"]))
+    print("环级 %d · %s · %s" % (data["level"], data["school"],
+                                "专注" if data["concentration"] else "非专注"))
+    print("施法 %s · 距离 %s · 持续 %s · 成分 %s"
+          % (data["cast"]["text"], data["range"]["text"], data["duration"]["text"],
+             "/".join(item.upper() for item in data["components"])))
+    if data["save"]:
+        print("豁免 %s" % data["save"].upper())
+    if data["attack"]:
+        print("法术攻击：%s" % data["attack"])
+    if data["area"]:
+        print("范围 %s %d 尺" % (data["area"]["shape"], data["area"]["feet"]))
+    if data["damage"]:
+        print("伤害 %s（%s）" % (data["damage_at_base"], data["damage_type"]))
+    print(data["text"])
+    return 0
+
+
 def cmd_subclasses(args) -> int:
     """按职业分组列出子职 —— 建角色时先看这张表。"""
     bundle = api.load_content(args.root)
@@ -239,6 +274,19 @@ def main(argv=None) -> int:
     use.add_argument("--form", default=None, help="变形类能力要选的形态 id")
     use.add_argument("--seed", type=int, default=None)
     use.set_defaults(func=cmd_use)
+
+    spells = sub.add_parser("spells", help="列出法术（可按职业与环级过滤）")
+    spells.add_argument("--class", dest="cls", default=None)
+    spells.add_argument("--level", type=int, default=None)
+    spells.add_argument("--root", default="plugins")
+    spells.add_argument("--lang", default="zh", choices=["zh", "en"])
+    spells.set_defaults(func=cmd_spells)
+
+    spell = sub.add_parser("spell", help="看一个法术的细节")
+    spell.add_argument("--spell", required=True)
+    spell.add_argument("--root", default="plugins")
+    spell.add_argument("--lang", default="zh", choices=["zh", "en"])
+    spell.set_defaults(func=cmd_spell)
 
     subs = sub.add_parser("subclasses", help="列出子职（可按职业过滤）")
     subs.add_argument("--class", dest="cls", default=None)

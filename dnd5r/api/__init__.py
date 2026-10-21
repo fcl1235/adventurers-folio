@@ -37,6 +37,9 @@ from ..rules.morph import reasons_for
 from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
 from ..rules.resolver import RefContext, Resolver, crit_text
+from ..rules.spellcasting import (
+    casting_summary, spell_detail, spell_options,
+)
 from ..rules.scores import score_bonus_of
 from ..rules.weapons import profiles_for
 from ..rules.powers import use_power as _use_power
@@ -58,6 +61,39 @@ def content_summary(bundle: ContentBundle, locale: str = "zh") -> dict:
     stats["class_names"] = sorted(item.name.get(locale) for item in bundle.classes.values())
     stats["plugins"] = [manifest.id for manifest in bundle.manifests]
     return stats
+
+
+def spell_catalog(
+    bundle: ContentBundle,
+    class_id: str | None = None,
+    level: int | None = None,
+    locale: str = "zh",
+) -> dict:
+    """法术目录（可按职业与环级过滤）。给界面出选择列表用。"""
+    allowed = set(bundle.spell_list(class_id)) if class_id else None
+    rows = [
+        spell for spell in bundle.spells.values()
+        if (level is None or int(spell.level) == int(level))
+        and (allowed is None or spell.id in allowed)
+    ]
+    rows.sort(key=lambda item: (int(item.level), item.id))
+    return {
+        "class": class_id,
+        "level": level,
+        "count": len(rows),
+        "spells": [
+            {"id": spell.id, "name": spell.name.get(locale), "level": int(spell.level),
+             "school": spell.school, "ritual": spell.ritual,
+             "concentration": spell.concentration,
+             "classes": list(bundle.classes_for_spell(spell.id))}
+            for spell in rows
+        ],
+    }
+
+
+def spell_info(bundle: ContentBundle, spell_id: str, locale: str = "zh") -> dict:
+    """单条法术的完整展示数据（含基础环的伤害骰式）。"""
+    return spell_detail(bundle, spell_id, locale)
 
 
 def subclass_options(
@@ -301,6 +337,15 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "powers": powers,
     }
     if profile:
+        # 施法块：每个施法职业一块（兼职各算各的 DC 与法位）
+        casting = []
+        for entry in profile.classes:
+            class_def = content.classes.get(entry.class_id)
+            if class_def is None or class_def.caster is not None and class_def.caster.value == "none":
+                continue
+            casting.append(casting_summary(content, actor, entry.class_id,
+                                           entry.class_level, resolver, locale))
+        sheet["spellcasting"] = casting
         sheet["classes"] = [
             {"id": entry.class_id, "class_level": int(entry.class_level),
              "name": content.classes[entry.class_id].name.get(locale)

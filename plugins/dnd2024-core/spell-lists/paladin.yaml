@@ -1,0 +1,43 @@
+# 由 tools/gen_spells.py 从 data/raw/spells.json 的 classes 字段反推。
+# paladin 的法术表：共 38 条。加法术只需在这里加一行 id。
+
+class: dnd2024.class.paladin
+spells:
+  - dnd2024.spell.aid
+  - dnd2024.spell.aura_of_life
+  - dnd2024.spell.banishment
+  - dnd2024.spell.bless
+  - dnd2024.spell.command
+  - dnd2024.spell.create_food_and_water
+  - dnd2024.spell.cure_wounds
+  - dnd2024.spell.daylight
+  - dnd2024.spell.death_ward
+  - dnd2024.spell.detect_evil_and_good
+  - dnd2024.spell.detect_magic
+  - dnd2024.spell.detect_poison_and_disease
+  - dnd2024.spell.dispel_evil_and_good
+  - dnd2024.spell.dispel_magic
+  - dnd2024.spell.divine_favor
+  - dnd2024.spell.divine_smite
+  - dnd2024.spell.find_steed
+  - dnd2024.spell.geas
+  - dnd2024.spell.gentle_repose
+  - dnd2024.spell.greater_restoration
+  - dnd2024.spell.heroism
+  - dnd2024.spell.lesser_restoration
+  - dnd2024.spell.locate_creature
+  - dnd2024.spell.locate_object
+  - dnd2024.spell.magic_circle
+  - dnd2024.spell.magic_weapon
+  - dnd2024.spell.prayer_of_healing
+  - dnd2024.spell.protection_from_evil_and_good
+  - dnd2024.spell.protection_from_poison
+  - dnd2024.spell.purify_food_and_drink
+  - dnd2024.spell.raise_dead
+  - dnd2024.spell.remove_curse
+  - dnd2024.spell.revivify
+  - dnd2024.spell.searing_smite
+  - dnd2024.spell.shield_of_faith
+  - dnd2024.spell.shining_smite
+  - dnd2024.spell.warding_bond
+  - dnd2024.spell.zone_of_truth
