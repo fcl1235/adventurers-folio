@@ -1,0 +1,158 @@
+# P4 验证用最小兽栏（16 种，CR 0–1）。
+#
+# 这里只放「荒野变形能变成的野兽」，够覆盖 CR 轴的三档与游泳/飞行解禁即可；
+# 完整怪物表在 P8 由 monsters 插件补，召唤物另走 summons 插件。
+#
+# 数值基线：SRD 5.2（2024）。ac 是**最终 AC**，不含任何敏捷推导 ——
+# 内核会反推成 ac_base，所以这里写多少最终就是多少。
+
+- id: dnd2024.form.beast.bat
+  name: { zh: 蝙蝠, en: Bat }
+  size: tiny
+  ac: 12
+  hp: 1
+  cr: 0
+  abilities: { str: 2, dex: 15, con: 8, int: 2, wis: 12, cha: 4 }
+  speeds: { walk: 5, fly: 30 }
+  senses: { blindsight: 60 }
+
+- id: dnd2024.form.beast.cat
+  name: { zh: 猫, en: Cat }
+  size: tiny
+  ac: 12
+  hp: 2
+  cr: 0
+  abilities: { str: 3, dex: 15, con: 10, int: 3, wis: 12, cha: 7 }
+  speeds: { walk: 40, climb: 30 }
+
+- id: dnd2024.form.beast.frog
+  name: { zh: 青蛙, en: Frog }
+  size: tiny
+  ac: 11
+  hp: 1
+  cr: 0
+  abilities: { str: 1, dex: 13, con: 8, int: 1, wis: 8, cha: 3 }
+  speeds: { walk: 20, swim: 20 }
+
+- id: dnd2024.form.beast.owl
+  name: { zh: 猫头鹰, en: Owl }
+  size: tiny
+  ac: 11
+  hp: 1
+  cr: 0
+  abilities: { str: 3, dex: 13, con: 8, int: 2, wis: 12, cha: 7 }
+  speeds: { walk: 5, fly: 60 }
+  senses: { darkvision: 120 }
+
+- id: dnd2024.form.beast.rat
+  name: { zh: 巨鼠, en: Giant Rat }
+  size: small
+  ac: 13
+  hp: 7
+  cr: 0.125
+  abilities: { str: 7, dex: 16, con: 11, int: 2, wis: 10, cha: 4 }
+  speeds: { walk: 30, climb: 30 }
+  senses: { darkvision: 60 }
+
+- id: dnd2024.form.beast.weasel
+  name: { zh: 鼬, en: Weasel }
+  size: tiny
+  ac: 13
+  hp: 1
+  cr: 0.125
+  abilities: { str: 3, dex: 16, con: 8, int: 1, wis: 12, cha: 3 }
+  speeds: { walk: 30 }
+
+- id: dnd2024.form.beast.poisonous_snake
+  name: { zh: 毒蛇, en: Poisonous Snake }
+  size: tiny
+  ac: 13
+  hp: 5
+  cr: 0.125
+  abilities: { str: 2, dex: 18, con: 11, int: 1, wis: 10, cha: 3 }
+  speeds: { walk: 30, swim: 30 }
+  senses: { blindsight: 10 }
+
+- id: dnd2024.form.beast.boar
+  name: { zh: 野猪, en: Boar }
+  size: medium
+  ac: 11
+  hp: 13
+  cr: 0.25
+  abilities: { str: 13, dex: 11, con: 14, int: 2, wis: 9, cha: 5 }
+  speeds: { walk: 40 }
+
+- id: dnd2024.form.beast.panther
+  name: { zh: 黑豹, en: Panther }
+  size: medium
+  ac: 12
+  hp: 13
+  cr: 0.25
+  abilities: { str: 14, dex: 15, con: 10, int: 3, wis: 14, cha: 7 }
+  speeds: { walk: 50, climb: 40 }
+  senses: { darkvision: 60 }
+
+- id: dnd2024.form.beast.wolf
+  name: { zh: 狼, en: Wolf }
+  size: medium
+  ac: 12
+  hp: 11
+  cr: 0.25
+  abilities: { str: 12, dex: 15, con: 12, int: 2, wis: 12, cha: 6 }
+  speeds: { walk: 40 }
+
+- id: dnd2024.form.beast.black_bear
+  name: { zh: 黑熊, en: Black Bear }
+  size: medium
+  ac: 11
+  hp: 19
+  cr: 0.5
+  abilities: { str: 15, dex: 10, con: 14, int: 2, wis: 12, cha: 7 }
+  speeds: { walk: 40, climb: 30 }
+
+- id: dnd2024.form.beast.crocodile
+  name: { zh: 鳄鱼, en: Crocodile }
+  size: large
+  ac: 12
+  hp: 19
+  cr: 0.5
+  abilities: { str: 15, dex: 10, con: 13, int: 2, wis: 10, cha: 5 }
+  speeds: { walk: 20, swim: 30 }
+
+- id: dnd2024.form.beast.reef_shark
+  name: { zh: 礁鲨, en: Reef Shark }
+  size: medium
+  ac: 12
+  hp: 22
+  cr: 0.5
+  abilities: { str: 14, dex: 13, con: 13, int: 1, wis: 10, cha: 4 }
+  speeds: { swim: 40 }
+  senses: { blindsight: 30 }
+
+- id: dnd2024.form.beast.brown_bear
+  name: { zh: 棕熊, en: Brown Bear }
+  size: large
+  ac: 11
+  hp: 22
+  cr: 1
+  abilities: { str: 17, dex: 12, con: 15, int: 2, wis: 13, cha: 7 }
+  speeds: { walk: 40, climb: 30 }
+
+- id: dnd2024.form.beast.giant_spider
+  name: { zh: 巨型蜘蛛, en: Giant Spider }
+  size: large
+  ac: 14
+  hp: 26
+  cr: 1
+  abilities: { str: 14, dex: 16, con: 12, int: 2, wis: 11, cha: 4 }
+  speeds: { walk: 30, climb: 30 }
+  senses: { blindsight: 10, darkvision: 60 }
+
+- id: dnd2024.form.beast.giant_eagle
+  name: { zh: 巨鹰, en: Giant Eagle }
+  size: large
+  ac: 13
+  hp: 26
+  cr: 1
+  abilities: { str: 16, dex: 17, con: 13, int: 8, wis: 14, cha: 10 }
+  speeds: { walk: 10, fly: 80 }

@@ -18,6 +18,7 @@ from dnd5r.rules.powers import (
     Power,
     PowerBook,
     PowerKind,
+    apply_patch,
     can_use,
     parse_power,
     use_power,
@@ -217,26 +218,28 @@ class PowerBookTest(unittest.TestCase):
 
     def test_augments_patch_cost(self):
         book = PowerBook()
-        book.add(simple_power({"id": "demo.power.base", "level": 1,
-                               "cost": {"action": "bonus", "resource": "demo.pool"}}))
-        book.add(parse_power({
+        base = book.add(simple_power({"id": "demo.power.base", "level": 1,
+                                      "cost": {"action": "bonus", "resource": "demo.pool"}}))
+        upgrade = book.add(parse_power({
             "id": "demo.power.upgrade", "name": TEXT, "text": TEXT, "level": 3,
             "kind": "passive", "augments": ["demo.power.base"],
             "patch": {"cost": {"action": "free", "resource": "demo.pool"}},
         }))
-        patched = book.apply_augments()
-        self.assertEqual(patched.get("demo.power.base").cost.action, ActionType.FREE)
+        book.validate_augments()
+        self.assertEqual(apply_patch(base, upgrade).cost.action, ActionType.FREE)
 
     def test_augments_unknown_field(self):
         book = PowerBook()
-        book.add(simple_power({"id": "demo.power.base"}))
-        book.add(parse_power({
+        base = book.add(simple_power({"id": "demo.power.base"}))
+        upgrade = book.add(parse_power({
             "id": "demo.power.bad", "name": TEXT, "text": TEXT, "level": 3,
             "kind": "passive", "augments": ["demo.power.base"],
             "patch": {"damage": "2d10"},
         }))
         with self.assertRaises(PluginError):
-            book.apply_augments()
+            book.validate_augments()
+        with self.assertRaises(PluginError):
+            apply_patch(base, upgrade)
 
     def test_augments_missing_target(self):
         book = PowerBook()
@@ -245,7 +248,27 @@ class PowerBookTest(unittest.TestCase):
             "kind": "passive", "augments": ["demo.power.nope"], "patch": {"target": "self"},
         }))
         with self.assertRaises(PluginError):
-            book.apply_augments()
+            book.validate_augments()
+
+    def test_augments_can_replace_effects(self):
+        """按 op 整条替换；目标没有这类效果要报错，不能静默无视。"""
+        base = simple_power({"id": "demo.power.base", "level": 1})   # 自带 heal
+        upgrade = parse_power({
+            "id": "demo.power.up", "name": TEXT, "text": TEXT, "level": 3,
+            "kind": "passive", "augments": ["demo.power.base"],
+            "patch": {"effects": {"heal": {"dice": "2d4"}}},
+        })
+        patched = apply_patch(base, upgrade)
+        self.assertEqual([effect.op for effect in patched.effects], ["heal"])
+        self.assertEqual(str(patched.effects[0].amount.dice), "2d4")
+
+        wrong = parse_power({
+            "id": "demo.power.wrong", "name": TEXT, "text": TEXT, "level": 3,
+            "kind": "passive", "augments": ["demo.power.base"],
+            "patch": {"effects": {"note": {"zh": "a", "en": "a"}}},
+        })
+        with self.assertRaises(PluginError):
+            apply_patch(base, wrong)
 
     def test_stats(self):
         book = self.book()

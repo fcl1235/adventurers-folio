@@ -87,6 +87,10 @@ class Actor:
     layer: "Actor | None" = None      # 指向被替换的本体（变形/附身）
     above: "Actor | None" = field(default=None, repr=False)  # 指向压在自己上面的层
     display_name: str = ""
+    # 变形：形态层记下「这次给了多少临时 HP」，回本体时要收回那部分
+    morph_temp: int = 0
+    # 变形期间的禁令（如 spellcasting）；空表示没有额外限制
+    forbid: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id:
@@ -128,13 +132,32 @@ class Actor:
         return form
 
     def unmorph(self) -> "Actor":
-        """弹出顶层，返回本体。"""
+        """弹出顶层，返回本体。
+
+        临时 HP 只收回「形态给的那部分」—— 施法者自己喝药得来的临时 HP 不该被吞掉。
+        """
         if self.layer is None:
             return self
         body = self.layer
         body.above = None
+        if self.morph_temp:
+            body.hp.temp = max(0, body.hp.temp - int(self.morph_temp))
+            self.morph_temp = 0
         self.layer = None
         return body
+
+    @property
+    def name_text(self):
+        return self.statblock.name
+
+    def forbids(self, action: str) -> bool:
+        """变形期间的禁令沿层链叠加，任何一层说不行就是不行。"""
+        node: Actor | None = self
+        while node is not None:
+            if action in node.forbid:
+                return True
+            node = node.layer
+        return False
 
     # --- 便捷读取 -----------------------------------------------------
     def ability_mod(self, key: str) -> int:

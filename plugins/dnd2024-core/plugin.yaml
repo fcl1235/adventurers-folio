@@ -4,11 +4,12 @@ api: 1
 name:
   zh: D&D 2024 核心内容
   en: D&D 2024 Core Content
-version: 0.2.0
+version: 0.3.0
 requires: []
 provides:
   classes:
     - dnd2024.class.fighter
+    - dnd2024.class.druid
   subclasses: []
   species: []
   feats: []

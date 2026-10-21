@@ -23,16 +23,19 @@ from ..model.levels import ClassLevel, TotalLevel
 from ..model.profile import ClassEntry, Profile
 from ..model.statblock import Abilities, Statblock
 from ..rules.actioneconomy import ActionEconomy, ActionType
-from ..rules.build import available_powers, build_actor
+from ..rules.build import (
+    available_powers, build_actor, eligible_forms_for, morph_class_of,
+)
 from ..rules.effects import EffectContext
 from ..rules.health import hit_dice_average
+from ..rules.morph import reasons_for
 from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
 from ..rules.resolver import RefContext, Resolver
 from ..rules.powers import use_power as _use_power
 from ..session import LongRest, NewTurn, Regain, Session, ShortRest, TakeDamage, UsePower
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 ABILITY_KEYS = ("str", "dex", "con", "int", "wis", "cha")
 
@@ -200,6 +203,12 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "attack": {"total": attack.total, "detail": attack.describe(), "ability": attack_ability},
         "attacks_per_action": attacks_per_action,
         "conditions": list(actor.conditions.ids()),
+        "morphed": actor.top().layer is not None,
+        "forms": [
+            {"id": form.id, "name": form.name.get(locale), "cr": form.cr,
+             "ac": form.ac, "hp": form.hp, "speeds": dict(form.speeds)}
+            for form in eligible_forms_for(actor, content)
+        ],
         "pools": [
             {"id": pool.id, "left": pool.available, "max": pool.capacity,
              "kind": pool.kind.value, "refresh": pool.refresh.value}
@@ -277,7 +286,12 @@ def _context(
     )
 
 
-def find_power(content: ContentBundle, power_id: str) -> Power:
+def find_power(content: ContentBundle, power_id: str, actor: Actor | None = None) -> Power:
+    """按 id 取能力。给了 actor 就取「他当前等级解锁的那一份」（含叠层）。"""
+    if actor is not None:
+        for power in available_powers(content, actor):
+            if power.id == power_id:
+                return power
     return content.book.get(power_id)
 
 
@@ -288,11 +302,18 @@ def use_power(
     economy: ActionEconomy | None = None,
     seed: int | None = None,
     locale: str = "zh",
+    choice: Mapping[str, Any] | None = None,
 ) -> dict:
-    """执行主动能力，返回 {ok, message, events, rolls, sheet} 供前端直接渲染。"""
-    power = find_power(content, power_id)
+    """执行主动能力，返回 {ok, message, events, rolls, sheet} 供前端直接渲染。
+
+    `choice` 是这次操作要玩家做的选择：变形要传 `{"form_id": ...}`。
+    """
+    power = find_power(content, power_id, actor)
     economy = economy if economy is not None else ActionEconomy()
     ctx = _context(actor, locale, SeededRng(seed), power)
+    ctx.scratch.update(choice or {})
+    if any(getattr(effect, "op", "") == "morph" for effect in power.effects):
+        ctx.scratch["forms"] = {form.id: form for form in eligible_forms_for(actor, content)}
     try:
         report = _use_power(power, ctx, economy)
     except DndError as exc:
@@ -327,6 +348,40 @@ def _event_dict(event) -> dict:
     return data
 
 
+def form_options(actor: Actor, content: ContentBundle, locale: str = "zh") -> dict:
+    """变形形态清单：可选 + 不可选（带原因）。
+
+    前端只负责画，不判断 CR 轴和游泳／飞行解禁 —— 那是内容侧的事。
+    """
+    found = morph_class_of(actor, content)
+    if found is None:
+        return {"class": None, "class_level": 0, "usable": [], "blocked": []}
+    entry, class_def = found
+    usable = eligible_forms_for(actor, content)
+    usable_ids = {form.id for form in usable}
+    blocked = [
+        {
+            "id": form.id,
+            "name": form.name.get(locale),
+            "cr": form.cr,
+            "reasons": reasons_for(class_def.morph, entry.class_level, form)
+            or ["变形能力还没解锁"],
+        }
+        for form in sorted(content.forms.values(), key=lambda item: (item.cr, item.id))
+        if form.id not in usable_ids
+    ]
+    return {
+        "class": class_def.name.get(locale),
+        "class_level": int(entry.class_level),
+        "usable": [
+            {"id": form.id, "name": form.name.get(locale), "cr": form.cr,
+             "ac": form.ac, "hp": form.hp, "speeds": dict(form.speeds)}
+            for form in usable
+        ],
+        "blocked": blocked,
+    }
+
+
 def plugin_summary(root: str = "plugins", locale: str = "zh") -> list[dict]:
     """给前端看的插件列表；坏掉的插件只记录不抛出。"""
     from ..loader import discover
@@ -349,6 +404,7 @@ __all__ = [
     "create_actor", "new_character", "resolver_for",
     "character_sheet", "actor_view",
     "find_power", "use_power", "plugin_summary",
+    "eligible_forms_for", "morph_class_of", "form_options",
     "ActionEconomy", "ActionType",
     "Session", "UsePower", "ShortRest", "LongRest", "NewTurn", "TakeDamage", "Regain",
 ]

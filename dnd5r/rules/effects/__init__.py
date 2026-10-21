@@ -25,6 +25,7 @@ from .grants import (
     GrantModifier,
     GrantProficiency,
 )
+from .morph import Morph, Revert
 from .numeric import Damage, GrantTempHp, Heal, ReduceDamage
 from .state import (
     ApplyCondition,
@@ -38,7 +39,7 @@ from .state import (
 __all__ = [
     "Effect", "EffectContext", "register", "parse_effect", "parse_effects",
     "known_ops", "effect_classes",
-    "Heal", "Damage", "GrantTempHp", "ReduceDamage",
+    "Heal", "Damage", "GrantTempHp", "ReduceDamage", "Morph", "Revert",
     "GrantModifier", "GrantDefense", "GrantProficiency", "GrantAdvantage", "GrantAction",
     "ApplyCondition", "RemoveCondition", "SpendResource", "RecoverResource",
     "ModifyRoll", "NoteEffect",

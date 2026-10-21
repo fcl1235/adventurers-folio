@@ -58,9 +58,10 @@ class ContentApiTest(unittest.TestCase):
 
     def test_content_summary(self):
         summary = api.content_summary(self.bundle)
-        self.assertEqual(summary["classes"], 1)
+        self.assertGreaterEqual(summary["classes"], 2)   # 内容只会变多，不写死总数
         self.assertEqual(summary["errors"], 0)
         self.assertIn("战士", summary["class_names"])
+        self.assertIn("德鲁伊", summary["class_names"])
 
     def test_new_character_matches_oracle_numbers(self):
         """与旧程序对齐：1 级战士、16/14/14/10/12/8 → HP 12、AC 12、力量豁免 +5。"""

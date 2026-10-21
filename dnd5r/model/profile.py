@@ -38,6 +38,8 @@ class ClassEntry:
 @dataclass(frozen=True, slots=True)
 class Profile:
     classes: tuple[ClassEntry, ...]
+    # 子职是显示名（"Circle of the Moon"），不是 id —— 内容里就是这么写的
+    subclass: str | None = None
     proficiencies: frozenset[str] = frozenset()
     expertise: frozenset[str] = frozenset()
     languages: frozenset[str] = frozenset()
@@ -65,6 +67,7 @@ class Profile:
     def add_class(self, class_id: str, class_level: int) -> "Profile":
         return Profile(
             classes=self.classes + (ClassEntry.make(class_id, class_level),),
+            subclass=self.subclass,
             proficiencies=self.proficiencies,
             expertise=self.expertise,
             languages=self.languages,
@@ -96,10 +99,22 @@ class Profile:
         return len(self.classes) > 1
 
     # --- 集合型贡献 ---------------------------------------------------
+    def with_subclass(self, subclass: str | None) -> "Profile":
+        return Profile(
+            classes=self.classes,
+            subclass=subclass,
+            proficiencies=self.proficiencies,
+            expertise=self.expertise,
+            languages=self.languages,
+            feats=self.feats,
+            choices=self.choices,
+        )
+
     def with_proficiencies(self, add: Iterable[str] = (), remove: Iterable[str] = ()) -> "Profile":
         new = (set(self.proficiencies) | set(add)) - set(remove)
         return Profile(
             classes=self.classes,
+            subclass=self.subclass,
             proficiencies=frozenset(new),
             expertise=frozenset(set(self.expertise) - set(remove)),
             languages=self.languages,
@@ -111,6 +126,7 @@ class Profile:
         """只写事实，总等级不写（C5）。"""
         return {
             "classes": [entry.to_dict() for entry in self.classes],
+            "subclass": self.subclass,
             "proficiencies": sorted(self.proficiencies),
             "expertise": sorted(self.expertise),
             "languages": sorted(self.languages),
@@ -126,6 +142,7 @@ class Profile:
         )
         return cls(
             classes=entries,
+            subclass=data.get("subclass"),
             proficiencies=frozenset(data.get("proficiencies", ())),
             expertise=frozenset(data.get("expertise", ())),
             languages=frozenset(data.get("languages", ())),

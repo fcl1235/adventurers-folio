@@ -18,6 +18,7 @@ from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
 from ..model.statblock import Abilities, Statblock
 from .health import hit_dice_pool, hit_points_max
+from .morph import eligible_forms
 from .progression import proficiency_bonus
 
 
@@ -94,10 +95,43 @@ def class_level_of(actor: Actor, class_id: str) -> ClassLevel:
 
 
 def available_powers(bundle: ContentBundle, actor: Actor):
-    """这个角色当前解锁的全部能力（按钮 + 被动）。兼职时按每个职业分别取。"""
+    """这个角色当前解锁的全部能力（按钮 + 被动）。
+
+    走 `ClassDef.powers_at` 而不是 `PowerBook.for_class`：前者会按等级把
+    patch 叠上去（18 级野兽施法解除变形施法禁令），后者是未叠层的原版。
+    """
     if actor.profile is None:
         return ()
     found = []
     for entry in actor.profile.classes:
-        found.extend(bundle.book.for_class(entry.class_id, entry.class_level))
+        class_def = bundle.classes.get(entry.class_id)
+        if class_def is not None:
+            found.extend(class_def.powers_at(entry.class_level))
     return tuple(sorted(found, key=lambda item: (item.owner, int(item.level), item.id)))
+
+
+def morph_class_of(actor: Actor, bundle: ContentBundle):
+    """这个角色身上带「形态轴」的那个职业（德鲁伊）。按数据找，不判 class_id。"""
+    if actor.profile is None:
+        return None
+    for entry in actor.profile.classes:
+        class_def = bundle.classes.get(entry.class_id)
+        if class_def is not None and class_def.morph is not None:
+            return entry, class_def
+    return None
+
+
+def eligible_forms_for(actor: Actor, bundle: ContentBundle):
+    """当前可选的形态。还要求变形能力本身已解锁 —— 1 级德鲁伊还没有荒野变形。"""
+    found = morph_class_of(actor, bundle)
+    if found is None:
+        return []
+    entry, class_def = found
+    unlocked = any(
+        getattr(effect, "op", "") == "morph"
+        for power in class_def.powers_at(entry.class_level)
+        for effect in power.effects
+    )
+    if not unlocked:
+        return []
+    return eligible_forms(bundle.forms.values(), class_def.morph, entry.class_level)

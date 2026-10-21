@@ -25,7 +25,7 @@ from ..kernel.predicate import explain as explain_when
 from ..kernel.text import Text
 from ..model.levels import ClassLevel, as_class_level
 from .actioneconomy import ActionEconomy, ActionType
-from .effects import Effect, EffectContext, parse_effects
+from .effects import Effect, EffectContext, parse_effect, parse_effects
 
 
 class PowerKind(str, Enum):
@@ -178,7 +178,7 @@ class Power:
 
 
 # --- 解析 -------------------------------------------------------------
-_PATCHABLE = ("cost", "target", "level", "when", "text", "name")
+_PATCHABLE = ("cost", "target", "level", "when", "text", "name", "effects")
 
 
 def parse_power(data: Any, owner: str = "", source: str = "") -> Power:
@@ -222,7 +222,6 @@ class PowerBook:
 
     _by_id: dict[str, Power] = field(default_factory=dict)
     _sources: dict[str, str] = field(default_factory=dict)
-    _augmented: bool = False
 
     def add(self, power: Power, replace_existing: bool = False) -> Power:
         if power.id in self._by_id and not replace_existing:
@@ -269,30 +268,25 @@ class PowerBook:
         )
 
     # --- 叠层（G9） ---------------------------------------------------
-    def apply_augments(self) -> "PowerBook":
-        """把 passive 的 patch 合并进目标能力，返回新集合。
+    def validate_augments(self) -> None:
+        """加载期体检：目标存在、patch 字段合法、增强者本身是被动。
 
-        只允许改白名单字段：改 effects 里的骰数这类需求，先扩原语，
-        不要在这里开任意字段的口子。
+        注意这里**不**改写任何能力 —— 改写发生在「按等级取能力」时
+        （`ClassDef.powers_at`），否则 18 级的 patch 会漏到 2 级角色身上。
         """
-        if self._augmented:
-            return self
-        book = PowerBook(dict(self._by_id), dict(self._sources), self._augmented)
         for power in self.all():
             if not power.augments:
                 continue
             if power.kind is not PowerKind.PASSIVE:
                 raise PluginError("%s 声明了 augments 但本身不是 passive；"
                                   "只有被动特性才能改写别的能力" % power.id)
+            if not power.patch:
+                raise PluginError("%s 声明了 augments 却没有 patch" % power.id)
             for target_id in power.augments:
-                if target_id not in book._by_id:
+                if target_id not in self._by_id:
                     raise PluginError("%s 想增强不存在的能力 %s（来自 %s）"
                                       % (power.id, target_id, power.source or "?"))
-                target = book._by_id[target_id]
-                changes = _patch_fields(target, power)
-                book._by_id[target_id] = replace(target, **changes)
-        book._augmented = True
-        return book
+                _patch_fields(self._by_id[target_id], power)  # 只做校验，结果丢弃
 
     def stats(self) -> dict[str, int]:
         counts: dict[str, int] = {}
@@ -317,6 +311,8 @@ def _patch_fields(target: Power, augment: Power) -> dict[str, Any]:
             changes["cost"] = Cost.parse(value)
         elif key == "level":
             changes["level"] = as_class_level(int(value))
+        elif key == "effects":
+            changes["effects"] = _patch_effects(target.effects, value, augment.id)
         else:
             changes[key] = value
     if "name" in changes and isinstance(changes["name"], Mapping):
@@ -324,6 +320,47 @@ def _patch_fields(target: Power, augment: Power) -> dict[str, Any]:
     if "text" in changes and isinstance(changes["text"], Mapping):
         changes["text"] = Text.from_dict(changes["text"], where="%s patch text" % augment.id)
     return changes
+
+
+def _patch_effects(
+    effects: tuple[Effect, ...],
+    patch: Any,
+    where: str,
+) -> tuple[Effect, ...]:
+    """按 op 整条替换效果。
+
+    不做字段级合并 —— 那要求每个原语都能无损往返，现在不成立。
+    写成 `{morph: {forbid: []}}` 就是「把这条 morph 换成这一条」，
+    缺的字段靠写全，不靠猜。
+    """
+    if not isinstance(patch, Mapping):
+        raise PluginError("%s 的 patch.effects 必须是 {原语: 参数} 映射" % where)
+    replacements = {
+        str(op): parse_effect({str(op): payload}, where="%s patch.effects" % where)
+        for op, payload in patch.items()
+    }
+    found = {op: False for op in replacements}
+    out: list[Effect] = []
+    for effect in effects:
+        if effect.op in replacements:
+            out.append(replacements[effect.op])
+            found[effect.op] = True
+        else:
+            out.append(effect)
+    missing = [op for op, seen in found.items() if not seen]
+    if missing:
+        raise PluginError("%s 想改写 %s，但目标能力没有这类效果（现有：%s）"
+                          % (where, "、".join(missing),
+                             "、".join(e.op for e in effects) or "无"))
+    return tuple(out)
+
+
+def apply_patch(target: Power, augment: Power) -> Power:
+    """把 augment 的 patch 落到 target 上，返回新对象（不修改入参）。
+
+    调用点必须是「按等级筛选之后」—— 见 `ClassDef.powers_at`。
+    """
+    return replace(target, **_patch_fields(target, augment))
 
 
 # --- 执行 -------------------------------------------------------------
@@ -362,6 +399,10 @@ def can_use(
     if not power.is_button:
         reasons.append("%s 不是主动能力" % power.id)
 
+    # 变形期间施法禁令：由 Morph 的 forbid 沿层链生效，这里只读结果
+    if "spell" in power.tags and ctx.actor.top().forbids("spellcasting"):
+        reasons.append("变形期间无法施法")
+
     cost = power.cost
     if cost is not None:
         if economy is not None and not economy.can_pay(cost.action):
@@ -382,10 +423,15 @@ def can_use(
 
 def _facts(ctx: EffectContext) -> dict:
     actor = ctx.actor
+    pool = actor.root().hp
     facts: dict[str, Any] = {
         "level": int(ctx.class_level or 0),
         "total_level": int(ctx.total_level),
         "prof_bonus": ctx.prof_bonus,
+        "hp": pool.current,
+        "hp_max": pool.maximum,
+        "temp_hp": pool.temp,
+        "morphed": actor.top().layer is not None,
         "conditions": set(actor.conditions.ids()),
         "resources": {key: actor.root().resources.get(key).available
                       for key in actor.root().resources.ids()},

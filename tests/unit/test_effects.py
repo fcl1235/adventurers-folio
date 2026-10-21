@@ -64,6 +64,7 @@ class ContractTest(unittest.TestCase):
             "grant_advantage", "grant_action",
             "apply_condition", "remove_condition", "spend_resource",
             "recover_resource", "modify_roll", "note",
+            "morph", "revert",
         }
         self.assertEqual(set(known_ops()), expected)
 

@@ -1,0 +1,207 @@
+id: dnd2024.class.druid
+name:
+  zh: 德鲁伊
+  en: Druid
+hit_die: 8
+primary: [wis]
+saves: [int, wis]
+caster: full
+subclass_level: 3
+skill_choices: 2
+skill_list:
+  - animal_handling
+  - arcana
+  - insight
+  - medicine
+  - nature
+  - perception
+  - religion
+  - survival
+
+# 荒野变形的 CR 轴（2024）：2 级 CR 1/4，4 级 1/2，8 级 1。
+# 游速 4 级解禁、飞行 8 级解禁 —— 这两条对普通德鲁伊和月之环同样生效，
+# 老版本这里按子职不同各写一遍，是错的。
+morph:
+  cr_by_level: { 2: 0.25, 4: 0.5, 8: 1 }
+  swim_from: 4
+  fly_from: 8
+
+resources:
+  # 荒野变形次数：2 级 2 次，6 级 3 次，17 级 4 次；短休回 1 次，长休全回
+  - id: dnd2024.resource.druid.wild_shape
+    kind: charge
+    refresh: long_rest
+    recover_on_short_rest: 1
+    label: { zh: 荒野变形, en: Wild Shape }
+    by_level: { 2: 2, 6: 3, 17: 4 }
+
+powers:
+  - id: dnd2024.class.druid.spellcasting
+    name: { zh: 施法, en: Spellcasting }
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: 以感知为施法属性准备德鲁伊法术。法术列表与环位表在法术数据里。
+      en: You prepare Druid spells using Wisdom as your spellcasting ability. The spell list and slot table live in spell data.
+    effects:
+      - note:
+          zh: 法术列表、准备数、环位表在 P5 由法术数据补齐；这里只登记属性与来源。
+          en: Spell lists, prepared counts, and slots arrive with spell data in P5.
+
+  - id: dnd2024.class.druid.druidic
+    name: { zh: 德鲁伊语, en: Druidic }
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: 你懂得德鲁伊语这门秘密语言，并能用动物交谈（Beast Speech）与野兽沟通。
+      en: You know Druidic, the secret language of druids, and you can use Beast Speech to converse with beasts.
+    effects:
+      - note:
+          zh: 语言熟练写进 Profile；动物交谈属于叙事能力，不做数值结算。
+          en: The language goes into Profile; Beast Speech is narrative.
+
+  - id: dnd2024.class.druid.primal_order
+    name: { zh: 原初职阶, en: Primal Order }
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: 在「术士」与「守护者」中选一项：术士多一个戏法与智力（奥秘／自然）检定加感知调整值；守护者获得军用武器与中甲熟练。
+      en: Choose Magician (an extra cantrip and Wisdom to Arcana/Nature checks) or Warden (Martial weapons and Medium armor training).
+    effects:
+      - note:
+          zh: 二选一属于建卡选择，由专长／熟练数据在 P5 落地；这里只保留原文。
+          en: The choice lands with proficiency data in P5; the text is kept here.
+
+  - id: dnd2024.class.druid.wild_shape
+    name: { zh: 荒野变形, en: Wild Shape }
+    level: 2
+    kind: activated
+    cost: { action: bonus, resource: dnd2024.resource.druid.wild_shape, label: 荒野变形 }
+    target: self
+    text:
+      zh: 附赠动作变成一只已知野兽。变形期间力、敏、体换成形态值，保留智力、感知、魅力；上限生命不变，获得等于德鲁伊等级的临时生命；不能施法。
+      en: As a Bonus Action, shift into a known Beast form. Your Str, Dex, and Con become the form's, you keep Int, Wis, and Cha, your Hit Point maximum stays the same, you gain Temporary Hit Points equal to your Druid level, and you can't cast spells.
+    effects:
+      - morph:
+          temp_hp: { plus: class_level }
+          forbid: [spellcasting]
+          keep: [int, wis, cha]
+      - note:
+          zh: 变形期间护甲、盾牌与武器不随形态生效；可用形态受 CR 轴与游泳／飞行解禁限制。
+          en: Armor, shields, and weapons don't carry over; eligible forms are limited by the CR axis and the swim/fly gates.
+
+  - id: dnd2024.class.druid.wild_shape_revert
+    name: { zh: 恢复本体, en: Revert Wild Shape }
+    level: 2
+    kind: activated
+    cost: { action: bonus, label: 恢复本体 }
+    target: self
+    prereq: { morphed: true }
+    text:
+      zh: 附赠动作回到本体形态。形态给的临时生命随之收回；施法者自己获得的临时生命保留。
+      en: As a Bonus Action, return to your true form. Temporary Hit Points from the form are lost; ones you gained elsewhere are kept.
+    effects:
+      - revert: {}
+
+  - id: dnd2024.class.druid.wild_companion
+    name: { zh: 野兽伙伴, en: Wild Companion }
+    level: 2
+    kind: activated
+    cost: { action: action, resource: dnd2024.resource.druid.wild_shape, label: 荒野变形 }
+    target: self
+    text:
+      zh: 消耗一次荒野变形次数，以仪式方式施放「寻获魔宠」，召唤的妖精以野兽形态出现。
+      en: Expend a Wild Shape use to cast Find Familiar as a Ritual; the familiar is a Fey that appears as a Beast.
+    effects:
+      - note:
+          zh: 需要法术数据与召唤物数据；P8 接召唤插件后按 formula 生成 stat block。
+          en: Needs spell and summon data; P8 generates the stat block from the summon plugin.
+
+  - id: dnd2024.class.druid.druid_subclass
+    name: { zh: 德鲁伊子职, en: Druid Subclass }
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: 选择一个大自然结社：大地、月亮、海洋、星辰。子职特性在 3／6／10／14 级解锁。
+      en: Choose a circle — Land, Moon, Sea, or Stars. Subclass features arrive at levels 3/6/10/14.
+    effects:
+      - note:
+          zh: 子职内容在 P5 逐一落地；子职永远按本职业 3 级解锁，不看总等级。
+          en: Subclass content lands in P5; subclasses unlock at class level 3, never total level.
+
+  - id: dnd2024.class.druid.wild_resurgence
+    name: { zh: 荒野复生, en: Wild Resurgence }
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: 每回合一次：没有荒野变形次数时，可消耗一个法术位换回 1 次；也可消耗 1 次荒野变形换回一个 1 环法术位。
+      en: Once per turn, you can expend a spell slot to regain a Wild Shape use (if you have none), or expend a use to regain a level 1 slot.
+    effects:
+      - note:
+          zh: 互换需要两个池同时可写（法术位在 P5）。在此之前只登记规则，不做假结算。
+          en: The swap needs both pools (slots arrive in P5); registered as text until then.
+
+  - id: dnd2024.class.druid.elemental_fury
+    name: { zh: 元素之怒, en: Elemental Fury }
+    level: 7
+    kind: passive
+    target: self
+    text:
+      zh: 二选一：原初打击（野兽形态的攻击视为力场伤害，且可改造成对应元素类型）或强力施法（戏法伤害加感知调整值）。
+      en: Choose Primal Strike (Beast form attacks deal Force damage, or an elemental type) or Potent Spellcasting (add Wisdom to cantrip damage).
+    effects:
+      - note:
+          zh: 需要伤害类型改写通道；随攻击选项在 P5 接入。
+          en: Needs damage-type rewriting; lands with attack options in P5.
+
+  - id: dnd2024.class.druid.improved_elemental_fury
+    name: { zh: 强化元素之怒, en: Improved Elemental Fury }
+    level: 15
+    kind: passive
+    target: self
+    text:
+      zh: 原初打击额外把目标速度降为 0 或推开 15 尺；强力施法改为 300 尺内可加感知调整值。
+      en: Primal Strike also slows or pushes the target; Potent Spellcasting extends to 300 feet.
+    effects:
+      - note:
+          zh: 同上，属于攻击选项，不是独立数值。
+          en: Also an attack option, not a standalone number.
+
+  - id: dnd2024.class.druid.beast_spells
+    name: { zh: 野兽施法, en: Beast Spells }
+    level: 18
+    kind: passive
+    target: self
+    augments: [dnd2024.class.druid.wild_shape]
+    text:
+      zh: 变形期间可以施法。仍需满足法术的语言与姿势成分。
+      en: You can cast spells while in a Wild Shape form, provided the spell's Verbal and Somatic components are possible.
+    effects:
+      - note:
+          zh: 解除的是「不能在变形期间施法」这一条；成分限制由具体法术判断。
+          en: This lifts the no-spellcasting clause of Wild Shape; component limits are per spell.
+    # 按 op 整条替换 morph，而不是字段级合并 —— 缺的字段写全，不靠猜。
+    patch:
+      effects:
+        morph:
+          temp_hp: { plus: class_level }
+          forbid: []
+          keep: [int, wis, cha]
+
+  - id: dnd2024.class.druid.archdruid
+    name: { zh: 大德鲁伊, en: Archdruid }
+    level: 20
+    kind: passive
+    target: self
+    text:
+      zh: 荒野变形次数无限；可把次数换成法术位（自然魔法）；衰老速度变为每 10 年 1 岁。
+      en: You can use Wild Shape any number of times, convert uses into spell slots, and age only one year per ten.
+    effects:
+      - note:
+          zh: 「无限次」是把资源上限改成不受限，等资源系统支持 unlimited 标记（P5）再落地。
+          en: Unlimited uses need an unlimited pool flag, which arrives with the resource system in P5.

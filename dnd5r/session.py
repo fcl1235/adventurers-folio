@@ -13,16 +13,18 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
-from .content import ContentBundle, load_all
+from .content import ClassDef, ContentBundle, load_all
 from .kernel.errors import DndError, IllegalAction
 from .kernel.events import Report
 from .kernel.rng import Rng, SeededRng
 from .kernel.text import Text
 from .model.actor import Actor
 from .model.levels import ClassLevel, TotalLevel
+from .model.profile import ClassEntry
 from .rules.actioneconomy import ActionEconomy, ActionType
-from .rules.build import build_actor
+from .rules.build import available_powers, build_actor, eligible_forms_for, morph_class_of
 from .rules.effects import EffectContext
+from .rules.morph import FormSpec, is_morphed
 from .rules.powers import Power, can_use, phase_label, use_power
 from .rules.progression import proficiency_bonus
 from .rules.rest import RestResult, long_rest, short_rest
@@ -33,7 +35,10 @@ from .view import Card, CardAction, CharacterView, HeaderView
 # --- 命令 -------------------------------------------------------------
 @dataclass(frozen=True, slots=True)
 class UsePower:
+    """用能力。`choice` 是这次操作需要玩家做的选择（如变形选哪个形态）。"""
+
     power_id: str
+    choice: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,6 +125,21 @@ class Session:
                 found[entry.class_id] = class_def.hit_die
         return found
 
+    def morph_class(self) -> tuple[ClassEntry, ClassDef] | None:
+        """当前职业里带「形态轴」的那个（德鲁伊）。按数据找，不判 class_id。"""
+        return morph_class_of(self.character, self.bundle)
+
+    def forms(self) -> list[FormSpec]:
+        """当前可选的全部形态：按 CR 轴 + 游速 4 级 / 飞行 8 级解禁过滤。
+
+        还要求「变形能力本身已解锁」——1 级德鲁伊有 CR 轴但还没有荒野变形，
+        这时候列出形态就是骗人。
+        """
+        return eligible_forms_for(self.character, self.bundle)
+
+    def is_morphed(self) -> bool:
+        return is_morphed(self.character)
+
     def resolver(self) -> Resolver:
         actor = self.character
         profile = actor.profile
@@ -127,12 +147,13 @@ class Session:
         class_level = None
         if profile and len(profile.classes) == 1:
             class_level = ClassLevel(int(profile.classes[0].class_level))
+        top = actor.top()
         return Resolver(RefContext(
             prof_bonus=proficiency_bonus(total),
             total_level=total,
             class_level=class_level,
-            abilities=actor.statblock.abilities,
-            speeds=dict(actor.statblock.speeds),
+            abilities=top.statblock.abilities,
+            speeds=dict(top.statblock.speeds),
         ))
 
     def context_for(self, power: Power | None = None) -> EffectContext:
@@ -168,7 +189,7 @@ class Session:
 
     def _handle(self, command: Any) -> Report:
         if isinstance(command, UsePower):
-            return self._use_power(command.power_id)
+            return self._use_power(command.power_id, command.choice)
         if isinstance(command, ShortRest):
             return self._rest(short_rest(self.character, self.hit_dies(),
                                         spend=command.dice, rng=self.rng))
@@ -185,9 +206,10 @@ class Session:
             return Report(ok=True, message="恢复 %d 点生命" % healed)
         raise IllegalAction("不认识的命令：%r" % (command,))
 
-    def _use_power(self, power_id: str) -> Report:
-        power = self.bundle.book.get(power_id)
+    def _use_power(self, power_id: str, choice: Mapping[str, Any] | None = None) -> Report:
+        power = self._resolve_power(power_id)
         context = self.context_for(power)
+        context.scratch.update(self._scratch(power, choice or {}))
         report = use_power(power, context, self.economy)
         for key, amount in list(context.scratch.items()):
             if key.startswith("granted_"):
@@ -196,6 +218,24 @@ class Session:
                 except DndError:
                     continue
         return report
+
+    def _resolve_power(self, power_id: str) -> Power:
+        """取「这个角色当前等级下」的能力对象。
+
+        不能直接查 PowerBook：叠层（18 级野兽施法解除施法禁令）是按等级
+        现算的，book 里那份是未叠层的原版。
+        """
+        for power in available_powers(self.bundle, self.character):
+            if power.id == power_id:
+                return power
+        return self.bundle.book.get(power_id)   # 不存在时抛「没有这个能力」
+
+    def _scratch(self, power: Power, choice: Mapping[str, Any]) -> dict[str, Any]:
+        """把这次操作需要的数据塞进 scratch（变形要选形态就是这么进来的）。"""
+        scratch: dict[str, Any] = dict(choice)
+        if any(getattr(effect, "op", "") == "morph" for effect in power.effects):
+            scratch["forms"] = {form.id: form for form in self.forms()}
+        return scratch
 
     def _rest(self, result: RestResult) -> Report:
         self.economy = ActionEconomy(movement=self.character.statblock.speed("walk"))

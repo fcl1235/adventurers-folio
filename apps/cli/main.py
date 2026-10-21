@@ -65,7 +65,9 @@ def cmd_sheet(args) -> int:
 
 def cmd_use(args) -> int:
     bundle, actor = _character(args)
-    result = api.use_power(actor, bundle, args.power, seed=args.seed, locale=args.lang)
+    choice = {"form_id": args.form} if getattr(args, "form", None) else {}
+    result = api.use_power(actor, bundle, args.power, seed=args.seed, locale=args.lang,
+                           choice=choice)
     rows: list[str] = [result["message"]] if result["message"] else []
     for roll in result["rolls"]:
         rows.append("  %s：%d（%s）" % (roll["label"], roll["total"], roll["detail"]))
@@ -75,6 +77,34 @@ def cmd_use(args) -> int:
                       for item in result["sheet"]["pools"])
     print("资源 %s" % (pools or "无"))
     return 0 if result["ok"] else 1
+
+
+def _cr(value: float) -> str:
+    """CR 显示成 1/8 而不是 0.125 —— 桌面上没人说「零点一二五」。"""
+    for fraction, label in ((0.125, "1/8"), (0.25, "1/4"), (0.5, "1/2")):
+        if abs(float(value) - fraction) < 1e-9:
+            return label
+    return "%g" % float(value)
+
+
+def cmd_forms(args) -> int:
+    """列出当前等级可选的形态（含被过滤掉的原因）。"""
+    bundle, actor = _character(args)
+    options = api.form_options(actor, bundle, locale=args.lang)
+    if options["class"] is None:
+        print("这个职业没有形态轴（不是德鲁伊类的变形职业）")
+        return 0
+    print("%s 等级 %d：可选 %d 种"
+          % (options["class"], options["class_level"], len(options["usable"])))
+    for form in options["usable"]:
+        print("  %-42s CR %-5s AC %-3d HP %-3d %s"
+              % (form["id"], _cr(form["cr"]), form["ac"], form["hp"],
+                 " ".join("%s %d" % item for item in form["speeds"].items())))
+    if options["blocked"]:
+        print("--- 当前不可选 ---")
+        for form in options["blocked"]:
+            print("  %-42s %s" % (form["id"], "；".join(form["reasons"])))
+    return 0
 
 
 def cmd_plugins(args) -> int:
@@ -132,7 +162,8 @@ def cmd_play(args) -> int:
     print(report.message, "→ HP %d/%d" % (actor.hp.current, actor.hp.maximum))
 
     print("\n=== 使用 %s ===" % args.power)
-    view, report = session.dispatch(api.UsePower(args.power))
+    choice = {"form_id": args.form} if getattr(args, "form", None) else {}
+    view, report = session.dispatch(api.UsePower(args.power, choice))
     print(report.message or "（无输出）")
     print("→ HP %d/%d" % (actor.hp.current, actor.hp.maximum))
 
@@ -142,7 +173,7 @@ def cmd_play(args) -> int:
 
     print("\n=== 新回合后再次使用 ===")
     session.dispatch(api.NewTurn())
-    _, report = session.dispatch(api.UsePower(args.power))
+    _, report = session.dispatch(api.UsePower(args.power, choice))
     print(("成功：" if report.ok else "被拒绝：") + (report.message or "（无输出）"))
 
     print("\n=== 长休 ===")
@@ -184,12 +215,19 @@ def main(argv=None) -> int:
     use = sub.add_parser("use", help="执行一个主动能力")
     _add_character_args(use)
     use.add_argument("--power", required=True)
+    use.add_argument("--form", default=None, help="变形类能力要选的形态 id")
     use.add_argument("--seed", type=int, default=None)
     use.set_defaults(func=cmd_use)
+
+    forms = sub.add_parser("forms", help="列出当前可选形态（德鲁伊）")
+    _add_character_args(forms)
+    forms.add_argument("--seed", type=int, default=None)
+    forms.set_defaults(func=cmd_forms)
 
     play = sub.add_parser("play", help="无头剧本：掉血 → 用能力 → 短休 → 长休")
     _add_character_args(play)
     play.add_argument("--power", default="dnd2024.class.fighter.second_wind")
+    play.add_argument("--form", default=None, help="变形类能力要选的形态 id")
     play.add_argument("--seed", type=int, default=7)
     play.set_defaults(func=cmd_play)
 

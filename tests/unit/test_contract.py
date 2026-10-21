@@ -10,6 +10,7 @@
 
 import unittest
 from pathlib import Path
+from typing import Mapping
 
 import dnd5r.api as api
 from dnd5r.kernel.errors import DndError
@@ -58,21 +59,25 @@ class ContractTest(unittest.TestCase):
                 self.assertEqual(power.owner, class_id, power.id)
 
     def test_every_power_can_execute(self):
-        """每个能力都在一个满资源的角色上跑一遍。"""
+        """每个能力都在「刚好够用」的最小场景里跑一遍。
+
+        两处需要摆状态的地方，都在这里显式摆，不在规则里开特例：
+          - 变形类能力要先有一个可选形态（scratch 注入）
+          - 前置写 `morphed: true` 的能力要先把角色真的变形一次
+        """
         for class_id, class_def in self.bundle.classes.items():
             level = max(int(power.level) for power in class_def.powers) if class_def.powers else 1
             for power in class_def.powers:
                 with self.subTest(power=power.id):
                     actor = api.new_character(self.bundle, class_id, level, SCORES,
                                               name_zh="契约", name_en="Contract")
-                    context = EffectContext(
-                        actor=actor, rng=ScriptedRng(list(RESERVE)),
-                        prof_bonus=api.resolver_for(actor).ctx.prof_bonus,
-                        total_level=actor.profile.total,
-                        class_level=ClassLevel(level),
-                        source=power.id,
-                    )
+                    context = self._context(actor, power, level)
                     economy = ActionEconomy()
+                    if _needs_morph(power):
+                        self.assertTrue(_morph(actor, class_def, level, self.bundle),
+                                        "%s 需要变形状态，但 %s 没有可用的变形能力"
+                                        % (power.id, class_id))
+                        context = self._context(actor, power, level)
                     if power.is_button:
                         self.assertEqual(can_use(power, context, economy), [], power.id)
                         report = use_power(power, context, economy)
@@ -80,6 +85,20 @@ class ContractTest(unittest.TestCase):
                     else:
                         for effect in power.effects:
                             effect.apply(context)
+
+    def _context(self, actor, power, level):
+        context = EffectContext(
+            actor=actor, rng=ScriptedRng(list(RESERVE)),
+            prof_bonus=api.resolver_for(actor).ctx.prof_bonus,
+            total_level=actor.profile.total,
+            class_level=ClassLevel(level),
+            source=power.id,
+        )
+        forms = _forms_of(self.bundle, actor)
+        if forms and any(getattr(effect, "op", "") == "morph" for effect in power.effects):
+            context.scratch["forms"] = {form.id: form for form in forms}
+            context.scratch["form_id"] = forms[0].id
+        return context
 
     def test_triggered_powers_are_not_buttons(self):
         for power in self.bundle.book.all():
@@ -110,6 +129,42 @@ def _texts_of(class_def):
     for power in class_def.powers:
         yield power.name, "%s name" % power.id
         yield power.text, "%s text" % power.id
+
+
+def _needs_morph(power) -> bool:
+    prereq = power.prereq
+    return isinstance(prereq, Mapping) and "morphed" in prereq
+
+
+def _forms_of(bundle, actor):
+    from dnd5r.rules.morph import eligible_forms
+
+    for entry in actor.profile.classes:
+        class_def = bundle.classes.get(entry.class_id)
+        if class_def is not None and class_def.morph is not None:
+            return eligible_forms(bundle.forms.values(), class_def.morph, entry.class_level)
+    return []
+
+
+def _morph(actor, class_def, level, bundle) -> bool:
+    """用该职业自己的变形能力把角色真的变形一次（给「需要变形状态」的能力铺路）。"""
+    forms = _forms_of(bundle, actor)
+    if not forms:
+        return False
+    for candidate in class_def.powers_at(ClassLevel(level)):
+        if not any(getattr(effect, "op", "") == "morph" for effect in candidate.effects):
+            continue
+        context = EffectContext(
+            actor=actor, rng=ScriptedRng(list(RESERVE)),
+            prof_bonus=2, total_level=actor.profile.total,
+            class_level=ClassLevel(level), source=candidate.id,
+        )
+        context.scratch["forms"] = {form.id: form for form in forms}
+        context.scratch["form_id"] = forms[0].id
+        for effect in candidate.effects:
+            effect.apply(context)
+        return True
+    return False
 
 
 if __name__ == "__main__":

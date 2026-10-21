@@ -22,10 +22,12 @@ from .kernel.text import Text
 from .plugin import Manifest, load_manifest
 from .rules.amount import Amount, parse_amount
 from .rules.effects import parse_effects
-from .rules.powers import Power, PowerBook, parse_power
+from .rules.morph import CrAxis, FormSpec
+from .rules.powers import Power, PowerBook, apply_patch, parse_power
 from .rules.progression import CasterKind, attacks_per_action
 from .model.levels import ClassLevel, as_class_level
 from .model.resources import Pool, PoolKind, Refresh
+from .model.statblock import Abilities
 
 RESOURCE_KINDS = {item.value: item for item in PoolKind}
 REFRESH_KINDS = {item.value: item for item in Refresh}
@@ -144,6 +146,7 @@ class ClassDef:
     skill_list: tuple[str, ...] = ()
     resources: tuple[ResourceDef, ...] = ()
     powers: tuple[Power, ...] = ()
+    morph: CrAxis | None = None
     source: str = ""
 
     def __post_init__(self) -> None:
@@ -167,8 +170,21 @@ class ClassDef:
         raise PluginError("%s 没有资源 %s" % (self.id, resource_id))
 
     def powers_at(self, class_level: ClassLevel) -> tuple[Power, ...]:
+        """当前等级解锁的能力，**并且把已解锁的 patch 应用进去**。
+
+        叠层必须在这里做而不是加载时做：18 级的「野兽施法」要解除变形期间
+        的施法禁令，如果在加载时全局套用，2 级德鲁伊也能施法了。
+        """
         picked = [power for power in self.powers if int(power.level) <= int(class_level)]
-        return tuple(sorted(picked, key=lambda item: (int(item.level), item.id)))
+        picked.sort(key=lambda item: (int(item.level), item.id))
+        index = {power.id: power for power in picked}
+        for power in picked:
+            if not power.augments:
+                continue
+            for target_id in power.augments:
+                if target_id in index:      # 目标也解锁了才叠，跨职业的交由校验期报错
+                    index[target_id] = apply_patch(index[target_id], power)
+        return tuple(index[power.id] for power in picked)
 
     def total_attacks(self, class_level: ClassLevel) -> int:
         """额外攻击取最大不叠加（Extra Attack 的 Stack.MAX 语义）。
@@ -192,6 +208,54 @@ class ClassDef:
             "resources": [item.to_dict() for item in self.resources],
             "powers": len(self.powers),
         }
+
+
+def parse_cr_axis(data: Any) -> CrAxis | None:
+    if data is None:
+        return None
+    if not isinstance(data, Mapping):
+        raise PluginError("morph 段必须是映射")
+    steps_raw = data.get("cr_by_level") or data.get("steps")
+    if not steps_raw:
+        raise PluginError("morph 段缺少 cr_by_level")
+    try:
+        steps = {int(key): float(value) for key, value in steps_raw.items()}
+    except (TypeError, ValueError):
+        raise PluginError("cr_by_level 必须是 等级→CR 的映射")
+    return CrAxis(
+        steps=steps,
+        swim_from=int(data.get("swim_from", 4)),
+        fly_from=int(data.get("fly_from", 8)),
+    )
+
+
+def parse_form(data: Any, source: str = "") -> FormSpec:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的形态定义必须是映射" % source)
+    for key in ("id", "name", "ac", "hp", "cr", "abilities"):
+        if key not in data:
+            raise PluginError("%s 的形态定义缺少 %s" % (source, key))
+    ident = str(data["id"])
+    if not is_valid(ident):
+        raise PluginError("形态 id 不合规范：%r" % ident)
+    try:
+        abilities = Abilities.of(**{str(key): int(value)
+                                    for key, value in data["abilities"].items()})
+    except RuleError as exc:
+        raise PluginError("%s 的属性不合法：%s" % (ident, exc))
+    speeds = {str(key): int(value) for key, value in (data.get("speeds") or {"walk": 30}).items()}
+    senses = {str(key): int(value) for key, value in (data.get("senses") or {}).items()}
+    return FormSpec(
+        id=ident,
+        name=Text.from_dict(data["name"], where="%s name" % ident),
+        ac=int(data["ac"]),
+        hp=int(data["hp"]),
+        cr=float(data["cr"]),
+        abilities=abilities,
+        speeds=speeds,
+        senses=senses,
+        size=str(data.get("size", "medium")),
+    )
 
 
 def parse_class(data: Any, source: str = "") -> ClassDef:
@@ -232,6 +296,7 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
         skill_list=tuple(str(item) for item in (data.get("skill_list") or ())),
         resources=resources,
         powers=powers,
+        morph=parse_cr_axis(data.get("morph")),
         source=source,
     )
 
@@ -242,6 +307,7 @@ class PluginContent:
     manifest: Manifest | None = None
     classes: dict[str, ClassDef] = field(default_factory=dict)
     book: PowerBook = field(default_factory=PowerBook)
+    forms: dict[str, FormSpec] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -253,6 +319,7 @@ class PluginContent:
 class ContentBundle:
     classes: dict[str, ClassDef] = field(default_factory=dict)
     book: PowerBook = field(default_factory=PowerBook)
+    forms: dict[str, FormSpec] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -270,6 +337,7 @@ class ContentBundle:
         return {
             "classes": len(self.classes),
             "powers": len(self.book.ids()),
+            "forms": len(self.forms),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -308,7 +376,29 @@ def load_plugin(folder: str | Path) -> PluginContent:
             except PluginError as exc:
                 result.errors.append(str(exc))
 
-    result.book = result.book.apply_augments()
+    bestiary = base / "bestiary"
+    if bestiary.exists():
+        for path in sorted(bestiary.glob("*.yaml")):
+            rel = "%s/bestiary/%s" % (base.name, path.name)
+            try:
+                rows = _read_yaml(path) or []
+            except PluginError as exc:
+                result.errors.append(str(exc))
+                continue
+            if isinstance(rows, Mapping):
+                rows = [rows]
+            for row in rows:
+                try:
+                    form = parse_form(row, source=rel)
+                except (PluginError, DndError) as exc:
+                    result.errors.append(str(exc))
+                    continue
+                if form.id in result.forms:
+                    result.errors.append("%s 的形态 id 重复：%s" % (rel, form.id))
+                    continue
+                result.forms[form.id] = form
+
+    result.book.validate_augments()
     return result
 
 
@@ -335,16 +425,22 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 )
                 continue
             bundle.classes[class_id] = class_def
+        for form_id, form in content.forms.items():
+            if form_id in bundle.forms:
+                bundle.errors.append("形态 %s 重复提供" % form_id)
+                continue
+            bundle.forms[form_id] = form
         for power in content.book.all():
             if bundle.book.has(power.id):
                 bundle.errors.append("能力 %s 重复提供" % power.id)
                 continue
             bundle.book.add(power)
-    bundle.book = bundle.book.apply_augments()
+    bundle.book.validate_augments()
     return bundle
 
 
 __all__ = [
     "ResourceDef", "ClassDef", "PluginContent", "ContentBundle",
-    "parse_resource", "parse_class", "load_plugin", "load_all",
+    "parse_resource", "parse_class", "parse_cr_axis", "parse_form",
+    "load_plugin", "load_all",
 ]
