@@ -8,6 +8,9 @@ name: {zh: 武僧, en: Monk}
 hit_die: 8
 primary: [dex, wis]
 saves: [str, dex]
+proficiencies:
+  weapons: [simple, martial_light]
+  armor: []
 caster: none
 subclass_level: 3
 skill_choices: 2

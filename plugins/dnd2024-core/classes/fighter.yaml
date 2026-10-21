@@ -5,6 +5,9 @@ name:
 hit_die: 10
 primary: [str, dex]
 saves: [str, con]
+proficiencies:
+  weapons: [simple, martial]
+  armor: [light, medium, heavy, shield]
 caster: none
 subclass_level: 3
 skill_choices: 2

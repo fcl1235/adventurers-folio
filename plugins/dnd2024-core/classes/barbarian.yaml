@@ -8,6 +8,9 @@ name: {zh: 野蛮人, en: Barbarian}
 hit_die: 12
 primary: [str]
 saves: [str, con]
+proficiencies:
+  weapons: [simple, martial]
+  armor: [light, medium, shield]
 caster: none
 subclass_level: 3
 skill_choices: 2

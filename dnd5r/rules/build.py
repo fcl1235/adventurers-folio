@@ -72,7 +72,9 @@ def build_actor(
     saves = tuple("save.%s" % key for key in class_def.saves)
     profile = Profile(
         classes=(ClassEntry.make(class_id, level),),
-        proficiencies=frozenset(saves) | frozenset(extra_proficiencies),
+        proficiencies=(frozenset(saves)
+                       | frozenset(class_def.proficiencies)
+                       | frozenset(extra_proficiencies)),
     )
 
     actor = Actor(

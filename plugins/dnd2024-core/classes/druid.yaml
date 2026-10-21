@@ -5,6 +5,9 @@ name:
 hit_die: 8
 primary: [wis]
 saves: [int, wis]
+proficiencies:
+  weapons: [simple]
+  armor: [light, medium, shield]
 caster: full
 subclass_level: 3
 skill_choices: 2

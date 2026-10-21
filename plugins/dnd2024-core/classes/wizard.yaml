@@ -7,6 +7,9 @@ name: {zh: 法师, en: Wizard}
 hit_die: 6
 primary: [int]
 saves: [int, wis]
+proficiencies:
+  weapons: [simple]
+  armor: []
 caster: full
 subclass_level: 3
 skill_choices: 2

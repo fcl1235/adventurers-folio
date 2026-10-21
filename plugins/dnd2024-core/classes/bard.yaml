@@ -7,6 +7,9 @@ name: {zh: 吟游诗人, en: Bard}
 hit_die: 8
 primary: [cha]
 saves: [dex, cha]
+proficiencies:
+  weapons: [simple]
+  armor: [light]
 caster: full
 subclass_level: 3
 skill_choices: 3

@@ -4,7 +4,7 @@ api: 1
 name:
   zh: D&D 2024 核心内容
   en: D&D 2024 Core Content
-version: 0.6.0
+version: 0.7.0
 requires: []
 provides:
   classes:
@@ -37,4 +37,42 @@ provides:
     - dnd2024.item.armor.splint
     - dnd2024.item.armor.plate
     - dnd2024.item.armor.shield
+    - dnd2024.item.weapon.club
+    - dnd2024.item.weapon.dagger
+    - dnd2024.item.weapon.greatclub
+    - dnd2024.item.weapon.handaxe
+    - dnd2024.item.weapon.javelin
+    - dnd2024.item.weapon.light_hammer
+    - dnd2024.item.weapon.mace
+    - dnd2024.item.weapon.quarterstaff
+    - dnd2024.item.weapon.sickle
+    - dnd2024.item.weapon.spear
+    - dnd2024.item.weapon.dart
+    - dnd2024.item.weapon.light_crossbow
+    - dnd2024.item.weapon.shortbow
+    - dnd2024.item.weapon.sling
+    - dnd2024.item.weapon.battleaxe
+    - dnd2024.item.weapon.flail
+    - dnd2024.item.weapon.glaive
+    - dnd2024.item.weapon.greataxe
+    - dnd2024.item.weapon.greatsword
+    - dnd2024.item.weapon.halberd
+    - dnd2024.item.weapon.lance
+    - dnd2024.item.weapon.longsword
+    - dnd2024.item.weapon.maul
+    - dnd2024.item.weapon.morningstar
+    - dnd2024.item.weapon.pike
+    - dnd2024.item.weapon.rapier
+    - dnd2024.item.weapon.scimitar
+    - dnd2024.item.weapon.shortsword
+    - dnd2024.item.weapon.trident
+    - dnd2024.item.weapon.war_pick
+    - dnd2024.item.weapon.warhammer
+    - dnd2024.item.weapon.whip
+    - dnd2024.item.weapon.blowgun
+    - dnd2024.item.weapon.hand_crossbow
+    - dnd2024.item.weapon.heavy_crossbow
+    - dnd2024.item.weapon.longbow
+    - dnd2024.item.weapon.musket
+    - dnd2024.item.weapon.pistol
   spells: []

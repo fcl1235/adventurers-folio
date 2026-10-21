@@ -21,16 +21,20 @@ from .kernel.text import Text
 from .model.actor import Actor
 from .model.levels import ClassLevel, TotalLevel
 from .model.profile import ClassEntry
+from .model.statblock import ABILITY_NAMES
 from .rules.actioneconomy import ActionEconomy, ActionType
 from .rules.armor import ac_inputs, loadout_for
 from .rules.build import available_powers, build_actor, eligible_forms_for, morph_class_of
-from .rules.contributions import facts_for, modifiers_for, passive_modifiers
+from .rules.contributions import (
+    facts_for, modifiers_for, passive_modifiers, passive_proficiencies,
+)
 from .rules.effects import EffectContext
 from .rules.morph import FormSpec, is_morphed
 from .rules.powers import Power, can_use, phase_label, use_power
 from .rules.progression import proficiency_bonus
 from .rules.rest import RestResult, long_rest, short_rest
 from .rules.resolver import RefContext, Resolver
+from .rules.weapons import damage_name, profiles_for
 from .view import Card, CardAction, CharacterView, HeaderView
 
 
@@ -366,12 +370,15 @@ class Session:
             ))
         return cards
 
-    def _attack_cards(self) -> list[Card]:
+    def _attack_cards(self) -> tuple[Card, ...]:
+        """攻击卡直接来自装备：没拿武器就是徒手打击（1 + 力量）。"""
         actor = self.character
         resolver = self.resolver()
         top = actor.top()
-        ability = "str" if top.statblock.abilities.mod("str") >= top.statblock.abilities.mod("dex") else "dex"
-        attack = resolver.attack_bonus(top, ability, proficient=True)
+        tokens = set(actor.profile.proficiencies) if actor.profile else set()
+        tokens |= passive_proficiencies(self.bundle, actor)
+        found = profiles_for(actor, self.bundle.weapons, top.statblock.abilities,
+                             resolver.ctx.prof_bonus, tokens)
         count = 1
         profile = actor.profile
         if profile is not None:
@@ -379,15 +386,29 @@ class Session:
                 class_def = self.bundle.classes.get(entry.class_id)
                 if class_def is not None:
                     count = max(count, class_def.total_attacks(entry.class_level))
-        label = {"str": "力量", "dex": "敏捷"}.get(ability, ability)
-        return (Card(
-            id="attack:basic",
-            title="普通攻击",
-            subtitle="%s武器 · +%d" % (label, attack.total),
-            value="%d 次/动作" % count,
-            tone="normal",
-            detail=("武器数据在 P5 接入；当前只验证攻击加值与攻击次数。",),
-        ),)
+        cards = []
+        for item in found:
+            detail = ["%s 武器" % ABILITY_NAMES[item.ability].get(self.locale)
+                      if item.ability in ABILITY_NAMES else item.ability]
+            if item.off_hand:
+                detail.append("副手（不加属性调整值）")
+            if not item.proficient:
+                detail.append("未熟练：没有熟练加值")
+            if item.mastery:
+                detail.append("专精：%s" % item.mastery)
+            if item.disadvantage:
+                detail.append("重型武器属性不足 13：攻击劣势")
+            cards.append(Card(
+                id="attack:%s" % item.weapon_id,
+                title=item.name.get(self.locale),
+                subtitle="+%d 攻击 · %s %s" % (
+                    item.attack, item.damage_total_hint,
+                    damage_name(item.damage_type, self.locale)),
+                value="%d 次/动作" % count,
+                tone="dim" if not item.proficient else "normal",
+                detail=tuple(detail),
+            ))
+        return tuple(cards)
 
     def report_dict(self) -> dict:
         report = self.last_report

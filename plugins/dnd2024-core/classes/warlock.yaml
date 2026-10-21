@@ -7,6 +7,9 @@ name: {zh: 邪术师, en: Warlock}
 hit_die: 8
 primary: [cha]
 saves: [wis, cha]
+proficiencies:
+  weapons: [simple]
+  armor: [light]
 caster: pact
 subclass_level: 3
 skill_choices: 2

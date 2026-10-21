@@ -16,6 +16,7 @@ from typing import Any, Mapping
 
 import yaml
 
+from .kernel.dice import parse as parse_dice
 from .kernel.errors import DndError, PluginError, RuleError
 from .kernel.ids import is_valid
 from .kernel.text import Text
@@ -215,6 +216,94 @@ def parse_armor(data: Any, where: str = "") -> ArmorDef:
         raise PluginError("%s %s 的数值字段不合法：%s" % (prefix, ident, exc))
 
 
+# --- 物品：武器 -------------------------------------------------------
+WEAPON_CATEGORIES = ("simple", "martial")
+DAMAGE_TYPES = ("bludgeoning", "piercing", "slashing")
+WEAPON_PROPERTIES = (
+    "light", "finesse", "two_handed", "versatile", "thrown",
+    "heavy", "reach", "loading", "ranged",
+)
+
+
+@dataclass(frozen=True)
+class WeaponDef:
+    """一件武器。伤害骰、属性、专精全在数据里，规则层只做推论。
+
+    `versatile` 是双手握持时的另一档伤害；没有它就不能双手加值。
+    """
+
+    id: str
+    name: Text
+    category: str = "simple"
+    damage: str = "1d4"
+    damage_type: str = "bludgeoning"
+    versatile: str | None = None
+    properties: tuple[str, ...] = ()
+    mastery: str = ""
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("武器 id 不合规范：%r" % (self.id,))
+        if self.category not in WEAPON_CATEGORIES:
+            raise PluginError("%s 的武器类别必须是 %s"
+                              % (self.id, "/".join(WEAPON_CATEGORIES)))
+        if self.damage_type not in DAMAGE_TYPES:
+            raise PluginError("%s 的伤害类型必须是 %s"
+                              % (self.id, "/".join(DAMAGE_TYPES)))
+        unknown = [item for item in self.properties if item not in WEAPON_PROPERTIES]
+        if unknown:
+            raise PluginError("%s 的武器属性未知：%s" % (self.id, ", ".join(unknown)))
+        if self.versatile and "versatile" not in self.properties:
+            raise PluginError("%s 有 versatile 伤害却没声明 versatile 属性" % self.id)
+        for field_name, expr in (("damage", self.damage), ("versatile", self.versatile)):
+            if expr is None:
+                continue
+            try:
+                parse_dice(str(expr))
+            except DndError as exc:
+                raise PluginError("%s 的 %s 不是合法骰式：%s" % (self.id, field_name, exc))
+
+    def has(self, prop: str) -> bool:
+        return prop in self.properties
+
+    def dice(self, two_handed: bool = False):
+        """伤害骰。两用武器双手握持取 `versatile` 那一档。"""
+        expr = self.versatile if (two_handed and self.versatile) else self.damage
+        return parse_dice(str(expr))
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id, "name": self.name.to_dict(), "category": self.category,
+            "damage": self.damage, "damage_type": self.damage_type,
+            "versatile": self.versatile, "properties": list(self.properties),
+            "mastery": self.mastery,
+        }
+
+
+def parse_weapon(data: Any, where: str = "") -> WeaponDef:
+    prefix = ("%s: " % where) if where else ""
+    if not isinstance(data, Mapping):
+        raise PluginError("%s武器条目必须是映射" % prefix)
+    ident = data.get("id")
+    if not ident:
+        raise PluginError("%s武器缺少 id" % prefix)
+    if "name" not in data:
+        raise PluginError("%s %s 缺少 name" % (prefix, ident))
+    props = data.get("properties") or ()
+    if isinstance(props, str):
+        props = [props]
+    return WeaponDef(
+        id=str(ident),
+        name=Text.from_dict(data["name"], where="%s name" % ident),
+        category=str(data.get("category", "simple")).lower(),
+        damage=str(data.get("damage", "1d4")),
+        damage_type=str(data.get("damage_type", "bludgeoning")).lower(),
+        versatile=None if data.get("versatile") in (None, "") else str(data["versatile"]),
+        properties=tuple(str(item).lower() for item in props),
+        mastery=str(data.get("mastery", "")).lower(),
+    )
+
+
 # --- 职业 -------------------------------------------------------------
 @dataclass(frozen=True)
 class ClassDef:
@@ -229,6 +318,8 @@ class ClassDef:
     skill_list: tuple[str, ...] = ()
     resources: tuple[ResourceDef, ...] = ()
     powers: tuple[Power, ...] = ()
+    # 武器/护甲熟练，统一写带前缀的 token：weapon.simple / armor.light
+    proficiencies: tuple[str, ...] = ()
     morph: CrAxis | None = None
     # 法术位表：等级 → (1 环, 2 环, …, 9 环)。内核只查表，不写公式
     slots: Mapping[int, tuple[int, ...]] = field(default_factory=dict)
@@ -399,6 +490,29 @@ def parse_slots(data: Any) -> dict[int, tuple[int, ...]]:
     return rows
 
 
+def _parse_class_proficiencies(data: Any, where: str) -> tuple[str, ...]:
+    """职业给的武器/护甲熟练。
+
+    写成 `{weapons: [simple, martial], armor: [light, medium, shield]}`，
+    解析成 `weapon.simple` / `armor.light` 这种 token —— 与 `grant_proficiency`
+    同一套命名，这样装备判定只需要看一份集合。
+    """
+    if not data:
+        return ()
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的 proficiencies 必须是映射" % where)
+    tokens: list[str] = []
+    for kind, values in data.items():
+        if kind not in ("weapons", "armor"):
+            raise PluginError("%s 的 proficiencies 只认 weapons / armor，实际 %r" % (where, kind))
+        prefix = "weapon" if kind == "weapons" else "armor"
+        for value in (values or ()):
+            token = "%s.%s" % (prefix, str(value).lower().replace("-", "_"))
+            if token not in tokens:
+                tokens.append(token)
+    return tuple(tokens)
+
+
 def parse_class(data: Any, source: str = "") -> ClassDef:
     if not isinstance(data, Mapping):
         raise PluginError("%s 的职业定义必须是映射" % source)
@@ -437,6 +551,7 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
         skill_list=tuple(str(item) for item in (data.get("skill_list") or ())),
         resources=resources,
         powers=powers,
+        proficiencies=_parse_class_proficiencies(data.get("proficiencies"), ident),
         morph=parse_cr_axis(data.get("morph")),
         slots=parse_slots(data.get("slots")),
         cantrips=_parse_level_table(data.get("cantrips"), "%s cantrips" % ident),
@@ -454,6 +569,7 @@ class PluginContent:
     book: PowerBook = field(default_factory=PowerBook)
     forms: dict[str, FormSpec] = field(default_factory=dict)
     armors: dict[str, ArmorDef] = field(default_factory=dict)
+    weapons: dict[str, WeaponDef] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -467,6 +583,7 @@ class ContentBundle:
     book: PowerBook = field(default_factory=PowerBook)
     forms: dict[str, FormSpec] = field(default_factory=dict)
     armors: dict[str, ArmorDef] = field(default_factory=dict)
+    weapons: dict[str, WeaponDef] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -485,12 +602,18 @@ class ContentBundle:
             raise PluginError("没有这件护甲：%s" % armor_id)
         return self.armors[armor_id]
 
+    def weapon(self, weapon_id: str) -> WeaponDef:
+        if weapon_id not in self.weapons:
+            raise PluginError("没有这件武器：%s" % weapon_id)
+        return self.weapons[weapon_id]
+
     def stats(self) -> dict[str, Any]:
         return {
             "classes": len(self.classes),
             "powers": len(self.book.ids()),
             "forms": len(self.forms),
             "armors": len(self.armors),
+            "weapons": len(self.weapons),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -578,8 +701,13 @@ def _load_items(base: Path, result: PluginContent) -> None:
                     if armor.id in result.armors:
                         raise PluginError("%s 的护甲 id 重复：%s" % (rel, armor.id))
                     result.armors[armor.id] = armor
+                elif kind == "weapon":
+                    weapon = parse_weapon(row, where=rel)
+                    if weapon.id in result.weapons:
+                        raise PluginError("%s 的武器 id 重复：%s" % (rel, weapon.id))
+                    result.weapons[weapon.id] = weapon
                 else:
-                    raise PluginError("%s 未知物品类型 %r（现在只支持 armor）" % (rel, kind))
+                    raise PluginError("%s 未知物品类型 %r（支持 armor / weapon）" % (rel, kind))
             except (PluginError, DndError) as exc:
                 result.errors.append(str(exc))
 
@@ -617,6 +745,11 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("护甲 %s 重复提供" % armor_id)
                 continue
             bundle.armors[armor_id] = armor
+        for weapon_id, weapon in content.weapons.items():
+            if weapon_id in bundle.weapons:
+                bundle.errors.append("武器 %s 重复提供" % weapon_id)
+                continue
+            bundle.weapons[weapon_id] = weapon
         for power in content.book.all():
             if bundle.book.has(power.id):
                 bundle.errors.append("能力 %s 重复提供" % power.id)
@@ -627,7 +760,8 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
 
 
 __all__ = [
-    "ResourceDef", "ClassDef", "ArmorDef", "PluginContent", "ContentBundle",
-    "parse_resource", "parse_class", "parse_cr_axis", "parse_form", "parse_armor",
+    "ResourceDef", "ClassDef", "ArmorDef", "WeaponDef", "PluginContent", "ContentBundle",
+    "parse_resource", "parse_class", "parse_cr_axis", "parse_form",
+    "parse_armor", "parse_weapon",
     "load_plugin", "load_all",
 ]

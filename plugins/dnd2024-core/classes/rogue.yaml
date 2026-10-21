@@ -8,6 +8,9 @@ name: {zh: 游荡者, en: Rogue}
 hit_die: 8
 primary: [dex]
 saves: [dex, int]
+proficiencies:
+  weapons: [simple, martial_finesse_or_light]
+  armor: [light]
 caster: none
 subclass_level: 3
 skill_choices: 4

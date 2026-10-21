@@ -7,6 +7,9 @@ name: {zh: 术士, en: Sorcerer}
 hit_die: 6
 primary: [cha]
 saves: [con, cha]
+proficiencies:
+  weapons: [simple]
+  armor: []
 caster: full
 subclass_level: 3
 skill_choices: 2

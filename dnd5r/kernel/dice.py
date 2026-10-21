@@ -86,7 +86,10 @@ class Dice:
     def __str__(self) -> str:
         bits = ["%dd%d" % (d.count, d.sides) for d in self.dice]
         if self.flat:
-            bits.append(("+" if self.flat > 0 else "") + str(self.flat))
+            if bits:
+                bits.append(("+" if self.flat > 0 else "") + str(self.flat))
+            else:
+                bits.append(str(self.flat))   # 纯定值（徒手 1 点）不要写成 "+1"
         return "".join(bits) if bits else "0"
 
 

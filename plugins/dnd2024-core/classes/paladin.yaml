@@ -8,6 +8,9 @@ name: {zh: 圣武士, en: Paladin}
 hit_die: 10
 primary: [str, cha]
 saves: [wis, cha]
+proficiencies:
+  weapons: [simple, martial]
+  armor: [light, medium, heavy, shield]
 caster: half
 subclass_level: 3
 skill_choices: 2

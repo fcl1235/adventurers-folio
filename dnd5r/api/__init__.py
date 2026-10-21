@@ -37,6 +37,7 @@ from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
 from ..rules.resolver import RefContext, Resolver
 from ..rules.scores import score_bonus_of
+from ..rules.weapons import profiles_for
 from ..rules.powers import use_power as _use_power
 from ..session import LongRest, NewTurn, Regain, Session, ShortRest, TakeDamage, UsePower
 
@@ -202,6 +203,12 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         level = profile.class_level(class_def.id) if profile else ClassLevel(1)
         attacks_per_action = max(attacks_per_action, class_def.total_attacks(level))
 
+    tokens = set(actor.profile.proficiencies) if actor.profile else set()
+    tokens |= passive_proficiencies(content, actor)
+    attack_profiles = profiles_for(actor, content.weapons, top.statblock.abilities,
+                                   resolver.ctx.prof_bonus, tokens)
+    attacks = [item.to_dict(locale) for item in attack_profiles]
+
     powers = []
     for power in available_powers(content, actor):
         reasons = can_use(power, _context(actor, locale, SeededRng(0)), None) if power.is_button else []
@@ -238,6 +245,7 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
                         "proficient": key in saves_prof}
                   for key, value in saves.items()},
         "attack": {"total": attack.total, "detail": attack.describe(), "ability": attack_ability},
+        "attacks": attacks,
         "attacks_per_action": attacks_per_action,
         "conditions": list(actor.conditions.ids()),
         "morphed": actor.top().layer is not None,

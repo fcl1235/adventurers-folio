@@ -1,0 +1,322 @@
+# 2024 SRD 武器表（由 tools/gen_weapons.py 从旧程序快照生成）。
+#
+# 字段：
+#   category    simple / martial
+#   damage      伤害骰；versatile 武器的双手档写在 versatile
+#   properties  light / finesse / two_handed / versatile / thrown / heavy / reach / loading / ranged
+#   mastery     2024 武器专精属性（cleave / graze / nick / push / sap / slow / topple / vex）
+#
+# 规则层不判「哪把武器该用力量还是敏捷」—— 那是 finesse/ranged 属性的推论，
+# 见 rules/weapons.py；这里只放数据。
+
+- id: dnd2024.item.weapon.club
+  kind: weapon
+  name: {zh: 木棒, en: Club}
+  category: simple
+  damage: "1d4"
+  damage_type: bludgeoning
+  properties: [light]
+  mastery: slow
+- id: dnd2024.item.weapon.dagger
+  kind: weapon
+  name: {zh: 匕首, en: Dagger}
+  category: simple
+  damage: "1d4"
+  damage_type: piercing
+  properties: [finesse, light, thrown]
+  mastery: nick
+- id: dnd2024.item.weapon.greatclub
+  kind: weapon
+  name: {zh: 大棒, en: Greatclub}
+  category: simple
+  damage: "1d8"
+  damage_type: bludgeoning
+  properties: [two_handed]
+  mastery: push
+- id: dnd2024.item.weapon.handaxe
+  kind: weapon
+  name: {zh: 手斧, en: Handaxe}
+  category: simple
+  damage: "1d6"
+  damage_type: slashing
+  properties: [light, thrown]
+  mastery: vex
+- id: dnd2024.item.weapon.javelin
+  kind: weapon
+  name: {zh: 标枪, en: Javelin}
+  category: simple
+  damage: "1d6"
+  damage_type: piercing
+  properties: [thrown]
+  mastery: slow
+- id: dnd2024.item.weapon.light_hammer
+  kind: weapon
+  name: {zh: 轻锤, en: Light Hammer}
+  category: simple
+  damage: "1d4"
+  damage_type: bludgeoning
+  properties: [light, thrown]
+  mastery: nick
+- id: dnd2024.item.weapon.mace
+  kind: weapon
+  name: {zh: 钉头锤, en: Mace}
+  category: simple
+  damage: "1d6"
+  damage_type: bludgeoning
+  properties: []
+  mastery: sap
+- id: dnd2024.item.weapon.quarterstaff
+  kind: weapon
+  name: {zh: 木棍, en: Quarterstaff}
+  category: simple
+  damage: "1d6"
+  damage_type: bludgeoning
+  versatile: "1d8"
+  properties: [versatile]
+  mastery: topple
+- id: dnd2024.item.weapon.sickle
+  kind: weapon
+  name: {zh: 短镰, en: Sickle}
+  category: simple
+  damage: "1d4"
+  damage_type: slashing
+  properties: [finesse, light]
+  mastery: nick
+- id: dnd2024.item.weapon.spear
+  kind: weapon
+  name: {zh: 长矛, en: Spear}
+  category: simple
+  damage: "1d6"
+  damage_type: piercing
+  versatile: "1d8"
+  properties: [thrown, versatile]
+  mastery: sap
+- id: dnd2024.item.weapon.dart
+  kind: weapon
+  name: {zh: 飞镖, en: Dart}
+  category: simple
+  damage: "1d4"
+  damage_type: piercing
+  properties: [finesse, ranged, thrown]
+  mastery: vex
+- id: dnd2024.item.weapon.light_crossbow
+  kind: weapon
+  name: {zh: 轻弩, en: Light Crossbow}
+  category: simple
+  damage: "1d8"
+  damage_type: piercing
+  properties: [loading, ranged, two_handed]
+  mastery: slow
+- id: dnd2024.item.weapon.shortbow
+  kind: weapon
+  name: {zh: 短弓, en: Shortbow}
+  category: simple
+  damage: "1d6"
+  damage_type: piercing
+  properties: [ranged, two_handed]
+  mastery: vex
+- id: dnd2024.item.weapon.sling
+  kind: weapon
+  name: {zh: 投石索, en: Sling}
+  category: simple
+  damage: "1d4"
+  damage_type: bludgeoning
+  properties: [ranged]
+  mastery: slow
+- id: dnd2024.item.weapon.battleaxe
+  kind: weapon
+  name: {zh: 战斧, en: Battleaxe}
+  category: martial
+  damage: "1d8"
+  damage_type: slashing
+  versatile: "1d10"
+  properties: [versatile]
+  mastery: topple
+- id: dnd2024.item.weapon.flail
+  kind: weapon
+  name: {zh: 连枷, en: Flail}
+  category: martial
+  damage: "1d8"
+  damage_type: bludgeoning
+  properties: []
+  mastery: sap
+- id: dnd2024.item.weapon.glaive
+  kind: weapon
+  name: {zh: 关刀, en: Glaive}
+  category: martial
+  damage: "1d10"
+  damage_type: slashing
+  properties: [heavy, reach, two_handed]
+  mastery: graze
+- id: dnd2024.item.weapon.greataxe
+  kind: weapon
+  name: {zh: 巨斧, en: Greataxe}
+  category: martial
+  damage: "1d12"
+  damage_type: slashing
+  properties: [heavy, two_handed]
+  mastery: cleave
+- id: dnd2024.item.weapon.greatsword
+  kind: weapon
+  name: {zh: 巨剑, en: Greatsword}
+  category: martial
+  damage: "2d6"
+  damage_type: slashing
+  properties: [heavy, two_handed]
+  mastery: graze
+- id: dnd2024.item.weapon.halberd
+  kind: weapon
+  name: {zh: 戟, en: Halberd}
+  category: martial
+  damage: "1d10"
+  damage_type: slashing
+  properties: [heavy, reach, two_handed]
+  mastery: cleave
+- id: dnd2024.item.weapon.lance
+  kind: weapon
+  name: {zh: 骑枪, en: Lance}
+  category: martial
+  damage: "1d10"
+  damage_type: piercing
+  properties: [heavy, reach, two_handed]
+  mastery: topple
+- id: dnd2024.item.weapon.longsword
+  kind: weapon
+  name: {zh: 长剑, en: Longsword}
+  category: martial
+  damage: "1d8"
+  damage_type: slashing
+  versatile: "1d10"
+  properties: [versatile]
+  mastery: sap
+- id: dnd2024.item.weapon.maul
+  kind: weapon
+  name: {zh: 大锤, en: Maul}
+  category: martial
+  damage: "2d6"
+  damage_type: bludgeoning
+  properties: [heavy, two_handed]
+  mastery: topple
+- id: dnd2024.item.weapon.morningstar
+  kind: weapon
+  name: {zh: 晨星, en: Morningstar}
+  category: martial
+  damage: "1d8"
+  damage_type: piercing
+  properties: []
+  mastery: sap
+- id: dnd2024.item.weapon.pike
+  kind: weapon
+  name: {zh: 长枪, en: Pike}
+  category: martial
+  damage: "1d10"
+  damage_type: piercing
+  properties: [heavy, reach, two_handed]
+  mastery: push
+- id: dnd2024.item.weapon.rapier
+  kind: weapon
+  name: {zh: 细剑, en: Rapier}
+  category: martial
+  damage: "1d8"
+  damage_type: piercing
+  properties: [finesse]
+  mastery: vex
+- id: dnd2024.item.weapon.scimitar
+  kind: weapon
+  name: {zh: 弯刀, en: Scimitar}
+  category: martial
+  damage: "1d6"
+  damage_type: slashing
+  properties: [finesse, light]
+  mastery: nick
+- id: dnd2024.item.weapon.shortsword
+  kind: weapon
+  name: {zh: 短剑, en: Shortsword}
+  category: martial
+  damage: "1d6"
+  damage_type: piercing
+  properties: [finesse, light]
+  mastery: vex
+- id: dnd2024.item.weapon.trident
+  kind: weapon
+  name: {zh: 三叉戟, en: Trident}
+  category: martial
+  damage: "1d8"
+  damage_type: piercing
+  versatile: "1d10"
+  properties: [thrown, versatile]
+  mastery: topple
+- id: dnd2024.item.weapon.war_pick
+  kind: weapon
+  name: {zh: 战镐, en: War Pick}
+  category: martial
+  damage: "1d8"
+  damage_type: piercing
+  versatile: "1d10"
+  properties: [versatile]
+  mastery: sap
+- id: dnd2024.item.weapon.warhammer
+  kind: weapon
+  name: {zh: 战锤, en: Warhammer}
+  category: martial
+  damage: "1d8"
+  damage_type: bludgeoning
+  versatile: "1d10"
+  properties: [versatile]
+  mastery: push
+- id: dnd2024.item.weapon.whip
+  kind: weapon
+  name: {zh: 长鞭, en: Whip}
+  category: martial
+  damage: "1d4"
+  damage_type: slashing
+  properties: [finesse, reach]
+  mastery: slow
+- id: dnd2024.item.weapon.blowgun
+  kind: weapon
+  name: {zh: 吹箭, en: Blowgun}
+  category: martial
+  damage: "1"
+  damage_type: piercing
+  properties: [finesse, loading, ranged]
+  mastery: vex
+- id: dnd2024.item.weapon.hand_crossbow
+  kind: weapon
+  name: {zh: 手弩, en: Hand Crossbow}
+  category: martial
+  damage: "1d6"
+  damage_type: piercing
+  properties: [finesse, light, loading, ranged]
+  mastery: vex
+- id: dnd2024.item.weapon.heavy_crossbow
+  kind: weapon
+  name: {zh: 重弩, en: Heavy Crossbow}
+  category: martial
+  damage: "1d10"
+  damage_type: piercing
+  properties: [heavy, loading, ranged, two_handed]
+  mastery: push
+- id: dnd2024.item.weapon.longbow
+  kind: weapon
+  name: {zh: 长弓, en: Longbow}
+  category: martial
+  damage: "1d8"
+  damage_type: piercing
+  properties: [heavy, ranged, two_handed]
+  mastery: slow
+- id: dnd2024.item.weapon.musket
+  kind: weapon
+  name: {zh: 火枪, en: Musket}
+  category: martial
+  damage: "1d12"
+  damage_type: piercing
+  properties: [loading, ranged, two_handed]
+  mastery: slow
+- id: dnd2024.item.weapon.pistol
+  kind: weapon
+  name: {zh: 手枪, en: Pistol}
+  category: martial
+  damage: "1d10"
+  damage_type: piercing
+  properties: [finesse, loading, ranged]
+  mastery: vex

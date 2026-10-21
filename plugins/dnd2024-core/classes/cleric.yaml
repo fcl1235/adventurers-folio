@@ -7,6 +7,9 @@ name: {zh: 牧师, en: Cleric}
 hit_die: 8
 primary: [wis]
 saves: [wis, cha]
+proficiencies:
+  weapons: [simple]
+  armor: [light, medium, shield]
 caster: full
 subclass_level: 3
 skill_choices: 2

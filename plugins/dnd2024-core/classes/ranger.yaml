@@ -7,6 +7,9 @@ name: {zh: 游侠, en: Ranger}
 hit_die: 10
 primary: [dex, wis]
 saves: [str, dex]
+proficiencies:
+  weapons: [simple, martial]
+  armor: [light, medium, shield]
 caster: half
 subclass_level: 3
 skill_choices: 3
