@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-D&D 5.5e (2024 规则) 人物卡 · 桌面应用
-=====================================
+D&D 5R (5.5e / 2024 规则) 人物卡 · 桌面应用
+==========================================
 零第三方依赖，仅需 Python 标准库 (tkinter)。
+只做 2024 修订版 (5R)：属性加值来自背景、战斗风格是专长、
+力竭每级 d20 −2 / 速度 −5 尺、武器专精、法术配额查职业表。
 
 代码按职责拆到 dnd55e/ 包里 (见 dnd55e/__init__.py 的模块说明),
 规则数据都在 JSON 里按需加载, 不再堆在代码中:
   dnd55e_core_data.json          职业/种族/背景/法术位等核心规则
   dnd55e_classes_detail.json     12 职业 × 174 条特性 / 48 子职
-  dnd55e_spells.json             339 个法术
+  dnd55e_spells.json             347 个法术 (含召唤物映射)
   dnd55e/data/*.json             界面用静态表 (武器/护甲/物品/专长/文案…)
 
 用法: python dnd55e_character_builder.py [--selftest]
