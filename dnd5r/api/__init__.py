@@ -14,7 +14,7 @@ from dataclasses import replace
 from typing import Any, Mapping, Sequence
 
 from ..content import ClassDef, ContentBundle, load_all
-from ..kernel.errors import DndError, RuleError
+from ..kernel.errors import DndError, PluginError, RuleError
 from ..kernel.events import Report
 from ..kernel.rng import Rng, SeededRng
 from ..kernel.text import Text
@@ -831,6 +831,9 @@ __all__ = [
     "character_sheet", "actor_view",
     "find_power", "use_power", "plugin_summary",
     "eligible_forms_for", "morph_class_of", "form_options",
+    # 前端要 catch 的是「调用失败」这件事，所以异常类型属于 api 的契约 ——
+    # 不让 apps 去 import kernel.errors（C3），否则拦错误都得越界。
+    "DndError", "RuleError", "PluginError",
     "ActionEconomy", "ActionType",
     "Session", "UsePower", "ShortRest", "LongRest", "NewTurn", "TakeDamage", "Regain",
 ]

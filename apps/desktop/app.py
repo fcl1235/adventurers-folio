@@ -17,6 +17,7 @@ from tkinter import ttk
 import dnd5r.api as api
 
 from .pages import OverviewPage
+from .pages_spells import SpellPage
 from .widgets import COL_MID, hint_bar
 
 WINDOW_MIN = (1180, 720)
@@ -64,7 +65,9 @@ class DesktopApp(tk.Tk):
 
         self.overview = OverviewPage(self.book)
         self.book.add(self.overview, text="概览")
-        self.pages = [self.overview]
+        self.spells = SpellPage(self.book, self)
+        self.book.add(self.spells, text="法术")
+        self.pages = [self.overview, self.spells]
 
     # --- 刷新 -------------------------------------------------------------
     def refresh(self) -> None:

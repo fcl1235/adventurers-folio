@@ -79,5 +79,100 @@ class DesktopAppTest(unittest.TestCase):
             self.assertLessEqual(height, avail_h, "页面纵向溢出")
 
 
+WIZARD = "dnd2024.class.wizard"
+INT_SCORES = {"str": 8, "dex": 14, "con": 14, "int": 17, "wis": 12, "cha": 10}
+
+
+class SpellPageTest(unittest.TestCase):
+    """P6e 验收：法术页能选、能存、选错能说清楚。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _page(self, class_id=WIZARD, level=5, scores=INT_SCORES):
+        actor = api.new_character(self.bundle, class_id, level, scores)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app, app.spells
+
+    def test_non_caster_page_is_disabled(self):
+        _, page = self._page(FIGHTER, 5, SCORES)
+        self.assertEqual(str(page.pick_button.cget("state")), "disabled")
+        self.assertEqual(page.prepared.row_count, 0)
+        self.assertIn("不施法", page.status_var.get() + page.class_var.get())
+
+    def test_caster_lists_options(self):
+        _, page = self._page()
+        block = page._block()
+        self.assertEqual(page.prepared.row_count, len(block["prepared"]["options"]))
+        self.assertEqual(page.cantrips.row_count, len(block["cantrips"]["options"]))
+        self.assertIn("0 /", page.prep_frame.cget("text"))
+
+    def test_toggle_writes_to_profile(self):
+        app, page = self._page()
+        target = page._spell_options("prepared")[0]["id"]
+        page.prepared.select_id(target)
+        self.assertTrue(page.toggle_prepared(), page.status_var.get())
+        self.assertIn(target, app.actor.profile.spells_of(WIZARD))
+        self.assertIn("1 /", page.prep_frame.cget("text"))
+
+    def test_toggle_again_removes(self):
+        app, page = self._page()
+        target = page._spell_options("prepared")[0]["id"]
+        page.prepared.select_id(target)
+        page.toggle_prepared()
+        page.prepared.select_id(target)
+        self.assertTrue(page.toggle_prepared(), page.status_var.get())
+        self.assertNotIn(target, app.actor.profile.spells_of(WIZARD))
+
+    def test_row_is_marked_when_chosen(self):
+        _, page = self._page()
+        target = page._spell_options("prepared")[0]["id"]
+        before = page.prepared.text_at(page.prepared.index_of(target))
+        page.prepared.select_id(target)
+        page.toggle_prepared()
+        after = page.prepared.text_at(page.prepared.index_of(target))
+        self.assertNotEqual(before, after, "选定后清单行没有勾选标记")
+        self.assertTrue(after.startswith("✓"), after)
+
+    def test_quota_overflow_reports_error_and_keeps_actor(self):
+        app, page = self._page()
+        options = [row["id"] for row in page._spell_options("prepared")]
+        quota = int(page._block()["prepared"]["max"])
+        for spell_id in options[:quota]:
+            page.prepared.select_id(spell_id)
+            self.assertTrue(page.toggle_prepared(), page.status_var.get())
+        page.prepared.select_id(options[quota])
+        self.assertFalse(page.toggle_prepared(), "超过名额还成功了")
+        self.assertIn("上限", page.status_var.get())
+        self.assertEqual(len(app.actor.profile.spells_of(WIZARD)), quota)
+        # 失败后选中项还在（玩家要能马上换个法术，而不是重新找）
+        self.assertEqual(page.prepared.selected_id(), options[quota])
+
+    def test_detail_panel_shows_the_selected_spell(self):
+        _, page = self._page()
+        row = page._spell_options("prepared")[0]
+        text = page.show("prepared", row["id"])
+        self.assertIn(row["name"], text)
+        self.assertIn("施法", text)
+
+    def test_cantrip_and_prepared_are_separate(self):
+        app, page = self._page()
+        cantrip = page._spell_options("cantrips")[0]["id"]
+        page.cantrips.select_id(cantrip)
+        self.assertTrue(page.toggle_cantrip(), page.status_var.get())
+        self.assertIn(cantrip, app.actor.profile.cantrips_of(WIZARD))
+        self.assertEqual(app.actor.profile.spells_of(WIZARD), ())
+
+    def test_selection_survives_refresh(self):
+        """重画清单后选中项不能丢 —— 否则连着选两个法术要点两次。"""
+        _, page = self._page()
+        target = page._spell_options("prepared")[3]["id"]
+        page.prepared.select_id(target)
+        page.refresh(page.app.sheet)
+        self.assertEqual(page.prepared.selected_id(), target)
+
+
 if __name__ == "__main__":
     unittest.main()

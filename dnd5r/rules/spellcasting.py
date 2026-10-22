@@ -167,22 +167,22 @@ def check_spell_picks(
             items = list(spell_ids)
             if len(set(items)) != len(items):
                 duplicates = sorted({item for item in items if items.count(item) > 1})
-                problems.append("%s 里有重复法术：%s" % (label, "、".join(duplicates)))
+                problems.append("%s里有重复法术：%s" % (label, "、".join(duplicates)))
                 continue
             quota = (max_cantrips(class_def, class_level) if is_cantrip
                      else max_prepared(class_def, class_level))
             if len(items) > quota:
-                problems.append("%s 超出上限：选了 %d 个，上限 %d"
+                problems.append("%s超出上限：选了 %d 个，上限 %d"
                                 % (label, len(items), quota))
             allowed = set(bundle.spell_list(class_id))
             top = highest_slot_table(class_def, class_level)
             for spell_id in items:
                 spell = _spell_of(bundle, spell_id)
                 if spell is None:
-                    problems.append("%s 里的 %s 不存在" % (label, spell_id))
+                    problems.append("%s里的 %s 不存在" % (label, spell_id))
                     continue
                 if spell.id not in allowed:
-                    problems.append("%s 不在 %s 的法术表里" % (spell.name.get(locale),
+                    problems.append("%s不在 %s 的法术表里" % (spell.name.get(locale),
                                                          class_def.name.get(locale)))
                     continue
                 if is_cantrip and int(spell.level) != 0:

@@ -7,7 +7,9 @@
     可用宽 = 窗口最小宽 − 左右 padding
     可用高 = 窗口最小高 − 头部 − 状态栏 − 笔记本标签
 
-审计两件事：每页需求不超过可用区；单元格宽度之和不超出所在栏的预算。
+审计三件事：每页需求不超过可用区；单元格宽度不超出所在栏预算；
+**页面上显示的数字与 `character_sheet()` 一致**（界面不许自己算第二遍）。
+最后一项比尺寸重要：布局塞得下但数字错了，比塞不下更糟。
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ if str(ROOT) not in sys.path:
 import dnd5r.api as api                      # noqa: E402
 from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
+from apps.desktop.pages_spells import SpellPage, _chosen_ids  # noqa: E402
 from apps.desktop.widgets import COL_MID, COL_RIGHT  # noqa: E402
 
 SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
@@ -51,6 +54,45 @@ def _check_skills(label: str, page: OverviewPage, sheet: dict) -> list[str]:
     return problems
 
 
+def _check_spells(label: str, page: SpellPage, stats: dict) -> list[str]:
+    """法术页：清单行数与候选一致，且**准备/取消真的写得进去**。"""
+    problems: list[str] = []
+    block = page._block()
+    if not block:
+        if str(page.pick_button.cget("state")) != "disabled":
+            problems.append("%s：不施法却让按钮可点" % label)
+        return problems
+    for kind, pane in (("cantrips", page.cantrips), ("prepared", page.prepared)):
+        options = page._spell_options(kind)
+        if pane.row_count != len(options):
+            problems.append("%s：%s 清单 %d 行，候选 %d 个"
+                            % (label, kind, pane.row_count, len(options)))
+        if pane.row_count and not pane.text_at(0).strip():
+            problems.append("%s：%s 清单首行是空的（没填数据）" % (label, kind))
+
+    bucket = block.get("prepared") or {}
+    if int(bucket.get("remaining") or 0) <= 0:
+        return problems                       # 名额已满，来回切换会被规则拒绝
+    chosen = _chosen_ids(bucket)
+    target = next((row["id"] for row in page._spell_options("prepared")
+                   if row["id"] not in chosen), "")
+    if not target:
+        return problems
+    page.prepared.select_id(target)
+    if not page.toggle_prepared():
+        problems.append("%s：准备法术失败（%s）" % (label, page.status_var.get()))
+        return problems
+    stats["toggles"] = stats.get("toggles", 0) + 1
+    if target not in _chosen_ids(page._block()["prepared"]):
+        problems.append("%s：点了准备但档案没变（%s）" % (label, target))
+    page.prepared.select_id(target)
+    if not page.toggle_prepared():
+        problems.append("%s：取消准备失败（%s）" % (label, page.status_var.get()))
+    elif target in _chosen_ids(page._block()["prepared"]):
+        problems.append("%s：点了取消但档案还留着（%s）" % (label, target))
+    return problems
+
+
 def main() -> int:
     bundle = api.load_content(ROOT / "plugins")
     if bundle.errors:
@@ -59,10 +101,13 @@ def main() -> int:
         return 1
 
     problems: list[str] = []
+    page_count = 0
+    stats: dict = {}
     for label, class_id, level, subclass, scores in CASES:
         actor = api.new_character(bundle, class_id, level, scores, subclass=subclass)
         app = DesktopApp(bundle, actor, selftest=True)   # withdrawn，永不显示
         try:
+            page_count = len(app.pages)
             report = app.layout_report()
             avail_w = WINDOW_MIN[0] - 16                   # 左右各 8 的 padding
             avail_h = WINDOW_MIN[1] - app.status.winfo_reqheight() - 40  # 40 = 头部 + 标签条
@@ -77,16 +122,17 @@ def main() -> int:
                     problems.append("%s：高 %d > 可用 %d（纵向溢出）"
                                     % (label, height, avail_h))
             # 列宽预算：**现量**控件的 reqwidth，不按字符数手算（字体一变手算就废）
-            page = app.pages[0]
-            if isinstance(page, OverviewPage):
-                need = page.skills.winfo_reqwidth()
-                if need > COL_MID:
-                    problems.append("技能表需要 %d px，超过中栏预算 %d" % (need, COL_MID))
-                need = page.attacks.winfo_reqwidth()
-                if need > COL_RIGHT:
-                    problems.append("攻击表需要 %d px，超过右栏预算 %d" % (need, COL_RIGHT))
-            if isinstance(page, OverviewPage):
-                problems.extend(_check_skills(label, page, app.sheet))
+            for page in app.pages:
+                if isinstance(page, OverviewPage):
+                    need = page.skills.winfo_reqwidth()
+                    if need > COL_MID:
+                        problems.append("技能表需要 %d px，超过中栏预算 %d" % (need, COL_MID))
+                    need = page.attacks.winfo_reqwidth()
+                    if need > COL_RIGHT:
+                        problems.append("攻击表需要 %d px，超过右栏预算 %d" % (need, COL_RIGHT))
+                    problems.extend(_check_skills(label, page, app.sheet))
+                elif isinstance(page, SpellPage):
+                    problems.extend(_check_spells(label, page, stats))
             if app.winfo_ismapped():
                 problems.append("%s：窗口被映射了（零弹窗铁律）" % label)
         finally:
@@ -96,7 +142,8 @@ def main() -> int:
         for item in problems:
             print("[FAIL] %s" % item)
         return 1
-    print("LAYOUT OK —— %d 个角色 × 1 页全部在预算内" % len(CASES))
+    print("LAYOUT OK —— %d 个角色 × %d 页全部在预算内；"
+          "法术页往返写库 %d 次" % (len(CASES), page_count, stats.get("toggles", 0)))
     return 0
 
 

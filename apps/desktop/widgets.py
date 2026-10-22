@@ -113,6 +113,59 @@ class GridTable(ttk.Frame):
         return self._cells[row][column].cget("text")
 
 
+class ListPane(ttk.Frame):
+    """可选清单（Listbox + 滚动条）。
+
+    `Listbox` 不做任何类型转换，`"+2"` 进来还是 `"+2"` —— 这一点比 Treeview 强。
+    选中一律走 `select_id()`：extended 模式下 `selection_set` 是**追加**，
+    直接设会留上一个选中项，测试里会静默选错行（旧程序吃过这个亏）。
+    """
+
+    def __init__(self, master, height: int = 10, width: int = 40) -> None:
+        super().__init__(master)
+        self.list = tk.Listbox(self, height=height, width=width, exportselection=False,
+                               activestyle="none", relief="flat",
+                               highlightthickness=0, borderwidth=0)
+        bar = ttk.Scrollbar(self, orient="vertical", command=self.list.yview)
+        self.list.configure(yscrollcommand=bar.set)
+        self.list.pack(side="left", fill="both", expand=True)
+        bar.pack(side="right", fill="y")
+        self._ids: list[str] = []
+
+    def fill(self, rows: list[tuple[str, str]]) -> None:
+        """`rows` 是 (id, 显示文本)。重画后按 id 恢复选中项。"""
+        keep = self.selected_id()
+        self.list.delete(0, "end")
+        self._ids = [row_id for row_id, _ in rows]
+        for _, text in rows:
+            self.list.insert("end", text)
+        if keep:
+            self.select_id(keep)
+
+    def selected_id(self) -> str:
+        picked = self.list.curselection()
+        return self._ids[picked[0]] if picked else ""
+
+    def select_id(self, row_id: str) -> None:
+        if row_id not in self._ids:
+            return
+        index = self._ids.index(row_id)
+        self.list.selection_clear(0, "end")
+        self.list.selection_set(index)
+        self.list.activate(index)
+        self.list.see(index)
+
+    def index_of(self, row_id: str) -> int:
+        return self._ids.index(row_id) if row_id in self._ids else -1
+
+    def text_at(self, index: int) -> str:
+        return self.list.get(index)
+
+    @property
+    def row_count(self) -> int:
+        return int(self.list.size())
+
+
 def section(master, title: str, note: str = "") -> ttk.LabelFrame:
     """带标题的分区框；note 是给玩家的一句说明（不是给我们自己看的注释）。"""
     frame = ttk.LabelFrame(master, text=title, padding=(8, 4))
