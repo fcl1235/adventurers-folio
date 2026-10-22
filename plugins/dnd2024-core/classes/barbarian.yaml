@@ -97,11 +97,12 @@ powers:
       en: |-
         You gain an uncanny sense of when things aren't as they should be, giving you an edge when you dodge perils. You have Advantage on Dexterity saving throws unless you have the Incapacitated condition.
     effects:
-      - note:
-          zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
-          en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+      # 无条件优势里少见的「有挂载条件」的一条：失能期间这条优势不存在。
+      # 条件放在**挂载**时判（不满足就不挂标记），掷骰那边只管照着标记掷。
+      - grant_advantage:
+          target: save.dex
+          mode: adv
+          when: {not: {conditions_contains: incapacitated}}
 
   - id: dnd2024.class.barbarian.reckless_attack
     name: {zh: 鲁莽攻击, en: Reckless Attack}
@@ -216,11 +217,14 @@ powers:
       en: |-
         Your instincts are so honed that you have Advantage on Initiative rolls.
     effects:
+      # 先攻优势（`initiative` 是独立的名字，不与敏捷检定混用）
+      - grant_advantage: {target: initiative, mode: adv}
+      # 后半句「若先攻时未狂暴，可免费进入狂暴」要战斗回合，归 P8
       - note:
           zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
+            掷先攻时若未狂暴可免费进入狂暴：需要回合流程，P8 处理。
           en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+            Entering Rage for free when you roll Initiative needs the turn pipeline (P8).
 
   - id: dnd2024.class.barbarian.instinctive_pounce
     name: {zh: 本能扑击, en: Instinctive Pounce}

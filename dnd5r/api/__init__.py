@@ -21,7 +21,7 @@ from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
 from ..model.levels import ClassLevel, TotalLevel
 from ..model.profile import ClassEntry, Profile, class_levels_of
-from ..model.statblock import Abilities, Statblock
+from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
 from ..rules.actioneconomy import ActionEconomy, ActionType
 from ..rules.armor import Loadout, ac_inputs, loadout_for
 from ..rules.build import (
@@ -30,9 +30,9 @@ from ..rules.build import (
     subclass_defs,
 )
 from ..rules.contributions import (
-    facts_for, modifiers_for, passive_defenses, passive_modifiers,
-    passive_proficiencies, power_channels, power_status, save_modifiers,
-    skill_modifiers,
+    facts_for, modifiers_for, passive_advantage_modes, passive_defenses,
+    passive_modifiers, passive_proficiencies, power_channels, power_status,
+    save_modifiers, skill_modifiers,
 )
 from ..rules.effects import EffectContext
 from ..rules.health import hit_dice_average
@@ -372,6 +372,29 @@ def _proficient_saves(actor: Actor) -> set[str]:
             if token.startswith("save.")}
 
 
+def _dice_mode(content: ContentBundle, actor: Actor, query: str) -> tuple[str, tuple[str, ...]]:
+    """这一次检定的掷骰模式。**所有 d20 都从这里取**，别在别处再判一遍。"""
+    return passive_advantage_modes(content, actor, query)
+
+
+def _proficiency_sets(actor: Actor, content: ContentBundle) -> tuple[set[str], set[str], set[str]]:
+    """(豁免熟练, 技能熟练令牌, 专精令牌)。
+
+    角色卡与掷骰**必须用同一份**：两边各算一遍的话，界面上写「隐匿 +7」、
+    真掷的时候按 +5 算，是最难发现的那种错。
+    """
+    profile = actor.profile
+    saves_prof = _proficient_saves(actor) | {
+        token.split(".", 1)[1]
+        for token in passive_proficiencies(content, actor)
+        if token.startswith("save.")
+    }
+    skill_tokens = set(profile.proficiencies if profile else ())
+    skill_tokens |= passive_proficiencies(content, actor)
+    expertise_tokens = set(profile.expertise if profile else ())
+    return saves_prof, skill_tokens, expertise_tokens
+
+
 def _class_defs(actor: Actor, content: ContentBundle) -> list[ClassDef]:
     if actor.profile is None:
         return []
@@ -505,18 +528,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
     root = actor.root()
     loadout = loadout_for(actor, content.armors)
     morphed = top.layer is not None
-    saves_prof = _proficient_saves(actor) | {
-        token.split(".", 1)[1]
-        for token in passive_proficiencies(content, actor)
-        if token.startswith("save.")
-    }
+    saves_prof, skill_tokens, expertise_tokens = _proficiency_sets(actor, content)
     # 常驻贡献：被动能力的 modifier（无甲防御、守护灵光）必须每次都算进去
     mods = passive_modifiers(content, actor, locale)
-
-    # 熟练令牌：档案里的 + 被动能力给的（如「技能全能」）。下面多处要用，先算一次。
-    skill_tokens = set(profile.proficiencies if profile else ())
-    skill_tokens |= passive_proficiencies(content, actor)
-    expertise_tokens = set(profile.expertise if profile else ())
 
     base, gear_mods = ac_inputs(loadout, top.statblock, locale)
     ac = resolver.armor_class(
@@ -529,32 +543,42 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         ).total
         for mode in top.statblock.speeds
     }
-    saves = {
-        key: resolver.saving_throw(top, key, proficient=key in saves_prof,
-                                   modifiers=save_modifiers(mods, key))
-        for key in ABILITY_KEYS
-    }
+    saves = {}
+    for key in ABILITY_KEYS:
+        mode, mode_sources = _dice_mode(content, actor, "save.%s" % key)
+        saves[key] = resolver.saving_throw(
+            top, key, proficient=key in saves_prof,
+            modifiers=save_modifiers(mods, key),
+            mode=mode, mode_sources=mode_sources)
     # 技能：属性检定 + 熟练（+ 专精）。熟练 token 与内容里的 `skill.<key>` 必须一致，
     # 所以这里从**内容**的技能表出发去查 token，而不是反过来枚举令牌。
     skill_rows = []
     for skill in sorted(content.skills.values(), key=lambda item: (item.ability, item.key)):
         token = "skill.%s" % skill.key
         proficient = token in skill_tokens
+        mode, mode_sources = _dice_mode(content, actor, "check.%s" % skill.key)
         roll = resolver.ability_check(
             top, skill.ability, proficient=proficient,
             expertise=token in expertise_tokens,
             modifiers=skill_modifiers(mods, skill.key),
+            mode=mode, mode_sources=mode_sources,
         )
         skill_rows.append({
             "id": skill.id, "key": skill.key, "ability": skill.ability,
             "name": skill.name.get(locale),
             "total": roll.total, "detail": roll.describe(),
+            "mode": roll.mode, "mode_sources": list(roll.mode_sources),
             "proficient": proficient, "expertise": token in expertise_tokens,
         })
     # 攻击：默认用最高的力量／敏捷，只看是否熟练（武器数据在 P5c）
     attack_ability = "str" if top.statblock.abilities.mod("str") >= top.statblock.abilities.mod("dex") else "dex"
+    attack_mode, attack_sources = _dice_mode(content, actor, "attack.%s" % attack_ability)
     attack = resolver.attack_bonus(top, attack_ability, proficient=True,
-                                   modifiers=modifiers_for(mods, "attack"))
+                                   modifiers=modifiers_for(mods, "attack"),
+                                   mode=attack_mode, mode_sources=attack_sources)
+    # 先攻单独算：它的优势标记叫 `initiative`，与「敏捷检定」不是同一条
+    init_mode, init_sources = _dice_mode(content, actor, "initiative")
+    initiative = resolver.initiative(top, mode=init_mode, mode_sources=init_sources)
 
     attacks_per_action = 1
     for class_def in _class_defs(actor, content):
@@ -609,7 +633,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
                          if pool.kind.value == "dice"],
         },
         "ac": {"total": ac.total, "detail": ac.describe()},
-        "initiative": resolver.ability_check(top, "dex").total,
+        "initiative": {"total": initiative.total, "detail": initiative.describe(),
+                       "mode": initiative.mode,
+                       "mode_sources": list(initiative.mode_sources)},
         "speed": speeds,
         "senses": senses,
         "resistances": resistances,
@@ -617,10 +643,12 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "abilities": _ability_rows(actor, content, morphed),
         "gear": loadout.to_dict(locale),
         "saves": {key: {"total": value.total, "detail": value.describe(),
+                        "mode": value.mode, "mode_sources": list(value.mode_sources),
                         "proficient": key in saves_prof}
                   for key, value in saves.items()},
         "skills": skill_rows,
-        "attack": {"total": attack.total, "detail": attack.describe(), "ability": attack_ability},
+        "attack": {"total": attack.total, "detail": attack.describe(), "ability": attack_ability,
+                   "mode": attack.mode, "mode_sources": list(attack.mode_sources)},
         "crit": {"min": crit.total, "detail": crit.describe(),
                  "text": crit_text(crit.total)},
         "attacks": attacks,
@@ -731,6 +759,111 @@ def _context(
         class_level=class_level,
         source=power.id if power else "",
     )
+
+
+CHECK_KINDS = ("save", "skill", "ability", "initiative", "attack")
+
+
+def roll_check(
+    actor: Actor,
+    content: ContentBundle,
+    kind: str,
+    key: str = "",
+    rng: Rng | None = None,
+    locale: str = "zh",
+) -> dict:
+    """掷一次 d20 检定 —— **优势/劣势在这里才真的变成「掷两次留一个」**。
+
+    `kind` 与 `key`：
+      save       key = str/dex/con/int/wis/cha
+      skill      key = 技能 key（stealth / athletics …）—— 属性检定 + 熟练 + 专精
+      ability    key = str/dex/…（裸属性检定）
+      initiative 不需要 key
+      attack     key = str 或 dex，缺省取调整值较高的那个
+
+    返回值里 **`advantage: true`** 就是「该掷两次、取高」这件事本身；
+    加值和明细来自与角色卡**同一个** `Resolver`，不会出现「卡上 +7、掷的时候 +5」。
+    """
+    from ..kernel.dice import roll_d20
+
+    if kind not in CHECK_KINDS:
+        raise RuleError("不认识的检定类型：%r（可选 %s）" % (kind, "/".join(CHECK_KINDS)))
+    resolver = resolver_for(actor, content)
+    top = actor.top()
+    mods = passive_modifiers(content, actor, locale)
+    saves_prof, skill_tokens, expertise_tokens = _proficiency_sets(actor, content)
+    label = ""
+
+    if kind == "save":
+        ability = str(key).lower()
+        _need_ability(ability)
+        mode, mode_sources = _dice_mode(content, actor, "save.%s" % ability)
+        resolution = resolver.saving_throw(
+            top, ability, proficient=ability in saves_prof,
+            modifiers=save_modifiers(mods, ability),
+            mode=mode, mode_sources=mode_sources)
+        label = "save.%s" % ability
+    elif kind == "skill":
+        # 两种写法都认：内容 id（`dnd2024.skill.stealth`）与内核 key（`stealth`）。
+        # 界面手里多半是 id，手写脚本/测试多半是 key —— 只认一种就会有人踩空。
+        skill = content.skills.get(str(key))
+        if skill is None:
+            skill = next((item for item in content.skills.values()
+                          if item.key == str(key)), None)
+        if skill is None:
+            raise RuleError("不认识的技能：%r" % (key,))
+        token = "skill.%s" % skill.key
+        mode, mode_sources = _dice_mode(content, actor, "check.%s" % skill.key)
+        resolution = resolver.ability_check(
+            top, skill.ability, proficient=token in skill_tokens,
+            expertise=token in expertise_tokens,
+            modifiers=skill_modifiers(mods, skill.key),
+            mode=mode, mode_sources=mode_sources)
+        label = skill.name.get(locale) or skill.key
+    elif kind == "ability":
+        ability = str(key).lower()
+        _need_ability(ability)
+        mode, mode_sources = _dice_mode(content, actor, "check.%s" % ability)
+        resolution = resolver.ability_check(top, ability, mode=mode, mode_sources=mode_sources)
+        label = ability.upper()
+    elif kind == "initiative":
+        mode, mode_sources = _dice_mode(content, actor, "initiative")
+        resolution = resolver.initiative(top, mode=mode, mode_sources=mode_sources)
+        label = "先攻"
+    else:
+        ability = str(key).lower() or (
+            "str" if top.statblock.abilities.mod("str") >= top.statblock.abilities.mod("dex")
+            else "dex")
+        _need_ability(ability)
+        mode, mode_sources = _dice_mode(content, actor, "attack.%s" % ability)
+        resolution = resolver.attack_bonus(top, ability, proficient=True,
+                                           modifiers=modifiers_for(mods, "attack"),
+                                           mode=mode, mode_sources=mode_sources)
+        label = "攻击（%s）" % ability.upper()
+
+    roll = roll_d20(rng or SeededRng(), resolution.mode)
+    kept = roll.parts[0].rolls
+    dropped = roll.parts[0].dropped if roll.parts else ()
+    return {
+        "kind": kind,
+        "key": key,
+        "label": label,
+        "mode": resolution.mode,
+        "advantage": resolution.mode == "adv",
+        "disadvantage": resolution.mode == "dis",
+        "mode_sources": list(resolution.mode_sources),
+        "die": roll.total,
+        "kept": list(kept),
+        "dropped": list(dropped),
+        "modifier": resolution.total,
+        "total": roll.total + resolution.total,
+        "detail": resolution.describe(),
+    }
+
+
+def _need_ability(ability: str) -> None:
+    if ability not in ABILITY_KEYS:
+        raise RuleError("不认识的属性：%r（可选 %s）" % (ability, "/".join(ABILITY_KEYS)))
 
 
 def find_power(content: ContentBundle, power_id: str, actor: Actor | None = None) -> Power:
@@ -850,7 +983,7 @@ __all__ = [
     "VERSION", "load_content", "content_summary",
     "create_actor", "new_character", "resolver_for", "build_from_profile",
     "set_feat_choice", "save_character", "load_character", "SAVE_VERSION",
-    "character_sheet", "actor_view",
+    "character_sheet", "actor_view", "roll_check", "CHECK_KINDS",
     "find_power", "use_power", "plugin_summary",
     "eligible_forms_for", "morph_class_of", "form_options",
     # 前端要 catch 的是「调用失败」这件事，所以异常类型属于 api 的契约 ——

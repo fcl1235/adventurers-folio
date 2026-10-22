@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any, ClassVar, Mapping, Sequence
 
 from ...kernel.errors import PluginError
+from ...kernel.predicate import evaluate
 from ...kernel.text import Text
 from ...model.effect_instance import ActiveEffect, Duration, DurationKind
 from ..modifiers import Direction, Modifier, Scope, Stack
@@ -264,13 +265,20 @@ def _with_languages(profile, extra):
 
 @dataclass(frozen=True, slots=True)
 class GrantAdvantage(Effect):
-    """优势 / 劣势，带方向（GIVEN 我给的，TAKEN 我承受的）。"""
+    """优势 / 劣势，带方向（GIVEN 我给的，TAKEN 我承受的）。
+
+    `when` 是**挂载条件**（不是掷骰时的条件）。典型用途是
+    「未失能时敏捷豁免有优势」—— 失能期间这条优势就不该存在。
+    条件不满足时直接不挂标记，而不是挂上去再由掷骰那边过滤一遍：
+    后者会让「为什么这次没优势」变成两处逻辑各说各话。
+    """
 
     op: ClassVar[str] = "grant_advantage"
     target: str = "check.all"
     direction: Direction = Direction.GIVEN
     mode: str = "adv"          # adv / dis
     duration: Duration = field(default_factory=lambda: Duration(DurationKind.PERMANENT))
+    when: Mapping[str, Any] | None = None
 
     @classmethod
     def from_payload(cls, payload: Any, where: str = "") -> "GrantAdvantage":
@@ -286,14 +294,27 @@ class GrantAdvantage(Effect):
         mode = str(payload.get("mode", "adv")).lower()
         if mode not in ("adv", "dis"):
             raise PluginError("%s mode 只能是 adv 或 dis" % where)
+        when = payload.get("when")
+        if when is not None and not isinstance(when, Mapping):
+            raise PluginError("%s grant_advantage.when 必须是映射" % where)
         return cls(
             target=str(payload.get("target", "check.all")),
             direction=direction,
             mode=mode,
             duration=_duration(payload.get("duration")),
+            when=when,
         )
 
     def apply(self, ctx: EffectContext) -> None:
+        if self.when is not None:
+            facts = {
+                "conditions": set(ctx.actor.conditions.ids()),
+                "morphed": ctx.actor.top().layer is not None,
+                "hp": ctx.actor.root().hp.current,
+                "hp_max": ctx.actor.root().hp.maximum,
+            }
+            if not evaluate(self.when, facts):
+                return
         source = ctx.source or self.op
         token = "advantage.%s.%s" % (self.mode, self.target)
         ctx.subject.effects.append(ActiveEffect(
@@ -307,7 +328,7 @@ class GrantAdvantage(Effect):
 
     def to_dict(self) -> dict:
         return {"op": self.op, "target": self.target, "mode": self.mode,
-                "direction": self.direction.value}
+                "direction": self.direction.value, "when": self.when}
 
 
 @dataclass(frozen=True, slots=True)

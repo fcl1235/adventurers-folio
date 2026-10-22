@@ -25,6 +25,16 @@ def _signed(value: int) -> str:
     return "%+d" % int(value)
 
 
+def _mode_mark(row: dict) -> str:
+    """优势/劣势的短标记。页面只负责显示，判断来自 sheet 的 `mode`。"""
+    mode = row.get("mode")
+    if mode == "adv":
+        return "（优势）"
+    if mode == "dis":
+        return "（劣势）"
+    return ""
+
+
 class OverviewPage(ttk.Frame):
     """概览：六属性 / 豁免 / 18 技能 / 战斗数值。"""
 
@@ -100,9 +110,10 @@ class OverviewPage(ttk.Frame):
     def refresh_fight(self, sheet: dict) -> None:
         hp = sheet.get("hp") or {}
         speed = (sheet.get("speed") or {}).get("walk", 0)
+        init = sheet.get("initiative") or {}
         self.fight.clear()
         self.fight.set_row(0, "AC", str((sheet.get("ac") or {}).get("total", 0)))
-        self.fight.set_row(1, "先攻", _signed(sheet.get("initiative", 0)))
+        self.fight.set_row(1, "先攻", _signed(init.get("total", 0)) + _mode_mark(init))
         self.fight.set_row(2, "HP", "%s/%s" % (hp.get("current", 0), hp.get("maximum", 0)))
         self.fight.set_row(3, "速度", "%d 尺" % speed)
         self.fight.set_row(4, "熟练", _signed(sheet.get("proficiency_bonus", 0)))

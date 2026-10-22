@@ -71,12 +71,18 @@ class Resolver:
         proficient: bool,
         expertise: bool,
         modifiers: Iterable[Modifier],
+        mode: str = "flat",
+        mode_sources: Iterable[str] = (),
     ) -> Resolution:
-        """d20 + 属性调整值 + 熟练（+ 专精）。
+        """d20 + 属性调整值 + 熟练（+ 专精），外加这一次的掷骰模式。
 
         熟练**不再并进 base**：把它做成一条 term，明细才写得出
         「6 = 3 DEX +3 熟练」。并进 base 的写法数值一样，但界面上只剩一个 6，
         玩家没法核对，也看不出有没有丢掉专精。
+
+        掷骰模式（优势/劣势）由调用方算好传进来：**Resolver 不读内容**，
+        而「角色身上有哪些优势」要读能力与条件（`contributions.passive_advantage_modes`）。
+        这里只负责把模式挂到结果上，不自己去找。
         """
         terms = list(modifiers)
         if expertise:
@@ -86,7 +92,7 @@ class Resolver:
             terms.append(Modifier(target="proficiency",
                                   value=self.ctx.prof_bonus, source="熟练"))
         return resolve(terms, base=stat.abilities.mod(ability), ctx=self._ctx_map,
-                       base_label=ability.upper())
+                       base_label=ability.upper(), mode=mode, mode_sources=mode_sources)
 
     def saving_throw(
         self,
@@ -94,8 +100,11 @@ class Resolver:
         ability: str,
         proficient: bool = False,
         modifiers: Iterable[Modifier] = (),
+        mode: str = "flat",
+        mode_sources: Iterable[str] = (),
     ) -> Resolution:
-        return self._d20_check(actor.top().statblock, ability, proficient, False, modifiers)
+        return self._d20_check(actor.top().statblock, ability, proficient, False, modifiers,
+                               mode=mode, mode_sources=mode_sources)
 
     # --- 进攻 ---------------------------------------------------------
     def attack_bonus(
@@ -104,8 +113,11 @@ class Resolver:
         ability: str = "str",
         proficient: bool = True,
         modifiers: Iterable[Modifier] = (),
+        mode: str = "flat",
+        mode_sources: Iterable[str] = (),
     ) -> Resolution:
-        return self._d20_check(actor.top().statblock, ability, proficient, False, modifiers)
+        return self._d20_check(actor.top().statblock, ability, proficient, False, modifiers,
+                               mode=mode, mode_sources=mode_sources)
 
     def spell_dc(
         self,
@@ -160,8 +172,20 @@ class Resolver:
         proficient: bool = False,
         expertise: bool = False,
         modifiers: Iterable[Modifier] = (),
+        mode: str = "flat",
+        mode_sources: Iterable[str] = (),
     ) -> Resolution:
-        return self._d20_check(actor.top().statblock, ability, proficient, expertise, modifiers)
+        return self._d20_check(actor.top().statblock, ability, proficient, expertise, modifiers,
+                               mode=mode, mode_sources=mode_sources)
+
+    def initiative(self, actor: Actor, modifiers: Iterable[Modifier] = (),
+                   mode: str = "flat", mode_sources: Iterable[str] = ()) -> Resolution:
+        """先攻 = 敏捷检定，但优势标记走自己的名字（野性本能、卓越运动员）。
+
+        「先攻熟练」（警觉）不在这里：那是加值，走 `initiative` modifier 通道。
+        """
+        return self._d20_check(actor.top().statblock, "dex", False, False, modifiers,
+                               mode=mode, mode_sources=mode_sources)
 
     def passive_score(self, actor: Actor, ability: str, proficient: bool = False) -> int:
         return 10 + self.ability_check(actor, ability, proficient=proficient).total

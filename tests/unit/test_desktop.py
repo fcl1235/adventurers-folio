@@ -47,7 +47,8 @@ class DesktopAppTest(unittest.TestCase):
         app = self._app()
         sheet = app.sheet
         self.assertEqual(app.overview.fight._values[0].get(), str(sheet["ac"]["total"]))
-        self.assertEqual(app.overview.fight._values[1].get(), "%+d" % sheet["initiative"])
+        self.assertEqual(app.overview.fight._values[1].get(),
+                         "%+d" % sheet["initiative"]["total"])
         self.assertEqual(app.overview.fight._values[2].get(),
                          "%d/%d" % (sheet["hp"]["current"], sheet["hp"]["maximum"]))
 

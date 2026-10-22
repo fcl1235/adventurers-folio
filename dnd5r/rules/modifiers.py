@@ -107,13 +107,35 @@ class Resolution:
     # 基础值的名字（"DEX" / "皮甲"）。空 = 显示「基础」。
     # 没有它，明细从「6 = 3 +3 熟练」读不出那个 3 是什么 —— 数字对了但看不懂。
     base_label: str = ""
+    # 掷骰模式：flat / adv / dis。**优势不进合计** —— 它是掷骰形状，不是加值。
+    # 放在这里而不是另开一条通道，是因为「一次敏捷豁免」的所有信息本来就该在一处：
+    # 玩家看见「+5，优势」，才知道该掷两次。
+    mode: str = "flat"
+    mode_sources: tuple[str, ...] = ()
+
+    @property
+    def advantage(self) -> bool:
+        return self.mode == "adv"
+
+    @property
+    def disadvantage(self) -> bool:
+        return self.mode == "dis"
 
     def describe(self) -> str:
         """「16 = 13 皮甲 + 2 敏捷 + 1 风格」
 
         不是加法的项要写清语义：MAX/MIN 是「取高／取低」而不是加减
         —— 重击门槛写 19 和 18，合计是 18，写成「+19 +18」会算成 57。
+        优势 / 劣势缀在末尾：它是掷骰方式，混进合计会变成「+5」。
         """
+        text = self._describe_sum()
+        if self.mode == "adv":
+            return "%s（优势）" % text
+        if self.mode == "dis":
+            return "%s（劣势）" % text
+        return text
+
+    def _describe_sum(self) -> str:
         if not self.terms:
             return str(self.total)
         if len(self.terms) == 1 and self.terms[0].source == "@base":
@@ -164,10 +186,13 @@ def resolve(
     base: int = 0,
     ctx: Mapping[str, Any] | None = None,
     base_label: str = "",
+    mode: str = "flat",
+    mode_sources: Iterable[str] = (),
 ) -> Resolution:
     """按 SET → ADD → MAX/MIN 的顺序合成。
 
     多个 SET 值不一致视为数据错误 —— 这正是「无甲防御只能选一个」该报错的地方。
+    `mode` 只对 d20 有意义（优势/劣势），数值通道一律留默认。
     """
     active = [mod for mod in modifiers if eval_when(mod.when, ctx or {})]
 
@@ -201,7 +226,8 @@ def resolve(
                 total = value
             terms.append(Term(value, Stack.MIN, mod.source or "@min"))
 
-    return Resolution(total=total, terms=tuple(terms), base_label=base_label)
+    return Resolution(total=total, terms=tuple(terms), base_label=base_label,
+                      mode=mode, mode_sources=tuple(mode_sources))
 
 
 def resolve_ref(ref: Ref | str, ctx: Mapping[str, Any]) -> int:

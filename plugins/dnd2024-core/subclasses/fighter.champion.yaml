@@ -36,11 +36,14 @@ powers:
       en: |-
         Thanks to your athleticism, you have Advantage on Initiative rolls and Strength (Athletics) checks. In addition, immediately after you score a Critical Hit, you can move up to half your Speed without provoking Opportunity Attacks.
     effects:
+      - grant_advantage: {target: initiative, mode: adv}
+      - grant_advantage: {target: check.athletics, mode: adv}
+      # 「重击后移动半速且不引发借机攻击」需要回合与移动管道，归 P8
       - note:
           zh: |-
-            优势尚未接进检定管道：目前只在说明里登记，掷骰界面还不会自动给两次取高。
+            重击后移动至多一半速度且不引发借机攻击：需要回合流程，P8 处理。
           en: |-
-            Advantage is not wired into the check pipeline yet; this entry records the rule, but the dice roller does not roll twice and take the higher.
+            Moving up to half your Speed after a Critical Hit needs the turn pipeline (P8).
 
   - id: dnd2024.subclass.fighter.champion.additional_fighting_style
     name: {zh: 额外战斗风格, en: Additional Fighting Style}
