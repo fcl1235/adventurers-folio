@@ -514,6 +514,53 @@ CHOICE_UNIVERSE = {
     # 专精的候选与技能同一套；「必须是已熟练」由 Profile 的集合约束兜底
     "expertise": SKILL_KEYS,
 }
+
+
+@dataclass(frozen=True)
+class SkillDef:
+    """一项技能：名称 + 所属属性。
+
+    技能的**数值**不单独存 —— 它就是「属性检定 + 熟练（+ 专精）」，
+    所以内核不为它开新通道，`rules/checks.skill_check()` 组合已有的能力。
+
+    id 的最后一段就是熟练 token 用的 key：`dnd2024.skill.stealth` ↔ `skill.stealth`。
+    两者对不上就等于「熟练了但算不出来」，所以装载时校验。
+    """
+
+    id: str
+    name: Text
+    ability: str
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("技能 id 不合规范：%r" % (self.id,))
+        if self.key not in SKILL_KEYS:
+            raise PluginError("技能 %s 的 key 不在内核的 18 项里（%s）"
+                              % (self.id, ", ".join(SKILL_KEYS)))
+        if self.ability not in ("str", "dex", "con", "int", "wis", "cha"):
+            raise PluginError("技能 %s 的属性不合法：%r" % (self.id, self.ability))
+
+    @property
+    def key(self) -> str:
+        return self.id.rsplit(".", 1)[-1]
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {"id": self.id, "key": self.key, "ability": self.ability,
+                "name": self.name.get(locale)}
+
+
+def parse_skill(data: Any, source: str = "") -> SkillDef:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的技能定义必须是映射" % source)
+    for key in ("id", "name", "ability"):
+        if key not in data:
+            raise PluginError("%s 的技能定义缺少 %s（%s）"
+                              % (source, key, data.get("id", "?")))
+    return SkillDef(
+        id=str(data["id"]),
+        name=Text.from_dict(data["name"], where="%s name" % data["id"]),
+        ability=str(data["ability"]).lower(),
+    )
 DAMAGE_TYPES = (
     "acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic",
     "piercing", "poison", "psychic", "radiant", "slashing", "thunder",
@@ -1186,6 +1233,7 @@ class PluginContent:
     spells: dict[str, SpellDef] = field(default_factory=dict)
     spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
     feats: dict[str, FeatDef] = field(default_factory=dict)
+    skills: dict[str, SkillDef] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -1204,6 +1252,7 @@ class ContentBundle:
     spells: dict[str, SpellDef] = field(default_factory=dict)
     spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
     feats: dict[str, FeatDef] = field(default_factory=dict)
+    skills: dict[str, SkillDef] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -1290,6 +1339,7 @@ class ContentBundle:
             "weapons": len(self.weapons),
             "spells": len(self.spells),
             "spell_lists": len(self.spell_lists),
+            "skills": len(self.skills),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -1371,6 +1421,7 @@ def load_plugin(folder: str | Path) -> PluginContent:
     _load_items(base, result)
     _load_spells(base, result)
     _load_feats(base, result)
+    _load_skills(base, result)
     result.book.validate_augments()
     return result
 
@@ -1400,6 +1451,31 @@ def _load_feats(base: Path, result: PluginContent) -> None:
                 result.book.add(power)
             except PluginError as exc:
                 result.errors.append(str(exc))
+
+
+def _load_skills(base: Path, result: PluginContent) -> None:
+    """技能表：一个插件一份 `skills.yaml`（18 行，名称+属性）。"""
+    path = base / "skills.yaml"
+    if not path.exists():
+        return
+    rel = "%s/skills.yaml" % base.name
+    try:
+        rows = _read_yaml(path) or []
+    except PluginError as exc:
+        result.errors.append(str(exc))
+        return
+    if isinstance(rows, Mapping):
+        rows = [rows]
+    for row in rows:
+        try:
+            skill = parse_skill(row, source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if skill.id in result.skills:
+            result.errors.append("%s 的技能 id 重复：%s" % (rel, skill.id))
+            continue
+        result.skills[skill.id] = skill
 
 
 def _load_spells(base: Path, result: PluginContent) -> None:
@@ -1517,6 +1593,11 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("能力 %s 重复提供" % power.id)
                 continue
             bundle.book.add(power)
+        for skill_id, skill in content.skills.items():
+            if skill_id in bundle.skills:
+                bundle.errors.append("技能 %s 重复提供" % skill_id)
+                continue
+            bundle.skills[skill_id] = skill
         for subclass_id, subclass in content.subclasses.items():
             if subclass_id in bundle.subclasses:
                 bundle.errors.append("子职 %s 重复提供" % subclass_id)
@@ -1579,5 +1660,6 @@ __all__ = [
     "SpellDef", "parse_spell", "parse_spell_list", "lookup_dice",
     "FeatDef", "FeatChoice", "parse_feat", "parse_feat_choice",
     "FEAT_KINDS", "CHOICE_KINDS", "CHOICE_UNIVERSE", "DAMAGE_TYPES", "SKILL_KEYS",
+    "SkillDef", "parse_skill",
     "load_plugin", "load_all",
 ]

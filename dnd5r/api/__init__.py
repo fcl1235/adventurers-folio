@@ -30,7 +30,7 @@ from ..rules.build import (
 )
 from ..rules.contributions import (
     facts_for, modifiers_for, passive_defenses, passive_modifiers,
-    passive_proficiencies, save_modifiers,
+    passive_proficiencies, save_modifiers, skill_modifiers,
 )
 from ..rules.effects import EffectContext
 from ..rules.health import hit_dice_average
@@ -397,6 +397,11 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
     # 常驻贡献：被动能力的 modifier（无甲防御、守护灵光）必须每次都算进去
     mods = passive_modifiers(content, actor, locale)
 
+    # 熟练令牌：档案里的 + 被动能力给的（如「技能全能」）。下面多处要用，先算一次。
+    skill_tokens = set(profile.proficiencies if profile else ())
+    skill_tokens |= passive_proficiencies(content, actor)
+    expertise_tokens = set(profile.expertise if profile else ())
+
     base, gear_mods = ac_inputs(loadout, top.statblock, locale)
     ac = resolver.armor_class(
         top, list(modifiers_for(mods, "ac")) + list(gear_mods), base=base
@@ -413,6 +418,23 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
                                    modifiers=save_modifiers(mods, key))
         for key in ABILITY_KEYS
     }
+    # 技能：属性检定 + 熟练（+ 专精）。熟练 token 与内容里的 `skill.<key>` 必须一致，
+    # 所以这里从**内容**的技能表出发去查 token，而不是反过来枚举令牌。
+    skill_rows = []
+    for skill in sorted(content.skills.values(), key=lambda item: (item.ability, item.key)):
+        token = "skill.%s" % skill.key
+        proficient = token in skill_tokens
+        roll = resolver.ability_check(
+            top, skill.ability, proficient=proficient,
+            expertise=token in expertise_tokens,
+            modifiers=skill_modifiers(mods, skill.key),
+        )
+        skill_rows.append({
+            "id": skill.id, "key": skill.key, "ability": skill.ability,
+            "name": skill.name.get(locale),
+            "total": roll.total, "detail": roll.describe(),
+            "proficient": proficient, "expertise": token in expertise_tokens,
+        })
     # 攻击：默认用最高的力量／敏捷，只看是否熟练（武器数据在 P5c）
     attack_ability = "str" if top.statblock.abilities.mod("str") >= top.statblock.abilities.mod("dex") else "dex"
     attack = resolver.attack_bonus(top, attack_ability, proficient=True,
@@ -423,8 +445,7 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         level = profile.class_level(class_def.id) if profile else ClassLevel(1)
         attacks_per_action = max(attacks_per_action, class_def.total_attacks(level))
 
-    tokens = set(actor.profile.proficiencies) if actor.profile else set()
-    tokens |= passive_proficiencies(content, actor)
+    tokens = skill_tokens          # 上面算过一次，别在这里重算（重复来源会漂）
     ranged_bonus = 0 if morphed else resolver.bonus(
         modifiers_for(mods, "attack.ranged")).total
     attack_profiles = profiles_for(actor, content.weapons, top.statblock.abilities,
@@ -479,6 +500,7 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "saves": {key: {"total": value.total, "detail": value.describe(),
                         "proficient": key in saves_prof}
                   for key, value in saves.items()},
+        "skills": skill_rows,
         "attack": {"total": attack.total, "detail": attack.describe(), "ability": attack_ability},
         "crit": {"min": crit.total, "detail": crit.describe(),
                  "text": crit_text(crit.total)},

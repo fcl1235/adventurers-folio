@@ -64,6 +64,30 @@ class Resolver:
             base = stat.ac_base + stat.abilities.mod("dex")
         return resolve(modifiers, base=base, ctx=self._ctx_map)
 
+    def _d20_check(
+        self,
+        stat,
+        ability: str,
+        proficient: bool,
+        expertise: bool,
+        modifiers: Iterable[Modifier],
+    ) -> Resolution:
+        """d20 + 属性调整值 + 熟练（+ 专精）。
+
+        熟练**不再并进 base**：把它做成一条 term，明细才写得出
+        「6 = 3 DEX +3 熟练」。并进 base 的写法数值一样，但界面上只剩一个 6，
+        玩家没法核对，也看不出有没有丢掉专精。
+        """
+        terms = list(modifiers)
+        if expertise:
+            terms.append(Modifier(target="proficiency",
+                                  value=self.ctx.prof_bonus * 2, source="专精"))
+        elif proficient:
+            terms.append(Modifier(target="proficiency",
+                                  value=self.ctx.prof_bonus, source="熟练"))
+        return resolve(terms, base=stat.abilities.mod(ability), ctx=self._ctx_map,
+                       base_label=ability.upper())
+
     def saving_throw(
         self,
         actor: Actor,
@@ -71,11 +95,7 @@ class Resolver:
         proficient: bool = False,
         modifiers: Iterable[Modifier] = (),
     ) -> Resolution:
-        stat = actor.top().statblock
-        base = stat.abilities.mod(ability)
-        if proficient:
-            base += self.ctx.prof_bonus
-        return resolve(modifiers, base=base, ctx=self._ctx_map)
+        return self._d20_check(actor.top().statblock, ability, proficient, False, modifiers)
 
     # --- 进攻 ---------------------------------------------------------
     def attack_bonus(
@@ -85,11 +105,7 @@ class Resolver:
         proficient: bool = True,
         modifiers: Iterable[Modifier] = (),
     ) -> Resolution:
-        stat = actor.top().statblock
-        base = stat.abilities.mod(ability)
-        if proficient:
-            base += self.ctx.prof_bonus
-        return resolve(modifiers, base=base, ctx=self._ctx_map)
+        return self._d20_check(actor.top().statblock, ability, proficient, False, modifiers)
 
     def spell_dc(
         self,
@@ -145,13 +161,7 @@ class Resolver:
         expertise: bool = False,
         modifiers: Iterable[Modifier] = (),
     ) -> Resolution:
-        stat = actor.top().statblock
-        base = stat.abilities.mod(ability)
-        if expertise:
-            base += self.ctx.prof_bonus * 2
-        elif proficient:
-            base += self.ctx.prof_bonus
-        return resolve(modifiers, base=base, ctx=self._ctx_map)
+        return self._d20_check(actor.top().statblock, ability, proficient, expertise, modifiers)
 
     def passive_score(self, actor: Actor, ability: str, proficient: bool = False) -> int:
         return 10 + self.ability_check(actor, ability, proficient=proficient).total

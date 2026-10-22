@@ -104,6 +104,9 @@ class Term:
 class Resolution:
     total: int
     terms: tuple[Term, ...] = ()
+    # 基础值的名字（"DEX" / "皮甲"）。空 = 显示「基础」。
+    # 没有它，明细从「6 = 3 +3 熟练」读不出那个 3 是什么 —— 数字对了但看不懂。
+    base_label: str = ""
 
     def describe(self) -> str:
         """「16 = 13 皮甲 + 2 敏捷 + 1 风格」
@@ -114,10 +117,16 @@ class Resolution:
         if not self.terms:
             return str(self.total)
         if len(self.terms) == 1 and self.terms[0].source == "@base":
+            # 只有基础值时也要说清「这个 3 是什么」—— 否则未熟练的技能只显示一个数
+            if self.base_label:
+                return "%d = %d %s" % (self.total, self.total, self.base_label)
             return str(self.total)
         bits = []
         for term in self.terms:
-            source = "基础" if term.source == "@base" else term.source.lstrip("@")
+            if term.source == "@base":
+                source = self.base_label or "基础"
+            else:
+                source = term.source.lstrip("@")
             if term.stack is Stack.MAX:
                 bits.append("取高 %d %s" % (term.value, source))
             elif term.stack is Stack.MIN:
@@ -154,6 +163,7 @@ def resolve(
     modifiers: Iterable[Modifier],
     base: int = 0,
     ctx: Mapping[str, Any] | None = None,
+    base_label: str = "",
 ) -> Resolution:
     """按 SET → ADD → MAX/MIN 的顺序合成。
 
@@ -191,7 +201,7 @@ def resolve(
                 total = value
             terms.append(Term(value, Stack.MIN, mod.source or "@min"))
 
-    return Resolution(total=total, terms=tuple(terms))
+    return Resolution(total=total, terms=tuple(terms), base_label=base_label)
 
 
 def resolve_ref(ref: Ref | str, ctx: Mapping[str, Any]) -> int:

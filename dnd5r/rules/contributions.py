@@ -131,8 +131,18 @@ def save_modifiers(modifiers, ability: str) -> list[Modifier]:
     return modifiers_for(modifiers, "save.%s" % ability)
 
 
+def skill_modifiers(modifiers, skill_key: str) -> list[Modifier]:
+    """技能检定的加值：通用（`skill_check`）+ 指定技能（`skill.stealth`）两档。
+
+    两档都收，是因为内容里两种写法都自然：「所有感知检定 +2」与
+    「隐匿检定 +2」。合成一份交给 `ability_check`，加值明细里才看得见来源。
+    """
+    return (modifiers_for(modifiers, "skill.%s" % skill_key)
+            + modifiers_for(modifiers, "skill_check"))
+
+
 __all__ = [
     "facts_for", "passive_modifiers", "passive_proficiencies", "passive_defenses",
-    "modifiers_for", "save_modifiers",
+    "modifiers_for", "save_modifiers", "skill_modifiers",
     "ScoreBonus", "score_bonuses", "score_bonus_of", "apply_score_bonuses",
 ]

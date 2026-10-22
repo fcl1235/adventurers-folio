@@ -1,0 +1,57 @@
+# 18 项技能：名称与所属属性。
+# id 用 `dnd2024.skill.<key>`，key 与内核 `SKILL_KEYS` 一致 ——
+# 熟练 token 是 `skill.<key>`，两处必须对得上。
+- id: dnd2024.skill.acrobatics
+  name: {zh: 体操, en: Acrobatics}
+  ability: dex
+- id: dnd2024.skill.animal_handling
+  name: {zh: 驯兽, en: Animal Handling}
+  ability: wis
+- id: dnd2024.skill.arcana
+  name: {zh: 奥秘, en: Arcana}
+  ability: int
+- id: dnd2024.skill.athletics
+  name: {zh: 运动, en: Athletics}
+  ability: str
+- id: dnd2024.skill.deception
+  name: {zh: 欺骗, en: Deception}
+  ability: cha
+- id: dnd2024.skill.history
+  name: {zh: 历史, en: History}
+  ability: int
+- id: dnd2024.skill.insight
+  name: {zh: 洞悉, en: Insight}
+  ability: wis
+- id: dnd2024.skill.intimidation
+  name: {zh: 威吓, en: Intimidation}
+  ability: cha
+- id: dnd2024.skill.investigation
+  name: {zh: 调查, en: Investigation}
+  ability: int
+- id: dnd2024.skill.medicine
+  name: {zh: 医药, en: Medicine}
+  ability: wis
+- id: dnd2024.skill.nature
+  name: {zh: 自然, en: Nature}
+  ability: int
+- id: dnd2024.skill.perception
+  name: {zh: 察觉, en: Perception}
+  ability: wis
+- id: dnd2024.skill.performance
+  name: {zh: 表演, en: Performance}
+  ability: cha
+- id: dnd2024.skill.persuasion
+  name: {zh: 说服, en: Persuasion}
+  ability: cha
+- id: dnd2024.skill.religion
+  name: {zh: 宗教, en: Religion}
+  ability: int
+- id: dnd2024.skill.sleight_of_hand
+  name: {zh: 巧手, en: Sleight of Hand}
+  ability: dex
+- id: dnd2024.skill.stealth
+  name: {zh: 隐匿, en: Stealth}
+  ability: dex
+- id: dnd2024.skill.survival
+  name: {zh: 生存, en: Survival}
+  ability: wis
