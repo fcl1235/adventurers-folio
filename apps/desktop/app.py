@@ -18,6 +18,7 @@ import dnd5r.api as api
 
 from .pages import OverviewPage
 from .pages_feats import FeatPage
+from .pages_powers import PowersPage
 from .pages_spells import SpellPage
 from .widgets import COL_MID, hint_bar
 
@@ -70,7 +71,9 @@ class DesktopApp(tk.Tk):
         self.book.add(self.spells, text="法术")
         self.feats = FeatPage(self.book, self)
         self.book.add(self.feats, text="专长")
-        self.pages = [self.overview, self.spells, self.feats]
+        self.powers_page = PowersPage(self.book, self)
+        self.book.add(self.powers_page, text="能力")
+        self.pages = [self.overview, self.spells, self.feats, self.powers_page]
 
     # --- 刷新 -------------------------------------------------------------
     def refresh(self) -> None:

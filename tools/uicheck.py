@@ -25,6 +25,7 @@ import dnd5r.api as api                      # noqa: E402
 from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
 from apps.desktop.pages_feats import FeatPage  # noqa: E402
+from apps.desktop.pages_powers import PowersPage  # noqa: E402
 from apps.desktop.pages_spells import SpellPage, _chosen_ids  # noqa: E402
 from apps.desktop.widgets import COL_MID, COL_RIGHT  # noqa: E402
 
@@ -144,6 +145,75 @@ def _check_feats(label: str, page: FeatPage, stats: dict) -> list[str]:
     return problems
 
 
+def _check_overview_defense(label: str, page: OverviewPage, sheet: dict) -> list[str]:
+    """概览页的抗性/感官/暴击行必须与 sheet 一致（这几行以前根本没显示过）。"""
+    problems = []
+    rows = {page.fight.label_at(index): page.fight.value_at(index) for index in range(8)}
+    want_resist = "、".join(sheet.get("resistances") or []) or "—"
+    if rows.get("抗性") != want_resist:
+        problems.append("%s：概览抗性 %r，sheet 是 %r" % (label, rows.get("抗性"), want_resist))
+    if rows.get("暴击") != "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)):
+        problems.append("%s：概览暴击 %r 与 sheet 不一致" % (label, rows.get("暴击")))
+    return problems
+
+
+def _check_pools(label: str, page: PowersPage) -> list[str]:
+    """资源池的显示值必须等于 sheet 的「剩余 / 上限」。
+
+    必须在**用掉一次之后**比对才有意义：满的时候 `left == max`，
+    写成 `max / max` 也能通过 —— 那种检查等于没检查。
+    """
+    problems = []
+    for index, pool in enumerate(page._pools[:9]):
+        shown = page.pools.value_at(index)
+        want = "%d / %d" % (pool["left"], pool["max"])
+        if shown != want:
+            problems.append("%s：资源池「%s」显示 %r，sheet 是 %r"
+                            % (label, pool.get("label") or pool["id"], shown, want))
+    return problems
+
+
+def _check_powers(label: str, page: PowersPage, stats: dict) -> list[str]:
+    """能力页：资源池/能力清单与 sheet 一致；能用的能力真能点一次。"""
+    problems: list[str] = []
+    if page.powers.row_count != len(page._powers):
+        problems.append("%s：能力清单 %d 行，sheet 是 %d 条"
+                        % (label, page.powers.row_count, len(page._powers)))
+
+    usable = [row for row in page._powers if row.get("button") and not row.get("blocked")]
+    if not usable:
+        if str(page.use_button.cget("state")) == "normal" and page._selected().get("button"):
+            problems.append("%s：不可用的能力却让按钮亮着" % label)
+        return problems
+
+    row = usable[0]
+    page.powers.select_id(row["id"])
+    page._power_id = row["id"]
+    page._fill_detail()
+    before = _pool_left(page, row)
+    if not page.use_selected():
+        problems.append("%s：使用「%s」失败（%s）" % (label, row["name"], page.status_var.get()))
+        return problems
+    stats["power_uses"] = stats.get("power_uses", 0) + 1
+    after = _pool_left(page, row)
+    if before is not None and after is not None and after != before - 1:
+        problems.append("%s：用了「%s」但资源没扣（%d → %d）"
+                        % (label, row["name"], before, after))
+    if not page.report.text.get("1.0", "end").strip():
+        problems.append("%s：使用「%s」后没有报告" % (label, row["name"]))
+    problems.extend(_check_pools(label, page))
+    return problems
+
+
+def _pool_left(page: PowersPage, row: dict):
+    """这次使用该扣哪个池：按能力的 owner 找同前缀的资源池。"""
+    owner = str(row.get("owner") or "")
+    for pool in page._pools:
+        if owner and pool["id"].startswith(owner.rsplit(".", 1)[0]):
+            return pool["left"]
+    return None
+
+
 def main() -> int:
     bundle = api.load_content(ROOT / "plugins")
     if bundle.errors:
@@ -183,10 +253,13 @@ def main() -> int:
                     if need > COL_RIGHT:
                         problems.append("攻击表需要 %d px，超过右栏预算 %d" % (need, COL_RIGHT))
                     problems.extend(_check_skills(label, page, app.sheet))
+                    problems.extend(_check_overview_defense(label, page, app.sheet))
                 elif isinstance(page, SpellPage):
                     problems.extend(_check_spells(label, page, stats))
                 elif isinstance(page, FeatPage):
                     problems.extend(_check_feats(label, page, stats))
+                elif isinstance(page, PowersPage):
+                    problems.extend(_check_powers(label, page, stats))
             if app.winfo_ismapped():
                 problems.append("%s：窗口被映射了（零弹窗铁律）" % label)
         finally:
@@ -197,9 +270,9 @@ def main() -> int:
             print("[FAIL] %s" % item)
         return 1
     print("LAYOUT OK —— %d 个角色 × %d 页全部在预算内；"
-          "法术页写库 %d 次 / 专长页写库 %d 次"
+          "法术 %d / 专长 %d / 能力 %d 次写库"
           % (len(CASES), page_count, stats.get("toggles", 0),
-             stats.get("feat_picks", 0)))
+             stats.get("feat_picks", 0), stats.get("power_uses", 0)))
     return 0
 
 

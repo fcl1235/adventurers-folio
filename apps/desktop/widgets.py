@@ -66,6 +66,12 @@ class KeyValue(ttk.Frame):
             caption.configure(text="")
             value.set("")
 
+    def label_at(self, index: int) -> str:
+        return str(self._labels[index].cget("text"))
+
+    def value_at(self, index: int) -> str:
+        return self._values[index].get()
+
 
 class GridTable(ttk.Frame):
     """标签网格表（定行数、定列宽）。

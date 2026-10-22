@@ -634,7 +634,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         ],
         "pools": [
             {"id": pool.id, "left": pool.available, "max": pool.capacity,
-             "kind": pool.kind.value, "refresh": pool.refresh.value}
+             "kind": pool.kind.value, "refresh": pool.refresh.value,
+             # 显示名来自内容（「回气」「狂暴」），没有就退回 id —— 界面不该自己编名字
+             "label": pool.label.get(locale) if pool.label else pool.id}
             for pool in root.resources.pools.values()
             if pool.kind.value != "dice"
         ],

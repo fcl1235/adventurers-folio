@@ -59,7 +59,8 @@ class OverviewPage(ttk.Frame):
         # --- 右：战斗数值 ---------------------------------------------------
         fight = section(right, "战斗")
         fight.pack(fill="x")
-        self.fight = KeyValue(fight, rows=6)
+        # 抗性/感官以前全仓库零显示点（§P6 方案里点名过的缺口），一并补在这里
+        self.fight = KeyValue(fight, rows=8)
         self.fight.pack(fill="x", pady=(0, 6))
 
         attacks = section(right, "攻击")
@@ -105,6 +106,13 @@ class OverviewPage(ttk.Frame):
         self.fight.set_row(2, "HP", "%s/%s" % (hp.get("current", 0), hp.get("maximum", 0)))
         self.fight.set_row(3, "速度", "%d 尺" % speed)
         self.fight.set_row(4, "熟练", _signed(sheet.get("proficiency_bonus", 0)))
+        resist = sheet.get("resistances") or []
+        self.fight.set_row(5, "抗性", "、".join(resist) if resist else "—")
+        senses = sheet.get("senses") or {}
+        self.fight.set_row(6, "感官", "、".join("%s %d" % (key, value)
+                                               for key, value in sorted(senses.items()))
+                           or "—")
+        self.fight.set_row(7, "暴击", "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)))
 
     def refresh_attacks(self, sheet: dict) -> None:
         rows = []

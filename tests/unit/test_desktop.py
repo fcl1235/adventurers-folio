@@ -291,5 +291,78 @@ class FeatPageTest(unittest.TestCase):
         self.assertIn("skill.stealth", app.actor.profile.proficiencies)
 
 
+class PowersPageTest(unittest.TestCase):
+    """P6g 验收：资源池、能力清单、防御信息，以及「使用」真的改了角色。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _page(self, class_id=FIGHTER, level=5, scores=SCORES):
+        actor = api.new_character(self.bundle, class_id, level, scores)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app, app.powers_page
+
+    def _open(self, page, power_id):
+        page.powers.select_id(power_id)
+        page._power_id = power_id
+        page._fill_detail()
+
+    def test_pools_match_sheet(self):
+        app, page = self._page()
+        pools = app.sheet["pools"]
+        self.assertGreater(len(pools), 0, "战士 5 级应该有资源池")
+        for index, pool in enumerate(pools):
+            self.assertEqual(page.pools.label_at(index), pool["label"])
+            self.assertEqual(page.pools.value_at(index),
+                             "%d / %d" % (pool["left"], pool["max"]))
+
+    def test_defense_block_matches_sheet(self):
+        app, page = self._page()
+        sheet = app.sheet
+        self.assertEqual(page.defense.value_at(0), str(sheet["ac"]["total"]))
+        self.assertEqual(page.defense.value_at(1), "≥ %d" % sheet["crit"]["min"])
+        # 没有抗性/感官时要显式写「—」，不能留空让玩家以为漏了
+        self.assertEqual(page.defense.value_at(3), "—")
+
+    def test_power_list_marked(self):
+        _, page = self._page()
+        self.assertEqual(page.powers.row_count, len(page._powers))
+        text = page.powers.text_at(page.powers.index_of("dnd2024.class.fighter.second_wind"))
+        self.assertIn("回气", text)
+        self.assertIn("▶", text, "主动能力应标成「使用时结算」")
+
+    def test_using_a_power_changes_character(self):
+        app, page = self._page()
+        app.actor.hp.current = 10
+        pool_id = "dnd2024.resource.fighter.second_wind"
+        before = app.actor.resources.pools[pool_id].available
+        self._open(page, "dnd2024.class.fighter.second_wind")
+        self.assertTrue(page.use_selected(), page.status_var.get())
+        self.assertEqual(app.actor.resources.pools[pool_id].available, before - 1)
+        self.assertGreater(app.actor.hp.current, 10, "回气没回血")
+        self.assertTrue(page.report.text.get("1.0", "end").strip(), "没有使用报告")
+
+    def test_spent_out_power_becomes_blocked(self):
+        """次数用完必须变灰并写明原因 —— 让玩家点了才知道不行是最差的体验。"""
+        _, page = self._page(level=9)
+        pool_id = "dnd2024.resource.fighter.second_wind"
+        total = page.app.actor.resources.pools[pool_id].available
+        self._open(page, "dnd2024.class.fighter.second_wind")
+        for _ in range(total):
+            self.assertTrue(page.use_selected(), page.status_var.get())
+        self._open(page, "dnd2024.class.fighter.second_wind")
+        self.assertEqual(str(page.use_button.cget("state")), "disabled")
+        self.assertTrue(page.blocked_var.get(), "用完了却没写原因")
+
+    def test_passive_power_is_not_usable(self):
+        _, page = self._page()
+        self._open(page, "dnd2024.class.fighter.extra_attack")
+        self.assertEqual(str(page.use_button.cget("state")), "disabled")
+        self.assertFalse(page.use_selected(), "被动能力不该能「使用」")
+        self.assertIn("被动", page.status_var.get())
+
+
 if __name__ == "__main__":
     unittest.main()
