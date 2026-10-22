@@ -10,6 +10,13 @@ venv/
 # 运行时数据：角色存档指针（每个人本机不同）
 characters/_last.json
 
+# 上游原始抓取快照：属第三方版权内容，不随仓库分发
+# 需要时运行 _fetch_srd.py / _fetch_class_detail.py 自行获取
+data/raw/
+
+# 工具内部记录（开发过程笔记，不公开）
+.workbuddy/
+
 # 编辑器 / 系统
 .vscode/
 .idea/

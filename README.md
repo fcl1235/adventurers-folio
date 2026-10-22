@@ -150,6 +150,23 @@ python _summoncheck.py    # summons.json
 - 传奇恩惠里一部分效果（能量转移、复原池等）按说明记录，不自动结算。
 - 只有简体中文界面。
 
+## 许可与声明
+
+本项目是**非官方、免费**的粉丝作品（unofficial fan content），与 Wizards of the Coast 无隶属关系。
+
+- **程序代码**（`dnd55e/`、`dnd5r/`、`apps/`、`tools/` 等）：MIT License，见 `LICENSE`
+- **SRD 5.2 规则内容**：依 CC-BY-4.0 使用，已翻译并重构为中文 JSON
+- **非 SRD 的 2024 核心内容**：依 WotC [Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy) 使用
+
+完整署名、修改说明与免责声明见 **[`NOTICE.md`](NOTICE.md)**。
+
+本仓库**不包含** `data/raw/` 上游原始快照（已在 `.gitignore` 排除），需要时自行运行
+`_fetch_srd.py` 获取。
+
+> 本作品部分材料版权归 Wizards of the Coast LLC 所有。
+> Portions of the materials used are property of Wizards of the Coast LLC. ©Wizards of the Coast LLC.
+> This is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards.
+
 ## 文档
 
 - `dnd55e_rules_reference.md` — 规则基准与实现口径（2024 vs 2014 差异、逐条实现的判定）
