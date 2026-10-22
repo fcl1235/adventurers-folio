@@ -23,11 +23,12 @@ powers:
       en: |-
         The magic in your body manifests physical traits of your draconic gift. Your Hit Point maximum increases by 3, and it increases by 1 whenever you gain another Sorcerer level. Parts of you are also covered by dragon-like scales. While you aren't wearing armor, your base Armor Class equals 10 plus your Dexterity and Charisma modifiers.
     effects:
-      # 生命上限 = 等级 + 2（1 级 +3，之后每级 +1）：per_level 记 1 点，剩下的 2 点走一次性。
+      # 3 级拿到时 +3，此后每级 +1 —— 恰好等于「等级 × 1」，所以只写 per_level。
+      # 别再补一次性 +2：那是照 2014 版「1 级就有」的错觉，会让 3 级多出 2 点血
+      # （P7 的对账矩阵就是靠这条抓到它的）。
       - grant_modifier:
           modifiers:
             - {target: hp.per_level, value: 1}
-            - {target: hp.flat, value: 2}
             # 无甲时基础 AC 已经含了 10 + 敏捷，这里再把魅力加上去
             - {target: ac, value: ability.cha, when: {unarmored: true}}
           label: 龙族韧性

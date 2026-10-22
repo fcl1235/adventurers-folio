@@ -195,7 +195,7 @@ class ChampionCritTest(unittest.TestCase):
 
 
 class DraconicResilienceTest(unittest.TestCase):
-    """HP 走 `hp.per_level` + `hp.flat`，AC 走「无甲时追加魅力」。"""
+    """HP 走 `hp.per_level`，AC 走「无甲时追加魅力」。"""
 
     @classmethod
     def setUpClass(cls):
@@ -216,11 +216,13 @@ class DraconicResilienceTest(unittest.TestCase):
         # 1 级术士没有子职：d6 + 2 = 8
         self.assertEqual(self._sheet(1, subclass=None)["hp"]["maximum"], 8)
 
-    def test_hp_bonus_is_level_plus_two(self):
-        # 3 级：8 + 6 + 6 + (3 + 2) = 25
-        self.assertEqual(self._sheet(3)["hp"]["maximum"], 25)
-        # 20 级：8 + 6×19 + (20 + 2) = 144
-        self.assertEqual(self._sheet(20)["hp"]["maximum"], 144)
+    def test_hp_bonus_equals_level(self):
+        # 原文：拿到特性时 +3，此后每获得一个术士等级 +1 —— 恰好等于「等级 × 1」。
+        # 别按 2014 版「1 级起 +1/级」写成 per_level + flat，那会凭空多 2 点。
+        # 3 级：8 + 6 + 6 + 3 = 23
+        self.assertEqual(self._sheet(3)["hp"]["maximum"], 23)
+        # 20 级：8 + 6×19 + 20 = 142
+        self.assertEqual(self._sheet(20)["hp"]["maximum"], 142)
 
     def test_unarmored_ac_adds_charisma(self):
         sheet = self._sheet(3)
