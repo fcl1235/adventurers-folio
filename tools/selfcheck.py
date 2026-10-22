@@ -5,6 +5,7 @@
   2. 分层与硬约束（C1 C2 C3 C4 C6 C8）
   3. 插件与内容校验（清单、id、双语 C7、术语）
   4. 黄金对账（新旧内核 AC/HP/攻击/豁免）
+  5. 桌面布局（reqsize 口径，窗口全程不显示）
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ STEPS = [
     ("分层约束", [PY, "tools/lint_layers.py"]),
     ("插件内容", [PY, "-m", "tools.plugins_cli", "check", "--root", "plugins", "--terms"]),
     ("黄金对账", [PY, "tools/golden.py"]),
+    ("桌面布局", [PY, "tools/uicheck.py"]),
 ]
 
 
