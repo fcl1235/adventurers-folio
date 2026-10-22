@@ -23,8 +23,13 @@ from dnd55e.character import Character            # noqa: E402
 from dnd55e.rules import Rules                    # noqa: E402
 from dnd55e.util import proficiency_bonus         # noqa: E402
 
-RAW = json.load(open(os.path.join(DIR, "data", "raw", "class-levels-2024.json"),
-                     encoding="utf-8"))
+_RAW_PATH = os.path.join(DIR, "data", "raw", "class-levels-2024.json")
+if not os.path.exists(_RAW_PATH):
+    # data/raw/ 是上游快照, 不入库(见 NOTICE.md); 全新 clone 时优雅跳过而不是崩
+    print("SKIP: 缺少 data/raw/class-levels-2024.json")
+    print("      该目录不入库, 请先运行 python _fetch_class_detail.py 生成后重跑。")
+    sys.exit(0)
+RAW = json.load(open(_RAW_PATH, encoding="utf-8"))
 r = Rules()
 FAIL = []
 
