@@ -1,0 +1,153 @@
+# 由 tools/gen_tools.py 从 data/raw/equipment.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改生成器的 TOOL_ZH 或数据源。
+#
+# `ability` 是原文给的**建议属性**（用这件工具做检定时通常配哪项），
+# 不是硬绑定 —— 规则是「DM 决定用哪项属性」，界面据此给默认值。
+- id: dnd2024.tool.alchemists_supplies
+  name: {zh: 炼金工具, en: Alchemist's Supplies}
+  kind: artisan
+  ability: int
+- id: dnd2024.tool.brewers_supplies
+  name: {zh: 酿酒工具, en: Brewer's Supplies}
+  kind: artisan
+  ability: int
+- id: dnd2024.tool.calligraphers_supplies
+  name: {zh: 书法工具, en: Calligrapher's Supplies}
+  kind: artisan
+  ability: dex
+- id: dnd2024.tool.carpenters_tools
+  name: {zh: 木匠工具, en: Carpenter's Tools}
+  kind: artisan
+  ability: str
+- id: dnd2024.tool.cartographer_tools
+  name: {zh: 制图工具, en: Cartographer's Tools}
+  kind: artisan
+  ability: wis
+- id: dnd2024.tool.cobblers_tools
+  name: {zh: 鞋匠工具, en: Cobbler's Tools}
+  kind: artisan
+  ability: dex
+- id: dnd2024.tool.cooks_utensils
+  name: {zh: 厨具, en: Cook's Utensils}
+  kind: artisan
+  ability: wis
+- id: dnd2024.tool.glassblowers_tools
+  name: {zh: 吹玻璃工具, en: Glassblower's Tools}
+  kind: artisan
+  ability: int
+- id: dnd2024.tool.jewelers_tools
+  name: {zh: 珠宝匠工具, en: Jeweler's Tools}
+  kind: artisan
+  ability: int
+- id: dnd2024.tool.leatherworkers_tools
+  name: {zh: 皮革匠工具, en: Leatherworker's Tools}
+  kind: artisan
+  ability: dex
+- id: dnd2024.tool.masons_tools
+  name: {zh: 石匠工具, en: Mason's Tools}
+  kind: artisan
+  ability: str
+- id: dnd2024.tool.painters_supplies
+  name: {zh: 绘画工具, en: Painter's Supplies}
+  kind: artisan
+  ability: wis
+- id: dnd2024.tool.potters_tools
+  name: {zh: 陶匠工具, en: Potter's Tools}
+  kind: artisan
+  ability: int
+- id: dnd2024.tool.smiths_tools
+  name: {zh: 铁匠工具, en: Smith's Tools}
+  kind: artisan
+  ability: str
+- id: dnd2024.tool.tinkers_tools
+  name: {zh: 修补工具, en: Tinker's Tools}
+  kind: artisan
+  ability: dex
+- id: dnd2024.tool.weavers_tools
+  name: {zh: 织布工具, en: Weaver's Tools}
+  kind: artisan
+  ability: dex
+- id: dnd2024.tool.woodcarvers_tools
+  name: {zh: 木雕工具, en: Woodcarver's Tools}
+  kind: artisan
+  ability: dex
+- id: dnd2024.tool.dice
+  name: {zh: 骰子, en: Dice}
+  kind: gaming
+  ability: wis
+- id: dnd2024.tool.dragonchess
+  name: {zh: 龙棋, en: Dragonchess}
+  kind: gaming
+  ability: wis
+- id: dnd2024.tool.playing_cards
+  name: {zh: 扑克牌, en: Playing Cards}
+  kind: gaming
+  ability: wis
+- id: dnd2024.tool.three_dragon_ante
+  name: {zh: 三龙安特牌, en: Three-Dragon Ante}
+  kind: gaming
+  ability: wis
+- id: dnd2024.tool.bagpipes
+  name: {zh: 风笛, en: Bagpipes}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.drum
+  name: {zh: 鼓, en: Drum}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.dulcimer
+  name: {zh: 扬琴, en: Dulcimer}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.flute
+  name: {zh: 长笛, en: Flute}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.horn
+  name: {zh: 号角, en: Horn}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.lute
+  name: {zh: 鲁特琴, en: Lute}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.lyre
+  name: {zh: 里拉琴, en: Lyre}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.pan_flute
+  name: {zh: 排箫, en: Pan flute}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.shawm
+  name: {zh: 肖姆管, en: Shawm}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.viol
+  name: {zh: 维奥尔琴, en: Viol}
+  kind: musical
+  ability: cha
+- id: dnd2024.tool.disguise_kit
+  name: {zh: 易容工具, en: Disguise Kit}
+  kind: other
+  ability: cha
+- id: dnd2024.tool.forgery_kit
+  name: {zh: 伪造工具, en: Forgery Kit}
+  kind: other
+  ability: dex
+- id: dnd2024.tool.herbalism_kit
+  name: {zh: 草药工具, en: Herbalism Kit}
+  kind: other
+  ability: int
+- id: dnd2024.tool.navigators_tools
+  name: {zh: 领航工具, en: Navigator's Tools}
+  kind: other
+  ability: wis
+- id: dnd2024.tool.poisoners_kit
+  name: {zh: 制毒工具, en: Poisoner's Kit}
+  kind: other
+  ability: int
+- id: dnd2024.tool.thieves_tools
+  name: {zh: 盗贼工具, en: Thieves' Tools}
+  kind: other
+  ability: dex

@@ -60,7 +60,18 @@ class OverviewPage(ttk.Frame):
         self.saves = KeyValue(saves, rows=6)
         self.saves.pack(fill="x")
 
-        # --- 中：技能 -------------------------------------------------------
+        # --- 中：技能 + 熟练工具 ---------------------------------------------
+        # 工具**只列熟练的**，且用一行折行文本而不是小表：全 37 件铺在卡上会把
+        # 18 项技能挤没，而未熟练的工具本来也不需要常驻 —— 真要掷，
+        # `api.roll_check(kind="tool")` 任意指定都行。一行文本还不会随熟练数长高。
+        # 打包顺序：先把底部这块 `side="bottom"` 钉住，再让技能吃掉剩余空间。
+        self.tools_var = tk.StringVar(value="")
+        tools = section(mid, "工具熟练")
+        tools.pack(side="bottom", fill="x", pady=(6, 0))
+        self.tools_label = ttk.Label(tools, textvariable=self.tools_var,
+                                     wraplength=560, justify="left")
+        self.tools_label.pack(anchor="w")
+
         skills = section(mid, "技能", "熟练加熟练加值，专精再加一份；明细在右侧说明栏")
         skills.pack(fill="both", expand=True)
         self.skills = GridTable(skills, SKILL_COLUMNS, rows=18)
@@ -95,6 +106,7 @@ class OverviewPage(ttk.Frame):
                                _signed(row.get("total", 0)))
 
         self.refresh_skills(sheet)
+        self.refresh_tools(sheet)
         self.refresh_fight(sheet)
         self.refresh_attacks(sheet)
 
@@ -106,6 +118,16 @@ class OverviewPage(ttk.Frame):
             rows.append(((row["name"], row["ability"].upper(),
                           _signed(row["total"]), mark, row["detail"]), tag))
         self.skills.fill(rows)
+
+    def refresh_tools(self, sheet: dict) -> None:
+        """只列熟练的工具，一行折行文本 —— 不随熟练数长高，版面才稳。"""
+        known = [row for row in (sheet.get("tools") or []) if row.get("proficient")]
+        if not known:
+            self.tools_var.set("尚无工具熟练（%d 件工具仍可掷，指定属性即可）"
+                               % len(sheet.get("tools") or ()))
+            return
+        self.tools_var.set("、".join("%s %s" % (row["name"], _signed(row["total"]))
+                                     for row in known))
 
     def refresh_fight(self, sheet: dict) -> None:
         hp = sheet.get("hp") or {}

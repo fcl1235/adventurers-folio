@@ -1,0 +1,20 @@
+# 行尾统一。
+#
+# 为什么要这个文件：在 Windows 上，Python 的 `Path.write_text()` 默认把 `\n`
+# 写成 `\r\n`，于是「改 30 行」会变成「整个文件 1000 行全变」的 diff ——
+# 真正改了什么完全看不出来。这一条踩过两次，都在 P7。
+#
+# 只管**手写的 Python 与根目录文档**。故意不管的东西：
+#   dnd55e/      旧程序，已冻结（G12），别动它的字节
+#   plugins/     生成出来的内容，生成器写什么就是什么
+#   tests/*.json 黄金快照，3 万行，重排一遍等于把 diff 全埋掉
+dnd5r/**/*.py  text eol=lf
+apps/**/*.py   text eol=lf
+tools/**/*.py  text eol=lf
+tests/**/*.py  text eol=lf
+/*.md          text eol=lf
+
+# 原始抓取快照与二进制永远不要碰
+data/raw/**  -text
+*.png        binary
+*.ico        binary

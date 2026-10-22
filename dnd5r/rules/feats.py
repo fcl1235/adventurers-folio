@@ -22,6 +22,10 @@ from ..kernel.errors import RuleError
 from ..kernel.text import Text
 from .scores import ScoreBonus
 
+# 候选**来自内容**而不是 `CHOICE_UNIVERSE` 的选择项：判不了在 `picks_for` 里
+# （那时还没有 bundle），只能在 build 时用 `check_feat_choices` 校验。
+_CONTENT_DRIVEN = ("spell", "proficiency")
+
 
 @dataclass(frozen=True)
 class FeatPicks:
@@ -107,10 +111,11 @@ def picks_for(
         if not picked:
             pending.append(key)
             continue
-        # `spell` 的候选来自法术表（内容），不在 `choice.options` 里 ——
-        # 这里没法判（拿到 FeatDef 时还没有法术表），交给 `spell_pool` + build 校验。
+        # `spell` / `proficiency` 的候选来自内容（法术表、工具表），不在
+        # `choice.options` 里 —— 拿到 FeatDef 时还没有 bundle，判不了，
+        # 交给 `check_feat_choices` 在 build 时校验。
         allowed = set(choice.options)
-        unknown = [] if choice.kind == "spell" else [
+        unknown = [] if choice.kind in _CONTENT_DRIVEN else [
             item for item in picked if item not in allowed]
         if unknown:
             raise RuleError("专长「%s」的 %s 选了不存在的项：%s（可选：%s）"
@@ -173,6 +178,9 @@ def _land(
         resist.update(picked)
     elif choice.kind == "spell":
         spells.extend(picked)
+    elif choice.kind == "proficiency":
+        # 混选：`skill.stealth` 与 `tool.thieves_tools` 都已经是完整 token
+        prof.update(picked)
 
 
 def collect_picks(
@@ -220,42 +228,64 @@ def spell_pool(bundle: ContentBundle, choice: FeatChoice) -> tuple[str, ...]:
     ))
 
 
-def check_feat_spells(
+def proficiency_pool(bundle: ContentBundle) -> tuple[str, ...]:
+    """`kind: proficiency` 的候选：全部技能 + 全部工具，都写成**完整 token**。
+
+    顺序固定（先技能后工具，各自按 key 排）：界面上选项的顺序不该随加载顺序抖。
+    两者都是内容，所以不放进 `CHOICE_UNIVERSE`（那张表是规则词汇的闭环）。
+    """
+    skills = sorted("skill.%s" % skill.key for skill in bundle.skills.values())
+    tools = sorted("tool.%s" % tool.key for tool in bundle.tools.values())
+    return tuple(skills) + tuple(tools)
+
+
+def check_feat_choices(
     bundle: ContentBundle,
     feats: Iterable[FeatDef],
     choices: Mapping[str, tuple[str, ...]],
     repeats: Mapping[str, int] | None = None,
     locale: str = "zh",
 ) -> list[str]:
-    """专长选的法术是否都在候选里。返回问题清单（空 = 通过）。
+    """专长里「候选来自内容」的那几种选择项（`spell` / `proficiency`）是否合法。
 
-    「选错法术」与「还没选」要分开：没选只是 `pending`（界面上的待办），
-    选了一个不在表里的法术才是数据错误。
+    「选错」与「还没选」要分开：没选只是 `pending`（界面上的待办），
+    选了一个不在候选里的项才是数据错误 —— 后者会让卡片上出现一个
+    永远算不出来的熟练，比报错难查得多。
     """
     problems: list[str] = []
     for feat in feats:
-        # 可重复登记的专长（属性提升类）每次登记是一轮独立选择，
-        # 键带 `#序号` —— 次数从 `repeats` 来，别在这里自己数
+        # 可重复登记的专长每次登记是一轮独立选择，键带 `#序号` ——
+        # 次数从 `repeats` 来，别在这里自己数（`feats` 是去重后的）
         for index in range(int((repeats or {}).get(feat.id, 1))):
             for choice in feat.choices:
-                if choice.kind != "spell":
+                if choice.kind not in _CONTENT_DRIVEN:
                     continue
                 picked = tuple(str(item) for item in
                                (choices.get(pick_key(feat.id, choice.id, index)) or ()))
                 if not picked:
                     continue
-                pool = set(spell_pool(bundle, choice))
-                where = ("任意法术表" if choice.spell_list == SPELL_LIST_ANY
-                         else "%s 法术表" % choice.spell_list)
-                for item in picked:
-                    if item not in pool:
-                        problems.append(
-                            "专长「%s」的 %s 选了 %s，但它不在候选里（%s的 %d 环%s法术）"
-                            % (_label(feat, locale), choice.id, item, where,
-                               choice.spell_level,
-                               "（限%s）" % "/".join(choice.spell_school)
-                               if choice.spell_school else ""))
+                problems += _check_pool(bundle, feat, choice, picked, locale)
     return problems
+
+
+def _check_pool(bundle: ContentBundle, feat: FeatDef, choice: FeatChoice,
+                picked: tuple[str, ...], locale: str) -> list[str]:
+    if choice.kind == "proficiency":
+        legal = set(proficiency_pool(bundle))
+        unknown = [item for item in picked if item not in legal]
+        if not unknown:
+            return []
+        return ["专长「%s」的 %s 选了不存在的熟练项：%s（可选：%d 项技能 + %d 件工具）"
+                % (_label(feat, locale), choice.id, ", ".join(unknown),
+                   len(bundle.skills), len(bundle.tools))]
+    legal = set(spell_pool(bundle, choice))
+    where = ("任意法术表" if choice.spell_list == SPELL_LIST_ANY
+             else "%s 法术表" % choice.spell_list)
+    return ["专长「%s」的 %s 选了 %s，但它不在候选里（%s的 %d 环%s法术）"
+            % (_label(feat, locale), choice.id, item, where, choice.spell_level,
+               "（限%s）" % "/".join(choice.spell_school)
+               if choice.spell_school else "")
+            for item in picked if item not in legal]
 
 
 def hard_problems(
@@ -323,6 +353,10 @@ def choice_prompt(feat: FeatDef, choice: FeatChoice, locale: str = "zh") -> Text
     if choice.kind == "expertise":
         return Text.of("选 %d 项已有熟练的技能获得专精" % choice.count,
                        "Choose %d skill proficiency to gain Expertise" % choice.count)
+    if choice.kind == "proficiency":
+        return Text.of("选 %d 项技能**或**工具熟练（可自由混合）" % choice.count,
+                       "Choose %d skill or tool proficiencies (any combination)"
+                       % choice.count)
     if choice.kind == "resistance":
         return Text.of("选 %d 种伤害抗性" % choice.count,
                        "Choose %d damage resistances" % choice.count)
@@ -331,5 +365,5 @@ def choice_prompt(feat: FeatDef, choice: FeatChoice, locale: str = "zh") -> Text
 
 __all__ = [
     "FeatPicks", "picks_for", "collect_picks", "pick_key",
-    "hard_problems", "soft_problems", "prereq_report", "choice_prompt",
+    "hard_problems", "soft_problems", "proficiency_pool", "check_feat_choices", "prereq_report", "choice_prompt",
 ]

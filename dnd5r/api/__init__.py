@@ -43,7 +43,8 @@ from ..rules.resolver import RefContext, Resolver, crit_text
 from ..rules.spellcasting import (
     casting_summary, check_spell_picks, spell_detail, spell_options,
 )
-from ..rules.feats import choice_prompt, pick_key, prereq_report, spell_pool
+from ..rules.feats import (choice_prompt, pick_key, prereq_report,
+                           proficiency_pool, spell_pool)
 from ..rules.scores import bonus_totals, merge_bonuses, score_bonuses
 from ..rules.weapons import profiles_for
 from ..rules.powers import use_power as _use_power
@@ -459,6 +460,9 @@ def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list
                 # 候选由法术表 + 环级现算，内容里不抄（见 rules/feats.py:spell_pool）
                 options = list(spell_pool(content, choice))
                 granted += [item for item in picked if item not in granted]
+            elif choice.kind == "proficiency":
+                # 「技能或工具，任意组合」—— 候选同样是现算的，且是**完整 token**
+                options = list(proficiency_pool(content))
             choices.append({
                 "id": choice.id,
                 "key": key,
@@ -620,6 +624,27 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
             "mode": roll.mode, "mode_sources": list(roll.mode_sources),
             "proficient": proficient, "expertise": token in expertise_tokens,
         })
+    # 工具：也是「属性检定 + 熟练」，但属性**不绑死**（规则是「DM 决定用哪项」）。
+    # 卡片上按内容里的建议属性算一个默认值，掷骰时可以传 `ability` 覆盖。
+    tool_rows = []
+    for tool in sorted(content.tools.values(), key=lambda item: (item.kind, item.key)):
+        token = "tool.%s" % tool.key
+        proficient = token in skill_tokens
+        mode, mode_sources = _dice_mode(content, actor, "check.%s" % tool.ability)
+        roll = resolver.ability_check(
+            top, tool.ability, proficient=proficient,
+            modifiers=(modifiers_for(mods, token)
+                       + modifiers_for(mods, "skill_check")),
+            mode=mode, mode_sources=mode_sources,
+        )
+        tool_rows.append({
+            "id": tool.id, "key": tool.key, "kind": tool.kind,
+            "name": tool.name.get(locale),
+            "ability": tool.ability,
+            "total": roll.total, "detail": roll.describe(),
+            "mode": roll.mode, "mode_sources": list(roll.mode_sources),
+            "proficient": proficient,
+        })
     # 攻击：默认用最高的力量／敏捷，只看是否熟练（武器数据在 P5c）
     attack_ability = "str" if top.statblock.abilities.mod("str") >= top.statblock.abilities.mod("dex") else "dex"
     attack_mode, attack_sources = _dice_mode(content, actor, "attack.%s" % attack_ability)
@@ -697,6 +722,7 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
                         "proficient": key in saves_prof}
                   for key, value in saves.items()},
         "skills": skill_rows,
+        "tools": tool_rows,
         "attack": {"total": attack.total, "detail": attack.describe(), "ability": attack_ability,
                    "mode": attack.mode, "mode_sources": list(attack.mode_sources)},
         "crit": {"min": crit.total, "detail": crit.describe(),
@@ -811,7 +837,7 @@ def _context(
     )
 
 
-CHECK_KINDS = ("save", "skill", "ability", "initiative", "attack")
+CHECK_KINDS = ("save", "skill", "ability", "tool", "initiative", "attack")
 
 
 def roll_check(
@@ -821,6 +847,7 @@ def roll_check(
     key: str = "",
     rng: Rng | None = None,
     locale: str = "zh",
+    ability: str = "",
 ) -> dict:
     """掷一次 d20 检定 —— **优势/劣势在这里才真的变成「掷两次留一个」**。
 
@@ -828,8 +855,12 @@ def roll_check(
       save       key = str/dex/con/int/wis/cha
       skill      key = 技能 key（stealth / athletics …）—— 属性检定 + 熟练 + 专精
       ability    key = str/dex/…（裸属性检定）
+      tool       key = 工具 id 或 key（thieves_tools …）；**属性可换**，见下
       initiative 不需要 key
       attack     key = str 或 dex，缺省取调整值较高的那个
+
+    工具的规则是「DM 决定用哪项属性」，所以工具检定允许显式传 `ability` 覆盖
+    内容里的**建议属性**；不传就用建议值。
 
     返回值里 **`advantage: true`** 就是「该掷两次、取高」这件事本身；
     加值和明细来自与角色卡**同一个** `Resolver`，不会出现「卡上 +7、掷的时候 +5」。
@@ -876,6 +907,27 @@ def roll_check(
         mode, mode_sources = _dice_mode(content, actor, "check.%s" % ability)
         resolution = resolver.ability_check(top, ability, mode=mode, mode_sources=mode_sources)
         label = ability.upper()
+    elif kind == "tool":
+        # 两种写法都认：内容 id（`dnd2024.tool.thieves_tools`）与 key（`thieves_tools`）
+        tool = content.tools.get(str(key))
+        if tool is None:
+            tool = next((item for item in content.tools.values()
+                         if item.key == str(key)), None)
+        if tool is None:
+            raise RuleError("不认识的工具：%r" % (key,))
+        # 规则里工具**不绑属性**（「DM 决定用哪项」），内容里的只是建议值。
+        # 所以这里允许覆盖，而不是拿建议值当唯一答案。
+        picked = str(ability).lower() or tool.ability
+        _need_ability(picked)
+        token = "tool.%s" % tool.key
+        mode, mode_sources = _dice_mode(content, actor, "check.%s" % picked)
+        # 加值只取「这件工具」与「所有属性检定」两档：技能专属的加值不该串过来
+        resolution = resolver.ability_check(
+            top, picked, proficient=token in skill_tokens,
+            modifiers=(modifiers_for(mods, token)
+                       + modifiers_for(mods, "skill_check")),
+            mode=mode, mode_sources=mode_sources)
+        label = "%s（%s）" % (tool.name.get(locale) or tool.key, picked.upper())
     elif kind == "initiative":
         mode, mode_sources = _dice_mode(content, actor, "initiative")
         resolution = resolver.initiative(top, mode=mode, mode_sources=mode_sources)

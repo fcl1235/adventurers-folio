@@ -19,7 +19,7 @@ from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
 from ..model.resources import Pool, PoolKind, Refresh
 from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
-from .feats import check_feat_spells, collect_picks, hard_problems
+from .feats import check_feat_choices, collect_picks, hard_problems
 from .health import hit_dice_pool, hit_points_max
 from .modifiers import resolve as resolve_modifiers
 from .morph import eligible_forms
@@ -167,11 +167,11 @@ def build_actor(
         [feat for feat in feat_defs_ for _ in range(repeats.get(feat.id, 1))],
         picked_choices,
     )
-    # 专长给的法术要真的在「该职业法术表 + 该环级」里 —— 候选由内容生成，
-    # 所以只能在拿到 bundle 的地方校验，而不是`picks_for`里
-    problems = check_feat_spells(bundle, feat_defs_, picked_choices, repeats)
+    # 候选由内容生成的选项（法术、技能/工具混选）要真的在候选里 ——
+    # 拿到 bundle 才能查法术表与工具表，所以校验放在这里而不是 `picks_for` 里
+    problems = check_feat_choices(bundle, feat_defs_, picked_choices, repeats)
     if problems:
-        raise RuleError("专长法术选择有问题：" + "；".join(problems))
+        raise RuleError("专长选择有问题：" + "；".join(problems))
     bonuses = merge_bonuses(score_bonuses(all_powers), picks.score)
     abilities = apply_score_bonuses(Abilities.of(**dict(scores)), bonuses)
 

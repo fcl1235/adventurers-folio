@@ -499,7 +499,8 @@ FEAT_KINDS = ("origin", "general", "fighting_style", "epic_boon")
 
 # 选择项的语义集合。故意封闭：内容里写一个内核不认识的 kind，
 # 界面上就会变成一个「选了没反应」的下拉框，比报错难查得多。
-CHOICE_KINDS = ("ability_boost", "save", "skill", "expertise", "resistance", "spell")
+CHOICE_KINDS = ("ability_boost", "save", "skill", "expertise", "resistance",
+                "spell", "proficiency")
 # `spell_list` 的「不限法术表」哨兵值。2024 版有些专长（妖精触碰一族）说的是
 # 「任选一道某学派的 1 环法术」，没有职业限制 —— 硬塞给某张表就是改规则。
 SPELL_LIST_ANY = "any"
@@ -562,6 +563,60 @@ def parse_skill(data: Any, source: str = "") -> SkillDef:
     return SkillDef(
         id=str(data["id"]),
         name=Text.from_dict(data["name"], where="%s name" % data["id"]),
+        ability=str(data["ability"]).lower(),
+    )
+
+
+# 工具的四类。与技能不同，**不设 key 白名单**：工具是内容（37 件），
+# 谁都可以加一件自制工具；技能那 18 项是规则词汇，才需要闭环。
+TOOL_KINDS = ("artisan", "gaming", "musical", "other")
+
+
+@dataclass(frozen=True)
+class ToolDef:
+    """一件工具：名称 + 类别 + **建议属性**。
+
+    `ability` 是「用这件工具做检定时通常配哪项属性」，来自原文的工具表。
+    它不是硬绑定 —— 2024 的规则是「DM 决定用哪项属性」，所以检定仍然允许换，
+    界面只是拿它当默认值。写成必填是因为 37 件原文全都有，缺了就是数据没抄全。
+
+    id 的最后一段就是熟练 token 用的 key：`dnd2024.tool.thieves_tools` ↔
+    `tool.thieves_tools`。两者对不上就等于「熟练了但算不出来」。
+    """
+
+    id: str
+    name: Text
+    kind: str
+    ability: str
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("工具 id 不合规范：%r" % (self.id,))
+        if self.kind not in TOOL_KINDS:
+            raise PluginError("工具 %s 的类别必须是 %s" % (self.id, "/".join(TOOL_KINDS)))
+        if self.ability not in ("str", "dex", "con", "int", "wis", "cha"):
+            raise PluginError("工具 %s 的建议属性不合法：%r" % (self.id, self.ability))
+
+    @property
+    def key(self) -> str:
+        return self.id.rsplit(".", 1)[-1]
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {"id": self.id, "key": self.key, "kind": self.kind,
+                "ability": self.ability, "name": self.name.get(locale)}
+
+
+def parse_tool(data: Any, source: str = "") -> ToolDef:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的工具定义必须是映射" % source)
+    for key in ("id", "name", "kind", "ability"):
+        if key not in data:
+            raise PluginError("%s 的工具定义缺少 %s（%s）"
+                              % (source, key, data.get("id", "?")))
+    return ToolDef(
+        id=str(data["id"]),
+        name=Text.from_dict(data["name"], where="%s name" % data["id"]),
+        kind=str(data["kind"]).lower(),
         ability=str(data["ability"]).lower(),
     )
 DAMAGE_TYPES = (
@@ -654,6 +709,11 @@ class FeatChoice:
             return self.pool or DAMAGE_TYPES
         if self.kind == "spell":
             return ()          # 候选由法术表生成，见 rules/feats.py:spell_pool
+        if self.kind == "proficiency":
+            # 「任意组合的技能与工具」：候选是内容（18 技能 + 37 工具），
+            # 见 rules/feats.py:proficiency_pool。技能是规则词汇、工具是内容，
+            # 两者长度都会变，写死在 CHOICE_UNIVERSE 里必然漂。
+            return ()
         full = CHOICE_UNIVERSE.get(self.kind, ())
         if not self.pool:
             return full
@@ -1362,6 +1422,7 @@ class PluginContent:
     spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
     feats: dict[str, FeatDef] = field(default_factory=dict)
     skills: dict[str, SkillDef] = field(default_factory=dict)
+    tools: dict[str, ToolDef] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -1381,6 +1442,7 @@ class ContentBundle:
     spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
     feats: dict[str, FeatDef] = field(default_factory=dict)
     skills: dict[str, SkillDef] = field(default_factory=dict)
+    tools: dict[str, ToolDef] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -1468,6 +1530,7 @@ class ContentBundle:
             "spells": len(self.spells),
             "spell_lists": len(self.spell_lists),
             "skills": len(self.skills),
+            "tools": len(self.tools),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -1550,8 +1613,38 @@ def load_plugin(folder: str | Path) -> PluginContent:
     _load_spells(base, result)
     _load_feats(base, result)
     _load_skills(base, result)
+    _load_tools(base, result)
     result.book.validate_augments()
     return result
+
+
+def _load_tools(base: Path, result: PluginContent) -> None:
+    """工具表：一个插件一份 `tools.yaml`（37 行，名称+类别+建议属性）。
+
+    与技能同样的位置、同样的写法 —— 工具只是「另一种可以练熟的物品」，
+    不该因为「只有 37 件」就塞进代码里。
+    """
+    path = base / "tools.yaml"
+    if not path.exists():
+        return
+    rel = "%s/tools.yaml" % base.name
+    try:
+        rows = _read_yaml(path) or []
+    except PluginError as exc:
+        result.errors.append(str(exc))
+        return
+    if isinstance(rows, Mapping):
+        rows = [rows]
+    for row in rows:
+        try:
+            tool = parse_tool(row, source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if tool.id in result.tools:
+            result.errors.append("%s 的工具 id 重复：%s" % (rel, tool.id))
+            continue
+        result.tools[tool.id] = tool
 
 
 def _load_feats(base: Path, result: PluginContent) -> None:
@@ -1726,6 +1819,11 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("技能 %s 重复提供" % skill_id)
                 continue
             bundle.skills[skill_id] = skill
+        for tool_id, tool in content.tools.items():
+            if tool_id in bundle.tools:
+                bundle.errors.append("工具 %s 重复提供" % tool_id)
+                continue
+            bundle.tools[tool_id] = tool
         for subclass_id, subclass in content.subclasses.items():
             if subclass_id in bundle.subclasses:
                 bundle.errors.append("子职 %s 重复提供" % subclass_id)

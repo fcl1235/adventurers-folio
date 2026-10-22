@@ -20,7 +20,7 @@ from pathlib import Path
 import dnd5r.api as api
 from dnd5r.content import SPELL_LIST_ANY
 from dnd5r.kernel.errors import PluginError, RuleError
-from dnd5r.rules.feats import check_feat_spells, spell_pool
+from dnd5r.rules.feats import check_feat_choices, spell_pool
 
 ROOT = Path(__file__).resolve().parents[2]
 PLUGINS = ROOT / "plugins"
@@ -232,15 +232,15 @@ class FeatSpellContentGuardTest(unittest.TestCase):
         with self.assertRaises(RuleError):
             spell_pool(self.bundle, self._choice(spell_list="mystic"))
 
-    def test_check_feat_spells_reports_problems(self):
+    def test_check_feat_choices_reports_problems(self):
         feat = self.bundle.feats[FEY]
-        problems = check_feat_spells(
+        problems = check_feat_choices(
             self.bundle, [feat],
             {"dnd2024.feat.fey_touched.spell": ("dnd2024.spell.fireball",)})
         self.assertEqual(len(problems), 1)
         self.assertIn("fireball", problems[0])
         # 反证：合法的选项不该报问题
-        self.assertEqual(check_feat_spells(
+        self.assertEqual(check_feat_choices(
             self.bundle, [feat],
             {"dnd2024.feat.fey_touched.spell": ("dnd2024.spell.bless",)}), [])
 

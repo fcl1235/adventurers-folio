@@ -33,11 +33,20 @@ STATUS_TEXT = {
 
 
 def _option_label(choice: dict, value: str, bundle) -> str:
-    """把选项的内部值翻成中文。技能/法术从内容里查，属性用固定表。"""
+    """把选项的内部值翻成中文。技能/工具/法术从内容里查，属性用固定表。"""
     kind = str(choice.get("kind") or "")
     if kind == "spell":
         # 法术名由服务端放进 `option_labels`（内容里查得到才给），查不到就退回 id
         return str((choice.get("option_labels") or {}).get(value) or value)
+    if kind == "proficiency":
+        # 混选的取值是**完整 token**：`skill.stealth` / `tool.thieves_tools`。
+        # 靠前缀分流，只查内容里那两种，别猜。
+        category, _, key = str(value).partition(".")
+        if category == "tool":
+            tool = bundle.tools.get("dnd2024.tool.%s" % key)
+            return tool.name.zh if tool else key
+        skill = bundle.skills.get("dnd2024.skill.%s" % key)
+        return skill.name.zh if skill else key
     if kind in ("skill", "expertise"):
         skill = bundle.skills.get("dnd2024.skill.%s" % value)
         return skill.name.zh if skill else value
