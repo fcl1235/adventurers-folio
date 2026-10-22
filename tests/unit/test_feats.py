@@ -12,6 +12,7 @@
   6. 选择没选完不是错误（留在 choices_needed 里），选错了要报错
 """
 
+import json
 import unittest
 from pathlib import Path
 
@@ -283,6 +284,81 @@ class FeatMechanicsTest(unittest.TestCase):
         expertise = [item for item in row["choices"] if item["id"] == "expertise"][0]
         self.assertEqual(expertise["options"], ["stealth"])
         self.assertEqual(expertise["remaining"], 1)
+
+
+ABIL = ("str", "dex", "con", "int", "wis", "cha")
+
+
+def _xphb_ability_specs():
+    """`data/raw/_5e_feats.json` 里 XPHB 条目的 ability 字段（权威原文）。"""
+    path = ROOT / "data" / "raw" / "_5e_feats.json"
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8")).get("feat") or []
+    rows = raw if isinstance(raw, list) else list(raw.values())
+    out = {}
+    for item in rows:
+        if isinstance(item, dict) and item.get("source") == "XPHB":
+            out[item["name"]] = item
+    return out
+
+
+def _expected_from_spec(spec):
+    """把 XPHB 的 ability 写法折成 (允许的属性集, 总点数)。"""
+    pools, total = set(), 0
+    for entry in spec or ():
+        if not isinstance(entry, dict) or entry.get("hidden"):
+            continue
+        if "choose" in entry:
+            chosen = entry["choose"] or {}
+            froms = [str(item).lower() for item in (chosen.get("from") or ())]
+            pools |= set(froms) if froms else set(ABIL)
+            total = max(total, int(chosen.get("amount") or 1) * int(chosen.get("count") or 1))
+        else:
+            keys = {key for key in entry if key in ABIL}
+            if keys:
+                pools |= keys
+                total = max(total, sum(int(entry[key]) for key in keys))
+    return pools, total
+
+
+class FeatAuthorityTest(unittest.TestCase):
+    """属性加值必须与 XPHB 原文一致 —— 中文说明只是兜底，不是权威。
+
+    这条测试是 P5g 那个「重要发现」的永久护栏：旧数据的 `effects` 只记了恩惠的
+    ability_boost，40 多个通用专长的 +1 全在中文说明里；而中文说明本身也有错
+    （骑乘战斗者写「智力或感知」，原文是 力量/敏捷/感知）。生成器现在先读原文，
+    这个测试保证以后重新生成时不会悄悄退回按中文猜。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+        cls.raw = _xphb_ability_specs()
+
+    def test_every_ability_bonus_matches_source(self):
+        checked = 0
+        for feat in self.bundle.feats.values():
+            en = feat.name.en
+            item = self.raw.get(en) or self.raw.get(en.split(" (")[0])
+            if not item or not item.get("ability"):
+                continue
+            pools, total = _expected_from_spec(item["ability"])
+            if not pools:
+                continue
+            boost = [c for c in feat.choices if c.kind == "ability_boost"]
+            if not boost:
+                # 坚毅把加值绑在「选哪项豁免」上，等价但走 save 通道
+                save = [c for c in feat.choices if c.kind == "save"]
+                self.assertTrue(save and save[0].boost == 1, "%s 丢了属性加值" % en)
+                continue
+            self.assertEqual(len(boost), 1, en)
+            choice = boost[0]
+            self.assertEqual(set(choice.pool or ABIL), pools, "%s 的可选属性与原文不符" % en)
+            self.assertEqual(choice.count * choice.amount, total, "%s 的加值点数与原文不符" % en)
+            self.assertEqual(choice.cap, 30 if feat.kind == "epic_boon" else 20, en)
+            checked += 1
+        self.assertGreaterEqual(checked, 50, "只对上了 %d 条，数据源可能读错" % checked)
 
 
 if __name__ == "__main__":

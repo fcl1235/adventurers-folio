@@ -5,6 +5,11 @@
   dnd55e/data/feats_general.json   43 通用 + 12 战斗风格 + 12 传奇恩惠（中文说明 + effects 键）
   dnd55e/data/feats.json           12 个起源专长（中文名 + 中文说明）
   data/raw/feats.json              17 个 SRD 专长的英文原文
+  data/raw/_5e_feats.json          77 条 XPHB 原文的**结构化字段**（ability / prerequisite）
+
+**属性加值以 XPHB 的 `ability` 字段为准**，中文说明只在没有原文时兜底。
+理由：旧中文数据是按 2014 版翻译后手改的，`effects` 又只记了恩惠那 12 条 —— 两处都不可靠。
+实测就抓到「骑乘战斗者」中文写「智力或感知」、原文是 `str/dex/wis`。按文字解析会把错固化。
 
 **英文只有 17 条**：SRD 5.2 只收录了这些，其余原文不存在（不是没抓到）。
 所以 `en` 文案统一写成「… is not part of SRD 5.2」，中文那条是本插件认定的正式文本。
@@ -121,16 +126,40 @@ def split_origin(cn_name: str) -> tuple[str, str, str]:
 
 
 # --- 数据源 -----------------------------------------------------------
+def load_xphb() -> dict[str, dict]:
+    """XPHB 原文里的结构化字段：{英文名: {"ability": [...], "level": n, "category": "G"}}。"""
+    path = RAW / "_5e_feats.json"
+    if not path.exists():
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8")).get("feat") or []
+    rows = raw if isinstance(raw, list) else list(raw.values())
+    out: dict[str, dict] = {}
+    for item in rows:
+        if not isinstance(item, dict) or item.get("source") != "XPHB":
+            continue
+        level = 0
+        for prereq in item.get("prerequisite") or ():
+            if isinstance(prereq, dict) and prereq.get("level"):
+                level = max(level, int(prereq["level"]))
+        out[str(item["name"])] = {
+            "ability": item.get("ability") or [],
+            "level": level,
+            "category": str(item.get("category") or ""),
+        }
+    return out
+
+
 def load_sources() -> tuple[dict[str, dict], dict[str, dict]]:
     """返回 (有序专长表, 英文原文表)。
 
     专长表的每项统一成：
       { en, zh, kind, level, abilities, min_score, feature, classes, repeatable,
-        text_zh, effects, source }
+        text_zh, effects, source, xphb }
     """
     detail = json.loads((ROOT / "dnd55e" / "data" / "feats_general.json").read_text(encoding="utf-8"))
     origin = json.loads((ROOT / "dnd55e" / "data" / "feats.json").read_text(encoding="utf-8"))["origin"]
     raw = json.loads((RAW / "feats.json").read_text(encoding="utf-8"))["items"]
+    xphb = load_xphb()
 
     english = {item["name"]: item for item in raw}
     rows: dict[str, dict] = {}
@@ -153,6 +182,7 @@ def load_sources() -> tuple[dict[str, dict], dict[str, dict]]:
                 "text_zh": (row.get("desc") or "").strip(),
                 "effects": row.get("effects") or {},
                 "source": row.get("source") or "",
+                "xphb": xphb.get(en_name) or {},
             }
 
     for cn_name, value in origin.items():
@@ -171,6 +201,7 @@ def load_sources() -> tuple[dict[str, dict], dict[str, dict]]:
             "text_zh": zh_text,
             "effects": {},
             "source": "PHB 2024",
+            "xphb": xphb.get(base) or {},
         }
     return rows, english
 
@@ -259,6 +290,7 @@ def build_powers(ident: str, row: dict) -> list[tuple[str, str, list[str]]]:
 
 ABILITY_ZH = {"力量": "str", "敏捷": "dex", "体质": "con",
               "智力": "int", "感知": "wis", "魅力": "cha"}
+ABILITY_ORDER = ("str", "dex", "con", "int", "wis", "cha")
 # 「力量或敏捷 +1（上限 20）」。要求「（上限 N）」是为了不误伤
 # 「伤害掷骰 +2（可持用盾牌）」这类战斗加成。
 BOOST_RE = re.compile(r"([^。；]*?)\+(\d)（上限 (\d+)）")
@@ -291,10 +323,64 @@ def parse_boost_from_text(text: str) -> dict | None:
     return choice
 
 
+def ability_from_xphb(spec: list, cap: int) -> dict | None:
+    """XPHB 的 `ability` 字段 → 一个 ability_boost 选择项。
+
+    原文有四种写法，全部收敛到「count 次、每次 amount 点」：
+
+        [{"cha": 1}]                                       固定 +1 魅力
+        [{"choose": {"from": [...], "amount": 2}}]          一项 +2
+        [{"choose": {"from": [...], "count": 2}}]           两项各 +1
+        ASI 同时给上面两条 = 「一项 +2 **或** 两项各 +1」
+
+    最后这种不需要新语法：`count: 2, amount: 1, repeat: true` 里「同一项选两次」就是 +2。
+    """
+    if not spec:
+        return None
+    pools: list[list[str]] = []
+    fixed: list[str] = []
+    picks = 0
+    for entry in spec:
+        if not isinstance(entry, dict) or entry.get("hidden"):
+            continue
+        if "choose" in entry:
+            chosen = entry["choose"] or {}
+            pool = [str(item).lower() for item in (chosen.get("from") or ())]
+            pools.append(pool)
+            one = int(chosen.get("amount") or 1) * int(chosen.get("count") or 1)
+            picks = max(picks, one)
+        else:
+            names = [key for key in entry if key in ABILITY_ZH.values()]
+            if names:
+                fixed.extend(names)
+                picks = max(picks, int(entry[names[0]] or 1))
+    if not pools and not fixed:
+        return None
+    pool = [key for key in ABILITY_ORDER if key in set(pools[0] if pools else fixed)]
+    count = picks if picks >= 2 else 1
+    choice = {"id": "boost", "kind": "ability_boost", "count": count, "amount": 1, "cap": cap}
+    if count >= 2:
+        # 「两项各 +1」与「一项 +2」用同一组参数表达
+        choice["repeat"] = True
+    if len(pool) < 6:
+        choice["from"] = pool
+    if count >= 2:
+        choice["label"] = {"zh": "任选 %d 项属性各 +1（上限 %d）" % (count, cap),
+                           "en": "Increase %d ability scores by 1 each (maximum %d)" % (count, cap)}
+    else:
+        choice["label"] = {"zh": "任选一项属性 +1（上限 %d）" % cap,
+                           "en": "Increase one ability score by 1 (maximum %d)" % cap}
+    return choice
+
+
 def build_choices(row: dict) -> list[dict]:
     effects = row["effects"]
     found: list[dict] = []
-    if effects.get("ability_boost"):
+    cap = 30 if row["kind"] == "epic_boon" else 20
+    authoritative = ability_from_xphb((row.get("xphb") or {}).get("ability") or [], cap)
+    if authoritative:
+        found.append(authoritative)
+    elif effects.get("ability_boost"):
         boost = effects["ability_boost"]
         choice = {
             "id": "boost",
@@ -320,7 +406,7 @@ def build_choices(row: dict) -> list[dict]:
     if effects.get("expertise_choice"):
         found.append({"id": "expertise", "kind": "expertise",
                       "count": int(effects["expertise_choice"])})
-    if not effects.get("ability_boost"):
+    if not effects.get("ability_boost") and not authoritative:
         parsed = parse_boost_from_text(row["text_zh"])
         if parsed:
             found.append(parsed)
@@ -403,6 +489,30 @@ def render(row: dict, english: dict[str, dict]) -> str:
     return "\n".join(out).rstrip() + "\n"
 
 
+def audit_ability(rows: dict[str, dict]) -> list[str]:
+    """中文说明解析出来的属性池 vs XPHB 原文，不一致就报出来。
+
+    这一条是给「以后」用的：原文若被替换、或有人改了中文说明，这里会立刻出声，
+    而不是等玩家发现「选了专长属性不动」。
+    """
+    problems: list[str] = []
+    for feat_slug, row in sorted(rows.items()):
+        spec = (row.get("xphb") or {}).get("ability") or []
+        if not spec:
+            continue
+        cap = 30 if row["kind"] == "epic_boon" else 20
+        truth = ability_from_xphb(spec, cap)
+        parsed = parse_boost_from_text(row["text_zh"])
+        if truth is None or parsed is None:
+            continue                       # 一边没有就不比（坚毅的加值绑在豁免选择上）
+        left = set(truth.get("from") or ABILITY_ZH.values())
+        right = set(parsed.get("from") or ABILITY_ZH.values())
+        if left != right:
+            problems.append("%s：中文说明 %s ≠ 原文 %s"
+                            % (row["en"], "/".join(sorted(right)), "/".join(sorted(left))))
+    return problems
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="生成专长的插件 YAML")
     parser.add_argument("--only", nargs="*", default=None, help="只生成这些专长（按英文名或 id 片段）")
@@ -410,6 +520,8 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     rows, english = load_sources()
+    for line in audit_ability(rows):
+        print("属性池不一致 —— %s" % line)
     OUT.mkdir(parents=True, exist_ok=True)
     written, skipped = [], []
 

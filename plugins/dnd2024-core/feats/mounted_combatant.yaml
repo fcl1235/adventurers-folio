@@ -11,4 +11,4 @@ text:
   en: |-
     Mounted Combatant — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
 choices:
-  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [int, wis]}
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str, dex, wis], label: {zh: 任选一项属性 +1（上限 20）, en: Increase one ability score by 1 (maximum 20)}}
