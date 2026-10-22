@@ -373,6 +373,85 @@ def ability_from_xphb(spec: list, cap: int) -> dict | None:
     return choice
 
 
+# 旧数据里只有两条战斗风格写了 `spell_grants`，且只写「几道戏法」。「魔法入门」三兄弟
+# 与「妖精触碰」这一族的法术部分只写在中文说明里 —— 就在这里补，不改旧数据库：
+# 旧程序不读这个键，但它是**旧程序的数据文件**，不该为了新内核的需要去动它。
+#
+# 三种写法：
+#   list + cantrips/level1  → 从某张职业法术表里选几道
+#   schools + list: any     → 「任选一道某学派的 N 环法术」，不限职业法术表
+#   fixed                   → 「你始终准备该法术」里写死的那几道（不需要选）
+SCHOOL_ZH = {
+    "abjuration": "防护", "conjuration": "咒法", "divination": "预言",
+    "enchantment": "惑控", "evocation": "塑能", "illusion": "幻术",
+    "necromancy": "死灵", "transmutation": "变化",
+}
+# 只给「选择项说明」用。职业显示名在职业插件里，这里不引用 —— 生成器不该依赖
+# 插件内容（它读的是旧程序的数据文件）。缺了就退回 id，至少不会静默空白。
+CLASS_ZH = {"cleric": "牧师", "druid": "德鲁伊", "wizard": "法师"}
+HAND_GRANTS = {
+    "Magic Initiate (Cleric)": {
+        "list": "cleric", "cantrips": 2, "level1": 1,
+        # 「可不用法术位施放 1 次，长休后恢复」—— 就一道法术，所以池容量是精确的 1
+        "resource": {"id": "free_cast", "zh": "魔法入门的免费施法",
+                     "en": "Magic Initiate free casting"},
+    },
+    "Magic Initiate (Druid)": {
+        "list": "druid", "cantrips": 2, "level1": 1,
+        "resource": {"id": "free_cast", "zh": "魔法入门的免费施法",
+                     "en": "Magic Initiate free casting"},
+    },
+    "Magic Initiate (Wizard)": {
+        "list": "wizard", "cantrips": 2, "level1": 1,
+        "resource": {"id": "free_cast", "zh": "魔法入门的免费施法",
+                     "en": "Magic Initiate free casting"},
+    },
+    "Fey-Touched": {
+        "list": "any", "level1": 1, "schools": ["divination", "enchantment"],
+        "fixed": ["misty_step"],
+        # 「两道法术各自可免费施放一次」= **按法术计次**，不是共享的一格。
+        # 合成 capacity 2 会让人能连放两次迷踪步 —— 宁可先不建池，留给回合流程（G16）。
+        "note_zh": "迷踪步与你选的那道法术各可免法术位施放一次，长休恢复；"
+                   "「各一次」是按法术记的次数，现在没有按法术计次的池，先手动记。",
+        "note_en": "Each of the two spells can be cast once without a spell slot; "
+                   "per-spell uses are not modelled yet, track them by hand.",
+    },
+    "Shadow-Touched": {
+        "list": "any", "level1": 1, "schools": ["illusion", "necromancy"],
+        "fixed": ["invisibility"],
+        "note_zh": "隐形术与你选的那道法术各可免法术位施放一次，长休恢复；"
+                   "「各一次」是按法术记的次数，现在没有按法术计次的池，先手动记。",
+        "note_en": "Each of the two spells can be cast once without a spell slot; "
+                   "per-spell uses are not modelled yet, track them by hand.",
+    },
+    "Telepathic": {
+        "fixed": ["detect_thoughts"],
+        "note_zh": "侦测思想可免法术位与法术成分施放一次，长休恢复；这道法术是写死的，不是选择项。",
+        "note_en": "Detect Thoughts can be cast once without a spell slot or components; "
+                   "the spell itself is fixed.",
+    },
+}
+
+
+def spell_id(name: str) -> str:
+    """`misty_step` → `dnd2024.spell.misty_step`。已经是全 id 就原样返回。"""
+    return name if name.startswith("dnd2024.") else "dnd2024.spell.%s" % name
+
+
+def _grant_spec(row: dict) -> dict:
+    """这个专长给不给法术：先看旧数据的 `spell_grants`，再看手写表。
+
+    旧数据用的是 `class` 键，手写表用 `list` —— 在这里统一，别让下游记两套。
+    """
+    spec = row["effects"].get("spell_grants") or HAND_GRANTS.get(row["en"]) or {}
+    if not isinstance(spec, dict) or not spec:
+        return {}
+    merged = dict(spec)
+    if not merged.get("list"):
+        merged["list"] = str(merged.get("class") or "").lower()
+    return merged
+
+
 def build_choices(row: dict) -> list[dict]:
     effects = row["effects"]
     found: list[dict] = []
@@ -406,6 +485,38 @@ def build_choices(row: dict) -> list[dict]:
     if effects.get("expertise_choice"):
         found.append({"id": "expertise", "kind": "expertise",
                       "count": int(effects["expertise_choice"])})
+    grants = _grant_spec(row)
+    if grants:
+        # 「给你两道牧师戏法」这类：候选是**那张职业法术表**里的 0 环法术，
+        # 不抄进内容（抄了必然和法术表漂）—— 见 rules/feats.py:spell_pool
+        spells = grants.get("list")
+        cn_name = CLASS_ZH.get(spells, spells)
+        zh_where = "任意法术表" if spells == "any" else "%s法术表" % cn_name
+        en_where = "any spell list" if spells == "any" else "the %s spell list" % spells
+        cantrips = int(grants.get("cantrips") or 0)
+        if cantrips:
+            found.append({"id": "cantrips", "kind": "spell", "count": cantrips,
+                          "spell_list": spells, "spell_level": 0,
+                          "label": {"zh": "从%s的戏法里选 %d 道" % (zh_where, cantrips),
+                                    "en": "Choose %d cantrip%s from %s"
+                                          % (cantrips, "" if cantrips == 1 else "s",
+                                             en_where)}})
+        level1 = int(grants.get("level1") or 0)
+        if level1:
+            schools = [str(item) for item in (grants.get("schools") or ())]
+            choice = {"id": "spell", "kind": "spell", "count": level1,
+                      "spell_list": spells, "spell_level": 1}
+            if schools:
+                choice["spell_school"] = schools
+            zh_schools = "或".join(SCHOOL_ZH.get(item, item) for item in schools)
+            choice["label"] = {
+                "zh": "从%s的 1 环法术里选 %d 道%s"
+                      % (zh_where, level1, "（%s）" % zh_schools if schools else ""),
+                "en": "Choose %d level 1 spell%s from %s%s"
+                      % (level1, "" if level1 == 1 else "s", en_where,
+                         " (%s)" % "/".join(schools) if schools else ""),
+            }
+            found.append(choice)
     if not effects.get("ability_boost") and not authoritative:
         parsed = parse_boost_from_text(row["text_zh"])
         if parsed:
@@ -464,12 +575,40 @@ def render(row: dict, english: dict[str, dict]) -> str:
                 pairs.append(("repeat", "true"))
             if choice.get("from"):
                 pairs.append(("from", "[%s]" % ", ".join(choice["from"])))
+            if choice.get("spell_list"):
+                pairs.append(("spell_list", choice["spell_list"]))
+            if choice.get("spell_level") is not None and choice.get("spell_list"):
+                pairs.append(("spell_level", int(choice["spell_level"])))
+            if choice.get("spell_school"):
+                pairs.append(("spell_school", "[%s]" % ", ".join(choice["spell_school"])))
             if choice.get("label"):
                 pairs.append(("label", flow([("zh", choice["label"]["zh"]),
                                              ("en", choice["label"]["en"])])))
             out.append("  - %s" % flow(pairs))
 
+    grants = _grant_spec(row)
+    fixed = [spell_id(item) for item in (grants.get("fixed") or ())]
+    if fixed:
+        out.append("spells: [%s]" % ", ".join(fixed))
+    resource = grants.get("resource")
+    if resource:
+        # 「每长休可不耗法术位施放一次」。只给**恰好一道法术**的专长建池 ——
+        # 两道法术「各一次」是按法术计次，合并成一个 2 次的池会算错（见 HAND_GRANTS）。
+        out += [
+            "resources:",
+            "  - id: %s.%s" % (ident, resource["id"]),
+            "    kind: charge",
+            "    refresh: long_rest",
+            "    capacity: 1",
+            "    label: %s" % flow([("zh", resource["zh"]), ("en", resource["en"])]),
+        ]
+
     powers = build_powers(ident, row)
+    if grants.get("note_zh"):
+        # 「各一次」这种暂时算不了的效果写成显式提示，状态是 text 而不是假装算过了
+        note = flow([("zh", grants["note_zh"]), ("en", grants.get("note_en", ""))])
+        powers.append(("note", "      - note: %s" % note,
+                       (grants["note_zh"], grants.get("note_en", ""))))
     if powers:
         out.append("")
         out.append("powers:")

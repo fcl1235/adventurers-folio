@@ -17,7 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Mapping
 
-from ..content import FeatChoice, FeatDef
+from ..content import SPELL_LIST_ANY, ContentBundle, FeatChoice, FeatDef
 from ..kernel.errors import RuleError
 from ..kernel.text import Text
 from .scores import ScoreBonus
@@ -31,15 +31,23 @@ class FeatPicks:
     proficiencies: frozenset[str] = frozenset()
     expertise: frozenset[str] = frozenset()
     resistances: frozenset[str] = frozenset()
+    # 专长给的法术（法术内容 id）。**不占职业的准备名额** —— 它来自专长，
+    # 与 `Profile.prepared` 是两条账，混起来会让「魔法入门」把法师的准备位吃掉。
+    spells: tuple[str, ...] = ()
     # 还没选完的选择项（`<专长 id>.<选择项 id>`）。空 = 都选好了。
     pending: tuple[str, ...] = ()
 
     def merged(self, other: "FeatPicks") -> "FeatPicks":
+        # 法术按「始终准备的清单」理解：重复取同一个专长不该在界面上出现两行同一道法术。
+        # 熟练/专精本来就是 frozenset，天然去重；这里补上唯一的例外。
+        spells = list(self.spells)
+        spells += [item for item in other.spells if item not in spells]
         return FeatPicks(
             score=self.score + other.score,
             proficiencies=self.proficiencies | other.proficiencies,
             expertise=self.expertise | other.expertise,
             resistances=self.resistances | other.resistances,
+            spells=tuple(spells),
             pending=self.pending + other.pending,
         )
 
@@ -50,6 +58,7 @@ class FeatPicks:
             "proficiencies": sorted(self.proficiencies),
             "expertise": sorted(self.expertise),
             "resistances": sorted(self.resistances),
+            "spells": list(self.spells),
             "pending": list(self.pending),
         }
 
@@ -85,6 +94,7 @@ def picks_for(
     prof: set[str] = set()
     expertise: set[str] = set()
     resist: set[str] = set()
+    spells: list[str] = []
     pending: list[str] = []
 
     for choice in feat.choices:
@@ -97,8 +107,11 @@ def picks_for(
         if not picked:
             pending.append(key)
             continue
+        # `spell` 的候选来自法术表（内容），不在 `choice.options` 里 ——
+        # 这里没法判（拿到 FeatDef 时还没有法术表），交给 `spell_pool` + build 校验。
         allowed = set(choice.options)
-        unknown = [item for item in picked if item not in allowed]
+        unknown = [] if choice.kind == "spell" else [
+            item for item in picked if item not in allowed]
         if unknown:
             raise RuleError("专长「%s」的 %s 选了不存在的项：%s（可选：%s）"
                             % (_label(feat, locale), choice.id, ", ".join(unknown),
@@ -112,13 +125,15 @@ def picks_for(
         if len(picked) < choice.count:
             pending.append(key)
             continue
-        _land(choice, picked, _label(feat, locale), score, prof, expertise, resist)
+        _land(choice, picked, _label(feat, locale), score, prof, expertise, resist, spells)
 
     return FeatPicks(
         score=tuple(score),
         proficiencies=frozenset(prof),
         expertise=frozenset(expertise),
         resistances=frozenset(resist),
+        # 写死的「始终准备」排在前面：内容里定了顺序，界面上就别抖
+        spells=tuple(feat.spells) + tuple(spells),
         pending=tuple(pending),
     )
 
@@ -131,6 +146,7 @@ def _land(
     prof: set[str],
     expertise: set[str],
     resist: set[str],
+    spells: list[str],
 ) -> None:
     """把选好的项落成具体加成。每种 kind 一行，别在这里加第二套判断。"""
     if choice.kind == "ability_boost":
@@ -155,6 +171,8 @@ def _land(
         expertise.update("skill.%s" % skill for skill in picked)
     elif choice.kind == "resistance":
         resist.update(picked)
+    elif choice.kind == "spell":
+        spells.extend(picked)
 
 
 def collect_picks(
@@ -169,6 +187,75 @@ def collect_picks(
         seen[feat.id] = index + 1
         total = total.merged(picks_for(feat, choices, locale, index=index))
     return total
+
+
+def spell_pool(bundle: ContentBundle, choice: FeatChoice) -> tuple[str, ...]:
+    """`kind: spell` 的候选：**该职业法术表**里、**该环级**（可再按学派收窄）的法术 id。
+
+    候选不写进内容：法术表本身就是权威，抄一份到专长里必然漂。
+    排序用 id，界面上的顺序才稳定（不受加载顺序影响）。
+    """
+    if choice.kind != "spell":
+        return ()
+    if choice.spell_list == SPELL_LIST_ANY:
+        # 「任选一道某学派的 1 环法术」—— 不限职业法术表。收窄全靠环级 + 学派，
+        # 所以这里必须有学派，否则候选会是全部法术（那是给玩家一整个法术库）
+        if not choice.spell_school:
+            raise RuleError("选择项 %s 写了 spell_list: any 却没写 spell_school，候选会是全部法术"
+                            % choice.id)
+        allowed = set(bundle.spells)
+    else:
+        class_id = "dnd2024.class.%s" % choice.spell_list
+        if class_id not in bundle.classes:
+            raise RuleError("选择项 %s 的 spell_list 指向不存在的职业：%s"
+                            % (choice.id, choice.spell_list))
+        allowed = set(bundle.spell_list(class_id))
+        if not allowed:
+            raise RuleError("职业 %s 没有法术表，不能作为 spell_list" % choice.spell_list)
+    schools = set(choice.spell_school)
+    return tuple(sorted(
+        spell.id for spell in bundle.spells.values()
+        if spell.id in allowed and int(spell.level) == int(choice.spell_level)
+        and (not schools or spell.school in schools)
+    ))
+
+
+def check_feat_spells(
+    bundle: ContentBundle,
+    feats: Iterable[FeatDef],
+    choices: Mapping[str, tuple[str, ...]],
+    repeats: Mapping[str, int] | None = None,
+    locale: str = "zh",
+) -> list[str]:
+    """专长选的法术是否都在候选里。返回问题清单（空 = 通过）。
+
+    「选错法术」与「还没选」要分开：没选只是 `pending`（界面上的待办），
+    选了一个不在表里的法术才是数据错误。
+    """
+    problems: list[str] = []
+    for feat in feats:
+        # 可重复登记的专长（属性提升类）每次登记是一轮独立选择，
+        # 键带 `#序号` —— 次数从 `repeats` 来，别在这里自己数
+        for index in range(int((repeats or {}).get(feat.id, 1))):
+            for choice in feat.choices:
+                if choice.kind != "spell":
+                    continue
+                picked = tuple(str(item) for item in
+                               (choices.get(pick_key(feat.id, choice.id, index)) or ()))
+                if not picked:
+                    continue
+                pool = set(spell_pool(bundle, choice))
+                where = ("任意法术表" if choice.spell_list == SPELL_LIST_ANY
+                         else "%s 法术表" % choice.spell_list)
+                for item in picked:
+                    if item not in pool:
+                        problems.append(
+                            "专长「%s」的 %s 选了 %s，但它不在候选里（%s的 %d 环%s法术）"
+                            % (_label(feat, locale), choice.id, item, where,
+                               choice.spell_level,
+                               "（限%s）" % "/".join(choice.spell_school)
+                               if choice.spell_school else ""))
+    return problems
 
 
 def hard_problems(

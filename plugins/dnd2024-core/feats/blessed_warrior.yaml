@@ -11,3 +11,5 @@ text:
     你习得两道你选择的牧师戏法（推荐神导术与圣火术）。这些戏法对你视为圣武士法术，其施法属性为魅力。每当你获得一个圣武士等级时，你可以将其中的一道戏法替换为另一道你选择的牧师戏法。
   en: |-
     Blessed Warrior — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: cantrips, kind: spell, count: 2, spell_list: cleric, spell_level: 0, label: {zh: 从牧师法术表的戏法里选 2 道, en: Choose 2 cantrips from the cleric spell list}}

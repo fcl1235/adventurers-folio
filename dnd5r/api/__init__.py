@@ -43,7 +43,7 @@ from ..rules.resolver import RefContext, Resolver, crit_text
 from ..rules.spellcasting import (
     casting_summary, check_spell_picks, spell_detail, spell_options,
 )
-from ..rules.feats import choice_prompt, pick_key, prereq_report
+from ..rules.feats import choice_prompt, pick_key, prereq_report, spell_pool
 from ..rules.scores import bonus_totals, merge_bonuses, score_bonuses
 from ..rules.weapons import profiles_for
 from ..rules.powers import use_power as _use_power
@@ -447,6 +447,7 @@ def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list
     rows: list[dict] = []
     for feat in feat_defs(content, profile):
         choices = []
+        granted: list[str] = list(feat.spells)
         for choice in feat.choices:
             key = "%s.%s" % (feat.id, choice.id)
             picked = list(profile.choices.get(key, ())) if profile else []
@@ -454,14 +455,22 @@ def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list
             if choice.kind == "expertise":
                 # 专精只能选已有熟练的技能 —— Profile 会校验，但选单不该给出非法项
                 options = [item for item in options if "skill.%s" % item in tokens]
+            elif choice.kind == "spell":
+                # 候选由法术表 + 环级现算，内容里不抄（见 rules/feats.py:spell_pool）
+                options = list(spell_pool(content, choice))
+                granted += [item for item in picked if item not in granted]
             choices.append({
                 "id": choice.id,
                 "key": key,
+                "kind": choice.kind,
                 "label": choice_prompt(feat, choice, locale).get(locale),
                 "picked": picked,
                 "remaining": choice.count - len(picked),
                 "count": choice.count,
                 "options": options,
+                # 选单要显示法术名而不是裸 id；值仍然是 id
+                "option_labels": {ident: _spell_name(content, ident, locale)
+                                  for ident in options} if choice.kind == "spell" else {},
             })
         rows.append({
             "id": feat.id,
@@ -472,8 +481,43 @@ def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list
             "text": feat.text.get(locale),
             "choices": choices,
             "pending": any(row["key"] in picks.pending for row in choices),
+            # 这个专长给的法术：写死的 + 你在选择项里选中的，合成一条「始终准备」清单
+            "spells": [_spell_row(content, ident, locale) for ident in granted],
+            "resources": [_feat_pool_row(pool, locale)
+                          for pool in _feat_pools(actor, feat)],
         })
     return rows
+
+
+def _feat_pools(actor: Actor, feat) -> list:
+    """这个专长建出来的资源池。按 id 前缀认 —— 池 id 就是 `<专长 id>.<名字>`。"""
+    root = actor.root()
+    return [pool for pool_id, pool in root.resources.pools.items()
+            if pool_id == feat.id or pool_id.startswith(feat.id + ".")]
+
+
+def _feat_pool_row(pool, locale: str = "zh") -> dict:
+    return {
+        "id": pool.id,
+        "label": pool.label.get(locale) if pool.label else pool.id,
+        "used": int(pool.used),
+        "capacity": int(pool.capacity),
+    }
+
+
+def _spell_name(content: ContentBundle, spell_id: str, locale: str = "zh") -> str:
+    spell = content.spells.get(spell_id)
+    return spell.name.get(locale) if spell is not None else spell_id
+
+
+def _spell_row(content: ContentBundle, spell_id: str, locale: str = "zh") -> dict:
+    spell = content.spells.get(spell_id)
+    return {
+        "id": spell_id,
+        "name": spell.name.get(locale) if spell is not None else spell_id,
+        "level": int(spell.level) if spell is not None else 0,
+        "school": spell.school if spell is not None else "",
+    }
 
 
 def _feat_status(feat) -> str:
@@ -485,7 +529,8 @@ def _feat_status(feat) -> str:
     if feat.choices:
         return "counted"
     statuses = {power_status(power) for power in feat.powers}
-    for level in ("counted", "active", "manual"):
+    # dice 排在 counted 之后：优势/劣势改的是掷骰形状，不是加值，但它确实被消费了
+    for level in ("counted", "dice", "active", "manual"):
         if level in statuses:
             return level
     return "text"

@@ -499,7 +499,10 @@ FEAT_KINDS = ("origin", "general", "fighting_style", "epic_boon")
 
 # 选择项的语义集合。故意封闭：内容里写一个内核不认识的 kind，
 # 界面上就会变成一个「选了没反应」的下拉框，比报错难查得多。
-CHOICE_KINDS = ("ability_boost", "save", "skill", "expertise", "resistance")
+CHOICE_KINDS = ("ability_boost", "save", "skill", "expertise", "resistance", "spell")
+# `spell_list` 的「不限法术表」哨兵值。2024 版有些专长（妖精触碰一族）说的是
+# 「任选一道某学派的 1 环法术」，没有职业限制 —— 硬塞给某张表就是改规则。
+SPELL_LIST_ANY = "any"
 # 这些 kind 的候选项由内核的全集决定，内容不必也不该重复列举
 SKILL_KEYS = (
     "acrobatics", "animal_handling", "arcana", "athletics", "deception",
@@ -589,6 +592,14 @@ class FeatChoice:
     # 只对 save 有意义 —— 它选中就是属性名。
     boost: int = 0
     boost_cap: int = 0
+    # `kind: spell` 的两个坐标：从**哪张职业法术表**里选、选几环的。
+    # 候选集不写死在内容里 —— 它由法术表 + 环级动态生成（`spell_pool`），
+    # 否则「魔法入门」的 3 个变体要各抄一份几十条法术 id，抄漏一条就是静默少一个选项。
+    spell_list: str = ""
+    spell_level: int = 0
+    # 再按学派收窄（「妖精触碰」= 1 环的预言或惑控）。空 = 不限学派。
+    # 用学派而不是列举法术 id：2024 版新法术随时会加进法术表，列举必然漏。
+    spell_school: tuple[str, ...] = ()
     label: Text | None = None
 
     def __post_init__(self) -> None:
@@ -613,6 +624,23 @@ class FeatChoice:
                 raise PluginError("专长选择项 %s 的 boost 至少是 1" % self.id)
             if self.boost_cap and self.boost_cap < 1:
                 raise PluginError("专长选择项 %s 的 boost_cap 至少是 1" % self.id)
+        if self.kind == "spell":
+            if not self.spell_list:
+                raise PluginError("专长选择项 %s 是法术选择，必须写 spell_list（职业）" % self.id)
+            if not 0 <= self.spell_level <= 9:
+                raise PluginError("专长选择项 %s 的 spell_level 必须在 0–9" % self.id)
+            if self.pool:
+                raise PluginError("专长选择项 %s 的候选来自法术表，不该写 from" % self.id)
+            bad = [item for item in self.spell_school if item not in SPELL_SCHOOLS]
+            if bad:
+                raise PluginError("专长选择项 %s 的 spell_school 里有不认识的学派：%s（可选 %s）"
+                                  % (self.id, ", ".join(bad), "/".join(SPELL_SCHOOLS)))
+            if self.spell_school and self.spell_level == 0:
+                raise PluginError("专长选择项 %s 是戏法选择，戏法学派收窄没有意义（2024 戏法不限学派）"
+                                  % self.id)
+        elif self.spell_list or self.spell_level or self.spell_school:
+            raise PluginError("专长选择项 %s 不是法术选择，不该写 spell_list/spell_level/spell_school"
+                              % self.id)
         if self.pool:
             universe = set(self.options)
             unknown = [item for item in self.pool if item not in universe]
@@ -624,6 +652,8 @@ class FeatChoice:
     def options(self) -> tuple[str, ...]:
         if self.kind == "resistance":
             return self.pool or DAMAGE_TYPES
+        if self.kind == "spell":
+            return ()          # 候选由法术表生成，见 rules/feats.py:spell_pool
         full = CHOICE_UNIVERSE.get(self.kind, ())
         if not self.pool:
             return full
@@ -635,6 +665,8 @@ class FeatChoice:
             "id": self.id, "kind": self.kind, "count": self.count,
             "amount": self.amount, "cap": self.cap, "repeat": self.repeat,
             "boost": self.boost, "boost_cap": self.boost_cap,
+            "spell_list": self.spell_list, "spell_level": self.spell_level,
+            "spell_school": list(self.spell_school),
             "options": list(self.options),
             "label": self.label.get(locale) if self.label else "",
         }
@@ -655,6 +687,9 @@ def parse_feat_choice(data: Any, where: str) -> FeatChoice:
         repeat=bool(data.get("repeat", False)),
         boost=int(data.get("boost", 0)),
         boost_cap=int(data.get("boost_cap", 0)),
+        spell_list=str(data.get("spell_list", "")),
+        spell_level=int(data.get("spell_level", 0)),
+        spell_school=tuple(str(item).lower() for item in (data.get("spell_school") or ())),
         label=Text.from_dict(data["label"], where="%s %s label" % (where, data["id"]))
         if data.get("label") else None,
     )
@@ -680,6 +715,13 @@ class FeatDef:
     repeatable: bool = False
     choices: tuple[FeatChoice, ...] = ()
     powers: tuple[Power, ...] = ()
+    # 「你始终准备该法术」里**写死的那一道**（妖精触碰的迷踪步、影界触碰的隐形术）。
+    # 与 `kind: spell` 的选择项不同：这条不需要选，所有拿了这个专长的人都一样。
+    # 只是法术 id，具体能不能施放、有几个位，仍由施法规则决定。
+    spells: tuple[str, ...] = ()
+    # 专长也能给资源池（「每长休一次免费施放」这类每日一次的次数）。
+    # 容量按**总等级**查（专长没有「专长等级」这种轴），一般写固定值 1。
+    resources: tuple[ResourceDef, ...] = ()
     source: str = ""
 
     def __post_init__(self) -> None:
@@ -721,6 +763,7 @@ class FeatDef:
             "classes": list(self.classes),
             "repeatable": self.repeatable,
             "choices": [item.to_dict(locale) for item in self.choices],
+            "spells": list(self.spells),
             "powers": len(self.powers),
         }
 
@@ -748,6 +791,9 @@ def parse_feat(data: Any, source: str = "") -> FeatDef:
         classes=tuple(str(item) for item in (data.get("classes") or ())),
         repeatable=bool(data.get("repeatable", False)),
         choices=tuple(parse_feat_choice(row, ident) for row in (data.get("choices") or ())),
+        resources=tuple(parse_resource(row, owner_class=ident)
+                        for row in (data.get("resources") or ())),
+        spells=tuple(str(item) for item in (data.get("spells") or ())),
         powers=tuple(
             parse_power(row, owner=ident, source=source)
             for row in (data.get("powers") or ())
@@ -1702,6 +1748,7 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
             bundle.feats[feat_id] = feat
     _check_subclass_classes(bundle)
     _check_spell_lists(bundle)
+    _check_feat_spell_refs(bundle)
     bundle.book.validate_augments()
     return bundle
 
@@ -1718,6 +1765,34 @@ def _check_spell_lists(bundle: ContentBundle) -> None:
         if missing:
             bundle.errors.append("法术表 %s 引用了不存在的法术：%s"
                                  % (class_id, ", ".join(missing[:5])))
+
+
+def _check_feat_spell_refs(bundle: ContentBundle) -> None:
+    """专长引用的法术/法术表必须存在。
+
+    与法术表同样的理由只能在合并后查：专长可以来自别的插件，法术也是。
+    `choice.spell_list` 指向的职业必须**有法术表** —— 否则玩家在界面上会看到
+    一个空下拉框，而不是一条能被看见的错误。
+    """
+    for feat in bundle.feats.values():
+        missing = [ident for ident in feat.spells if ident not in bundle.spells]
+        if missing:
+            bundle.errors.append("专长 %s 给了不存在的法术：%s"
+                                 % (feat.id, ", ".join(missing[:5])))
+        for choice in feat.choices:
+            if choice.kind != "spell":
+                continue
+            if choice.spell_list == SPELL_LIST_ANY:
+                continue
+            class_id = "dnd2024.class.%s" % choice.spell_list
+            if class_id not in bundle.classes:
+                bundle.errors.append(
+                    "专长 %s 的选择项 %s 指向未知职业 %s"
+                    % (feat.id, choice.id, choice.spell_list))
+            elif not bundle.spell_list(class_id):
+                bundle.errors.append(
+                    "专长 %s 的选择项 %s 指向的职业 %s 没有法术表"
+                    % (feat.id, choice.id, choice.spell_list))
 
 
 def _check_subclass_classes(bundle: ContentBundle) -> None:

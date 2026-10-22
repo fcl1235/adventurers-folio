@@ -11,3 +11,12 @@ text:
     习得牧师 2 个戏法 + 1 个 1 环法术; 每长休可不耗法术位施放该 1 环法术 1 次
   en: |-
     You gain the following benefits. Two Cantrips. You learn two cantrips of your choice from the Cleric, Druid, or Wizard spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat). Level 1 Spell. Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have. Spell Change. Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.
+choices:
+  - {id: cantrips, kind: spell, count: 2, spell_list: cleric, spell_level: 0, label: {zh: 从牧师法术表的戏法里选 2 道, en: Choose 2 cantrips from the cleric spell list}}
+  - {id: spell, kind: spell, count: 1, spell_list: cleric, spell_level: 1, label: {zh: 从牧师法术表的 1 环法术里选 1 道, en: Choose 1 level 1 spell from the cleric spell list}}
+resources:
+  - id: dnd2024.feat.magic_initiate_cleric.free_cast
+    kind: charge
+    refresh: long_rest
+    capacity: 1
+    label: {zh: 魔法入门的免费施法, en: Magic Initiate free casting}

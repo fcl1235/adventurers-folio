@@ -22,17 +22,22 @@ ABILITY_ZH = {"str": "力量", "dex": "敏捷", "con": "体质",
               "int": "智力", "wis": "感知", "cha": "魅力"}
 KIND_ZH = {"origin": "起源", "general": "通用",
            "fighting_style": "战斗风格", "epic_boon": "传奇恩惠"}
-STATUS_MARK = {"counted": "✓", "active": "▶", "manual": "△", "text": "□"}
+STATUS_MARK = {"counted": "✓", "dice": "◆", "active": "▶", "manual": "△", "text": "□"}
 STATUS_TEXT = {
     "counted": "已计入数值：这条专长的加值/熟练/抗性算在角色卡里了。",
+    "dice": "已接入掷骰：这条专长改的是掷骰形状（优势/劣势），不加数值，掷骰时会多掷一颗取高/取低。",
     "active": "使用时结算：点能力按钮才会产生效果，角色卡上的常驻数字不含它。",
-    "manual": "只登记了规则，尚未计入数值：优势/劣势暂时没有消费方，需要手动处理。",
+    "manual": "只登记了规则，尚未计入数值：这条专长还需要手动处理。",
     "text": "只登记了规则，尚未计入数值：本程序没有把它算进任何数字。",
 }
 
 
-def _option_label(kind: str, value: str, bundle) -> str:
-    """把选项的内部值翻成中文。技能从内容里查，属性用固定表。"""
+def _option_label(choice: dict, value: str, bundle) -> str:
+    """把选项的内部值翻成中文。技能/法术从内容里查，属性用固定表。"""
+    kind = str(choice.get("kind") or "")
+    if kind == "spell":
+        # 法术名由服务端放进 `option_labels`（内容里查得到才给），查不到就退回 id
+        return str((choice.get("option_labels") or {}).get(value) or value)
     if kind in ("skill", "expertise"):
         skill = bundle.skills.get("dnd2024.skill.%s" % value)
         return skill.name.zh if skill else value
@@ -65,7 +70,7 @@ class FeatPage(ttk.Frame):
         # --- 左：专长清单 -------------------------------------------------
         listed = section(left, "专长")
         listed.pack(fill="both", expand=True)
-        ttk.Label(listed, text="✓ 已计入　▶ 用时算　△ 待手动　□ 仅文字",
+        ttk.Label(listed, text="✓ 已计入　◆ 改掷骰　▶ 用时算　△ 待手动　□ 仅文字",
                   foreground="#666666").pack(anchor="w")
         self.feats = ListPane(listed, height=20, width=28)
         self.feats.pack(fill="both", expand=True, pady=(2, 0))
@@ -166,7 +171,21 @@ class FeatPage(ttk.Frame):
             self._enable(False)
             return
         kind = KIND_ZH.get(feat.get("kind") or "", feat.get("kind") or "")
-        self.text.set_text("%s（%s）\n\n%s" % (feat["name"], kind, feat.get("text") or ""))
+        body = "%s（%s）\n\n%s" % (feat["name"], kind, feat.get("text") or "")
+        spells = feat.get("spells") or []
+        if spells:
+            # 「始终准备」是这条专长给的东西里最容易被忘掉的一半：法术不在职业法术页里
+            body += "\n\n始终准备：\n" + "\n".join(
+                "　· %s（%s）" % (row["name"], "戏法" if not row.get("level")
+                                  else "%d 环" % int(row["level"]))
+                for row in spells)
+        pools = feat.get("resources") or []
+        if pools:
+            body += "\n\n免费施放次数：\n" + "\n".join(
+                "　· %s：%d/%d（长休恢复）"
+                % (row["label"], int(row["capacity"]) - int(row["used"]), int(row["capacity"]))
+                for row in pools)
+        self.text.set_text(body)
         self.honesty.set_text(STATUS_TEXT.get(feat.get("status") or "text",
                                               STATUS_TEXT["text"]))
 
@@ -196,18 +215,16 @@ class FeatPage(ttk.Frame):
             self.options.fill([])
             return
         picked = list(choice.get("picked") or [])
-        kind = str(choice.get("id") or "")
         rows = []
         for value in choice.get("options") or []:
             used = picked.count(value)
-            label = _option_label(kind, str(value), self.app.bundle)
+            label = _option_label(choice, str(value), self.app.bundle)
             rows.append((str(value), "%s%s" % (label, "　（已选 %d）" % used if used else "")))
         self.options.fill(rows)
         self._fill_summary(choice, picked)
 
     def _fill_summary(self, choice: dict, picked: list[str]) -> None:
-        kind = str(choice.get("id") or "")
-        names = [_option_label(kind, item, self.app.bundle) for item in picked]
+        names = [_option_label(choice, item, self.app.bundle) for item in picked]
         if names:
             text = "已选：" + "、".join(names)
         else:

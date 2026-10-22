@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Mapping
 
 from ..content import ClassDef, ContentBundle, FeatDef, SubclassDef
@@ -18,7 +19,7 @@ from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
 from ..model.resources import Pool, PoolKind, Refresh
 from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
-from .feats import collect_picks, hard_problems
+from .feats import check_feat_spells, collect_picks, hard_problems
 from .health import hit_dice_pool, hit_points_max
 from .modifiers import resolve as resolve_modifiers
 from .morph import eligible_forms
@@ -166,6 +167,11 @@ def build_actor(
         [feat for feat in feat_defs_ for _ in range(repeats.get(feat.id, 1))],
         picked_choices,
     )
+    # 专长给的法术要真的在「该职业法术表 + 该环级」里 —— 候选由内容生成，
+    # 所以只能在拿到 bundle 的地方校验，而不是`picks_for`里
+    problems = check_feat_spells(bundle, feat_defs_, picked_choices, repeats)
+    if problems:
+        raise RuleError("专长法术选择有问题：" + "；".join(problems))
     bonuses = merge_bonuses(score_bonuses(all_powers), picks.score)
     abilities = apply_score_bonuses(Abilities.of(**dict(scores)), bonuses)
 
@@ -221,6 +227,22 @@ def build_actor(
         if pool.capacity <= 0:
             continue  # 未解锁的资源不建池，避免界面上出现 0/0
         actor.resources.add(pool)
+    # 专长给的池（「每长休一次免费施放」）。容量按总等级查，一般写固定值。
+    # 可重复选取的专长（魔法入门）登记两次就该有**两个**池 —— 每次登记是一次独立选择，
+    # 合成一个会让人少一次施放。`feat_defs_` 是去重后的（同一专长只出现一次），
+    # 所以次数要按 `repeats` 展开，不能靠遍历列表数出来。
+    feat_copies: dict[str, int] = {}
+    for feat in [item for item in feat_defs_
+                 for _ in range(int(repeats.get(item.id, 1)))]:
+        copy = feat_copies.get(feat.id, 0)
+        feat_copies[feat.id] = copy + 1
+        for resource in feat.resources:
+            built = (resource if copy == 0
+                     else replace(resource, id="%s_%d" % (resource.id, copy + 1)))
+            pool = built.build(ClassLevel(int(total)), ref)
+            if pool.capacity <= 0:
+                continue
+            actor.resources.add(pool)
     for index_, capacity in enumerate(class_def.slots_at(level), start=1):
         if capacity <= 0:
             continue
