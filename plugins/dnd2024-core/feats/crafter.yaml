@@ -1,0 +1,12 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.crafter
+kind: origin
+name: {zh: 巧匠, en: Crafter}
+level: 0
+text:
+  zh: |-
+    获 3 种工匠工具熟练; 长休后可急造一件简单物品(持续到下次长休); 购买相关非魔法装备享折扣
+  en: |-
+    Crafter — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.

@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.shadow_touched
+kind: general
+name: {zh: 影界触碰, en: Shadow-Touched}
+level: 4
+text:
+  zh: |-
+    智力、感知或魅力 +1（上限 20）。【阴影魔法】选择一道幻术或死灵学派的 1 环法术；你始终准备该法术与“隐形术”法术，并可用相应环阶的法术位施放它们。你可以不消耗法术位的方式各施放这两道法术一次；如此施放后，须完成长休才能再次以该方式施放该法术。施法属性为你以此专长提升的属性。
+  en: |-
+    Shadow-Touched — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [int, wis, cha]}

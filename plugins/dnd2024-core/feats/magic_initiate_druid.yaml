@@ -1,0 +1,13 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.magic_initiate_druid
+kind: origin
+name: {zh: 魔法入门·德鲁伊, en: Magic Initiate (Druid)}
+level: 0
+repeatable: true
+text:
+  zh: |-
+    习得德鲁伊 2 个戏法 + 1 个 1 环法术; 每长休可不耗法术位施放该 1 环法术 1 次
+  en: |-
+    You gain the following benefits. Two Cantrips. You learn two cantrips of your choice from the Cleric, Druid, or Wizard spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat). Level 1 Spell. Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have. Spell Change. Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.

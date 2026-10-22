@@ -1,0 +1,22 @@
+# hand-edited 手写：HP +2×等级 走 hp.per_level 通道（不是 hp.flat，后者不随等级涨）。
+id: dnd2024.feat.tough
+kind: origin
+name: {zh: 坚韧, en: Tough}
+level: 0
+text:
+  zh: |-
+    HP 上限 +2×当前等级，此后每升 1 级再 +2。
+  en: |-
+    Tough — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+powers:
+  - id: dnd2024.feat.tough.hp
+    name: {zh: 坚韧, en: Tough}
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        生命值上限每级 +2。
+      en: |-
+        Your Hit Point maximum increases by 2 for each level you have.
+    effects:
+      - grant_modifier: {target: hp.per_level, value: 2}

@@ -1,0 +1,17 @@
+# hand-edited 手写：原文是「技能**或**工具」，工具不在技能全集里 ——
+# 这里只落技能那一半，工具选项写在 text 里说明，不假装支持。
+id: dnd2024.feat.skilled
+kind: origin
+name: {zh: 多面手, en: Skilled}
+level: 0
+repeatable: true
+text:
+  zh: |-
+    任选 3 项技能或工具熟练（可自由混合）。本插件只结算技能那一半：工具熟练请在角色卡上手记。
+  en: |-
+    You gain proficiency in any combination of three skills or tools of your choice. This plugin only records the skill half; note tool proficiencies by hand.
+choices:
+  - id: skill
+    kind: skill
+    count: 3
+    label: {zh: 选 3 项技能熟练（工具熟练需手记）, en: Pick three skill proficiencies (tools must be noted by hand)}

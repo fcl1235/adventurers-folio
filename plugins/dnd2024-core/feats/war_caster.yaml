@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.war_caster
+kind: general
+name: {zh: 战地施法者, en: War Caster}
+level: 4
+text:
+  zh: |-
+    智力、感知或魅力 +1（上限 20）。【专注】你为维持专注所作的体质豁免检定具有优势。【反应法术】当生物因离开你的触及范围而引发你的借机攻击时，你可以用反应对该生物施放一道法术，而非发动借机攻击；该法术的施法时间必须为一个动作，且只能以该生物为目标。【姿势成分】即使一只手或双手持用武器或盾牌，你也能完成法术的姿势成分。
+  en: |-
+    War Caster — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [int, wis, cha]}

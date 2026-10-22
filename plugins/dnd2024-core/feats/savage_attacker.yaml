@@ -1,0 +1,12 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.savage_attacker
+kind: origin
+name: {zh: 凶蛮攻击者, en: Savage Attacker}
+level: 0
+text:
+  zh: |-
+    每回合 1 次: 武器伤害骰掷两次, 取较高值
+  en: |-
+    You've trained to deal particularly damaging strikes. Once per turn when you hit a target with a weapon, you can roll the weapon's damage dice twice and use either roll against the target.

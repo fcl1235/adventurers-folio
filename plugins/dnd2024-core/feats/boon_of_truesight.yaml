@@ -1,0 +1,27 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.boon_of_truesight
+kind: epic_boon
+name: {zh: 真实视觉之恩惠, en: Boon of Truesight}
+level: 19
+text:
+  zh: |-
+    任选一项属性 +1（上限 30）。【真实视觉】你获得 60 尺的真实视觉。
+  en: |-
+    You gain the following benefits. Ability Score Increase. Increase one ability score of your choice by 1, to a maximum of 30. Truesight. You have Truesight with a range of 60 feet.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 30, label: {zh: 任选一项属性 +1（上限 30）, en: Increase one ability score by 1 (maximum 30)}}
+
+powers:
+  - id: dnd2024.feat.boon_of_truesight.truesight
+    name: {zh: 真实视觉之恩惠, en: Boon of Truesight}
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得 60 尺真实视觉。
+      en: |-
+        You gain Truesight with a range of 60 feet.
+    effects:
+      - grant_modifier: {target: sense.truesight, value: 60}

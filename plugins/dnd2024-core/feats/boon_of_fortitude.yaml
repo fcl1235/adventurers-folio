@@ -1,0 +1,27 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.boon_of_fortitude
+kind: epic_boon
+name: {zh: 强健之恩惠, en: Boon of Fortitude}
+level: 19
+text:
+  zh: |-
+    HP 上限 +40。属性加值另记（任选一项 +1，上限 30）。【强健体魄】每当你回复 HP 时，可额外回复等于你体质调整值的 HP；这样用过一次后，直到你下一回合开始前不能再这样回复。
+  en: |-
+    Boon of Fortitude — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 30, label: {zh: 任选一项属性 +1（上限 30）, en: Increase one ability score by 1 (maximum 30)}}
+
+powers:
+  - id: dnd2024.feat.boon_of_fortitude.hp
+    name: {zh: 强健之恩惠, en: Boon of Fortitude}
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        生命值上限 +40。
+      en: |-
+        Your Hit Point maximum increases by 40.
+    effects:
+      - grant_modifier: {target: hp.flat, value: 40}

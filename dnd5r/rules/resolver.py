@@ -129,6 +129,13 @@ class Resolver:
         base = int(actor.top().statblock.senses.get(mode, 0))
         return resolve(modifiers, base=base, ctx=self._ctx_map)
 
+    def bonus(self, modifiers: Iterable[Modifier] = (), base: int = 0) -> Resolution:
+        """只算加值，不带属性与熟练（箭术的远程 +2 这类条件加值用它）。
+
+        不要拿 `attack_bonus(proficient=False)` 代替：那会顺带把属性调整值算进去。
+        """
+        return resolve(modifiers, base=base, ctx=self._ctx_map)
+
     # --- 检定 ---------------------------------------------------------
     def ability_check(
         self,

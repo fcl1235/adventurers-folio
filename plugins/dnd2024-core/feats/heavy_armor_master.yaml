@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.heavy_armor_master
+kind: general
+name: {zh: 重甲大师, en: Heavy Armor Master}
+level: 4
+text:
+  zh: |-
+    力量或体质 +1（上限 20）。【伤害减免】当你穿着重甲被一次攻击命中时，该攻击对你造成的钝击、穿刺与挥砍伤害减少等于你熟练加值的数值。
+  en: |-
+    Heavy Armor Master — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str, con]}

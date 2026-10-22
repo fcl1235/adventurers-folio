@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.boon_of_irresistible_offense
+kind: epic_boon
+name: {zh: 无敌攻势之恩惠, en: Boon of Irresistible Offense}
+level: 19
+text:
+  zh: |-
+    力量或敏捷 +1（上限 30）。【破除防御】你造成的钝击、穿刺与挥砍伤害始终忽略抗性。【压倒打击】当你在一次攻击检定的 d20 上掷出 20 时，你可以对目标造成额外伤害，数值等于你以此专长提升的那项属性值；该额外伤害的类型与该次攻击相同。
+  en: |-
+    You gain the following benefits. Ability Score Increase. Increase one ability score of your choice by 1, to a maximum of 30. Overcome Defenses. The Bludgeoning, Piercing, and Slashing damage you deal always ignores Resistance. Overwhelming Strike. When you roll a 20 on the d20 for an attack roll, you can deal extra damage to the target equal to the ability score increased by this feat. The extra damage's type is the same as the attack's type.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 30, from: [str, dex], label: {zh: 任选一项属性 +1（上限 30）, en: Increase one ability score by 1 (maximum 30)}}

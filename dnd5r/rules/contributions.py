@@ -107,6 +107,21 @@ def passive_proficiencies(bundle, actor: Actor) -> set[str]:
     return tokens
 
 
+def passive_defenses(bundle, actor: Actor) -> tuple[set[str], set[str]]:
+    """被动能力给的抗性与免疫（`grant_defense`）。
+
+    返回 (抗性集合, 免疫集合)。这两个是**集合**，不是加减法 ——
+    与熟练同一类，所以不走 Modifier 管道。
+    """
+    resist: set[str] = set()
+    immune: set[str] = set()
+    for power in _unlocked(bundle, actor):
+        for effect in power.effects:
+            resist |= set(getattr(effect, "resistance", ()) or ())
+            immune |= set(getattr(effect, "immunity", ()) or ())
+    return resist, immune
+
+
 def modifiers_for(modifiers, target: str) -> list[Modifier]:
     """按 target 过滤。`resolve()` 不做过滤，调用方必须自己分开。"""
     return [mod for mod in modifiers if mod.target == target]
@@ -117,7 +132,7 @@ def save_modifiers(modifiers, ability: str) -> list[Modifier]:
 
 
 __all__ = [
-    "facts_for", "passive_modifiers", "passive_proficiencies",
+    "facts_for", "passive_modifiers", "passive_proficiencies", "passive_defenses",
     "modifiers_for", "save_modifiers",
     "ScoreBonus", "score_bonuses", "score_bonus_of", "apply_score_bonuses",
 ]

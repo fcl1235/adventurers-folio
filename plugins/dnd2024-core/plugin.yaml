@@ -4,7 +4,7 @@ api: 1
 name:
   zh: D&D 2024 核心内容
   en: D&D 2024 Core Content
-version: 0.9.0
+version: 0.10.0
 requires: []
 provides:
   classes:
@@ -70,7 +70,86 @@ provides:
     - dnd2024.subclass.wizard.evoker
     - dnd2024.subclass.wizard.illusionist
   species: []
-  feats: []
+  feats:
+    - dnd2024.feat.ability_score_improvement
+    - dnd2024.feat.actor
+    - dnd2024.feat.alert
+    - dnd2024.feat.archery
+    - dnd2024.feat.athlete
+    - dnd2024.feat.blessed_warrior
+    - dnd2024.feat.blind_fighting
+    - dnd2024.feat.boon_of_combat_prowess
+    - dnd2024.feat.boon_of_dimensional_travel
+    - dnd2024.feat.boon_of_energy_resistance
+    - dnd2024.feat.boon_of_fate
+    - dnd2024.feat.boon_of_fortitude
+    - dnd2024.feat.boon_of_irresistible_offense
+    - dnd2024.feat.boon_of_recovery
+    - dnd2024.feat.boon_of_skill
+    - dnd2024.feat.boon_of_speed
+    - dnd2024.feat.boon_of_spell_recall
+    - dnd2024.feat.boon_of_the_night_spirit
+    - dnd2024.feat.boon_of_truesight
+    - dnd2024.feat.charger
+    - dnd2024.feat.chef
+    - dnd2024.feat.crafter
+    - dnd2024.feat.crossbow_expert
+    - dnd2024.feat.crusher
+    - dnd2024.feat.defense
+    - dnd2024.feat.defensive_duelist
+    - dnd2024.feat.druidic_warrior
+    - dnd2024.feat.dual_wielder
+    - dnd2024.feat.dueling
+    - dnd2024.feat.durable
+    - dnd2024.feat.elemental_adept
+    - dnd2024.feat.fey_touched
+    - dnd2024.feat.grappler
+    - dnd2024.feat.great_weapon_fighting
+    - dnd2024.feat.great_weapon_master
+    - dnd2024.feat.healer
+    - dnd2024.feat.heavily_armored
+    - dnd2024.feat.heavy_armor_master
+    - dnd2024.feat.inspiring_leader
+    - dnd2024.feat.interception
+    - dnd2024.feat.keen_mind
+    - dnd2024.feat.lightly_armored
+    - dnd2024.feat.lucky
+    - dnd2024.feat.mage_slayer
+    - dnd2024.feat.magic_initiate_cleric
+    - dnd2024.feat.magic_initiate_druid
+    - dnd2024.feat.magic_initiate_wizard
+    - dnd2024.feat.martial_weapon_training
+    - dnd2024.feat.medium_armor_master
+    - dnd2024.feat.moderately_armored
+    - dnd2024.feat.mounted_combatant
+    - dnd2024.feat.musician
+    - dnd2024.feat.observant
+    - dnd2024.feat.piercer
+    - dnd2024.feat.poisoner
+    - dnd2024.feat.polearm_master
+    - dnd2024.feat.protection
+    - dnd2024.feat.resilient
+    - dnd2024.feat.ritual_caster
+    - dnd2024.feat.savage_attacker
+    - dnd2024.feat.sentinel
+    - dnd2024.feat.shadow_touched
+    - dnd2024.feat.sharpshooter
+    - dnd2024.feat.shield_master
+    - dnd2024.feat.skill_expert
+    - dnd2024.feat.skilled
+    - dnd2024.feat.skulker
+    - dnd2024.feat.slasher
+    - dnd2024.feat.speedy
+    - dnd2024.feat.spell_sniper
+    - dnd2024.feat.tavern_brawler
+    - dnd2024.feat.telekinetic
+    - dnd2024.feat.telepathic
+    - dnd2024.feat.thrown_weapon_fighting
+    - dnd2024.feat.tough
+    - dnd2024.feat.two_weapon_fighting
+    - dnd2024.feat.unarmed_fighting
+    - dnd2024.feat.war_caster
+    - dnd2024.feat.weapon_master
   items:
     - dnd2024.item.armor.padded
     - dnd2024.item.armor.leather

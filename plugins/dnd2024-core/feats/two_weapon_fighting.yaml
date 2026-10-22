@@ -1,0 +1,12 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.two_weapon_fighting
+kind: fighting_style
+name: {zh: 双武器战斗, en: Two-Weapon Fighting}
+level: 0
+text:
+  zh: |-
+    当你因使用具有轻型属性的武器而发动额外攻击时，若你尚未把属性调整值加到该攻击的伤害上，则可将其加上。
+  en: |-
+    Two-Weapon Fighting — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.

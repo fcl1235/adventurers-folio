@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.boon_of_the_night_spirit
+kind: epic_boon
+name: {zh: 暗夜精魂之恩惠, en: Boon of the Night Spirit}
+level: 19
+text:
+  zh: |-
+    任选一项属性 +1（上限 30）。【融入阴影】当你处于微光或黑暗区域时，可用附赠动作使自己获得隐形状态；当你采取一个动作、附赠动作或反应后，该状态立即结束。【幽影形态】当你处于微光或黑暗区域时，你对除心灵与光耀之外的所有伤害具有抗性。
+  en: |-
+    You gain the following benefits. Ability Score Increase. Increase one ability score of your choice by 1, to a maximum of 30. Merge with Shadows. While within Dim Light or Darkness, you can give yourself the Invisible condition as a Bonus Action. The condition ends on you immediately after you take an action, a Bonus Action, or a Reaction. Shadowy form. While within Dim Light or Darkness, you have Resistance to all damage except Psychic and Radiant.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 30, label: {zh: 任选一项属性 +1（上限 30）, en: Increase one ability score by 1 (maximum 30)}}

@@ -492,6 +492,223 @@ def parse_subclass(data: Any, source: str = "", unlock_level: int = 3) -> Subcla
     )
 
 
+# --- 专长 -------------------------------------------------------------
+# 专长的「静态部分」直接写成 powers（与职业特性同一套原语），
+# 「玩家选择部分」写成 choices —— 选完才知道加成多少，不能在加载期算死。
+FEAT_KINDS = ("origin", "general", "fighting_style", "epic_boon")
+
+# 选择项的语义集合。故意封闭：内容里写一个内核不认识的 kind，
+# 界面上就会变成一个「选了没反应」的下拉框，比报错难查得多。
+CHOICE_KINDS = ("ability_boost", "save", "skill", "expertise", "resistance")
+# 这些 kind 的候选项由内核的全集决定，内容不必也不该重复列举
+SKILL_KEYS = (
+    "acrobatics", "animal_handling", "arcana", "athletics", "deception",
+    "history", "insight", "intimidation", "investigation", "medicine",
+    "nature", "perception", "performance", "persuasion", "religion",
+    "sleight_of_hand", "stealth", "survival",
+)
+CHOICE_UNIVERSE = {
+    "save": ("str", "dex", "con", "int", "wis", "cha"),
+    "ability_boost": ("str", "dex", "con", "int", "wis", "cha"),
+    "skill": SKILL_KEYS,
+    # 专精的候选与技能同一套；「必须是已熟练」由 Profile 的集合约束兜底
+    "expertise": SKILL_KEYS,
+}
+DAMAGE_TYPES = (
+    "acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic",
+    "piercing", "poison", "psychic", "radiant", "slashing", "thunder",
+)
+
+
+@dataclass(frozen=True)
+class FeatChoice:
+    """专长里「要玩家选一个」的那部分。
+
+    `count` 是选几项，`amount` 是每项加多少。属性提升的「一项 +2 或两项 +1」
+    用 `count: 2, amount: 1, repeat: true` 表达 —— 选同一项两次就是 +2。
+    这样「或者」不需要新语法，规则也不会漏掉一种模式。
+    """
+
+    id: str
+    kind: str
+    count: int = 1
+    amount: int = 0
+    cap: int = 0
+    # 候选项的**收窄**（如「力量或敏捷」）。空 = 用该 kind 的全集。
+    pool: tuple[str, ...] = ()
+    # 同一项可以选两次（「任选一项 +2」用两次 +1 表达，见 rules/feats.py）
+    repeat: bool = False
+    # 「选了这一项，属性值同时也 +N」（坚毅：选一项豁免，该属性 +1）。
+    # 只对 save 有意义 —— 它选中就是属性名。
+    boost: int = 0
+    boost_cap: int = 0
+    label: Text | None = None
+
+    def __post_init__(self) -> None:
+        if not self.id:
+            raise PluginError("专长的选择项缺 id")
+        if self.kind not in CHOICE_KINDS:
+            raise PluginError("专长选择项 %s 的 kind 不认识：%r（可选 %s）"
+                              % (self.id, self.kind, "/".join(CHOICE_KINDS)))
+        if self.count < 1:
+            raise PluginError("专长选择项 %s 的 count 至少是 1" % self.id)
+        if self.kind == "ability_boost":
+            if self.amount < 1:
+                raise PluginError("专长选择项 %s 是属性加值，必须写 amount" % self.id)
+            if self.cap and self.cap < 1:
+                raise PluginError("专长选择项 %s 的 cap 至少是 1" % self.id)
+        elif self.amount or self.cap:
+            raise PluginError("专长选择项 %s 不是属性加值，不该写 amount/cap" % self.id)
+        if self.boost:
+            if self.kind != "save":
+                raise PluginError("专长选择项 %s 的 boost 只对 save 有意义" % self.id)
+            if self.boost < 1:
+                raise PluginError("专长选择项 %s 的 boost 至少是 1" % self.id)
+            if self.boost_cap and self.boost_cap < 1:
+                raise PluginError("专长选择项 %s 的 boost_cap 至少是 1" % self.id)
+        if self.pool:
+            universe = set(self.options)
+            unknown = [item for item in self.pool if item not in universe]
+            if unknown:
+                raise PluginError("专长选择项 %s 的 from 里有不认识的项：%s"
+                                  % (self.id, ", ".join(unknown)))
+
+    @property
+    def options(self) -> tuple[str, ...]:
+        if self.kind == "resistance":
+            return self.pool or DAMAGE_TYPES
+        full = CHOICE_UNIVERSE.get(self.kind, ())
+        if not self.pool:
+            return full
+        # from 只做**收窄**：顺序按全集走，界面上的排列才稳定
+        return tuple(item for item in full if item in set(self.pool))
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {
+            "id": self.id, "kind": self.kind, "count": self.count,
+            "amount": self.amount, "cap": self.cap, "repeat": self.repeat,
+            "boost": self.boost, "boost_cap": self.boost_cap,
+            "options": list(self.options),
+            "label": self.label.get(locale) if self.label else "",
+        }
+
+
+def parse_feat_choice(data: Any, where: str) -> FeatChoice:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的 choices 每项必须是映射" % where)
+    if "id" not in data or "kind" not in data:
+        raise PluginError("%s 的 choices 每项必须写 id 与 kind" % where)
+    return FeatChoice(
+        id=str(data["id"]),
+        kind=str(data["kind"]),
+        count=int(data.get("count", 1)),
+        amount=int(data.get("amount", 0)),
+        cap=int(data.get("cap", 0)),
+        pool=tuple(str(item) for item in (data.get("from") or ())),
+        repeat=bool(data.get("repeat", False)),
+        boost=int(data.get("boost", 0)),
+        boost_cap=int(data.get("boost_cap", 0)),
+        label=Text.from_dict(data["label"], where="%s %s label" % (where, data["id"]))
+        if data.get("label") else None,
+    )
+
+
+@dataclass(frozen=True)
+class FeatDef:
+    """一个专长：静态原语（powers）+ 待选（choices）+ 选取前提。
+
+    专长与子职一样是**顶层内容**，不属于职业：`classes` 只用来表达
+    「这个专长只有某几个职业能拿」（战斗风格），不是归属关系。
+    """
+
+    id: str
+    name: Text
+    text: Text
+    kind: str = "general"
+    level: int = 0                      # 前提等级（0 = 无等级前提）
+    min_score: int = 0                  # 前提属性门槛（0 = 无属性前提）
+    abilities: tuple[str, ...] = ()      # 前提属性：这些里任意一项达标即可
+    feature: str | None = None           # 前提特性（如战斗风格）
+    classes: tuple[str, ...] = ()        # 只有这些职业能选（空 = 所有职业）
+    repeatable: bool = False
+    choices: tuple[FeatChoice, ...] = ()
+    powers: tuple[Power, ...] = ()
+    source: str = ""
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("专长 id 不合规范：%r" % (self.id,))
+        if self.kind not in FEAT_KINDS:
+            raise PluginError("专长 %s 的 kind 不认识：%r（可选 %s）"
+                              % (self.id, self.kind, "/".join(FEAT_KINDS)))
+        seen: set[str] = set()
+        for choice in self.choices:
+            key = "%s.%s" % (self.id, choice.id)
+            if key in seen:
+                raise PluginError("专长 %s 的选择项 id 重复：%s" % (self.id, choice.id))
+            seen.add(key)
+        for power in self.powers:
+            if power.id in seen:
+                raise PluginError("专长 %s 的特性 id 重复：%s" % (self.id, power.id))
+            seen.add(power.id)
+
+    def choice(self, choice_id: str) -> FeatChoice:
+        for item in self.choices:
+            if item.id == choice_id:
+                return item
+        raise PluginError("专长 %s 没有选择项 %s" % (self.id, choice_id))
+
+    def choice_keys(self) -> tuple[str, ...]:
+        """`Profile.choices` 里这个专长的键：`<专长 id>.<选择项 id>`。"""
+        return tuple("%s.%s" % (self.id, item.id) for item in self.choices)
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {
+            "id": self.id,
+            "name": self.name.get(locale),
+            "text": self.text.get(locale),
+            "kind": self.kind,
+            "level": int(self.level),
+            "abilities": list(self.abilities),
+            "min_score": int(self.min_score),
+            "classes": list(self.classes),
+            "repeatable": self.repeatable,
+            "choices": [item.to_dict(locale) for item in self.choices],
+            "powers": len(self.powers),
+        }
+
+
+def parse_feat(data: Any, source: str = "") -> FeatDef:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的专长定义必须是映射" % source)
+    for key in ("id", "name", "text"):
+        if key not in data:
+            raise PluginError("%s 的专长定义缺少 %s" % (source, key))
+    ident = str(data["id"])
+    abilities = tuple(str(item).lower() for item in (data.get("abilities") or ()))
+    bad = [item for item in abilities if item not in CHOICE_UNIVERSE["ability_boost"]]
+    if bad:
+        raise PluginError("%s 的前提属性不认识：%s" % (ident, ", ".join(bad)))
+    return FeatDef(
+        id=ident,
+        name=Text.from_dict(data["name"], where="%s name" % ident),
+        text=Text.from_dict(data["text"], where="%s text" % ident),
+        kind=str(data.get("kind", "general")),
+        level=int(data.get("level", 0)),
+        min_score=int(data.get("min_score", 13 if abilities else 0)),
+        abilities=abilities,
+        feature=data.get("feature"),
+        classes=tuple(str(item) for item in (data.get("classes") or ())),
+        repeatable=bool(data.get("repeatable", False)),
+        choices=tuple(parse_feat_choice(row, ident) for row in (data.get("choices") or ())),
+        powers=tuple(
+            parse_power(row, owner=ident, source=source)
+            for row in (data.get("powers") or ())
+        ),
+        source=source,
+    )
+
+
 def parse_cr_axis(data: Any) -> CrAxis | None:
     if data is None:
         return None
@@ -968,6 +1185,7 @@ class PluginContent:
     weapons: dict[str, WeaponDef] = field(default_factory=dict)
     spells: dict[str, SpellDef] = field(default_factory=dict)
     spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    feats: dict[str, FeatDef] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -985,6 +1203,7 @@ class ContentBundle:
     weapons: dict[str, WeaponDef] = field(default_factory=dict)
     spells: dict[str, SpellDef] = field(default_factory=dict)
     spell_lists: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    feats: dict[str, FeatDef] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -1048,9 +1267,22 @@ class ContentBundle:
             key=lambda item: item.id,
         ))
 
+    def feat(self, feat_id: str) -> FeatDef:
+        if feat_id not in self.feats:
+            raise PluginError("没有这个专长：%s（已加载：%s）"
+                              % (feat_id, ", ".join(sorted(self.feats)) or "无"))
+        return self.feats[feat_id]
+
+    def feats_of_kind(self, kind: str) -> tuple[FeatDef, ...]:
+        return tuple(sorted(
+            (item for item in self.feats.values() if item.kind == kind),
+            key=lambda item: item.id,
+        ))
+
     def stats(self) -> dict[str, Any]:
         return {
             "classes": len(self.classes),
+            "feats": len(self.feats),
             "subclasses": len(self.subclasses),
             "powers": len(self.book.ids()),
             "forms": len(self.forms),
@@ -1138,8 +1370,36 @@ def load_plugin(folder: str | Path) -> PluginContent:
 
     _load_items(base, result)
     _load_spells(base, result)
+    _load_feats(base, result)
     result.book.validate_augments()
     return result
+
+
+def _load_feats(base: Path, result: PluginContent) -> None:
+    """专长：一专长一文件（`feats/defense.yaml`）。
+
+    与职业/子职同一套原语，所以装载时只多一步「把 powers 塞进 PowerBook」——
+    专长的静态效果之后走的是完全相同的 modifier / effect 管道。
+    """
+    folder = base / "feats"
+    if not folder.exists():
+        return
+    for path in sorted(folder.glob("*.yaml")):
+        rel = "%s/feats/%s" % (base.name, path.name)
+        try:
+            feat = parse_feat(_read_yaml(path), source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if feat.id in result.feats:
+            result.errors.append("%s 的专长 id 重复：%s" % (rel, feat.id))
+            continue
+        result.feats[feat.id] = feat
+        for power in feat.powers:
+            try:
+                result.book.add(power)
+            except PluginError as exc:
+                result.errors.append(str(exc))
 
 
 def _load_spells(base: Path, result: PluginContent) -> None:
@@ -1272,6 +1532,11 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("法术表 %s 重复提供" % class_id)
                 continue
             bundle.spell_lists[class_id] = spells
+        for feat_id, feat in content.feats.items():
+            if feat_id in bundle.feats:
+                bundle.errors.append("专长 %s 重复提供" % feat_id)
+                continue
+            bundle.feats[feat_id] = feat
     _check_subclass_classes(bundle)
     _check_spell_lists(bundle)
     bundle.book.validate_augments()
@@ -1312,5 +1577,7 @@ __all__ = [
     "parse_resource", "parse_class", "parse_subclass", "parse_cr_axis", "parse_form",
     "parse_armor", "parse_weapon", "powers_at_level",
     "SpellDef", "parse_spell", "parse_spell_list", "lookup_dice",
+    "FeatDef", "FeatChoice", "parse_feat", "parse_feat_choice",
+    "FEAT_KINDS", "CHOICE_KINDS", "CHOICE_UNIVERSE", "DAMAGE_TYPES", "SKILL_KEYS",
     "load_plugin", "load_all",
 ]

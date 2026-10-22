@@ -25,11 +25,12 @@ from ..model.statblock import Abilities, Statblock
 from ..rules.actioneconomy import ActionEconomy, ActionType
 from ..rules.armor import Loadout, ac_inputs, loadout_for
 from ..rules.build import (
-    available_powers, build_actor, eligible_forms_for, morph_class_of,
-    owner_class_id, subclass_defs,
+    available_powers, build_actor, eligible_forms_for, feat_defs, feat_picks,
+    morph_class_of, owner_class_id, subclass_defs,
 )
 from ..rules.contributions import (
-    facts_for, modifiers_for, passive_modifiers, passive_proficiencies, save_modifiers,
+    facts_for, modifiers_for, passive_defenses, passive_modifiers,
+    passive_proficiencies, save_modifiers,
 )
 from ..rules.effects import EffectContext
 from ..rules.health import hit_dice_average
@@ -40,7 +41,8 @@ from ..rules.resolver import RefContext, Resolver, crit_text
 from ..rules.spellcasting import (
     casting_summary, spell_detail, spell_options,
 )
-from ..rules.scores import score_bonus_of
+from ..rules.feats import choice_prompt, prereq_report
+from ..rules.scores import bonus_totals, merge_bonuses, score_bonuses
 from ..rules.weapons import profiles_for
 from ..rules.powers import use_power as _use_power
 from ..session import LongRest, NewTurn, Regain, Session, ShortRest, TakeDamage, UsePower
@@ -48,6 +50,9 @@ from ..session import LongRest, NewTurn, Regain, Session, ShortRest, TakeDamage,
 VERSION = "0.3.0"
 
 ABILITY_KEYS = ("str", "dex", "con", "int", "wis", "cha")
+
+# 选单里的分组顺序：起源 → 通用 → 战斗风格 → 传奇恩惠
+FEAT_KIND_ORDER = ("origin", "general", "fighting_style", "epic_boon")
 
 
 # --- 内容 -------------------------------------------------------------
@@ -157,8 +162,14 @@ def new_character(
     name_en: str = "Unnamed Adventurer",
     actor_id: str = "pc.hero",
     subclass: str | None = None,
+    feats: Sequence[str] = (),
+    choices: Mapping[str, Sequence[str]] | None = None,
 ) -> Actor:
-    """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。"""
+    """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。
+
+    `choices` 是专长的「选完还要选什么」：键 `<专长 id>.<选择项 id>`，
+    值是被选中的项（如 `{"dnd2024.feat.ability_score_improvement.boost": ["dex", "dex"]}`）。
+    """
     return build_actor(
         content,
         class_id=class_id,
@@ -168,6 +179,8 @@ def new_character(
         name_en=name_en,
         actor_id=actor_id,
         subclass=subclass,
+        feats=tuple(feats),
+        choices={key: tuple(value) for key, value in (choices or {}).items()},
     )
 
 
@@ -220,7 +233,13 @@ def _ability_rows(actor: Actor, content: ContentBundle, morphed: bool = False) -
     所以变形时 `bonus` 一律报 0 —— 免得界面上出现「熊 19 力（+4 原始冠军）」。
     """
     top = actor.top()
-    bonus = {} if morphed else score_bonus_of(available_powers(content, actor))
+    if morphed:
+        bonus = {}
+    else:
+        bonus = bonus_totals(merge_bonuses(
+            score_bonuses(available_powers(content, actor)),
+            feat_picks(content, actor.profile).score,
+        ))
     return {
         key: {
             "score": top.statblock.abilities.score(key),
@@ -229,6 +248,77 @@ def _ability_rows(actor: Actor, content: ContentBundle, morphed: bool = False) -
         }
         for key in ABILITY_KEYS
     }
+
+
+def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list[dict]:
+    """专长块：每条专长 + 它还没选完的选择项。"""
+    profile = actor.profile
+    picks = feat_picks(content, profile)
+    tokens = set(profile.proficiencies if profile else ())
+    tokens |= passive_proficiencies(content, actor)
+    rows: list[dict] = []
+    for feat in feat_defs(content, profile):
+        choices = []
+        for choice in feat.choices:
+            key = "%s.%s" % (feat.id, choice.id)
+            picked = list(profile.choices.get(key, ())) if profile else []
+            options = list(choice.options)
+            if choice.kind == "expertise":
+                # 专精只能选已有熟练的技能 —— Profile 会校验，但选单不该给出非法项
+                options = [item for item in options if "skill.%s" % item in tokens]
+            choices.append({
+                "id": choice.id,
+                "key": key,
+                "label": choice_prompt(feat, choice, locale).get(locale),
+                "picked": picked,
+                "remaining": choice.count - len(picked),
+                "count": choice.count,
+                "options": options,
+            })
+        rows.append({
+            "id": feat.id,
+            "name": feat.name.get(locale),
+            "kind": feat.kind,
+            "level": int(feat.level),
+            "text": feat.text.get(locale),
+            "choices": choices,
+            "pending": any(row["key"] in picks.pending for row in choices),
+        })
+    return rows
+
+
+def feat_options(
+    content: ContentBundle,
+    actor: Actor | None = None,
+    kind: str | None = None,
+    locale: str = "zh",
+) -> dict:
+    """可选专长清单。`selectable` 已经按**硬前提**判过，前端只画不判断（C2 的边界）。"""
+    profile = actor.profile if actor else None
+    total = int(profile.total) if profile else MAX_TOTAL_LEVEL
+    class_ids = profile.class_ids if profile else ()
+    scores = ({key: actor.top().statblock.abilities.score(key) for key in ABILITY_KEYS}
+              if actor else None)
+    taken = set(profile.feats) if profile else set()
+    order = {name: index for index, name in enumerate(FEAT_KIND_ORDER)}
+    rows = []
+    for feat in content.feats.values():
+        if kind and feat.kind != kind:
+            continue
+        blocked = prereq_report(feat, total, class_ids, scores)
+        if feat.id in taken and not feat.repeatable:
+            blocked.append("已经选过（不可重复选取）")
+        rows.append({
+            "id": feat.id,
+            "name": feat.name.get(locale),
+            "kind": feat.kind,
+            "level": int(feat.level),
+            "selectable": not blocked,
+            "blocked": blocked,
+            "taken": feat.id in taken,
+        })
+    rows.sort(key=lambda row: (order.get(row["kind"], 99), row["level"], row["id"]))
+    return {"total_level": total, "count": len(rows), "feats": rows}
 
 
 def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") -> dict:
@@ -275,10 +365,20 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
 
     tokens = set(actor.profile.proficiencies) if actor.profile else set()
     tokens |= passive_proficiencies(content, actor)
+    ranged_bonus = 0 if morphed else resolver.bonus(
+        modifiers_for(mods, "attack.ranged")).total
     attack_profiles = profiles_for(actor, content.weapons, top.statblock.abilities,
-                                   resolver.ctx.prof_bonus, tokens)
+                                   resolver.ctx.prof_bonus, tokens,
+                                   ranged_bonus=ranged_bonus)
     attacks = [item.to_dict(locale) for item in attack_profiles]
     crit = resolver.crit_range(top, modifiers_for(mods, "attack.crit_min"))
+    senses = {}
+    for mode in ("darkvision", "blindsight", "tremorsense", "truesight"):
+        total = resolver.sense(top, mode, () if morphed else modifiers_for(mods, "sense.%s" % mode)).total
+        if total > 0:
+            senses[mode] = total
+    feat_resist, feat_immune = passive_defenses(content, actor)
+    resistances = sorted(feat_resist | set(profile.resistances if profile else ()))
 
     powers = []
     for power in available_powers(content, actor):
@@ -311,6 +411,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "ac": {"total": ac.total, "detail": ac.describe()},
         "initiative": resolver.ability_check(top, "dex").total,
         "speed": speeds,
+        "senses": senses,
+        "resistances": resistances,
+        "immunities": sorted(feat_immune),
         "abilities": _ability_rows(actor, content, morphed),
         "gear": loadout.to_dict(locale),
         "saves": {key: {"total": value.total, "detail": value.describe(),
@@ -346,6 +449,8 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
             casting.append(casting_summary(content, actor, entry.class_id,
                                            entry.class_level, resolver, locale))
         sheet["spellcasting"] = casting
+        sheet["feats"] = _feat_rows(content, actor, locale)
+        sheet["choices_needed"] = list(feat_picks(content, profile).pending)
         sheet["classes"] = [
             {"id": entry.class_id, "class_level": int(entry.class_level),
              "name": content.classes[entry.class_id].name.get(locale)

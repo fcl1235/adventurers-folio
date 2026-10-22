@@ -42,7 +42,21 @@ def _character(args):
         bundle, args.cls, args.level, _scores(args),
         name_zh=args.zh, name_en=args.en,
         subclass=getattr(args, "subclass", None),
+        feats=tuple(getattr(args, "feat", None) or ()),
+        choices=_choices(getattr(args, "pick", None)),
     )
+
+
+def _choices(pairs) -> dict[str, list[str]]:
+    """`--pick <key>=a,b` → {key: [a, b]}。重复的键按出现顺序拼起来。"""
+    found: dict[str, list[str]] = {}
+    for raw in pairs or ():
+        key, _, value = raw.partition("=")
+        if not key or not value:
+            raise SystemExit("--pick 的写法是 <key>=<a,b,...>，实际：%r" % raw)
+        found.setdefault(key.strip(), []).extend(
+            [item.strip() for item in value.split(",") if item.strip()])
+    return found
 
 
 def cmd_version(_args) -> int:
@@ -140,6 +154,44 @@ def cmd_spell(args) -> int:
     if data["damage"]:
         print("伤害 %s（%s）" % (data["damage_at_base"], data["damage_type"]))
     print(data["text"])
+    return 0
+
+
+def cmd_feats(args) -> int:
+    """专长目录：按类别分组，标出 19 级恩惠这类等级门槛。"""
+    bundle = api.load_content(args.root)
+    options = api.feat_options(bundle, kind=args.kind or None, locale=args.lang)
+    current = None
+    labels = {"origin": "起源", "general": "通用",
+              "fighting_style": "战斗风格", "epic_boon": "传奇恩惠"}
+    for row in options["feats"]:
+        if row["kind"] != current:
+            current = row["kind"]
+            print("%s（%d 条）" % (labels.get(current, current),
+                                 len([item for item in options["feats"]
+                                      if item["kind"] == current])))
+        level = ("L%-2d" % row["level"]) if row["level"] else "  - "
+        print("  %-46s %s %s" % (row["id"], level, row["name"]))
+    print("共 %d 条" % options["count"])
+    return 0
+
+
+def cmd_feat(args) -> int:
+    """看一个专长的完整定义：前提、选择项、静态原语。"""
+    bundle = api.load_content(args.root)
+    feat = bundle.feat(args.feat)
+    data = feat.to_dict(args.lang)
+    print("%s（%s）" % (data["name"], data["id"]))
+    print("类别 %s · 前提等级 %s · 可重复 %s"
+          % (data["kind"], data["level"] or "无", "是" if data["repeatable"] else "否"))
+    if data["classes"]:
+        print("限定职业 %s" % "、".join(data["classes"]))
+    print(data["text"])
+    for choice in data["choices"]:
+        print("  选择项 %-10s %-14s 选 %d 项  候选 %s"
+              % (choice["id"], choice["kind"], choice["count"],
+                 "/".join(choice["options"]) or "见规则"))
+    print("静态能力 %d 条" % data["powers"])
     return 0
 
 
@@ -242,6 +294,10 @@ def cmd_play(args) -> int:
 def _add_character_args(parser) -> None:
     parser.add_argument("--class", dest="cls", default="dnd2024.class.fighter")
     parser.add_argument("--subclass", default=None, help="子职 id（如 dnd2024.subclass.fighter.champion）")
+    parser.add_argument("--feat", action="append", default=None,
+                        help="专长 id，可重复（如 --feat dnd2024.feat.tough）")
+    parser.add_argument("--pick", action="append", default=None,
+                        help="专长选择项的值：<专长 id>.<选择项>=a,b（可重复）")
     parser.add_argument("--level", type=int, default=1)
     parser.add_argument("--zh", default="无名冒险者")
     parser.add_argument("--en", default="Unnamed Adventurer")
@@ -274,6 +330,19 @@ def main(argv=None) -> int:
     use.add_argument("--form", default=None, help="变形类能力要选的形态 id")
     use.add_argument("--seed", type=int, default=None)
     use.set_defaults(func=cmd_use)
+
+    feats = sub.add_parser("feats", help="列出专长（可按类别过滤）")
+    feats.add_argument("--kind", default=None,
+                       choices=["origin", "general", "fighting_style", "epic_boon"])
+    feats.add_argument("--root", default="plugins")
+    feats.add_argument("--lang", default="zh", choices=["zh", "en"])
+    feats.set_defaults(func=cmd_feats)
+
+    feat = sub.add_parser("feat", help="看一个专长的定义")
+    feat.add_argument("--feat", required=True)
+    feat.add_argument("--root", default="plugins")
+    feat.add_argument("--lang", default="zh", choices=["zh", "en"])
+    feat.set_defaults(func=cmd_feat)
 
     spells = sub.add_parser("spells", help="列出法术（可按职业与环级过滤）")
     spells.add_argument("--class", dest="cls", default=None)

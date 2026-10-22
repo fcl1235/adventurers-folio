@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.boon_of_combat_prowess
+kind: epic_boon
+name: {zh: 英勇战斗之恩惠, en: Boon of Combat Prowess}
+level: 19
+text:
+  zh: |-
+    任选一项属性 +1（上限 30）。【无匹瞄准】当你的一次攻击检定失手时，你可以改为命中。使用此增益后，直到你下一回合开始前不能再使用。
+  en: |-
+    You gain the following benefits. Ability Score Increase. Increase one ability score of your choice by 1, to a maximum of 30. Peerless Aim. When you miss with an attack roll, you can hit instead. Once you use this benefit, you can't use it again until the start of your next turn.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 30, label: {zh: 任选一项属性 +1（上限 30）, en: Increase one ability score by 1 (maximum 30)}}

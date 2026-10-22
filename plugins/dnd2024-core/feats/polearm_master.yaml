@@ -1,0 +1,16 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.polearm_master
+kind: general
+name: {zh: 长柄武器大师, en: Polearm Master}
+level: 4
+abilities: [str, dex]
+min_score: 13
+text:
+  zh: |-
+    力量或敏捷 +1（上限 20）。【长柄打击】当你采取攻击动作并以长棍、矛，或具有重型与触及属性的武器攻击后，可用附赠动作以该武器的另一端发动一次近战攻击，造成 1d4 钝击伤害。【反应打击】当你持用长棍、矛，或具有重型与触及属性的武器时，若有生物进入该武器的触及范围，你可以用反应对其发动一次近战攻击。
+  en: |-
+    Polearm Master — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str, dex]}

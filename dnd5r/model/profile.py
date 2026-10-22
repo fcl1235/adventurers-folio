@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Iterable, Mapping
 
 from ..kernel.errors import RuleError
@@ -46,6 +46,9 @@ class Profile:
     languages: frozenset[str] = frozenset()
     feats: tuple[str, ...] = ()
     choices: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    # 伤害抗性（传奇恩惠「能量抗性」这类）。这里存**伤害类型**（fire / cold），
+    # 不存内容 id —— 它是规则词汇，不是某本书里的条目。
+    resistances: frozenset[str] = frozenset()
 
     def __post_init__(self) -> None:
         if not self.classes:
@@ -71,15 +74,7 @@ class Profile:
         return cls(classes=(ClassEntry.make(class_id, class_level),))
 
     def add_class(self, class_id: str, class_level: int) -> "Profile":
-        return Profile(
-            classes=self.classes + (ClassEntry.make(class_id, class_level),),
-            subclasses=self.subclasses,
-            proficiencies=self.proficiencies,
-            expertise=self.expertise,
-            languages=self.languages,
-            feats=self.feats,
-            choices=self.choices,
-        )
+        return replace(self, classes=self.classes + (ClassEntry.make(class_id, class_level),))
 
     # --- 等级 ---------------------------------------------------------
     @property
@@ -109,15 +104,7 @@ class Profile:
         """挂上子职（幂等）。「同一职业只能有一个子职」由内容层校验。"""
         if subclass_id in self.subclasses:
             return self
-        return Profile(
-            classes=self.classes,
-            subclasses=self.subclasses + (subclass_id,),
-            proficiencies=self.proficiencies,
-            expertise=self.expertise,
-            languages=self.languages,
-            feats=self.feats,
-            choices=self.choices,
-        )
+        return replace(self, subclasses=self.subclasses + (subclass_id,))
 
     def without_subclass(self, subclass_id: str | None = None) -> "Profile":
         """摘掉一个子职；不给 id 就全摘（改职业时用）。"""
@@ -126,30 +113,27 @@ class Profile:
         )
         if keep == self.subclasses:
             return self
-        return Profile(
-            classes=self.classes,
-            subclasses=keep,
-            proficiencies=self.proficiencies,
-            expertise=self.expertise,
-            languages=self.languages,
-            feats=self.feats,
-            choices=self.choices,
-        )
+        return replace(self, subclasses=keep)
 
     def has_subclass(self, subclass_id: str) -> bool:
         return subclass_id in self.subclasses
 
     def with_proficiencies(self, add: Iterable[str] = (), remove: Iterable[str] = ()) -> "Profile":
         new = (set(self.proficiencies) | set(add)) - set(remove)
-        return Profile(
-            classes=self.classes,
-            subclasses=self.subclasses,
+        return replace(
+            self,
             proficiencies=frozenset(new),
             expertise=frozenset(set(self.expertise) - set(remove)),
-            languages=self.languages,
-            feats=self.feats,
-            choices=self.choices,
         )
+
+    def with_feats(self, feats: Iterable[str]) -> "Profile":
+        return replace(self, feats=tuple(feats))
+
+    def with_choices(self, choices: Mapping[str, tuple[str, ...]]) -> "Profile":
+        return replace(self, choices=dict(choices))
+
+    def with_resistances(self, add: Iterable[str] = ()) -> "Profile":
+        return replace(self, resistances=self.resistances | frozenset(add))
 
     def to_dict(self) -> dict:
         """只写事实，总等级不写（C5）。"""
@@ -161,6 +145,7 @@ class Profile:
             "languages": sorted(self.languages),
             "feats": list(self.feats),
             "choices": {key: list(value) for key, value in self.choices.items()},
+            "resistances": sorted(self.resistances),
         }
 
     @classmethod
@@ -181,6 +166,7 @@ class Profile:
             languages=frozenset(data.get("languages", ())),
             feats=tuple(data.get("feats", ())),
             choices={key: tuple(value) for key, value in (data.get("choices") or {}).items()},
+            resistances=frozenset(data.get("resistances", ())),
         )
 
 

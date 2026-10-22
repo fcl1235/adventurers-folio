@@ -1,0 +1,12 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.alert
+kind: origin
+name: {zh: 警觉, en: Alert}
+level: 0
+text:
+  zh: |-
+    先攻检定 +熟练加值; 你掷先攻后可与一名自愿盟友交换先攻顺序
+  en: |-
+    You gain the following benefits. Initiative Proficiency. When you roll Initiative, you can add your Proficiency Bonus to the roll. Initiative Swap. Immediately after you roll Initiative, you can swap your Initiative with the Initiative of one willing ally in the same combat. You can't make this swap if you or the ally has the Incapacitated condition.

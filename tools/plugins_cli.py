@@ -44,16 +44,21 @@ def load_yaml(path: Path) -> Any:
         raise PluginError("%s 不是合法 YAML：%s" % (path, exc))
 
 
-def walk_entries(node: Any, where: str, result: CheckResult, rel: str) -> None:
-    """递归扫描内容条目：校验 id、收集双语文案。"""
+def walk_entries(node: Any, where: str, result: CheckResult, rel: str,
+                 local: bool = False) -> None:
+    """递归扫描内容条目：校验 id、收集双语文案。
+
+    `local=True` 表示这一段里的 id 只是**条目内部**的编号（专长的 choices），
+    不参与全局唯一性与格式校验 —— 否则 `id: boost` 会被当成内容 id 报错。
+    """
     if isinstance(node, list):
         for index, item in enumerate(node):
-            walk_entries(item, "%s[%d]" % (where, index), result, rel)
+            walk_entries(item, "%s[%d]" % (where, index), result, rel, local)
         return
     if not isinstance(node, Mapping):
         return
 
-    if "id" in node:
+    if "id" in node and not local:
         ident = str(node["id"])
         if not is_valid(ident):
             result.issues.append("%s: id 不合规范 %r" % (rel, ident))
@@ -72,7 +77,8 @@ def walk_entries(node: Any, where: str, result: CheckResult, rel: str) -> None:
 
     for key, value in node.items():
         if isinstance(value, (Mapping, list)):
-            walk_entries(value, "%s.%s" % (where, key), result, rel)
+            walk_entries(value, "%s.%s" % (where, key), result, rel,
+                         local or key == "choices")
 
 
 def check_root(root: str | Path, with_terms: bool = False) -> CheckResult:

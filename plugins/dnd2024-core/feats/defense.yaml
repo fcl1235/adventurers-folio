@@ -1,0 +1,24 @@
+# hand-edited 手写：条件写在 modifier 的 when 上（unarmored: false = 穿着护甲），
+# 生成器只会写「ac +1」，会把无甲的人也 +1 上去。
+id: dnd2024.feat.defense
+kind: fighting_style
+name: {zh: 防御, en: Defense}
+level: 0
+feature: Fighting Style
+text:
+  zh: |-
+    当你穿着轻甲、中甲或重甲时，你的 AC +1。
+  en: |-
+    While you're wearing Light, Medium, or Heavy armor, you gain a +1 bonus to Armor Class.
+powers:
+  - id: dnd2024.feat.defense.ac
+    name: {zh: 防御, en: Defense}
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        穿着护甲时 AC +1（无甲时无效）。
+      en: |-
+        +1 to Armor Class while wearing armor (no benefit while unarmored).
+    effects:
+      - grant_modifier: {target: ac, value: 1, when: {unarmored: false}}

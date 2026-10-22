@@ -257,17 +257,9 @@ class GrantProficiency(Effect):
 
 
 def _with_languages(profile, extra):
-    from ...model.profile import Profile
+    from dataclasses import replace
 
-    return Profile(
-        classes=profile.classes,
-        subclasses=profile.subclasses,
-        proficiencies=profile.proficiencies,
-        expertise=profile.expertise,
-        languages=frozenset(set(profile.languages) | set(extra)),
-        feats=profile.feats,
-        choices=profile.choices,
-    )
+    return replace(profile, languages=frozenset(set(profile.languages) | set(extra)))
 
 
 @dataclass(frozen=True, slots=True)

@@ -72,6 +72,17 @@ def score_bonuses(powers: Iterable[Power]) -> tuple[ScoreBonus, ...]:
     return tuple(found)
 
 
+def merge_bonuses(*groups: Iterable[ScoreBonus]) -> tuple[ScoreBonus, ...]:
+    """合并多组加值并**重新排序**（先窄后宽）。
+
+    职业给的与专长给的分开收集，合并时必须重排一次：压轴（25）与传奇恩惠（30）
+    来自两处，各排各的会把「先顶到 25 再 +1」算坏。
+    """
+    found = [bonus for group in groups for bonus in group]
+    found.sort(key=lambda item: (item.limit, item.ability))
+    return tuple(found)
+
+
 def apply_score_bonuses(abilities: Abilities, bonuses: Iterable[ScoreBonus]) -> Abilities:
     """把加成落成新属性值。传进来的顺序必须已经是「先窄后宽」。"""
     scores = dict(abilities.scores)
@@ -80,12 +91,19 @@ def apply_score_bonuses(abilities: Abilities, bonuses: Iterable[ScoreBonus]) -> 
     return Abilities.of(**scores)
 
 
-def score_bonus_of(powers: Iterable[Power]) -> dict[str, int]:
-    """给界面看的「这一级白给了多少属性」：属性 → 累计加值（不含截断）。"""
+def bonus_totals(bonuses: Iterable[ScoreBonus]) -> dict[str, int]:
+    """给界面看的「白给了多少属性」：属性 → 累计加值（不含截断）。"""
     totals: dict[str, int] = {}
-    for bonus in score_bonuses(powers):
+    for bonus in bonuses:
         totals[bonus.ability] = totals.get(bonus.ability, 0) + bonus.amount
     return totals
 
 
-__all__ = ["ScoreBonus", "score_bonuses", "apply_score_bonuses", "score_bonus_of"]
+def score_bonus_of(powers: Iterable[Power]) -> dict[str, int]:
+    return bonus_totals(score_bonuses(powers))
+
+
+__all__ = [
+    "ScoreBonus", "score_bonuses", "merge_bonuses", "apply_score_bonuses",
+    "score_bonus_of", "bonus_totals",
+]

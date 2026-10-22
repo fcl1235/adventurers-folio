@@ -148,6 +148,9 @@ class AttackProfile:
     mastery: str
     off_hand: bool = False
     disadvantage: bool = False
+    # 来自能力的额外攻击加值（箭术 +2）。单列一项，攻击总值里已经加过，
+    # 列出来是为了让界面能说明「+5 = +3 敏捷 +2 熟练 +2 箭术」里的最后那一项。
+    misc: int = 0
 
     @property
     def damage_total_hint(self) -> str:
@@ -169,6 +172,7 @@ class AttackProfile:
             "mastery": self.mastery,
             "off_hand": self.off_hand,
             "disadvantage": self.disadvantage,
+            "misc": self.misc,
         }
 
 
@@ -182,22 +186,25 @@ def profile(
     tokens: Iterable[str] = (),
     off_hand: bool = False,
     two_handed: bool = False,
+    misc: int = 0,
 ) -> AttackProfile:
-    """把武器 + 属性 + 熟练算成一次攻击。"""
+    """把武器 + 属性 + 熟练（+ 能力给的额外加值）算成一次攻击。"""
     tokens = tuple(tokens)
+    attack_extra = int(misc)
     ability = attack_ability(weapon, abilities) if weapon is not None else "str"
     return AttackProfile(
         weapon_id=weapon.id if weapon is not None else "unarmed",
         name=weapon.name if weapon is not None else UNARMED_NAME,
         ability=ability,
         proficient=proficient(weapon, tokens),
-        attack=attack_modifier(weapon, abilities, prof_bonus, tokens),
+        attack=attack_modifier(weapon, abilities, prof_bonus, tokens) + attack_extra,
         damage=damage_dice(weapon, two_handed=two_handed and not off_hand),
         damage_bonus=damage_modifier(weapon, abilities, off_hand=off_hand),
         damage_type=damage_type(weapon),
         mastery=weapon.mastery if weapon is not None else "",
         off_hand=off_hand,
         disadvantage=heavy_penalty(weapon, abilities),
+        misc=attack_extra,
     )
 
 
@@ -220,6 +227,8 @@ def profiles_for(
     abilities: Abilities,
     prof_bonus: int,
     tokens: Iterable[str] = (),
+    ranged_bonus: int = 0,
+    melee_bonus: int = 0,
 ) -> tuple[AttackProfile, ...]:
     """当前这一身能打出的攻击。没拿武器就是徒手打击。
 
@@ -228,14 +237,23 @@ def profiles_for(
     """
     main, off = equipped_weapons(actor, weapons)
     tokens = tuple(tokens)
+
+    def bonus_for(weapon: WeaponLike | None) -> int:
+        """远程加值只给远程武器，近战加值只给近战（徒手算近战）。"""
+        if weapon is not None and is_ranged(weapon):
+            return int(ranged_bonus)
+        return int(melee_bonus)
+
     if main is None and off is None:
-        return (profile(None, abilities, prof_bonus, tokens),)
+        return (profile(None, abilities, prof_bonus, tokens, misc=bonus_for(None)),)
     found: list[AttackProfile] = []
     two_handed = main is not None and has_property(main, "versatile") and off is None
     if main is not None:
-        found.append(profile(main, abilities, prof_bonus, tokens, two_handed=two_handed))
+        found.append(profile(main, abilities, prof_bonus, tokens, two_handed=two_handed,
+                             misc=bonus_for(main)))
     if off is not None:
-        found.append(profile(off, abilities, prof_bonus, tokens, off_hand=True))
+        found.append(profile(off, abilities, prof_bonus, tokens, off_hand=True,
+                             misc=bonus_for(off)))
     return tuple(found)
 
 

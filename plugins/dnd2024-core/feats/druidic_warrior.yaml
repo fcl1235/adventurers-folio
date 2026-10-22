@@ -1,0 +1,13 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.druidic_warrior
+kind: fighting_style
+name: {zh: 德鲁伊教战士, en: Druidic Warrior}
+level: 0
+classes: [ranger]
+text:
+  zh: |-
+    你习得两道你选择的德鲁伊戏法（推荐神导术与点点星芒）。这些戏法对你视为游侠法术，其施法属性为感知。每当你获得一个游侠等级时，你可以将其中的一道戏法替换为另一道你选择的德鲁伊戏法。
+  en: |-
+    Druidic Warrior — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.

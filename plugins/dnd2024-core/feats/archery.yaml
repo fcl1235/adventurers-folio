@@ -1,0 +1,25 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.archery
+kind: fighting_style
+name: {zh: 箭术, en: Archery}
+level: 0
+text:
+  zh: |-
+    使用远程武器进行的攻击检定 +2。
+  en: |-
+    You gain a +2 bonus to attack rolls you make with Ranged weapons.
+
+powers:
+  - id: dnd2024.feat.archery.ranged
+    name: {zh: 箭术, en: Archery}
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        远程武器攻击检定 +2。
+      en: |-
+        You gain a +2 bonus to attack rolls you make with Ranged weapons.
+    effects:
+      - grant_modifier: {target: attack.ranged, value: 2}

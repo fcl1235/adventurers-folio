@@ -1,0 +1,16 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.observant
+kind: general
+name: {zh: 观察力, en: Observant}
+level: 4
+abilities: [int, wis]
+min_score: 13
+text:
+  zh: |-
+    智力或感知 +1（上限 20）。【敏锐观察者】选择一项技能：洞悉、调查或察觉。若你尚无该技能熟练，则获得熟练；若你已有熟练，则获得专精（熟练加值加倍）。【快速搜索】你可以用附赠动作采取搜索动作。
+  en: |-
+    Observant — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [int, wis]}

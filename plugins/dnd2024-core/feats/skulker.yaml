@@ -1,0 +1,16 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.skulker
+kind: general
+name: {zh: 隐伏者, en: Skulker}
+level: 4
+abilities: [dex]
+min_score: 13
+text:
+  zh: |-
+    敏捷 +1（上限 20）。【盲视】你获得 10 尺盲视。【战场迷雾】战斗中，你作为隐匿动作的一部分进行敏捷（隐匿）检定时具有优势。【狙击】当你在隐藏状态下进行攻击检定且该次攻击失手时，该攻击不会暴露你的位置。
+  en: |-
+    Skulker — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [dex]}

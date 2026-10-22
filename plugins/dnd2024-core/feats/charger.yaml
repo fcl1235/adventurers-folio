@@ -1,0 +1,16 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.charger
+kind: general
+name: {zh: 冲锋手, en: Charger}
+level: 4
+abilities: [str, dex]
+min_score: 13
+text:
+  zh: |-
+    力量或敏捷 +1（上限 20）。【强化疾走】你采取疾走动作时，该动作期间你的速度 +10 尺。【冲锋攻击】若你在本回合以攻击动作进行近战攻击前，先朝目标直线移动至少 10 尺，且该攻击命中，则选择一项效果：该次攻击的伤害掷骰 +1d8；或将该目标推离至多 10 尺（目标体型不得比你大一级以上）。每回合只能使用一次。
+  en: |-
+    Charger — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str, dex]}

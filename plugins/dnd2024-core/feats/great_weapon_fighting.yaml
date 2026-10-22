@@ -1,0 +1,12 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.great_weapon_fighting
+kind: fighting_style
+name: {zh: 巨武器战斗, en: Great Weapon Fighting}
+level: 0
+text:
+  zh: |-
+    当你用双手握持的近战武器进行攻击并掷伤害时，可将伤害骰上的 1 或 2 视为 3；该武器须具有双手或两用（Versatile）属性。
+  en: |-
+    When you roll damage for an attack you make with a Melee weapon that you are holding with two hands, you can treat any 1 or 2 on a damage die as a 3. The weapon must have the Two-Handed or Versatile property to gain this benefit.

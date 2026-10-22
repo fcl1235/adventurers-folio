@@ -1,0 +1,21 @@
+# hand-edited 手写：属性提升是「一项 +2 或两项 +1」，用 repeat 让同一项可以选两次，
+# 所以一个 choice 就够，不需要给语法加「或者」。
+id: dnd2024.feat.ability_score_improvement
+kind: general
+name: {zh: 属性值提升, en: Ability Score Improvement}
+level: 4
+repeatable: true
+text:
+  zh: |-
+    任选一项属性值 +2，或任选两项属性值各 +1。本专长不能使属性值超过 20。可重复选取。
+  en: |-
+    Increase one ability score of your choice by 2, or increase two ability scores of your choice by 1. This feat can't increase an ability score above 20.
+choices:
+  # 两次 +1 = 一项 +2：选同一项两次就是 +2，选两项就是各 +1
+  - id: boost
+    kind: ability_boost
+    count: 2
+    amount: 1
+    cap: 20
+    repeat: true
+    label: {zh: 选两项属性各 +1（同一项选两次即 +2，上限 20）, en: Two +1 increases (pick the same ability twice for +2, maximum 20)}

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from ..content import ClassDef, ContentBundle, SubclassDef
+from ..content import ClassDef, ContentBundle, FeatDef, SubclassDef
 from ..kernel.errors import RuleError
 from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
@@ -18,12 +18,13 @@ from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
 from ..model.resources import Pool, PoolKind, Refresh
 from ..model.statblock import Abilities, Statblock
+from .feats import collect_picks, hard_problems
 from .health import hit_dice_pool, hit_points_max
 from .modifiers import resolve as resolve_modifiers
 from .morph import eligible_forms
 from .powers import Power
 from .progression import proficiency_bonus
-from .scores import apply_score_bonuses, score_bonuses
+from .scores import apply_score_bonuses, merge_bonuses, score_bonuses
 
 
 def _ref_map(
@@ -50,6 +51,49 @@ def subclass_defs(bundle: ContentBundle, profile: Profile | None) -> tuple[Subcl
         bundle.subclasses[item] for item in profile.subclasses
         if item in bundle.subclasses
     )
+
+
+def feat_defs(bundle: ContentBundle, profile: Profile | None) -> tuple[FeatDef, ...]:
+    """档案里登记的专长（缺插件时跳过，理由同子职）。"""
+    if profile is None:
+        return ()
+    return tuple(bundle.feats[item] for item in profile.feats if item in bundle.feats)
+
+
+def feat_picks(bundle: ContentBundle, profile: Profile | None, locale: str = "zh"):
+    """档案里专长的选择结果。**派生值的唯一入口** —— 别在别处重算一次。"""
+    return collect_picks(feat_defs(bundle, profile), profile.choices if profile else {}, locale)
+
+
+def _check_feats(
+    bundle: ContentBundle,
+    feats: tuple[str, ...],
+    total: TotalLevel,
+    class_ids: tuple[str, ...],
+    scores: Mapping[str, int],
+) -> tuple[FeatDef, ...]:
+    """选取前提 —— 硬前提在这里拒绝，软前提（属性）留给选单提示。
+
+    「可重复选取」由内容声明（`repeatable: true`，如属性提升）：只有这类专长
+    允许登记两次。别的专长出现两次是数据错误，不是「玩家贪心」。
+    """
+    seen: dict[str, int] = {}
+    for feat_id in feats:
+        seen[feat_id] = seen.get(feat_id, 0) + 1
+    for feat_id, count in sorted(seen.items()):
+        if count > 1 and not bundle.feat(feat_id).repeatable:
+            raise RuleError("专长「%s」不可重复选取，却登记了 %d 次"
+                            % (bundle.feat(feat_id).name.get("zh"), count))
+    feats = tuple(dict.fromkeys(feats))      # 重复登记只建一次特性，加值按次数另算
+    found: list[FeatDef] = []
+    for feat_id in feats:
+        feat = bundle.feat(feat_id)
+        problems = hard_problems(feat, int(total), class_ids)
+        if problems:
+            raise RuleError("专长「%s」不满足前提：%s"
+                            % (feat.name.get("zh"), "；".join(problems)))
+        found.append(feat)
+    return tuple(found)
 
 
 def _hp_bonus(powers, target: str, ref: Mapping[str, Any]) -> int:
@@ -80,8 +124,15 @@ def build_actor(
     kind: ActorKind = ActorKind.PC,
     extra_proficiencies: tuple[str, ...] = (),
     subclass: str | None = None,
+    feats: tuple[str, ...] = (),
+    choices: Mapping[str, tuple[str, ...]] | None = None,
 ) -> Actor:
-    """建一个单职业角色。兼职在 P3 的 Session 里做（要合并位表与熟练来源）。"""
+    """建一个单职业角色。兼职在 P3 的 Session 里做（要合并位表与熟练来源）。
+
+    专长与子职一样是**玩家选择**：`feats` 是内容 id，`choices` 是「选了还要选什么」
+    （`<专长 id>.<选择项 id>` → 选中的项）。选不完不报错，留在 `feat_picks().pending` 里
+    给界面当待办；选错了当场抛 RuleError。
+    """
     class_def: ClassDef = bundle.class_def(class_id)
     level = as_class_level(class_level)
     total = TotalLevel(int(level))
@@ -97,7 +148,20 @@ def build_actor(
     # 必须在算 HP 之前：加值改了体质调整值，HP 上限跟着变，否则 20 级会少 40 点。
     powers = class_def.powers_at(level)
     all_powers = tuple(powers) + tuple(p for p in sub_powers if p not in powers)
-    bonuses = score_bonuses(all_powers)
+    # 专长：硬前提（等级/职业）不满足就拒绝；选择项先结算，属性加值要赶在 HP 之前
+    picked_choices = dict(choices or {})
+    chosen_feats = tuple(feats)
+    # 专长前提看**总等级**（兼职也算）：19 级恩惠不会因为某个职业只有 3 级就拒绝
+    feat_defs_ = _check_feats(bundle, chosen_feats, total, (class_id,), scores)
+    feat_powers = tuple(p for feat in feat_defs_ for p in feat.powers)
+    all_powers = all_powers + tuple(p for p in feat_powers if p not in all_powers)
+    # 可重复选取的专长（属性提升）按登记次数结算加值：登记两次就是两轮选择
+    repeats = {feat.id: chosen_feats.count(feat.id) for feat in feat_defs_}
+    picks = collect_picks(
+        [feat for feat in feat_defs_ for _ in range(repeats.get(feat.id, 1))],
+        picked_choices,
+    )
+    bonuses = merge_bonuses(score_bonuses(all_powers), picks.score)
     abilities = apply_score_bonuses(Abilities.of(**dict(scores)), bonuses)
 
     con_mod = abilities.mod("con")
@@ -116,7 +180,12 @@ def build_actor(
         subclasses=(sub.id,) if sub is not None else (),
         proficiencies=(frozenset(saves)
                        | frozenset(class_def.proficiencies)
-                       | frozenset(extra_proficiencies)),
+                       | frozenset(extra_proficiencies)
+                       | picks.proficiencies),
+        expertise=picks.expertise,
+        feats=chosen_feats,
+        choices=picked_choices,
+        resistances=picks.resistances,
     )
 
     actor = Actor(
@@ -174,6 +243,9 @@ def available_powers(bundle: ContentBundle, actor: Actor):
         for sub in subclass_defs(bundle, actor.profile):
             if sub.class_id == entry.class_id:
                 found.extend(sub.powers_at(entry.class_level))
+    # 专长没有等级门槛（等级是**选取前提**，已在建角色时判过），全部生效
+    for feat in feat_defs(bundle, actor.profile):
+        found.extend(feat.powers)
     return tuple(sorted(found, key=lambda item: (item.owner, int(item.level), item.id)))
 
 

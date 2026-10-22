@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.shield_master
+kind: general
+name: {zh: 盾牌大师, en: Shield Master}
+level: 4
+text:
+  zh: |-
+    力量 +1（上限 20）。【盾击】若你在攻击动作中攻击 5 尺内的一个生物，并以近战武器命中，且你装备着盾牌，则可立即用盾牌撞击该目标，迫使其进行力量豁免，DC = 8 + 你的力量调整值 + 熟练加值；豁免失败时，你选择将其推离你 5 尺，或使其陷入倒地状态。每回合只能使用一次。【举盾遮蔽】当你成为允许你以敏捷豁免只受一半伤害的效果的目标时，若你持用盾牌，你可以用反应在豁免成功时不受任何伤害。
+  en: |-
+    Shield Master — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str]}

@@ -1,0 +1,27 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.lightly_armored
+kind: general
+name: {zh: 轻甲运用, en: Lightly Armored}
+level: 4
+text:
+  zh: |-
+    力量或敏捷 +1（上限 20）。【护甲训练】你获得轻甲与盾牌的训练（熟练）。
+  en: |-
+    Lightly Armored — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str, dex]}
+
+powers:
+  - id: dnd2024.feat.lightly_armored.armor
+    name: {zh: 轻甲运用, en: Lightly Armored}
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        获得轻型护甲、盾牌熟练。
+      en: |-
+        You gain training with Light and Shields.
+    effects:
+      - grant_proficiency: {armor: [light, shield]}

@@ -1,0 +1,16 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.crossbow_expert
+kind: general
+name: {zh: 强弩专家, en: Crossbow Expert}
+level: 4
+abilities: [dex]
+min_score: 13
+text:
+  zh: |-
+    敏捷 +1（上限 20）。【无视装填】你无视手弩、轻弩与重弩的装填属性；握持其中之一时，即使没有空手也能为其装填弹药。【近战射击】身处敌人 5 尺内不会使你的弩攻击检定具有劣势。【双持】当你因轻型属性获得额外攻击时，若该攻击使用具有轻型属性的弩，且你尚未把属性调整值加到该伤害上，则可将其加上。
+  en: |-
+    Crossbow Expert — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [dex]}

@@ -1,0 +1,16 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.grappler
+kind: general
+name: {zh: 擒抱者, en: Grappler}
+level: 4
+abilities: [str, dex]
+min_score: 13
+text:
+  zh: |-
+    力量或敏捷 +1（上限 20）。【拳打擒抱】当你在自己回合以攻击动作进行徒手打击并命中一个生物时，可同时使用伤害与擒抱两个选项；每回合只能使用一次。【攻击优势】你对你擒抱的生物进行攻击检定时具有优势。【快速摔跤】移动你擒抱的生物时，若该生物体型与你相同或更小，你无需为此额外消耗移动力。
+  en: |-
+    You gain the following benefits. Ability Score Increase. Increase your Strength or Dexterity score by 1, to a maximum of 20. Punch and Grab. When you hit a creature with an Unarmed Strike as part of the Attack action on your turn, you can use both the Damage and the Grapple option. You can use this benefit only once per turn. Attack Advantage. You have Advantage on attack rolls against a creature Grappled by you. Fast Wrestler. You don't have to spend extra movement to move a creature Grappled by you if the creature is your size or smaller.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str, dex]}

@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.boon_of_spell_recall
+kind: epic_boon
+name: {zh: 法术溯回之恩惠, en: Boon of Spell Recall}
+level: 19
+text:
+  zh: |-
+    智力、感知或魅力 +1（上限 30）。【免费施法】每当你使用 1–4 环的法术位施放一道法术时，掷 1d4；若掷出的数字与该法术位的环阶相同，则该法术位不被消耗。
+  en: |-
+    You gain the following benefits. Ability Score Increase. Increase one ability score of your choice by 1, to a maximum of 30. Free Casting. Whenever you cast a spell with a level 1–4 spell slot, roll 1d4. If the number you roll is the same as the slot's level, the slot isn't expended.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 30, from: [int, wis, cha], label: {zh: 任选一项属性 +1（上限 30）, en: Increase one ability score by 1 (maximum 30)}}

@@ -1,0 +1,14 @@
+# 由 tools/gen_feats.py 从 dnd55e/data/feats_general.json + data/raw/feats.json 生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+
+id: dnd2024.feat.mage_slayer
+kind: general
+name: {zh: 巫师杀手, en: Mage Slayer}
+level: 4
+text:
+  zh: |-
+    力量或敏捷 +1（上限 20）。【破专注】当你对一个正在专注的生物造成伤害时，它为维持专注所作的豁免检定具有劣势。【心灵防护】当你的一次智力、感知或魅力豁免检定失败时，你可以改为使其成功；使用此增益后，须完成短休或长休才能再次使用。
+  en: |-
+    Mage Slayer — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [str, dex]}

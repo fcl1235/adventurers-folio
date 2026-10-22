@@ -26,7 +26,7 @@ from .rules.actioneconomy import ActionEconomy, ActionType
 from .rules.armor import ac_inputs, loadout_for
 from .rules.build import (
     available_powers, build_actor, eligible_forms_for, morph_class_of,
-    owner_class_id, subclass_defs,
+    owner_class_id,
 )
 from .rules.contributions import (
     facts_for, modifiers_for, passive_modifiers, passive_proficiencies,
@@ -302,24 +302,12 @@ class Session:
         )
 
     def _power_cards(self) -> list[Card]:
-        actor = self.character
-        profile = actor.profile
-        cards: list[Card] = []
-        if profile is None:
-            return cards
-        for entry in profile.classes:
-            class_def = self.bundle.classes.get(entry.class_id)
-            if class_def is None:
-                continue
-            for power in class_def.powers_at(entry.class_level):
-                cards.append(self._card_for(power))
-            # 子职特性跟着父职业的等级出现，和解锁等级门槛一起判定
-            for sub in subclass_defs(self.bundle, profile):
-                if sub.class_id != entry.class_id:
-                    continue
-                for power in sub.powers_at(entry.class_level):
-                    cards.append(self._card_for(power))
-        return cards
+        """卡片 = 已解锁的全部能力。
+
+        走 `available_powers` 而不是自己再遍历一遍职业/子职/专长：
+        第二个入口就是第二个 bug 点（P5e 加子职时就漏过这里）。
+        """
+        return [self._card_for(power) for power in available_powers(self.bundle, self.character)]
 
     def _card_for(self, power: Power) -> Card:
         title = power.name.get(self.locale)

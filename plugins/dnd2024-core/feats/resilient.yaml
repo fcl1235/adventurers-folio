@@ -1,0 +1,18 @@
+# hand-edited 手写：属性 +1 与「选哪一项豁免」绑定 —— 选了哪项豁免，那一项属性才 +1。
+# 生成器只会把 +1 当成独立的任选项，会让「豁免选敏捷、属性选力量」这种错配通过。
+id: dnd2024.feat.resilient
+kind: general
+name: {zh: 坚毅, en: Resilient}
+level: 4
+text:
+  zh: |-
+    选择一项你尚无豁免熟练的属性，该属性 +1（上限 20），并获得该属性的豁免检定熟练。
+  en: |-
+    Resilient — the full rules text of this feat is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+choices:
+  - id: save
+    kind: save
+    count: 1
+    boost: 1
+    boost_cap: 20
+    label: {zh: 选一项尚无豁免熟练的属性（该属性 +1 并获得其豁免熟练）, en: Pick an ability you lack save proficiency in (+1 to it and gain its save proficiency)}
