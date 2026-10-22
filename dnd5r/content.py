@@ -27,6 +27,15 @@ from .rules.effects import parse_effects
 from .rules.morph import CrAxis, FormSpec
 from .rules.powers import Power, PowerBook, apply_patch, parse_power
 from .rules.progression import CasterKind, attacks_per_action
+from .rules.summon import (
+    SENSE_KINDS,
+    SIZES,
+    SPEED_KINDS,
+    SummonAction,
+    parse_action,
+    parse_scaling,
+    resolve as resolve_summon,
+)
 from .model.levels import ClassLevel, as_class_level
 from .model.resources import Pool, PoolKind, Refresh
 from .model.statblock import Abilities
@@ -218,7 +227,10 @@ def parse_armor(data: Any, where: str = "") -> ArmorDef:
 
 # --- 物品：武器 -------------------------------------------------------
 WEAPON_CATEGORIES = ("simple", "martial")
-DAMAGE_TYPES = ("bludgeoning", "piercing", "slashing")
+# 武器的物理伤害只有这三种。**不要**叫 `DAMAGE_TYPES` —— 那个名字下面还有一个
+# 13 种的同名常量（召唤物 / 抗性用的全集），后定义会静默盖掉这一个，
+# 于是「武器伤害类型是 fire」这种错数据能过校验。名字分开，两边互不影响。
+WEAPON_DAMAGE_TYPES = ("bludgeoning", "piercing", "slashing")
 WEAPON_PROPERTIES = (
     "light", "finesse", "two_handed", "versatile", "thrown",
     "heavy", "reach", "loading", "ranged",
@@ -247,9 +259,9 @@ class WeaponDef:
         if self.category not in WEAPON_CATEGORIES:
             raise PluginError("%s 的武器类别必须是 %s"
                               % (self.id, "/".join(WEAPON_CATEGORIES)))
-        if self.damage_type not in DAMAGE_TYPES:
+        if self.damage_type not in WEAPON_DAMAGE_TYPES:
             raise PluginError("%s 的伤害类型必须是 %s"
-                              % (self.id, "/".join(DAMAGE_TYPES)))
+                              % (self.id, "/".join(WEAPON_DAMAGE_TYPES)))
         unknown = [item for item in self.properties if item not in WEAPON_PROPERTIES]
         if unknown:
             raise PluginError("%s 的武器属性未知：%s" % (self.id, ", ".join(unknown)))
@@ -623,6 +635,225 @@ DAMAGE_TYPES = (
     "acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic",
     "piercing", "poison", "psychic", "radiant", "slashing", "thunder",
 )
+
+# 生物类型：规则词汇（14 种），不是内容。写错一个字母就没法做「驱散善恶」这类判定，
+# 所以设白名单；具体是龙还是史莱姆，那是内容说了算。
+CREATURE_TYPES = (
+    "aberration", "beast", "celestial", "construct", "dragon", "elemental",
+    "fey", "fiend", "giant", "humanoid", "monstrosity", "ooze", "plant", "undead",
+)
+CONDITION_IMMUNITIES = (
+    "blinded", "charmed", "deafened", "exhaustion", "frightened", "grappled",
+    "incapacitated", "invisible", "paralyzed", "petrified", "poisoned",
+    "prone", "restrained", "stunned", "unconscious",
+)
+
+
+@dataclass(frozen=True)
+class SummonDef:
+    """法术召出来的那只生物。
+
+    **为什么是独立内容类型，而不是法术的一段文案**：这只生物有自己的 AC / HP /
+    属性 / 抗性 / 动作，战斗里要独立掷骰、独立掉血。塞进法术的 `text` 里，
+    它就永远只能被「读」，不能被「算」—— 施法结算（G6）也就没法开工。
+
+    **数值必须是结构化的**：旧的旧程序把 AC 写成 `"11 + 法术环级"` 字符串，
+    结果只能照抄给人看，升环换个环位就不知道该显示什么。这里 `ac` / `hp` 是
+    `Scaling`（base + per_slot × 超出环级），任何环位都能现算，也能验算。
+
+    `hp` 与 `hp_by_size` **二选一**：绝大多数召唤物 HP 只是环级的函数；
+    活化物件的 HP 只跟物件体型有关（10 / 20 / 40），与环级无关。两种写法强行
+    并成一张表，就会出现「巨型物件用 9 环召 = 40 血」这种既对又读不懂的条目。
+    """
+
+    id: str
+    name: Text
+    spell: str
+    creature_type: str
+    ac: Scaling
+    languages: Text
+    abilities: Abilities
+    size: str = "medium"
+    # 体型不由这只生物决定时（「巨型或更小」）留空 + 写 size_note 说明。
+    size_note: Text | None = None
+    hp: Scaling | None = None
+    hp_by_size: Mapping[str, int] | None = None
+    hp_dice: Text | None = None
+    variant: Text | None = None
+    speeds: Mapping[str, int] = field(default_factory=dict)
+    # 「飞行要 4 环以上」（异界坐骑）这类速度解禁：速度 → 需要的最低环级。
+    speeds_require_slot: Mapping[str, int] = field(default_factory=dict)
+    senses: Mapping[str, int] = field(default_factory=dict)
+    passive_perception: int = 10
+    damage_resistances: tuple[str, ...] = ()
+    damage_immunities: tuple[str, ...] = ()
+    condition_immunities: tuple[str, ...] = ()
+    traits: tuple[SummonAction, ...] = ()
+    actions: tuple[SummonAction, ...] = ()
+    bonus_actions: tuple[SummonAction, ...] = ()
+    reactions: tuple[SummonAction, ...] = ()
+    note: Text | None = None
+    source: str = ""
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("召唤物 id 不合规范：%r" % (self.id,))
+        if not self.spell:
+            raise PluginError("召唤物 %s 必须写 summon.spell（谁把它召出来）" % self.id)
+        if self.creature_type not in CREATURE_TYPES:
+            raise PluginError("召唤物 %s 的生物类型必须是 %s"
+                              % (self.id, "/".join(CREATURE_TYPES)))
+        if self.size and self.size not in SIZES:
+            raise PluginError("召唤物 %s 的体型必须是 %s" % (self.id, "/".join(SIZES)))
+        if not self.size and self.size_note is None:
+            raise PluginError("召唤物 %s 没写体型时必须用 size_note 说明"
+                              "（「巨型或更小」这种不能靠猜）" % self.id)
+        if (self.hp is None) == (not self.hp_by_size):
+            raise PluginError("召唤物 %s 的 hp 与 hp_by_size 必须二选一" % self.id)
+        if self.hp_by_size:
+            bad = [key for key in self.hp_by_size if key not in SIZES]
+            if bad:
+                raise PluginError("召唤物 %s 的 hp_by_size 里有不认识的体型：%s"
+                                  % (self.id, ", ".join(bad)))
+            if any(int(value) < 1 for value in self.hp_by_size.values()):
+                raise PluginError("召唤物 %s 的 hp_by_size 有非正数" % self.id)
+        bad = [key for key in self.speeds if key not in SPEED_KINDS]
+        if bad:
+            raise PluginError("召唤物 %s 的速度类型不认识：%s（可选 %s）"
+                              % (self.id, ", ".join(bad), "/".join(SPEED_KINDS)))
+        bad = [key for key in self.speeds_require_slot
+               if key not in self.speeds or not 1 <= int(self.speeds_require_slot[key]) <= 9]
+        if bad:
+            raise PluginError("召唤物 %s 的 speeds_require_slot 写了没有的速度或环级越界：%s"
+                              % (self.id, ", ".join(bad)))
+        bad = [key for key in self.senses if key not in SENSE_KINDS]
+        if bad:
+            raise PluginError("召唤物 %s 的感官类型不认识：%s（可选 %s）"
+                              % (self.id, ", ".join(bad), "/".join(SENSE_KINDS)))
+        for field_name, values in (("damage_resistances", self.damage_resistances),
+                                   ("damage_immunities", self.damage_immunities)):
+            bad = [item for item in values if item not in DAMAGE_TYPES]
+            if bad:
+                raise PluginError("召唤物 %s 的 %s 有陌生的伤害类型：%s"
+                                  % (self.id, field_name, ", ".join(bad)))
+        bad = [item for item in self.condition_immunities
+               if item not in CONDITION_IMMUNITIES]
+        if bad:
+            raise PluginError("召唤物 %s 的状态免疫不认识：%s" % (self.id, ", ".join(bad)))
+        if not (self.traits or self.actions or self.bonus_actions or self.reactions):
+            raise PluginError("召唤物 %s 一条特性/动作都没有，等于召出来站着" % self.id)
+        if not 0 <= int(self.passive_perception) <= 40:
+            raise PluginError("召唤物 %s 的被动察觉不合法：%r"
+                              % (self.id, self.passive_perception))
+
+    @property
+    def key(self) -> str:
+        return self.id.rsplit(".", 1)[-1]
+
+    @property
+    def label(self) -> str:
+        """中文显示名：「巨型昆虫·蜈蚣」这种已经把变体写进名字的，直接返回名字。"""
+        if self.variant is None:
+            return self.name.zh
+        return "%s（%s）" % (self.name.zh, self.variant.zh)
+
+    def ac_at(self, slot_level: int) -> int:
+        return self.ac.at(int(slot_level))
+
+    def hp_at(self, slot_level: int, size: str = "") -> int:
+        if self.hp is not None:
+            return self.hp.at(int(slot_level))
+        table = dict(self.hp_by_size or {})
+        picked = str(size or "").lower()
+        if not picked:
+            raise PluginError("召唤物 %s 的生命值按体型分叉，必须传 size" % self.id)
+        if picked not in table:
+            raise PluginError("召唤物 %s 没有体型 %r 的生命值" % (self.id, picked))
+        return int(table[picked])
+
+    def speeds_at(self, slot_level: int) -> dict[str, int]:
+        slot = int(slot_level)
+        return {kind: int(value) for kind, value in self.speeds.items()
+                if not int(self.speeds_require_slot.get(kind, 0))
+                or slot >= int(self.speeds_require_slot[kind])}
+
+    def card(self, slot_level: int, locale: str = "zh",
+             caster_mod: int = 0, size: str = "") -> dict:
+        return resolve_summon(self, slot_level, caster_mod, size, locale)
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {"id": self.id, "key": self.key, "name": self.name.get(locale),
+                "variant": self.variant.get(locale) if self.variant else "",
+                "spell": self.spell, "creature_type": self.creature_type,
+                "size": self.size, "ac": self.ac.to_dict(),
+                "hp": self.hp.to_dict() if self.hp is not None else None,
+                "source": self.source}
+
+
+def parse_summon(data: Any, source: str = "") -> SummonDef:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的召唤物定义必须是映射" % source)
+    for key in ("id", "name", "spell", "creature_type", "ac", "languages", "abilities"):
+        if key not in data:
+            raise PluginError("%s 的召唤物定义缺少 %s（%s）"
+                              % (source, key, data.get("id", "?")))
+    ident = str(data["id"])
+    if not is_valid(ident):
+        raise PluginError("召唤物 id 不合规范：%r" % ident)
+    hs = data.get("hp")
+    by_size = data.get("hp_by_size")
+    if (hs is None) == (not by_size):
+        raise PluginError("召唤物 %s 的 hp 与 hp_by_size 必须二选一" % ident)
+    try:
+        abilities = Abilities.of(**{str(key): int(value)
+                                    for key, value in data["abilities"].items()})
+    except RuleError as exc:
+        raise PluginError("%s 的属性不合法：%s" % (ident, exc))
+
+    def actions(key: str) -> tuple[SummonAction, ...]:
+        rows = data.get(key) or ()
+        if isinstance(rows, Mapping):
+            rows = [rows]
+        return tuple(parse_action(row, DAMAGE_TYPES, where="%s %s" % (ident, key))
+                     for row in rows)
+
+    return SummonDef(
+        id=ident,
+        name=Text.from_dict(data["name"], where="%s name" % ident),
+        spell=str(data["spell"]),
+        creature_type=str(data["creature_type"]).lower(),
+        ac=parse_scaling(data["ac"], where="%s ac" % ident),
+        languages=Text.from_dict(data["languages"], where="%s languages" % ident),
+        abilities=abilities,
+        size=str(data.get("size", "medium")).lower(),
+        size_note=Text.from_dict(data["size_note"], where="%s size_note" % ident)
+        if data.get("size_note") else None,
+        hp=parse_scaling(hs, where="%s hp" % ident) if hs is not None else None,
+        hp_by_size={str(key).lower(): int(value) for key, value in by_size.items()}
+        if by_size else None,
+        hp_dice=Text.from_dict(data["hp_dice"], where="%s hp_dice" % ident)
+        if data.get("hp_dice") else None,
+        variant=Text.from_dict(data["variant"], where="%s variant" % ident)
+        if data.get("variant") else None,
+        speeds={str(k): int(v) for k, v in (data.get("speeds") or {"walk": 30}).items()},
+        speeds_require_slot={str(k): int(v) for k, v in
+                             (data.get("speeds_require_slot") or {}).items()},
+        senses={str(k): int(v) for k, v in (data.get("senses") or {}).items()},
+        passive_perception=int(data.get("passive_perception", 10)),
+        damage_resistances=tuple(str(v).lower()
+                                 for v in (data.get("damage_resistances") or ())),
+        damage_immunities=tuple(str(v).lower()
+                                for v in (data.get("damage_immunities") or ())),
+        condition_immunities=tuple(str(v).lower()
+                                   for v in (data.get("condition_immunities") or ())),
+        traits=actions("traits"),
+        actions=actions("actions"),
+        bonus_actions=actions("bonus_actions"),
+        reactions=actions("reactions"),
+        note=Text.from_dict(data["note"], where="%s note" % ident)
+        if data.get("note") else None,
+        source=source,
+    )
 
 
 @dataclass(frozen=True)
@@ -1423,6 +1654,7 @@ class PluginContent:
     feats: dict[str, FeatDef] = field(default_factory=dict)
     skills: dict[str, SkillDef] = field(default_factory=dict)
     tools: dict[str, ToolDef] = field(default_factory=dict)
+    summons: dict[str, "SummonDef"] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -1443,6 +1675,7 @@ class ContentBundle:
     feats: dict[str, FeatDef] = field(default_factory=dict)
     skills: dict[str, SkillDef] = field(default_factory=dict)
     tools: dict[str, ToolDef] = field(default_factory=dict)
+    summons: dict[str, "SummonDef"] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -1493,6 +1726,17 @@ class ContentBundle:
             key=lambda item: item.id,
         ))
 
+    def summons_for_spell(self, spell_id: str) -> tuple[SummonDef, ...]:
+        """这个法术能召出哪几只生物 —— 从召唤物反查，法术自己不存这份名单。
+
+        与 `classes_for_spell` 同一个道理：召唤物条目里写 `spell`，法术条目只描述
+        法术自己。存两份就会出现「法术说能召三只、召唤物表里只有两只」的漂移。
+        """
+        return tuple(sorted(
+            (item for item in self.summons.values() if item.spell == spell_id),
+            key=lambda item: (item.variant.zh if item.variant else "", item.id),
+        ))
+
     def subclass(self, subclass_id: str) -> SubclassDef:
         if subclass_id not in self.subclasses:
             raise PluginError("没有这个子职：%s（已加载：%s）"
@@ -1531,6 +1775,7 @@ class ContentBundle:
             "spell_lists": len(self.spell_lists),
             "skills": len(self.skills),
             "tools": len(self.tools),
+            "summons": len(self.summons),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -1614,8 +1859,38 @@ def load_plugin(folder: str | Path) -> PluginContent:
     _load_feats(base, result)
     _load_skills(base, result)
     _load_tools(base, result)
+    _load_summons(base, result)
     result.book.validate_augments()
     return result
+
+
+def _load_summons(base: Path, result: PluginContent) -> None:
+    """召唤物：一个插件一份 `summons.yaml`。
+
+    与 `tools.yaml` 同一个位置：几十条、条目之间没有互相引用、按 id 取用 ——
+    没有理由拆成「一条一文件」（那是专长/子职为了 git diff 好读才做的）。
+    """
+    path = base / "summons.yaml"
+    if not path.exists():
+        return
+    rel = "%s/summons.yaml" % base.name
+    try:
+        rows = _read_yaml(path) or []
+    except PluginError as exc:
+        result.errors.append(str(exc))
+        return
+    if isinstance(rows, Mapping):
+        rows = [rows]
+    for row in rows:
+        try:
+            summon = parse_summon(row, source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if summon.id in result.summons:
+            result.errors.append("%s 的召唤物 id 重复：%s" % (rel, summon.id))
+            continue
+        result.summons[summon.id] = summon
 
 
 def _load_tools(base: Path, result: PluginContent) -> None:
@@ -1824,6 +2099,11 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("工具 %s 重复提供" % tool_id)
                 continue
             bundle.tools[tool_id] = tool
+        for summon_id, summon in content.summons.items():
+            if summon_id in bundle.summons:
+                bundle.errors.append("召唤物 %s 重复提供" % summon_id)
+                continue
+            bundle.summons[summon_id] = summon
         for subclass_id, subclass in content.subclasses.items():
             if subclass_id in bundle.subclasses:
                 bundle.errors.append("子职 %s 重复提供" % subclass_id)
@@ -1847,8 +2127,21 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
     _check_subclass_classes(bundle)
     _check_spell_lists(bundle)
     _check_feat_spell_refs(bundle)
+    _check_summon_spells(bundle)
     bundle.book.validate_augments()
     return bundle
+
+
+def _check_summon_spells(bundle: ContentBundle) -> None:
+    """召唤物指向的法术必须存在。
+
+    只能合并之后查：召唤物与法术可以来自不同插件（一个插件提供法术、另一个补
+    stat block 是合法用法）。查不到就是「召出来但界面找不到入口」，报错而不是静默丢。
+    """
+    for summon in bundle.summons.values():
+        if summon.spell not in bundle.spells:
+            bundle.errors.append(
+                "召唤物 %s 指向不存在的法术 %s" % (summon.id, summon.spell))
 
 
 def _check_spell_lists(bundle: ContentBundle) -> None:

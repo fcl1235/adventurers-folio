@@ -50,6 +50,166 @@ def _chosen_ids(bucket: dict) -> list[str]:
 SCALING_ZH = {"damage": "伤害骰", "extra_damage": "额外伤害",
               "beams": "光束数", "range": "射程（尺）", "weapon_die": "武器骰"}
 
+# --- 召唤物 stat block 的词汇表 ---------------------------------------
+# 放前端而不是内核：这是**显示**用的对照表，内核只认英文键（约束 C1/C3）。
+CREATURE_ZH = {
+    "aberration": "异怪", "beast": "野兽", "celestial": "天界生物",
+    "construct": "构装", "dragon": "龙", "elemental": "元素",
+    "fey": "妖精", "fiend": "邪魔", "giant": "巨人", "humanoid": "类人",
+    "monstrosity": "怪诞生物", "ooze": "泥怪", "plant": "植物", "undead": "亡灵",
+}
+SIZE_ZH = {"tiny": "微型", "small": "小型", "medium": "中型",
+           "large": "大型", "huge": "巨型", "gargantuan": "超巨型"}
+SPEED_ZH = {"walk": "步行", "climb": "攀爬", "swim": "游泳",
+            "fly": "飞行", "burrow": "掘道"}
+SENSE_ZH = {"blindsight": "盲视", "darkvision": "黑暗视觉",
+            "tremorsense": "震颤感知", "truesight": "真实视觉"}
+DAMAGE_ZH = {
+    "acid": "强酸", "bludgeoning": "钝击", "cold": "冷冻", "fire": "火焰",
+    "force": "力场", "lightning": "闪电", "necrotic": "黯蚀", "piercing": "穿刺",
+    "poison": "毒素", "psychic": "心灵", "radiant": "光耀", "slashing": "挥砍",
+    "thunder": "雷鸣",
+}
+CONDITION_ZH = {
+    "blinded": "目盲", "charmed": "魅惑", "deafened": "耳聋", "exhaustion": "力竭",
+    "frightened": "恐惧", "grappled": "受擒", "incapacitated": "失能",
+    "invisible": "隐形", "paralyzed": "麻痹", "petrified": "石化",
+    "poisoned": "中毒", "prone": "倒地", "restrained": "束缚",
+    "stunned": "震慑", "unconscious": "昏迷",
+}
+AREA_ZH = {"cone": "锥形", "line": "线形", "sphere": "球形",
+           "cube": "立方", "cylinder": "柱形"}
+
+
+def _signed(value: int) -> str:
+    return "%+d" % int(value)
+
+
+def _damage_text(part: dict, word: str = "伤害") -> str:
+    """一段伤害：`1d6+9 穿刺` / `2d6+3+施法调整值 力场`。"""
+    bits = [str(part.get("at_slot") or "?")]
+    if part.get("caster_mod"):
+        bits.append("施法调整值")
+    kind = DAMAGE_ZH.get(str(part.get("type") or ""), str(part.get("type") or ""))
+    if kind:
+        bits.append(kind)
+    label = part.get("label") or {}
+    text = " ".join(bits)
+    if label.get("zh"):
+        text += "（%s）" % label["zh"]
+    return "%s %s" % (word, text)
+
+
+def _action_line(action: dict) -> str:
+    """一条动作 / 特性：名称 + 命中/豁免 + 伤害 + 说明。"""
+    kind = str(action.get("kind") or "other")
+    head = str(action.get("name") or "")
+    bits = []
+    if kind == "melee":
+        bits.append("近战，触及 %d 尺" % int(action.get("reach") or 0))
+    elif kind == "ranged":
+        bits.append("远程，射程 %d 尺" % int(action.get("range") or 0))
+    if action.get("attack") == "spell":
+        bits.append("命中＝你的法术攻击加值")
+    if action.get("save"):
+        where = ""
+        area = action.get("area")
+        if area:
+            where = "，%d 尺%s" % (int(area[1]), AREA_ZH.get(str(area[0]), str(area[0])))
+        elif action.get("range"):
+            where = "，%d 尺内" % int(action["range"])
+        bits.append("%s豁免（DC＝你的法术豁免 DC%s）"
+                    % (ABILITY_ZH.get(str(action["save"]), str(action["save"])), where))
+    word = "回复" if kind == "heal" else "伤害"
+    damage = [_damage_text(part, "").strip() for part in (action.get("damage") or [])]
+    if damage:
+        # 按体型分叉的（活化物件）用「／」并排，加一次词头就够，别每条都写「伤害」。
+        bits.append("%s %s" % (word, "／".join(damage)))
+    line = "%s：%s" % (head, "；".join(bits)) if bits else head
+    text = str(action.get("text") or "")
+    if text:
+        line += "\n    " + text
+    return line
+
+
+def summon_text(row: dict, slot: int = 0) -> str:
+    """一张召唤物 stat block。`row` 是 `spell_info(...)["summons"]` 的一项。"""
+    card = row.get("card") or {}
+    name = str(card.get("name") or "")
+    if card.get("variant"):
+        name = "%s（%s）" % (name, card["variant"])
+    size = str(row.get("size_note") or SIZE_ZH.get(str(card.get("size") or ""), ""))
+    kind = CREATURE_ZH.get(str(card.get("creature_type") or ""),
+                           str(card.get("creature_type") or ""))
+    parts = ["【%s】%s %s" % (name, size, kind)]
+    slot = int(slot or card.get("slot_level") or 0)
+    options = card.get("hp_options") or {}
+    if slot:
+        if options:
+            parts.append("%d 环时：AC %d" % (slot, int(card.get("ac") or 0)))
+        else:
+            parts.append("%d 环时：AC %d，生命值 %d（%s）"
+                         % (slot, int(card.get("ac") or 0), int(card.get("hp") or 0),
+                            str(card.get("ac_text") or "")))
+    if options:
+        parts.append("生命值按体型：%s"
+                     % "／".join("%s %d" % (SIZE_ZH.get(key, key), value)
+                                 for key, value in options.items()))
+    if card.get("hp_dice"):
+        parts.append("生命骰：%s" % card["hp_dice"])
+    speeds = card.get("speeds") or {}
+    if speeds:
+        parts.append("速度：" + "，".join("%s %d 尺" % (SPEED_ZH.get(key, key), value)
+                                        for key, value in speeds.items()))
+    locked = card.get("speeds_locked") or {}
+    if locked:
+        parts.append("尚未解禁：" + "，".join(
+            "%s %d 尺要 %d 环起" % (SPEED_ZH.get(key, key), int(item["value"]),
+                                   int(item["slot"]))
+            for key, item in locked.items()))
+    scores = card.get("abilities") or {}
+    if scores:
+        row_bits = []
+        for key in ("str", "dex", "con", "int", "wis", "cha"):
+            score = int(scores.get(key) or 0)
+            row_bits.append("%s %d（%s）" % (ABILITY_ZH[key], score,
+                                            _signed((score - 10) // 2)))
+        parts.append("　".join(row_bits))
+    senses = card.get("senses") or {}
+    sensory = ["%s %d 尺" % (SENSE_ZH.get(key, key), value)
+               for key, value in senses.items()]
+    sensory.append("被动察觉 %d" % int(card.get("passive_perception") or 0))
+    parts.append("感官：" + "，".join(sensory))
+    if card.get("languages"):
+        parts.append("语言：" + str(card["languages"]))
+    for tag, key, table in (("抗性", "resistances", DAMAGE_ZH),
+                            ("伤害免疫", "immunities", DAMAGE_ZH),
+                            ("状态免疫", "condition_immunities", CONDITION_ZH)):
+        values = card.get(key) or []
+        if values:
+            parts.append("%s：%s" % (tag, "，".join(table.get(item, item)
+                                                    for item in values)))
+    for group, title in (("traits", "特性"), ("actions", "动作"),
+                         ("bonus_actions", "附赠动作"), ("reactions", "反应")):
+        rows = card.get(group) or []
+        if not rows:
+            continue
+        parts.append("")
+        parts.append(title + "：")
+        parts.extend(_action_line(item) for item in rows)
+    curve = row.get("by_slot") or []
+    # 曲线全平时不画：活化物件的 AC/HP 跟环级无关，列 5 行一模一样的数字只会误导。
+    if len({(int(item["ac"]), int(item["hp"])) for item in curve}) > 1:
+        parts.append("")
+        parts.append("升环：" + "　".join("%d 环 AC %d／HP %d"
+                                         % (int(item["slot"]), int(item["ac"]),
+                                            int(item["hp"])) for item in curve[:5])
+                     + ("……" if len(curve) > 5 else ""))
+    if card.get("note"):
+        parts.append("")
+        parts.append("注：" + str(card["note"]))
+    return "\n".join(parts)
+
 
 def spell_text(row: dict, info: dict | None = None) -> str:
     """一条法术的完整说明（右栏）。用选项行里现成的字段拼，不查第二遍表。"""
@@ -88,7 +248,10 @@ def spell_text(row: dict, info: dict | None = None) -> str:
                                          for slot, dice in sorted(damage.items())))
         if row.get("damage_type"):
             parts.append("伤害类型：%s" % row["damage_type"])
-    if row.get("upcast"):
+    summons = (info or {}).get("summons") or []
+    if row.get("upcast") and not summons:
+        # 召唤类法术的 `upcast` 是整段英文 stat block 原文，下方已经有结构化卡片，
+        # 再贴一遍是两套文案、两处会漂移。
         parts.append("升环：" + str(row["upcast"]))
     # 戏法成长：**不是**环位伤害表的一部分，5/11/17 看的是角色等级
     scaling = row.get("scaling") or {}
@@ -101,6 +264,9 @@ def spell_text(row: dict, info: dict | None = None) -> str:
         if info and info.get("scaling_now"):
             parts.append("你现在 %s 级，按 %s 算"
                          % (info.get("character_level"), info["scaling_now"]))
+    for summon in summons:
+        parts.append("")
+        parts.append(summon_text(summon))
     return "\n".join(parts)
 
 

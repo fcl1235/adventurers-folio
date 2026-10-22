@@ -1,0 +1,336 @@
+# 召唤物 stat block。
+#
+# 数据来源：四个法术条目里 `upcast` 的**英文原文 stat block**
+# （`plugins/dnd2024-core/spells/level-{2,4,5}.yaml`）。没有一条是从旧程序的中文
+# 转录抄来的 —— 旧数据把被动察觉写成 10（原文 12 / 6）、把活化物件的伤害写成
+# 「(法术环级−4)d4」（原文是固定 1d4+3，升环才再加骰），照抄就是抄错。
+#
+# 只有「法术本身在内容里」的召唤物才在这里：SRD 5.2 只有 Summon Dragon，
+# 其余 8 个 summon-* 法术（野兽/异怪/天界/构装/元素/妖精/邪魔/亡灵精魂）
+# 连法术条目都还没有，凭空补一份 stat block 出来只会得到一个没有入口的死条目。
+#
+# AC / HP 一律写成结构化字段，不写「11 + 法术环级」这种字符串：
+#   ac: {base: 11, per_slot: 1}                     → 11 + 环级
+#   hp: {base: 30, per_slot: 5, from_level: 2}      → 30 + 5 × 超出 2 级的环级
+#   hp_by_size: {medium: 10, large: 20, huge: 40}   → 与环级无关，只看体型
+# 派生值由 dnd5r/rules/summon.py 现算，任何环位都能验算。
+
+# --- 召唤巨龙 Summon Dragon -------------------------------------------
+- id: dnd2024.summon.draconic_spirit
+  name: {zh: 龙之精魂, en: Draconic Spirit}
+  spell: dnd2024.spell.summon_dragon
+  creature_type: dragon
+  size: large
+  ac: {base: 14, per_slot: 1}
+  hp: {base: 50, per_slot: 10, from_level: 5}
+  speeds: {walk: 30, fly: 60, swim: 30}
+  abilities: {str: 19, dex: 14, con: 17, int: 10, wis: 14, cha: 14}
+  senses: {blindsight: 30, darkvision: 60}
+  passive_perception: 12
+  languages: {zh: 龙语；理解你说的语言但不会说, en: "Draconic, understands the languages you know"}
+  damage_resistances: [acid, cold, fire, lightning, poison]
+  condition_immunities: [charmed, frightened, poisoned]
+  traits:
+    - name: {zh: 共享抗性, en: Shared Resistances}
+      text:
+        zh: 召唤时从它的抗性里挑一种，在你的法术结束前，你获得该伤害类型的抗性。
+        en: When you summon the spirit, choose one of its Resistances. You have Resistance to the chosen damage type until the spell ends.
+  actions:
+    - name: {zh: 多重攻击, en: Multiattack}
+      kind: multiattack
+      text:
+        zh: 它发动「法术环级 ÷ 2（向下取整）」次撕裂攻击，并使用一次吐息武器。
+        en: The spirit makes a number of Rend attacks equal to half the spell's level (round down), and it uses Breath Weapon.
+    - name: {zh: 撕裂, en: Rend}
+      kind: melee
+      attack: spell
+      reach: 10
+      damage:
+        - {dice: 1d6, flat: 4, per_slot: 1, type: piercing}
+    - name: {zh: 吐息武器, en: Breath Weapon}
+      kind: save
+      save: dex
+      save_dc: spell
+      area: {shape: cone, size: 30}
+      damage:
+        - {dice: 2d6}
+      text:
+        zh: 30 尺锥形范围内每个生物做敏捷豁免，失败受 2d6 点伤害（类型从它有抗性的类型里选，施法时选定），成功则伤害减半。
+        en: "Dexterity Saving Throw: DC equals your spell save DC, each creature in a 30-foot Cone. Failure: 2d6 damage of a type this spirit has Resistance to (your choice when you cast the spell). Success: Half damage."
+  note:
+    zh: 撕裂的命中加值等于你的法术攻击加值，吐息武器的 DC 等于你的法术豁免 DC —— 两者都随施法者变，不是固定值。
+    en: The Rend attack bonus equals your spell attack modifier and the Breath Weapon DC equals your spell save DC; neither is fixed.
+
+# --- 活化物件 Animate Objects -----------------------------------------
+- id: dnd2024.summon.animated_object
+  name: {zh: 活化物件, en: Animated Object}
+  spell: dnd2024.spell.animate_objects
+  creature_type: construct
+  size: ""
+  size_note: {zh: 巨型或更小，由被活化那件物件的体型决定, en: Huge or Smaller, set by the animated object}
+  ac: 15
+  hp_by_size: {tiny: 10, small: 10, medium: 10, large: 20, huge: 40}
+  speeds: {walk: 30}
+  abilities: {str: 16, dex: 10, con: 10, int: 3, wis: 3, cha: 1}
+  senses: {blindsight: 30}
+  passive_perception: 6
+  languages: {zh: 理解你说的语言但不会说, en: Understands the languages you know}
+  damage_immunities: [poison, psychic]
+  condition_immunities: [charmed, exhaustion, frightened, paralyzed, poisoned]
+  actions:
+    - name: {zh: 重击, en: Slam}
+      kind: melee
+      attack: spell
+      reach: 5
+      damage:
+        - dice: 1d4
+          flat: 3
+          type: force
+          per_slot_dice: 1d4
+          per_slot_dice_above: 5
+          label: {zh: 中型或更小, en: Medium or smaller}
+        - dice: 2d6
+          flat: 3
+          caster_mod: true
+          type: force
+          per_slot_dice: 1d6
+          per_slot_dice_above: 5
+          label: {zh: 大型, en: Large}
+        - dice: 2d12
+          flat: 3
+          caster_mod: true
+          type: force
+          per_slot_dice: 1d12
+          per_slot_dice_above: 5
+          label: {zh: 巨型, en: Huge}
+  note:
+    zh: 一个法术能活化的物件数 = 你的施法属性调整值（中型或更小算 1 件，大型算 2 件，巨型算 3 件）。生命值只跟体型有关，与环级无关；升环只加伤害。
+    en: The maximum number of objects equals your spellcasting ability modifier (Medium or smaller counts as one, Large as two, Huge as three). Hit Points depend only on size; higher slots only add damage.
+
+# --- 巨虫术 Giant Insect ----------------------------------------------
+- id: dnd2024.summon.giant_insect_centipede
+  name: {zh: 巨型昆虫, en: Giant Insect}
+  variant: {zh: 蜈蚣, en: Centipede}
+  spell: dnd2024.spell.giant_insect
+  creature_type: beast
+  size: large
+  ac: {base: 11, per_slot: 1}
+  hp: {base: 30, per_slot: 10, from_level: 4}
+  speeds: {walk: 40, climb: 40}
+  abilities: {str: 17, dex: 13, con: 15, int: 4, wis: 14, cha: 3}
+  senses: {darkvision: 60}
+  passive_perception: 12
+  languages: {zh: 理解你说的语言但不会说, en: Understands the languages you know}
+  traits:
+    - name: {zh: 蛛行, en: Spider Climb}
+      text:
+        zh: 可以攀爬困难表面（包括沿天花板爬行），无需做属性检定。
+        en: The insect can climb difficult surfaces, including along ceilings, without needing to make an ability check.
+  actions:
+    - name: {zh: 多重攻击, en: Multiattack}
+      kind: multiattack
+      text:
+        zh: 它发动的攻击次数等于「法术环级 ÷ 2（向下取整）」。
+        en: The insect makes a number of attacks equal to half this spell's level (round down).
+    - name: {zh: 毒刺, en: Poison Jab}
+      kind: melee
+      attack: spell
+      reach: 10
+      damage:
+        - {dice: 1d6, flat: 3, per_slot: 1, type: piercing}
+        - {dice: 1d4, type: poison}
+  bonus_actions:
+    - name: {zh: 毒液喷吐, en: Venomous Spew}
+      kind: save
+      save: con
+      save_dc: spell
+      range: 10
+      text:
+        zh: 对它 10 尺内一个看得见的生物喷毒：目标做体质豁免，失败在其下个回合开始前处于中毒状态。
+        en: "Constitution Saving Throw: Your spell save DC, one creature the insect can see within 10 feet. Failure - The target has the Poisoned condition until the start of the insect's next turn."
+
+- id: dnd2024.summon.giant_insect_spider
+  name: {zh: 巨型昆虫, en: Giant Insect}
+  variant: {zh: 蜘蛛, en: Spider}
+  spell: dnd2024.spell.giant_insect
+  creature_type: beast
+  size: large
+  ac: {base: 11, per_slot: 1}
+  hp: {base: 30, per_slot: 10, from_level: 4}
+  speeds: {walk: 40, climb: 40}
+  abilities: {str: 17, dex: 13, con: 15, int: 4, wis: 14, cha: 3}
+  senses: {darkvision: 60}
+  passive_perception: 12
+  languages: {zh: 理解你说的语言但不会说, en: Understands the languages you know}
+  traits:
+    - name: {zh: 蛛行, en: Spider Climb}
+      text:
+        zh: 可以攀爬困难表面（包括沿天花板爬行），无需做属性检定。
+        en: The insect can climb difficult surfaces, including along ceilings, without needing to make an ability check.
+  actions:
+    - name: {zh: 多重攻击, en: Multiattack}
+      kind: multiattack
+      text:
+        zh: 它发动的攻击次数等于「法术环级 ÷ 2（向下取整）」。
+        en: The insect makes a number of attacks equal to half this spell's level (round down).
+    - name: {zh: 毒刺, en: Poison Jab}
+      kind: melee
+      attack: spell
+      reach: 10
+      damage:
+        - {dice: 1d6, flat: 3, per_slot: 1, type: piercing}
+        - {dice: 1d4, type: poison}
+    - name: {zh: 蛛网弹, en: Web Bolt}
+      kind: ranged
+      attack: spell
+      range: 60
+      damage:
+        - {dice: 1d10, flat: 3, per_slot: 1, type: bludgeoning}
+      text:
+        zh: 命中后目标的移动速度降为 0，直到该昆虫的下个回合开始。
+        en: On a hit, the target's Speed is reduced to 0 until the start of the insect's next turn.
+
+- id: dnd2024.summon.giant_insect_wasp
+  name: {zh: 巨型昆虫, en: Giant Insect}
+  variant: {zh: 黄蜂, en: Wasp}
+  spell: dnd2024.spell.giant_insect
+  creature_type: beast
+  size: large
+  ac: {base: 11, per_slot: 1}
+  hp: {base: 30, per_slot: 10, from_level: 4}
+  speeds: {walk: 40, climb: 40, fly: 40}
+  abilities: {str: 17, dex: 13, con: 15, int: 4, wis: 14, cha: 3}
+  senses: {darkvision: 60}
+  passive_perception: 12
+  languages: {zh: 理解你说的语言但不会说, en: Understands the languages you know}
+  traits:
+    - name: {zh: 蛛行, en: Spider Climb}
+      text:
+        zh: 可以攀爬困难表面（包括沿天花板爬行），无需做属性检定。
+        en: The insect can climb difficult surfaces, including along ceilings, without needing to make an ability check.
+  actions:
+    - name: {zh: 多重攻击, en: Multiattack}
+      kind: multiattack
+      text:
+        zh: 它发动的攻击次数等于「法术环级 ÷ 2（向下取整）」。
+        en: The insect makes a number of attacks equal to half this spell's level (round down).
+    - name: {zh: 毒刺, en: Poison Jab}
+      kind: melee
+      attack: spell
+      reach: 10
+      damage:
+        - {dice: 1d6, flat: 3, per_slot: 1, type: piercing}
+        - {dice: 1d4, type: poison}
+  note:
+    zh: 三种形态共用同一张 stat block，差别只有「飞行 40 尺（仅黄蜂）」「蛛网弹（仅蜘蛛）」「毒液喷吐（仅蜈蚣）」。
+    en: All three forms share one stat block; the only differences are Fly 40 ft. (Wasp only), Web Bolt (Spider only), and Venomous Spew (Centipede only).
+
+# --- 寻获坐骑 Find Steed ----------------------------------------------
+- id: dnd2024.summon.otherworldly_steed_celestial
+  name: {zh: 异界坐骑, en: Otherworldly Steed}
+  variant: {zh: 天界, en: Celestial}
+  spell: dnd2024.spell.find_steed
+  creature_type: celestial
+  size: large
+  ac: {base: 10, per_slot: 1}
+  hp: {base: 5, per_slot: 10}
+  hp_dice: {zh: d10，数量等于法术环级, en: "a number of d10s equal to the spell's level"}
+  speeds: {walk: 60, fly: 60}
+  speeds_require_slot: {fly: 4}
+  abilities: {str: 18, dex: 12, con: 14, int: 6, wis: 12, cha: 8}
+  senses: {}
+  passive_perception: 11
+  languages: {zh: 心灵感应 1 里（只与你通信）, en: "Telepathy 1 mile (works only with you)"}
+  traits:
+    - name: {zh: 生命纽带, en: Life Bond}
+      text:
+        zh: 当你因 1 环或更高环级的法术回复生命值时，若坐骑在你 5 尺内，它回复同等的生命值。
+        en: When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you're within 5 feet of it.
+  actions:
+    - name: {zh: 异界重击, en: Otherworldly Slam}
+      kind: melee
+      attack: spell
+      reach: 5
+      damage:
+        - {dice: 1d8, per_slot: 1, type: radiant}
+  bonus_actions:
+    - name: {zh: 治疗触碰, en: Healing Touch}
+      kind: heal
+      range: 5
+      damage:
+        - {dice: 2d8, per_slot: 1}
+      text:
+        zh: 坐骑 5 尺内一个生物回复 2d8 + 法术环级 点生命值。长休后恢复。
+        en: One creature within 5 feet of the steed regains a number of Hit Points equal to 2d8 plus the spell's level. Recharges after a Long Rest.
+
+- id: dnd2024.summon.otherworldly_steed_fey
+  name: {zh: 异界坐骑, en: Otherworldly Steed}
+  variant: {zh: 妖精, en: Fey}
+  spell: dnd2024.spell.find_steed
+  creature_type: fey
+  size: large
+  ac: {base: 10, per_slot: 1}
+  hp: {base: 5, per_slot: 10}
+  hp_dice: {zh: d10，数量等于法术环级, en: "a number of d10s equal to the spell's level"}
+  speeds: {walk: 60, fly: 60}
+  speeds_require_slot: {fly: 4}
+  abilities: {str: 18, dex: 12, con: 14, int: 6, wis: 12, cha: 8}
+  senses: {}
+  passive_perception: 11
+  languages: {zh: 心灵感应 1 里（只与你通信）, en: "Telepathy 1 mile (works only with you)"}
+  traits:
+    - name: {zh: 生命纽带, en: Life Bond}
+      text:
+        zh: 当你因 1 环或更高环级的法术回复生命值时，若坐骑在你 5 尺内，它回复同等的生命值。
+        en: When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you're within 5 feet of it.
+  actions:
+    - name: {zh: 异界重击, en: Otherworldly Slam}
+      kind: melee
+      attack: spell
+      reach: 5
+      damage:
+        - {dice: 1d8, per_slot: 1, type: psychic}
+  bonus_actions:
+    - name: {zh: 妖精步, en: Fey Step}
+      kind: other
+      range: 60
+      text:
+        zh: 坐骑连同其骑乘者一起传送到 60 尺内一处你选定的空地。长休后恢复。
+        en: The steed teleports, along with its rider, to an unoccupied space of your choice up to 60 feet away from itself. Recharges after a Long Rest.
+
+- id: dnd2024.summon.otherworldly_steed_fiend
+  name: {zh: 异界坐骑, en: Otherworldly Steed}
+  variant: {zh: 邪魔, en: Fiend}
+  spell: dnd2024.spell.find_steed
+  creature_type: fiend
+  size: large
+  ac: {base: 10, per_slot: 1}
+  hp: {base: 5, per_slot: 10}
+  hp_dice: {zh: d10，数量等于法术环级, en: "a number of d10s equal to the spell's level"}
+  speeds: {walk: 60, fly: 60}
+  speeds_require_slot: {fly: 4}
+  abilities: {str: 18, dex: 12, con: 14, int: 6, wis: 12, cha: 8}
+  senses: {}
+  passive_perception: 11
+  languages: {zh: 心灵感应 1 里（只与你通信）, en: "Telepathy 1 mile (works only with you)"}
+  traits:
+    - name: {zh: 生命纽带, en: Life Bond}
+      text:
+        zh: 当你因 1 环或更高环级的法术回复生命值时，若坐骑在你 5 尺内，它回复同等的生命值。
+        en: When you regain Hit Points from a level 1+ spell, the steed regains the same number of Hit Points if you're within 5 feet of it.
+  actions:
+    - name: {zh: 异界重击, en: Otherworldly Slam}
+      kind: melee
+      attack: spell
+      reach: 5
+      damage:
+        - {dice: 1d8, per_slot: 1, type: necrotic}
+  bonus_actions:
+    - name: {zh: 邪眼凝视, en: Fell Glare}
+      kind: save
+      save: wis
+      save_dc: spell
+      range: 60
+      text:
+        zh: 坐骑 60 尺内一个它看得见的生物做感知豁免，失败在其下个回合结束前处于恐惧状态。长休后恢复。
+        en: Wisdom Saving Throw - DC equals your spell save DC, one creature within 60 feet the steed can see. Failure - The target has the Frightened condition until the end of your next turn. Recharges after a Long Rest.

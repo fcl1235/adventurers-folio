@@ -184,5 +184,27 @@ hit_die: 0
         self.assertEqual(bundle.errors, [])
 
 
+class DamageTypeVocabularyTest(unittest.TestCase):
+    """武器伤害类型与「全部 13 种伤害」是两个词表，名字必须分开。
+
+    曾经两个常量都叫 `DAMAGE_TYPES`（先 3 种、后 13 种），后定义会静默盖掉前一个，
+    于是「武器伤害类型是 fire」这种错数据能过校验。这条测试盯住它们不是一个对象。
+    """
+
+    def test_武器只管三种物理伤害(self):
+        from dnd5r.content import DAMAGE_TYPES, WEAPON_DAMAGE_TYPES
+        self.assertEqual(set(WEAPON_DAMAGE_TYPES),
+                         {"bludgeoning", "piercing", "slashing"})
+        self.assertIsNot(WEAPON_DAMAGE_TYPES, DAMAGE_TYPES)
+        self.assertEqual(len(DAMAGE_TYPES), 13)
+
+    def test_武器写能量伤害要报错(self):
+        from dnd5r.content import PluginError, parse_weapon
+        with self.assertRaises(PluginError):
+            parse_weapon({"id": "dnd2024.item.weapon.test",
+                          "name": {"zh": "试作", "en": "Test"},
+                          "kind": "weapon", "damage_type": "fire"})
+
+
 if __name__ == "__main__":
     unittest.main()

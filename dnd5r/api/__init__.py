@@ -109,6 +109,22 @@ def spell_info(bundle: ContentBundle, spell_id: str, locale: str = "zh",
     return spell_detail(bundle, spell_id, locale, character_level)
 
 
+def summon_info(bundle: ContentBundle, summon_id: str, slot_level: int = 0,
+                size: str = "", locale: str = "zh") -> dict:
+    """一只召唤物在某个环级下的 stat block 卡。
+
+    `caster_mod` 一律按 0 算：法术攻击加值 / 豁免 DC / 施法属性调整值**取决于谁在施法**，
+    卡片上写「＝你的法术攻击加值」比写一个假数字诚实。真要在战斗里结算，调用方再把
+    角色的调整值传进 `rules.summon.resolve`。
+    """
+    summon = bundle.summons.get(str(summon_id))
+    if summon is None:
+        raise PluginError("没有这个召唤物：%s（已加载：%s）"
+                          % (summon_id, ", ".join(sorted(bundle.summons)) or "无"))
+    slot = int(slot_level) or int(bundle.spell(summon.spell).level)
+    return summon.card(slot, locale, 0, size)
+
+
 def plan_spells(
     actor: Actor,
     content: ContentBundle,
@@ -1087,6 +1103,7 @@ __all__ = [
     "set_feat_choice", "save_character", "load_character", "SAVE_VERSION",
     "character_sheet", "actor_view", "roll_check", "CHECK_KINDS",
     "find_power", "use_power", "plugin_summary",
+    "spell_info", "summon_info",
     "eligible_forms_for", "morph_class_of", "form_options",
     # 前端要 catch 的是「调用失败」这件事，所以异常类型属于 api 的契约 ——
     # 不让 apps 去 import kernel.errors（C3），否则拦错误都得越界。

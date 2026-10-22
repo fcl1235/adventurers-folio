@@ -22,6 +22,7 @@ from ..kernel.errors import RuleError
 from ..model.actor import Actor
 from ..model.levels import ClassLevel
 from ..rules.resolver import Resolver
+from .summon import slot_curve
 
 
 def casting_ability(class_def: ClassDef) -> str:
@@ -252,6 +253,7 @@ def spell_detail(bundle: ContentBundle, spell_id: str,
     spell = bundle.spell(spell_id)
     data = spell.to_dict(locale)
     data["damage_at_base"] = spell.damage_at(int(spell.level))
+    data["summons"] = _summon_rows(bundle, spell, locale)
     if character_level is None:
         return data
     now = spell.scaling_at(int(character_level))
@@ -262,6 +264,32 @@ def spell_detail(bundle: ContentBundle, spell_id: str,
     data["damage_now"] = now if (now and spell.scaling_kind == "damage") \
         else data["damage_at_base"]
     return data
+
+
+def _summon_rows(bundle: ContentBundle, spell: SpellDef, locale: str) -> list[dict]:
+    """这个法术召出的生物，各在**基础环**下的样子 + 升环曲线。
+
+    基础环取法术自己的环级。曲线从基础环到 9 环，界面据此说明「升环会变多强」；
+    有一格算不出来（比如按体型分叉却没指定体型）就跳过那一格 —— 不能因为界面上
+    想画一条曲线，就让整条法术详情炸掉。
+
+    `caster_mod` 传 0：这里是**没有角色上下文**的查询，法术属性调整值是多少取决于
+    谁在施法。需要真数的场合（战斗结算）走 `api.summon_info(...)`，那里能拿到角色。
+    """
+    base = max(1, int(spell.level))
+    rows = []
+    for summon in bundle.summons_for_spell(spell.id):
+        # 按体型分叉的那只（活化物件）拿「中型」当默认行；真正的用法是让玩家按物件
+        # 体型选，`hp_by_size` 与 `by_slot` 都一并带出去，界面列出全部选项。
+        size = "medium" if summon.hp_by_size else ""
+        card = summon.card(base, locale, 0, size)
+        rows.append({
+            "card": card,
+            "size_note": summon.size_note.get(locale) if summon.size_note else "",
+            "hp_by_size": dict(summon.hp_by_size) if summon.hp_by_size else {},
+            "by_slot": slot_curve(summon, base, locale, 0, size),
+        })
+    return rows
 
 
 __all__ = [
