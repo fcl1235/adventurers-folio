@@ -17,7 +17,7 @@ from ..model.inventory import Inventory
 from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
 from ..model.resources import Pool, PoolKind, Refresh
-from ..model.statblock import Abilities, Statblock
+from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
 from .feats import collect_picks, hard_problems
 from .health import hit_dice_pool, hit_points_max
 from .modifiers import resolve as resolve_modifiers
@@ -124,6 +124,8 @@ def build_actor(
     actor_id: str = "pc.hero",
     kind: ActorKind = ActorKind.PC,
     extra_proficiencies: tuple[str, ...] = (),
+    extra_expertise: tuple[str, ...] = (),
+    extra_resistances: tuple[str, ...] = (),
     subclass: str | None = None,
     feats: tuple[str, ...] = (),
     choices: Mapping[str, tuple[str, ...]] | None = None,
@@ -193,12 +195,15 @@ def build_actor(
                        | frozenset(class_def.proficiencies)
                        | frozenset(extra_proficiencies)
                        | picks.proficiencies),
-        expertise=picks.expertise,
+        expertise=picks.expertise | frozenset(extra_expertise),
         feats=chosen_feats,
         choices=picked_choices,
-        resistances=picks.resistances,
+        resistances=picks.resistances | frozenset(extra_resistances),
         cantrips=spell_cantrips,
         prepared=spell_prepared,
+        # 原始属性（加值之前）必须留在档案里：存档、重建、界面改专长都要靠它。
+        # 显示值里混着加值，倒推是减不掉的（有上限通道，越过上限的部分不会计入）。
+        base_scores={key: int(scores[key]) for key in ABILITY_KEYS},
     )
 
     actor = Actor(
@@ -229,6 +234,96 @@ def build_actor(
         ))
     actor.resources.add(hit_dice_pool(class_id, class_def.hit_die, level))
     return actor
+
+
+def build_from_profile(
+    bundle: ContentBundle,
+    profile: Profile,
+    name_zh: str,
+    name_en: str,
+    actor_id: str = "pc.hero",
+    kind: ActorKind = ActorKind.PC,
+) -> Actor:
+    """按**档案**重建角色（读档、改专长、洗点都用它）。
+
+    为什么必须走 `build_actor` 而不是「改一改现有 Actor」：属性加值、HP 上限、
+    法位表、资源池全是建角色时一次算定的，散着改必然漏一处（改完体质，
+    HP 上限还是旧的）。所以唯一正确的做法是整只重建。
+
+    档案里有一类东西**推导不出来**：玩家单独挑的熟练、专精、抗性（`Profile`
+    里那些不由内容决定的项）。第一遍先按内容算，再把这些差值补回去 ——
+    循环最多两轮，因为补进去的项本身不会再生出新的差值。
+    """
+    if profile.is_multiclass:
+        # 兼职要合并位表、熟练来源与施法者等级，归 P7。现在悄悄按主职业建会算错。
+        raise RuleError("兼职角色的重建要合并位表与熟练来源，归 P7；当前只支持单职业")
+    entry = profile.classes[0]
+    scores = {key: profile.base_score(key) for key in ABILITY_KEYS}
+    subclass = next(
+        (sub for sub in profile.subclasses
+         if sub in bundle.subclasses and bundle.subclasses[sub].class_id == entry.class_id),
+        None,
+    )
+
+    extra_prof: tuple[str, ...] = ()
+    extra_exp: tuple[str, ...] = ()
+    extra_res: tuple[str, ...] = ()
+    actor: Actor | None = None
+    for _ in range(3):
+        actor = build_actor(
+            bundle, entry.class_id, int(entry.class_level), scores,
+            name_zh, name_en, actor_id=actor_id, kind=kind,
+            extra_proficiencies=extra_prof, extra_expertise=extra_exp,
+            extra_resistances=extra_res,
+            subclass=subclass, feats=profile.feats, choices=profile.choices,
+            cantrips=profile.cantrips, prepared=profile.prepared,
+        )
+        assert actor.profile is not None
+        got = actor.profile
+        missing_prof = tuple(sorted(set(profile.proficiencies) - set(got.proficiencies)))
+        missing_exp = tuple(sorted(set(profile.expertise) - set(got.expertise)))
+        missing_res = tuple(sorted(set(profile.resistances) - set(got.resistances)))
+        if not (missing_prof or missing_exp or missing_res):
+            return actor
+        extra_prof = tuple(sorted(set(extra_prof) | set(missing_prof)))
+        extra_exp = tuple(sorted(set(extra_exp) | set(missing_exp)))
+        extra_res = tuple(sorted(set(extra_res) | set(missing_res)))
+    # 补了两轮还差，说明差值在自我增殖（数据有问题），不能带着错往下走
+    raise RuleError("按档案重建时熟练/专精/抗性无法收敛，档案可能有矛盾项")
+
+
+def rebuild_actor(
+    bundle: ContentBundle,
+    actor: Actor,
+    profile: Profile | None = None,
+) -> Actor:
+    """重建并**保住运行时状态**：当前 HP、临时 HP、资源的已用数。
+
+    界面改一个专长就得重建（属性加值变了），但玩家不该因此回满血、
+    或者把用掉的狂暴次数吐回来 —— 那是两件不同的事。
+
+    `profile` 是「还没写进 actor 的档案」：先在一份新档案上重建，成功了再换掉旧的。
+    这样校验失败时 actor 一个字段都没动过。
+    """
+    profile = profile if profile is not None else actor.profile
+    if profile is None:
+        raise RuleError("角色没有职业档案，无法重建")
+    name = actor.statblock.name
+    fresh = build_from_profile(bundle, profile, name.zh, name.en,
+                               actor_id=actor.id, kind=actor.kind)
+    old_hp = actor.root().hp
+    fresh.hp.current = max(0, min(old_hp.current, fresh.hp.maximum))
+    fresh.hp.temp = old_hp.temp
+    for pool_id, pool in actor.root().resources.pools.items():
+        if not fresh.resources.has(pool_id):
+            continue
+        used = pool.capacity - pool.available
+        if used > 0:
+            fresh.resources.pools[pool_id].spend(used)
+    fresh.conditions = actor.conditions
+    fresh.effects = list(actor.effects)
+    fresh.display_name = actor.display_name
+    return fresh
 
 
 def class_level_of(actor: Actor, class_id: str) -> ClassLevel:

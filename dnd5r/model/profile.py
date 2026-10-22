@@ -13,6 +13,7 @@ from typing import Iterable, Mapping
 from ..kernel.errors import RuleError
 from ..kernel.ids import is_valid
 from .levels import ClassLevel, TotalLevel, as_class_level
+from .statblock import ABILITY_KEYS, SCORE_MAX, SCORE_MIN
 
 # 语言清单属于内容，不属于模型 —— 这里只保留 lazy 的自由字符串集合。
 
@@ -54,6 +55,10 @@ class Profile:
     # 因为配额来自 ClassDef 的表，模型层看不到内容。
     cantrips: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     prepared: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    # **建角色时输入的原始属性**（属性加值之前）。没有它，档案就还原不出角色：
+    # 显示值里混着专长/子职给的加值，倒推回去是减不掉的（有上限通道）。
+    # 存档、读档、以及界面里改一个专长都要靠它重建。
+    base_scores: Mapping[str, int] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.classes:
@@ -72,6 +77,19 @@ class Profile:
         unknown = set(self.expertise) - set(self.proficiencies)
         if unknown:
             raise RuleError("专精项不在熟练集合里：%s" % ", ".join(sorted(unknown)))
+        # 原始属性：要么整块不给（旧档、怪物），要么六项齐全。给一半视为数据错误 ——
+        # 「少写了 con」会被当成 0 去算 HP，错得悄无声息。
+        if self.base_scores:
+            missing = [key for key in ABILITY_KEYS if key not in self.base_scores]
+            if missing:
+                raise RuleError("原始属性缺项：%s" % ", ".join(missing))
+            for key in ABILITY_KEYS:
+                value = self.base_scores[key]
+                if not isinstance(value, int) or isinstance(value, bool):
+                    raise RuleError("原始属性 %s 必须是整数：%r" % (key, value))
+                if not (SCORE_MIN <= value <= SCORE_MAX):
+                    raise RuleError("原始属性 %s 超出 %d..%d：%r"
+                                    % (key, SCORE_MIN, SCORE_MAX, value))
 
     # --- 构造 ---------------------------------------------------------
     @classmethod
@@ -140,6 +158,17 @@ class Profile:
     def with_resistances(self, add: Iterable[str] = ()) -> "Profile":
         return replace(self, resistances=self.resistances | frozenset(add))
 
+    # --- 原始属性 -----------------------------------------------------
+    def with_base_scores(self, scores: Mapping[str, int]) -> "Profile":
+        """记录建角色时输入的属性（**加值之前**）。界面改属性、存档、重建都靠它。"""
+        return replace(self, base_scores={key: int(scores[key]) for key in ABILITY_KEYS})
+
+    def base_score(self, key: str) -> int:
+        """没有记录原始属性时抛错 —— 悄悄返回 0 会让重建出一个废角色。"""
+        if not self.base_scores:
+            raise RuleError("档案没有记录原始属性，无法重建角色（旧档需重新建角色）")
+        return int(self.base_scores[key])
+
     # --- 法术选择 -----------------------------------------------------
     def with_cantrips(self, class_id: str, spells: Iterable[str]) -> "Profile":
         """设定某个职业的已知戏法。空列表 = 清掉这一职业的记录。"""
@@ -167,6 +196,9 @@ class Profile:
             "resistances": sorted(self.resistances),
             "cantrips": {key: list(value) for key, value in self.cantrips.items()},
             "prepared": {key: list(value) for key, value in self.prepared.items()},
+            # 原始属性必须进档：没有它，读回来的角色只剩一堆派生值，改不了也重建不了
+            "base_scores": {key: self.base_scores[key] for key in ABILITY_KEYS
+                            if key in self.base_scores},
         }
 
     @classmethod
@@ -190,6 +222,8 @@ class Profile:
             resistances=frozenset(data.get("resistances", ())),
             cantrips={key: tuple(value) for key, value in (data.get("cantrips") or {}).items()},
             prepared={key: tuple(value) for key, value in (data.get("prepared") or {}).items()},
+            base_scores={str(key): int(value)
+                         for key, value in (data.get("base_scores") or {}).items()},
         )
 
 

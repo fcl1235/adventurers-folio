@@ -25,8 +25,9 @@ from ..model.statblock import Abilities, Statblock
 from ..rules.actioneconomy import ActionEconomy, ActionType
 from ..rules.armor import Loadout, ac_inputs, loadout_for
 from ..rules.build import (
-    available_powers, build_actor, eligible_forms_for, feat_defs, feat_picks,
-    morph_class_of, owner_class_id, subclass_defs,
+    available_powers, build_actor, build_from_profile, eligible_forms_for,
+    feat_defs, feat_picks, morph_class_of, owner_class_id, rebuild_actor,
+    subclass_defs,
 )
 from ..rules.contributions import (
     facts_for, modifiers_for, passive_defenses, passive_modifiers,
@@ -41,7 +42,7 @@ from ..rules.resolver import RefContext, Resolver, crit_text
 from ..rules.spellcasting import (
     casting_summary, check_spell_picks, spell_detail, spell_options,
 )
-from ..rules.feats import choice_prompt, prereq_report
+from ..rules.feats import choice_prompt, pick_key, prereq_report
 from ..rules.scores import bonus_totals, merge_bonuses, score_bonuses
 from ..rules.weapons import profiles_for
 from ..rules.powers import use_power as _use_power
@@ -151,6 +152,104 @@ def spell_plan(actor: Actor, content: ContentBundle, locale: str = "zh") -> list
         rows.append(casting_summary(content, actor, entry.class_id,
                                     entry.class_level, resolver, locale))
     return rows
+
+
+def set_feat_choice(
+    actor: Actor,
+    content: ContentBundle,
+    feat_id: str,
+    choice_id: str,
+    picked: Sequence[str],
+    index: int = 0,
+    locale: str = "zh",
+) -> Actor:
+    """改一个专长选择项，返回**重建后**的角色（属性加值会改一堆派生值）。
+
+    为什么不就地改：属性提升改了体质调整值，HP 上限、豁免、技能全要跟着变。
+    就地改字段必然漏一处，所以整只重建 —— 重建时保住当前 HP 与已用资源。
+
+    失败时抛错且**原角色一个字段都没动**：先在验证通过的档案上重建，
+    再整只换掉。界面可以把错误显示出来，角色仍是可用的。
+    """
+    profile = actor.profile
+    if profile is None:
+        raise RuleError("角色没有职业档案")
+    feat = content.feats.get(feat_id)
+    if feat is None:
+        raise RuleError("没有这个专长：%s" % feat_id)
+    if feat_id not in profile.feats:
+        raise RuleError("角色没有这个专长：%s" % feat.name.get(locale))
+    choice = next((item for item in feat.choices if item.id == choice_id), None)
+    if choice is None:
+        raise RuleError("专长「%s」没有选择项 %s" % (feat.name.get(locale), choice_id))
+    items = tuple(str(item) for item in picked)
+    key = pick_key(feat_id, choice_id, index)
+    updated = profile.with_choices({**profile.choices, key: items})
+    return rebuild_actor(content, actor, profile=updated)
+
+
+# --- 存档 -------------------------------------------------------------
+SAVE_VERSION = 1
+
+
+def save_character(actor: Actor, locale: str = "zh") -> dict:
+    """把角色写成可存盘的字典。**只写事实**，派生值一律不写（C5）。
+
+    派生值进档看着省事，读回来就是一包会过期的数字：内容一升级（比如某条
+    专长补了 +1），存档里的旧 AC 还在，界面到底信谁？
+    """
+    profile = actor.profile
+    if profile is None:
+        raise RuleError("角色没有职业档案，无法存档")
+    name = actor.statblock.name
+    root = actor.root()
+    return {
+        "version": SAVE_VERSION,
+        "id": actor.id,
+        "kind": actor.kind.value,
+        "name": {"zh": name.zh, "en": name.en},
+        "locale": locale,
+        "profile": profile.to_dict(),
+        "hp": {"current": int(root.hp.current), "temp": int(root.hp.temp)},
+        # 已用数按池 id 记：内容改了池容量也不会读到负数（读档时夹一次）
+        "resources": {pool_id: int(pool.used)
+                      for pool_id, pool in root.resources.pools.items()},
+    }
+
+
+def load_character(
+    content: ContentBundle,
+    data: Mapping[str, Any],
+    locale: str = "zh",
+) -> Actor:
+    """从存档重建角色。存档里缺原始属性（旧档）时明确报错，不猜。"""
+    version = int(data.get("version") or 0)
+    if version > SAVE_VERSION:
+        raise RuleError("存档版本 %d 比程序新（支持到 %d），请升级程序"
+                        % (version, SAVE_VERSION))
+    raw = data.get("profile")
+    if not isinstance(raw, Mapping):
+        raise RuleError("存档缺少 profile")
+    profile = Profile.from_dict(raw)
+    name = data.get("name") or {}
+    actor = build_from_profile(
+        content, profile,
+        str(name.get("zh") or "无名角色"),
+        str(name.get("en") or "Unnamed"),
+        actor_id=str(data.get("id") or "pc.hero"),
+    )
+    hp = data.get("hp") or {}
+    if "current" in hp:
+        actor.hp.current = max(0, min(int(hp["current"]), actor.hp.maximum))
+    actor.hp.temp = max(0, int(hp.get("temp") or 0))
+    for pool_id, used in (data.get("resources") or {}).items():
+        if not actor.resources.has(pool_id):
+            continue                      # 内容升级后池没了：忽略，别让读档失败
+        pool = actor.resources.pools[pool_id]
+        amount = min(int(used), pool.capacity)
+        if amount > 0:
+            pool.spend(amount)
+    return actor
 
 
 def subclass_options(
@@ -727,7 +826,8 @@ def plugin_summary(root: str = "plugins", locale: str = "zh") -> list[dict]:
 
 __all__ = [
     "VERSION", "load_content", "content_summary",
-    "create_actor", "new_character", "resolver_for",
+    "create_actor", "new_character", "resolver_for", "build_from_profile",
+    "set_feat_choice", "save_character", "load_character", "SAVE_VERSION",
     "character_sheet", "actor_view",
     "find_power", "use_power", "plugin_summary",
     "eligible_forms_for", "morph_class_of", "form_options",
