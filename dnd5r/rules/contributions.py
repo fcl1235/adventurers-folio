@@ -141,8 +141,59 @@ def skill_modifiers(modifiers, skill_key: str) -> list[Modifier]:
             + modifiers_for(modifiers, "skill_check"))
 
 
+# --- 诚实标记 ---------------------------------------------------------
+# 界面上必须能回答一个问题：「这条能力真的进了数值，还是只是规则文字？」
+# 不标出来的后果是玩家以为已经算过了 —— 那比不算更糟。
+APPLIED_CHANNELS = ("defense", "modifier", "proficiency", "score")
+# 认得出来但**还没有消费方**的通道（优势/劣势要等掷骰上下文，见 §15 G1）。
+MANUAL_CHANNELS = ("advantage",)
+CHANNEL_ZH = {"modifier": "加值", "score": "属性", "proficiency": "熟练",
+              "defense": "抗性/免疫", "advantage": "优势/劣势", "text": "说明文字"}
+
+
+def power_channels(power: Power) -> tuple[str, ...]:
+    """这个能力实际触碰了哪些通道。空 = 只有说明文字。"""
+    from .effects.grants import (      # 局部导入：effects 会 import 本包的 Modifier
+        GrantAdvantage, GrantDefense, GrantModifier, GrantProficiency,
+    )
+
+    found: set[str] = set()
+    for effect in power.effects:
+        if isinstance(effect, GrantModifier):
+            targets = {str(item.target) for item in effect.modifiers}
+            # `score.<属性>` 改的是属性值本身，与 d20 加值是两条路
+            found.add("score" if any(item.startswith("score.") for item in targets)
+                      else "modifier")
+        elif isinstance(effect, GrantProficiency):
+            found.add("proficiency")
+        elif isinstance(effect, GrantDefense):
+            found.add("defense")
+        elif isinstance(effect, GrantAdvantage):
+            found.add("advantage")
+    return tuple(sorted(found))
+
+
+def power_status(power: Power) -> str:
+    """四种状态，别合并：
+
+    - `counted` 已经进了常驻数值（加值/属性/熟练/抗性）
+    - `active`  有按钮，数值在**使用那一刻**结算（回气、行动激增）
+    - `manual`  认得出但还没有消费方（优势/劣势，见 §15 G1）
+    - `text`    只有说明文字，什么都没算
+    """
+    channels = set(power_channels(power))
+    if channels & set(APPLIED_CHANNELS):
+        return "counted"
+    if power.is_button:
+        return "active"
+    if channels & set(MANUAL_CHANNELS):
+        return "manual"
+    return "text"
+
+
 __all__ = [
     "facts_for", "passive_modifiers", "passive_proficiencies", "passive_defenses",
     "modifiers_for", "save_modifiers", "skill_modifiers",
     "ScoreBonus", "score_bonuses", "score_bonus_of", "apply_score_bonuses",
+    "power_channels", "power_status", "APPLIED_CHANNELS", "MANUAL_CHANNELS", "CHANNEL_ZH",
 ]

@@ -31,7 +31,8 @@ from ..rules.build import (
 )
 from ..rules.contributions import (
     facts_for, modifiers_for, passive_defenses, passive_modifiers,
-    passive_proficiencies, save_modifiers, skill_modifiers,
+    passive_proficiencies, power_channels, power_status, save_modifiers,
+    skill_modifiers,
 )
 from ..rules.effects import EffectContext
 from ..rules.health import hit_dice_average
@@ -439,11 +440,27 @@ def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list
             "name": feat.name.get(locale),
             "kind": feat.kind,
             "level": int(feat.level),
+            "status": _feat_status(feat),
             "text": feat.text.get(locale),
             "choices": choices,
             "pending": any(row["key"] in picks.pending for row in choices),
         })
     return rows
+
+
+def _feat_status(feat) -> str:
+    """专长的诚实标记。与能力同一套词汇（counted/active/manual/text）。
+
+    有选择项的专长一定算数（选完就落属性/熟练/抗性），所以直接算 counted；
+    剩下的看它挂的能力里有没有真被消费的通道。
+    """
+    if feat.choices:
+        return "counted"
+    statuses = {power_status(power) for power in feat.powers}
+    for level in ("counted", "active", "manual"):
+        if level in statuses:
+            return level
+    return "text"
 
 
 def feat_options(
@@ -574,6 +591,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
             "subtitle": power.subtitle(locale),
             "button": power.is_button,
             "blocked": reasons,
+            # 诚实标记：这条能力到底进没进数值。没进就不许让玩家以为算过了。
+            "status": power_status(power),
+            "channels": list(power_channels(power)),
         })
 
     sheet: dict[str, Any] = {

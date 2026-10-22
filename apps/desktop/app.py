@@ -17,6 +17,7 @@ from tkinter import ttk
 import dnd5r.api as api
 
 from .pages import OverviewPage
+from .pages_feats import FeatPage
 from .pages_spells import SpellPage
 from .widgets import COL_MID, hint_bar
 
@@ -67,7 +68,9 @@ class DesktopApp(tk.Tk):
         self.book.add(self.overview, text="概览")
         self.spells = SpellPage(self.book, self)
         self.book.add(self.spells, text="法术")
-        self.pages = [self.overview, self.spells]
+        self.feats = FeatPage(self.book, self)
+        self.book.add(self.feats, text="专长")
+        self.pages = [self.overview, self.spells, self.feats]
 
     # --- 刷新 -------------------------------------------------------------
     def refresh(self) -> None:
@@ -76,6 +79,11 @@ class DesktopApp(tk.Tk):
         for page in self.pages:
             page.refresh(self.sheet)
         self._refresh_header()
+
+    def apply_actor(self, actor) -> None:
+        """换掉角色并重画。改档案（专长选择项）后必须整只换 —— 派生值全变了。"""
+        self.actor = actor
+        self.refresh()
 
     def _refresh_header(self) -> None:
         sheet = self.sheet

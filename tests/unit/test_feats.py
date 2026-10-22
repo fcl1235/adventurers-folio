@@ -25,6 +25,7 @@ PLUGINS = ROOT / "plugins"
 SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
 
 ASI = "dnd2024.feat.ability_score_improvement"
+ALERT = "dnd2024.feat.alert"
 DEFENSE = "dnd2024.feat.defense"
 ARCHERY = "dnd2024.feat.archery"
 TOUGH = "dnd2024.feat.tough"
@@ -389,6 +390,57 @@ class RepeatFeatTest(unittest.TestCase):
         actor = self._fighter(8, [ASI, ASI], {ASI + ".boost": ("str", "str")})
         needed = api.character_sheet(actor, self.bundle)["choices_needed"]
         self.assertEqual(needed, [ASI + "#1.boost"])
+
+
+class HonestyMarkTest(unittest.TestCase):
+    """「这条专长到底算没算进数值」必须能在数据里读出来。
+
+    没有这个标记，界面只能把 79 条专长画得一样 —— 玩家会以为「警觉」的
+    +5 先攻已经算进去了。这一组盯三件事：词汇封闭、有 choices 的一定算数、
+    「只有文字」的那一档真的存在（不是空集合）。
+    """
+
+    STATUSES = {"counted", "active", "manual", "text"}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+        cls.sheet = api.character_sheet(
+            api.new_character(cls.bundle, "dnd2024.class.fighter", 20, dict(SCORES)), cls.bundle)
+
+    def test_every_feat_has_a_known_status(self):
+        for feat in self.bundle.feats.values():
+            status = api._feat_status(feat)
+            self.assertIn(status, self.STATUSES, feat.id)
+
+    def test_feats_with_choices_are_counted(self):
+        for feat in self.bundle.feats.values():
+            if feat.choices:
+                self.assertEqual(api._feat_status(feat), "counted", feat.id)
+
+    def test_text_only_feats_exist_and_are_labelled(self):
+        text_only = [feat.id for feat in self.bundle.feats.values()
+                     if api._feat_status(feat) == "text"]
+        self.assertGreater(len(text_only), 0,
+                           "一条「只有文字」的都没有 —— 标记大概率是假的")
+
+    def test_power_status_distinguishes_buttons(self):
+        """有按钮的能力在使用时结算，不能和「只有文字」混为一谈。"""
+        from dnd5r.rules.build import available_powers
+        from dnd5r.rules.contributions import power_status
+
+        actor = api.new_character(self.bundle, "dnd2024.class.fighter", 5, dict(SCORES))
+        statuses = {power.name.zh: power_status(power) for power in available_powers(self.bundle, actor)}
+        self.assertEqual(statuses.get("回气"), "active")
+        self.assertEqual(statuses.get("额外攻击"), "counted")
+
+    def test_sheet_rows_carry_status(self):
+        actor = api.new_character(self.bundle, "dnd2024.class.fighter", 8, dict(SCORES),
+                                  feats=[ALERT])
+        sheet = api.character_sheet(actor, self.bundle)
+        self.assertEqual(sheet["feats"][0]["status"], "text")
+        for power in sheet["powers"]:
+            self.assertIn(power["status"], self.STATUSES)
 
 
 if __name__ == "__main__":

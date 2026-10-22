@@ -24,17 +24,24 @@ if str(ROOT) not in sys.path:
 import dnd5r.api as api                      # noqa: E402
 from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
+from apps.desktop.pages_feats import FeatPage  # noqa: E402
 from apps.desktop.pages_spells import SpellPage, _chosen_ids  # noqa: E402
 from apps.desktop.widgets import COL_MID, COL_RIGHT  # noqa: E402
 
 SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
 INT_SCORES = {"str": 8, "dex": 14, "con": 14, "int": 17, "wis": 12, "cha": 10}
+# (标签, 职业, 等级, 子职, 属性, 专长)
 CASES = [
-    ("战士 5", "dnd2024.class.fighter", 5, None, SCORES),
-    ("法师 5", "dnd2024.class.wizard", 5, None, INT_SCORES),
-    ("德鲁伊 8 · 大地", "dnd2024.class.druid", 8, "dnd2024.subclass.druid.circle_of_the_land", SCORES),
-    ("游荡者 3", "dnd2024.class.rogue", 3, None, {"str": 10, "dex": 17, "con": 14,
-                                                  "int": 12, "wis": 12, "cha": 10}),
+    ("战士 5", "dnd2024.class.fighter", 5, None, SCORES, ()),
+    ("法师 5", "dnd2024.class.wizard", 5, None, INT_SCORES, ()),
+    ("德鲁伊 8 · 大地", "dnd2024.class.druid", 8,
+     "dnd2024.subclass.druid.circle_of_the_land", SCORES, ()),
+    ("游荡者 3", "dnd2024.class.rogue", 3, None,
+     {"str": 10, "dex": 17, "con": 14, "int": 12, "wis": 12, "cha": 10}, ()),
+    # 专长必须单独跑一档：没有专长的角色会让「专长页」看起来永远是对的
+    ("战士 8 · 专长", "dnd2024.class.fighter", 8, None, SCORES,
+     ("dnd2024.feat.ability_score_improvement", "dnd2024.feat.skill_expert",
+      "dnd2024.feat.alert")),
 ]
 
 
@@ -93,6 +100,50 @@ def _check_spells(label: str, page: SpellPage, stats: dict) -> list[str]:
     return problems
 
 
+def _check_feats(label: str, page: FeatPage, stats: dict) -> list[str]:
+    """专长页：清单与 sheet 一致；选择项真能写进去；诚实标记必须说得清。"""
+    problems: list[str] = []
+    feats = page._feats
+    if page.feats.row_count != len(feats):
+        problems.append("%s：专长清单 %d 行，sheet 是 %d 条"
+                        % (label, page.feats.row_count, len(feats)))
+    for row in feats:
+        index = page.feats.index_of(row["id"])
+        if index < 0:
+            problems.append("%s：清单里找不到专长 %s" % (label, row["id"]))
+            continue
+        if row["name"] not in page.feats.text_at(index):
+            problems.append("%s：专长行没有名字（%s）" % (label, row["id"]))
+
+    choice = page._choice()
+    if not choice:
+        return problems
+    if str(page.add_button.cget("state")) == "disabled" and int(choice["remaining"]) > 0:
+        problems.append("%s：还差 %d 项却不让选" % (label, choice["remaining"]))
+        return problems
+    if int(choice["remaining"]) <= 0:
+        return problems
+
+    value = str((choice.get("options") or [""])[0])
+    page.options.select_id(value)
+    before = list(choice.get("picked") or [])
+    if not page.add_pick():
+        problems.append("%s：加选择项失败（%s）" % (label, page.status_var.get()))
+        return problems
+    stats["feat_picks"] = stats.get("feat_picks", 0) + 1
+    after = list(page._choice().get("picked") or [])
+    if len(after) != len(before) + 1:
+        problems.append("%s：点了加上但选择没变（%s → %s）" % (label, before, after))
+    if not page.clear_picks():
+        problems.append("%s：清空选择项失败（%s）" % (label, page.status_var.get()))
+    elif page._choice().get("picked"):
+        problems.append("%s：清空后还留着 %s" % (label, page._choice()["picked"]))
+    # 诚实标记：四条里必须有一条对得上（不能是空字符串）
+    if not page.honesty.text.get("1.0", "end").strip():
+        problems.append("%s：专长页没有说明「算没算进数值」" % label)
+    return problems
+
+
 def main() -> int:
     bundle = api.load_content(ROOT / "plugins")
     if bundle.errors:
@@ -103,8 +154,9 @@ def main() -> int:
     problems: list[str] = []
     page_count = 0
     stats: dict = {}
-    for label, class_id, level, subclass, scores in CASES:
-        actor = api.new_character(bundle, class_id, level, scores, subclass=subclass)
+    for label, class_id, level, subclass, scores, feats in CASES:
+        actor = api.new_character(bundle, class_id, level, scores,
+                                  subclass=subclass, feats=feats)
         app = DesktopApp(bundle, actor, selftest=True)   # withdrawn，永不显示
         try:
             page_count = len(app.pages)
@@ -133,6 +185,8 @@ def main() -> int:
                     problems.extend(_check_skills(label, page, app.sheet))
                 elif isinstance(page, SpellPage):
                     problems.extend(_check_spells(label, page, stats))
+                elif isinstance(page, FeatPage):
+                    problems.extend(_check_feats(label, page, stats))
             if app.winfo_ismapped():
                 problems.append("%s：窗口被映射了（零弹窗铁律）" % label)
         finally:
@@ -143,7 +197,9 @@ def main() -> int:
             print("[FAIL] %s" % item)
         return 1
     print("LAYOUT OK —— %d 个角色 × %d 页全部在预算内；"
-          "法术页往返写库 %d 次" % (len(CASES), page_count, stats.get("toggles", 0)))
+          "法术页写库 %d 次 / 专长页写库 %d 次"
+          % (len(CASES), page_count, stats.get("toggles", 0),
+             stats.get("feat_picks", 0)))
     return 0
 
 

@@ -81,6 +81,9 @@ class DesktopAppTest(unittest.TestCase):
 
 WIZARD = "dnd2024.class.wizard"
 INT_SCORES = {"str": 8, "dex": 14, "con": 14, "int": 17, "wis": 12, "cha": 10}
+ASI = "dnd2024.feat.ability_score_improvement"
+ALERT = "dnd2024.feat.alert"
+SKILL_EXPERT = "dnd2024.feat.skill_expert"
 
 
 class SpellPageTest(unittest.TestCase):
@@ -172,6 +175,120 @@ class SpellPageTest(unittest.TestCase):
         page.prepared.select_id(target)
         page.refresh(page.app.sheet)
         self.assertEqual(page.prepared.selected_id(), target)
+
+
+class FeatPageTest(unittest.TestCase):
+    """P6f 验收：专长的选择项能选、能撤，而且「没算进数值」要说出来。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _page(self, feats, class_id=FIGHTER, level=8, scores=SCORES):
+        actor = api.new_character(self.bundle, class_id, level, scores, feats=feats)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app, app.feats
+
+    def _open(self, page, feat_id):
+        page.feats.select_id(feat_id)
+        page._feat_id = feat_id
+        page._choice_id = ""
+        page._fill_detail()
+
+    def test_lists_feats_with_pending_mark(self):
+        _, page = self._page([ASI])
+        self.assertEqual(page.feats.row_count, 1)
+        self.assertIn("属性值提升", page.feats.text_at(0))
+        self.assertIn("待选", page.feats.text_at(0))
+
+    def test_add_pick_updates_character(self):
+        """属性提升是「两项各 +1」：选两次才 +2，选一次只是待办。"""
+        app, page = self._page([ASI])
+        page.options.select_id("str")
+        self.assertTrue(page.add_pick(), page.status_var.get())
+        self.assertEqual(app.actor.top().statblock.abilities.score("str"), 16)
+        self.assertTrue(page.add_pick(), page.status_var.get())
+        self.assertEqual(app.actor.top().statblock.abilities.score("str"), 18)
+        self.assertEqual(app.sheet["feats"][0]["choices"][0]["picked"], ["str", "str"])
+
+    def test_con_boost_raises_hp(self):
+        app, page = self._page([ASI])
+        page.options.select_id("con")
+        page.add_pick()
+        page.options.select_id("con")
+        before = app.actor.hp.maximum
+        self.assertTrue(page.add_pick(), page.status_var.get())
+        self.assertGreater(app.actor.hp.maximum, before)
+        self.assertEqual(app.sheet["hp"]["maximum"], app.actor.hp.maximum)
+
+    def test_overflow_refused_and_state_kept(self):
+        app, page = self._page([ASI])
+        for _ in range(2):
+            page.options.select_id("str")
+            page.add_pick()
+        page.options.select_id("dex")
+        self.assertFalse(page.add_pick(), "超过 2 项还写进去了")
+        self.assertIn("最多选", page.status_var.get())
+        self.assertEqual(app.sheet["feats"][0]["choices"][0]["picked"], ["str", "str"])
+
+    def test_remove_and_clear(self):
+        app, page = self._page([ASI])
+        page.options.select_id("str")
+        page.add_pick()
+        page.add_pick()
+        page.options.select_id("str")
+        self.assertTrue(page.remove_pick(), page.status_var.get())
+        self.assertEqual(page._choice()["picked"], ["str"])
+        self.assertTrue(page.clear_picks(), page.status_var.get())
+        self.assertEqual(page._choice()["picked"], [])
+
+    def test_repeat_value_removed_one_at_a_time(self):
+        """属性提升要能「力量、力量」：去掉一个不能把两个都删掉。"""
+        _, page = self._page([ASI])
+        page.options.select_id("str")
+        page.add_pick()
+        page.add_pick()
+        page.options.select_id("str")
+        page.remove_pick()
+        self.assertEqual(page._choice()["picked"], ["str"])
+
+    def test_honesty_says_text_only_feat_is_not_counted(self):
+        """警觉（Alert）在本程序里只有规则文字 —— 界面必须说出来。"""
+        _, page = self._page([ALERT])
+        self._open(page, ALERT)
+        text = page.honesty.text.get("1.0", "end")
+        self.assertIn("未计入数值", text)
+        self.assertIn("□", page.feats.text_at(0))
+
+    def test_honesty_says_counted_feat_is_counted(self):
+        _, page = self._page([ASI])
+        self.assertIn("已计入数值", page.honesty.text.get("1.0", "end"))
+
+    def test_feat_without_choices_disables_buttons(self):
+        _, page = self._page([ALERT])
+        self._open(page, ALERT)
+        for button in (page.add_button, page.remove_button, page.clear_button):
+            self.assertEqual(str(button.cget("state")), "disabled")
+
+    def test_choice_switch_keeps_each_choice_separate(self):
+        """技艺专家有三个选择项（技能/专精/属性）：切到另一个不能互相覆盖。"""
+        app, page = self._page([SKILL_EXPERT])
+        ids = [row["id"] for row in page._feat()["choices"]]
+        self.assertGreater(len(ids), 1)
+        page._choice_id = "skill"
+        page._fill_options()
+        page.options.select_id("stealth")
+        self.assertTrue(page.add_pick(), page.status_var.get())
+        for choice_id in ids:
+            page._choice_id = choice_id
+            page._fill_options()
+            picked = page._choice()["picked"]
+            if choice_id == "skill":
+                self.assertEqual(picked, ["stealth"])
+            else:
+                self.assertEqual(picked, [], "别的选择项被写脏了")
+        self.assertIn("skill.stealth", app.actor.profile.proficiencies)
 
 
 if __name__ == "__main__":
