@@ -47,7 +47,11 @@ def _chosen_ids(bucket: dict) -> list[str]:
             for row in (bucket.get("chosen") or [])]
 
 
-def spell_text(row: dict) -> str:
+SCALING_ZH = {"damage": "伤害骰", "extra_damage": "额外伤害",
+              "beams": "光束数", "range": "射程（尺）", "weapon_die": "武器骰"}
+
+
+def spell_text(row: dict, info: dict | None = None) -> str:
     """一条法术的完整说明（右栏）。用选项行里现成的字段拼，不查第二遍表。"""
     level = int(row.get("level") or 0)
     parts = ["%s（%s）" % (row["name"], "戏法" if level == 0 else "%d 环" % level)]
@@ -86,6 +90,17 @@ def spell_text(row: dict) -> str:
             parts.append("伤害类型：%s" % row["damage_type"])
     if row.get("upcast"):
         parts.append("升环：" + str(row["upcast"]))
+    # 戏法成长：**不是**环位伤害表的一部分，5/11/17 看的是角色等级
+    scaling = row.get("scaling") or {}
+    levels = scaling.get("levels") or {}
+    if levels:
+        tag = SCALING_ZH.get(str(scaling.get("kind")), str(scaling.get("kind")))
+        parts.append("戏法成长（%s）：%s"
+                     % (tag, " / ".join("%s 级 %s" % (level, value)
+                                        for level, value in sorted(levels.items()))))
+        if info and info.get("scaling_now"):
+            parts.append("你现在 %s 级，按 %s 算"
+                         % (info.get("character_level"), info["scaling_now"]))
     return "\n".join(parts)
 
 
@@ -286,7 +301,13 @@ class SpellPage(ttk.Frame):
         pane = self.cantrips if kind == "cantrips" else self.prepared
         spell_id = pane.selected_id()
         row = self._row(kind, spell_id) if spell_id else {}
-        self.detail.set_text(spell_text(row) if row else "")
+        if not row:
+            self.detail.set_text("")
+            return
+        # 「当前等级对应哪一档」是规则，问 api；页面只负责把答案排成文本
+        info = api.spell_info(self.app.bundle, spell_id,
+                              character_level=int((self.app.sheet or {}).get("total_level") or 0))
+        self.detail.set_text(spell_text(row, info))
 
     def show(self, kind: str, spell_id: str) -> str:
         """自检入口：选中某个法术并返回右栏文字（不依赖真实点击）。"""

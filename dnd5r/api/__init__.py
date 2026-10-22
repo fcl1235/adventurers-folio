@@ -98,9 +98,14 @@ def spell_catalog(
     }
 
 
-def spell_info(bundle: ContentBundle, spell_id: str, locale: str = "zh") -> dict:
-    """单条法术的完整展示数据（含基础环的伤害骰式）。"""
-    return spell_detail(bundle, spell_id, locale)
+def spell_info(bundle: ContentBundle, spell_id: str, locale: str = "zh",
+               character_level: int | None = None) -> dict:
+    """单条法术的完整展示数据（含基础环的伤害骰式）。
+
+    传 `character_level` 才会按 5 / 11 / 17 级给出戏法成长后的骰式 ——
+    成长看**角色等级**，不是环位。
+    """
+    return spell_detail(bundle, spell_id, locale, character_level)
 
 
 def plan_spells(

@@ -12,6 +12,7 @@
     save: dex
     area: {shape: sphere, feet: 5}
     damage: {type: acid, 0: 1d6}
+    scaling: {kind: damage, 5: 2d6, 11: 3d6, 17: 4d6}
     text:
       zh: |-
         对 60 尺内 1 个生物或 2 个相邻生物造成 1d6 强酸伤害(敏捷豁免免伤)。
@@ -28,6 +29,7 @@
     duration: instant
     attack: melee
     damage: {type: necrotic, 0: 1d10}
+    scaling: {kind: damage, 5: 2d10, 11: 3d10, 17: 4d10}
     text:
       zh: |-
         触碰造成 1d10 黯蚀伤害, 目标无法恢复 HP 至你下回合结束。
@@ -75,6 +77,7 @@
     duration: instant
     attack: ranged
     damage: {type: force, 0: 1d10}
+    scaling: {kind: beams, 5: 2, 11: 3, 17: 4}
     text:
       zh: |-
         射程 120 尺, 1 道 1d10 力场伤害光束; 5 级起 2 道, 11 级 3 道, 17 级 4 道。
@@ -106,6 +109,7 @@
     duration: instant
     attack: ranged
     damage: {type: fire, 0: 1d10}
+    scaling: {kind: damage, 5: 2d10, 11: 3d10, 17: 4d10}
     text:
       zh: |-
         远程法术攻击, 命中造成 1d10 火焰伤害(5 级起递增)。
@@ -212,6 +216,7 @@
     duration: instant
     attack: ranged
     damage: {type: poison, 0: 1d12}
+    scaling: {kind: damage, 5: 2d12, 11: 3d12, 17: 4d12}
     text:
       zh: |-
         对 30 尺内目标造成 1d12 毒素伤害(体质豁免免伤)。
@@ -242,6 +247,7 @@
     duration: {kind: time, zh: 10 分钟, en: 10 minutes}
     attack: ranged
     damage: {type: fire, 0: 1d8}
+    scaling: {kind: damage, 5: 2d8, 11: 3d8, 17: 4d8}
     text:
       zh: |-
         手中生出火焰, 可照明, 也可投掷造成 1d8 火焰伤害。
@@ -258,6 +264,7 @@
     duration: instant
     attack: ranged
     damage: {type: cold, 0: 1d8}
+    scaling: {kind: damage, 5: 2d8, 11: 3d8, 17: 4d8}
     text:
       zh: |-
         远程法术攻击, 1d8 寒冷伤害并使目标速度 -10 尺。
@@ -289,6 +296,7 @@
     duration: instant
     save: dex
     damage: {type: radiant, 0: 1d8}
+    scaling: {kind: damage, 5: 2d8, 11: 3d8, 17: 4d8}
     text:
       zh: |-
         目标 60 尺内, 敏捷豁免失败受 1d8 光耀伤害(无掩体加成)。
@@ -304,6 +312,7 @@
     components: [v, s, m]
     material: "mistletoe"
     duration: {kind: time, zh: 1 分钟, en: 1 minute}
+    scaling: {kind: weapon_die, 5: d10, 11: d12, 17: 2d6}
     text:
       zh: |-
         让木棍/长棍以施法属性攻击, 伤害变 1d8+施法属性, 持续 1 分钟。
@@ -320,6 +329,7 @@
     duration: instant
     attack: melee
     damage: {type: lightning, 0: 1d8}
+    scaling: {kind: damage, 5: 2d8, 11: 3d8, 17: 4d8}
     text:
       zh: |-
         近战法术攻击, 1d8 闪电伤害, 目标无法借机攻击。
@@ -335,6 +345,7 @@
     components: []
     duration: instant
     attack: ranged
+    scaling: {kind: damage, 5: 2d8, 11: 3d8, 17: 4d8}
     text:
       zh: |-
         远程法术攻击, 1d8 伤害(类型自选), 掷出 8 可追加骰。
@@ -349,6 +360,7 @@
     range: {feet: 15}
     components: [v, s]
     duration: instant
+    scaling: {kind: range, 5: 30, 11: 60, 17: 120}
     text:
       zh: |-
         触碰一个 0 HP 生物, 使其稳定(不再做死亡豁免)。
@@ -365,6 +377,7 @@
     duration: instant
     attack: ranged
     damage: {type: radiant, 0: 1d8}
+    scaling: {kind: damage, 5: 2d8, 11: 3d8, 17: 4d8}
     text:
       zh: |-
         发出星辉, 造成 1d8 光耀伤害, 并让目标显形(防隐形)。
@@ -394,6 +407,7 @@
     components: [s, m]
     material: "a weapon with which you have proficiency and that is worth 1+ CP"
     duration: instant
+    scaling: {kind: extra_damage, 5: 1d6, 11: 2d6, 17: 3d6}
     text:
       zh: |-
         用施法属性做一次武器攻击, 伤害类型改为光耀, 可附加 1d6。
@@ -410,6 +424,7 @@
     duration: instant
     save: wis
     damage: {type: psychic, 0: 1d6}
+    scaling: {kind: damage, 5: 2d6, 11: 3d6, 17: 4d6}
     text:
       zh: |-
         目标感知豁免失败: 1d6 心灵伤害, 且下次攻击劣势。

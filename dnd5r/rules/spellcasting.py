@@ -241,11 +241,26 @@ def casting_summary(
     }
 
 
-def spell_detail(bundle: ContentBundle, spell_id: str, locale: str = "zh") -> dict:
-    """单条法术的展示数据（含该环位的伤害骰式）。"""
+def spell_detail(bundle: ContentBundle, spell_id: str,
+                 locale: str = "zh", character_level: int | None = None) -> dict:
+    """单条法术的展示数据（含该环位的伤害骰式）。
+
+    给了 `character_level` 才有戏法成长 —— 5 / 11 / 17 级的档位看的是**角色等级**，
+    不是环位。没给的场合（法术目录、未经角色上下文的查询）宁可返回空，
+    也不要按「1 级角色」给一个会骗人的骰式。
+    """
     spell = bundle.spell(spell_id)
     data = spell.to_dict(locale)
     data["damage_at_base"] = spell.damage_at(int(spell.level))
+    if character_level is None:
+        return data
+    now = spell.scaling_at(int(character_level))
+    data["character_level"] = int(character_level)
+    data["scaling_now"] = now
+    # 只有「伤害骰被替换」这一类才改基础伤害；光束数 / 射程 / 武器骰是别的东西，
+    # 硬塞进 damage 会让「多道光束的法术 = 一颗更大的骰子」这种错读法成立。
+    data["damage_now"] = now if (now and spell.scaling_kind == "damage") \
+        else data["damage_at_base"]
     return data
 
 

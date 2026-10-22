@@ -1038,6 +1038,11 @@ class SpellDef:
     damage: Mapping[int, str] = field(default_factory=dict)
     damage_type: str = ""
     upcast: str = ""
+    # **戏法的成长档**：角色等级 → 值。和 `damage`（按环位查）是两条轴，
+    # 混成一张表会让 5 级角色用 0 环位施法时查到错误的骰子。
+    # `scaling_kind` 说明这个值是什么：伤害骰 / 额外伤害 / 光束数 / 射程 / 武器骰。
+    scaling: Mapping[int, str] = field(default_factory=dict)
+    scaling_kind: str = ""
     source: str = ""
 
     def __post_init__(self) -> None:
@@ -1061,6 +1066,7 @@ class SpellDef:
                 raise PluginError("%s 的成分只能是 v/s/m：%r" % (self.id, token))
         if self.level == 0 and self.damage and 0 not in self.damage:
             raise PluginError("%s 是戏法，damage 表必须从 0 档开始" % self.id)
+        _check_scaling(self)
 
     @property
     def is_cantrip(self) -> bool:
@@ -1074,6 +1080,15 @@ class SpellDef:
     def damage_at(self, slot_level: int) -> str:
         """在该环位施放时的伤害骰式；查不到就返回空串（不是 0）。"""
         return lookup_dice(self.damage, int(slot_level))
+
+    def scaling_at(self, character_level: int) -> str:
+        """**角色等级**达到哪一档就取哪一档（5 / 11 / 17）。没写成长就返回空串。
+
+        不要和 `damage_at` 混：那个查的是环位。戏法不能升环，成长只看角色等级。
+        """
+        if not self.scaling:
+            return ""
+        return lookup_dice(self.scaling, int(character_level))
 
     def to_dict(self, locale: str = "zh") -> dict:
         return {
@@ -1098,7 +1113,52 @@ class SpellDef:
             "damage": {int(key): value for key, value in self.damage.items()},
             "damage_type": self.damage_type,
             "upcast": self.upcast,
+            "scaling": {"kind": self.scaling_kind,
+                        "levels": {int(key): value for key, value in self.scaling.items()}},
         }
+
+
+# 戏法成长档「是什么」。都用文本存值，但语义不同，界面必须能分开说：
+#   伤害骰被替换 / 追加上去 / 光束数 / 射程 / 武器骰面
+SCALING_KINDS = ("damage", "extra_damage", "beams", "range", "weapon_die")
+_SCALING_LEVELS = (5, 11, 17)
+
+
+def _check_scaling(spell: "SpellDef") -> None:
+    """成长档一错，5 级之后整张卡都在骗人 —— 所以在加载期就把数据钉死。"""
+    if not spell.scaling:
+        if spell.scaling_kind:
+            raise PluginError("%s 写了 scaling_kind 却没有 scaling 表" % spell.id)
+        return
+    if not spell.scaling_kind:
+        raise PluginError("%s 有成长表却没写 scaling_kind（%s）"
+                          % (spell.id, "/".join(SCALING_KINDS)))
+    if spell.scaling_kind not in SCALING_KINDS:
+        raise PluginError("%s 的 scaling_kind 不认识：%r（可选 %s）"
+                          % (spell.id, spell.scaling_kind, "/".join(SCALING_KINDS)))
+    if not spell.is_cantrip:
+        # 有环法术的长进靠升环（`damage` 表），再写一条成长轴就会出现两个真相
+        raise PluginError("%s 不是戏法，成长档只对戏法有意义（升环请写 damage 表）"
+                          % spell.id)
+    for key in spell.scaling:
+        if int(key) not in _SCALING_LEVELS:
+            raise PluginError("%s 的成长档只能是 %s 级，实际写了 %r"
+                              % (spell.id, "/".join(str(item) for item in _SCALING_LEVELS), key))
+    for key, value in spell.scaling.items():
+        text = str(value)
+        if spell.scaling_kind in ("damage", "extra_damage", "weapon_die"):
+            try:
+                parse_dice(text)
+            except DiceError as exc:
+                raise PluginError("%s 的成长档 %s 不是合法骰式：%r（%s）"
+                                  % (spell.id, key, text, exc))
+        else:
+            try:
+                if int(text) <= 0:
+                    raise ValueError
+            except (TypeError, ValueError):
+                raise PluginError("%s 的成长档 %s 必须是正整数：%r"
+                                  % (spell.id, key, text))
 
 
 def lookup_dice(table: Mapping[int, str], level: int) -> str:
@@ -1154,6 +1214,25 @@ def _parse_duration_kind(data: Any, where: str) -> tuple[str, str, str]:
     raise PluginError("%s 的持续时间必须是字符串或映射" % where)
 
 
+def _parse_scaling(data: Any, where: str) -> tuple[dict[int, str], str]:
+    """戏法成长：`{kind: damage, 5: 2d6, 11: 3d6, 17: 4d6}` → (表, 类别)。"""
+    if not data:
+        return {}, ""
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的 scaling 必须是映射" % where)
+    kind = str(data.get("kind", "")).lower()
+    table: dict[int, str] = {}
+    for key, value in data.items():
+        if key in ("kind", "type"):
+            continue
+        try:
+            level = int(key)
+        except (TypeError, ValueError):
+            raise PluginError("%s 的 scaling 键必须是角色等级：%r" % (where, key))
+        table[level] = str(value)
+    return table, kind
+
+
 def parse_spell(data: Any, source: str = "") -> SpellDef:
     if not isinstance(data, Mapping):
         raise PluginError("%s 的法术定义必须是映射" % source)
@@ -1166,6 +1245,7 @@ def parse_spell(data: Any, source: str = "") -> SpellDef:
     duration_kind, dur_zh, dur_en = _parse_duration_kind(data.get("duration"), ident)
     range_feet, range_zh, range_en = _parse_spell_range(data.get("range"), ident)
     damage, damage_type, upcast = _parse_damage_table(data.get("damage"), ident)
+    scaling, scaling_kind = _parse_scaling(data.get("scaling"), ident)
     components = tuple(str(item).lower() for item in (data.get("components") or ()))
 
     return SpellDef(
@@ -1193,6 +1273,8 @@ def parse_spell(data: Any, source: str = "") -> SpellDef:
         damage=damage,
         damage_type=damage_type,
         upcast=upcast,
+        scaling=scaling,
+        scaling_kind=scaling_kind,
         source=source,
     )
 

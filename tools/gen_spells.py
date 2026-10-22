@@ -151,6 +151,56 @@ def parse_damage(data: Any) -> tuple[dict[int, str], str]:
     return table, kind
 
 
+# --- 戏法成长 ---------------------------------------------------------
+# 数据源没有结构化的「Cantrip Upgrade」字段，只有英文正文。所以只能解析正文，
+# 解析不出来的**不猜**（宁可不写成长，也不要给一个 5 级以后会骗人的骰式）。
+# 五种 kind 的语义在 `dnd5r/content.py:SCALING_KINDS` 里定死。
+_SCALE_THREE = re.compile(r"levels 5 \(([^)]+)\), 11 \(([^)]+)\), and 17 \(([^)]+)\)")
+_SCALE_BEAMS = re.compile(
+    r"(two|three|four) beams at level 5, (two|three|four) beams at level 11, "
+    r"and (two|three|four) beams at level 17")
+_WORD_NUM = {"two": 2, "three": 3, "four": 4}
+
+
+def parse_scaling(row: dict) -> tuple[str, dict[int, str]]:
+    """从英文正文解析戏法成长：返回 (kind, {5: 值, 11: 值, 17: 值})。
+
+    `kind` 判定顺序有意义：`damage die changes`（Shillelagh 是在改**武器骰**）
+    与 `range doubles`（Spare the Dying 改射程）都不是伤害成长，
+    只看「有没有 beam 这个词」会把 Ray of Frost 误判成光束法术。
+    """
+    if int(row.get("level", 1)) != 0:
+        return "", {}
+    text = row.get("description") or ""
+    if isinstance(text, list):
+        text = " ".join(str(item) for item in text)
+    lower = text.lower()
+    if "damage die changes" in lower:
+        kind = "weapon_die"
+    elif "range doubles" in lower:
+        kind = "range"
+    elif _SCALE_BEAMS.search(text):
+        kind = "beams"
+    elif "extra" in lower:
+        kind = "extra_damage"
+    else:
+        kind = "damage"
+    if kind == "beams":
+        match = _SCALE_BEAMS.search(text)
+        if not match:
+            return "", {}
+        return kind, {5: str(_WORD_NUM[match.group(1)]),
+                      11: str(_WORD_NUM[match.group(2)]),
+                      17: str(_WORD_NUM[match.group(3)])}
+    match = _SCALE_THREE.search(text)
+    if not match:
+        return "", {}
+    values = [item.strip() for item in match.groups()]
+    if kind == "range":
+        values = [re.sub(r"[^0-9]", "", item) or "0" for item in values]
+    return kind, dict(zip((5, 11, 17), values))
+
+
 # --- 渲染 -------------------------------------------------------------
 def flow(pairs: list[tuple[str, Any]]) -> str:
     return "{" + ", ".join("%s: %s" % (key, value) for key, value in pairs) + "}"
@@ -215,6 +265,10 @@ def render_spell(row: dict, zh: dict) -> str:
         pairs = ([("type", dmg_type)] if dmg_type else [])
         pairs += [(str(key), value) for key, value in sorted(table.items())]
         out.append("    damage: {%s}" % ", ".join("%s: %s" % pair for pair in pairs))
+    scale_kind, scale_table = parse_scaling(row)
+    if scale_table:
+        pairs = [("kind", scale_kind)] + [(str(key), value) for key, value in scale_table.items()]
+        out.append("    scaling: {%s}" % ", ".join("%s: %s" % pair for pair in pairs))
     if row.get("higher_level"):
         out.append("    upcast: %s" % json.dumps(clean(row["higher_level"]), ensure_ascii=False))
 
