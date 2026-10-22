@@ -14,6 +14,8 @@ from pathlib import Path
 
 import dnd5r.api as api
 from dnd5r.content import SpellDef, lookup_dice, parse_spell
+from dnd5r.kernel.errors import RuleError
+from dnd5r.model.profile import Profile
 
 ROOT = Path(__file__).resolve().parents[2]
 PLUGINS = ROOT / "plugins"
@@ -210,6 +212,107 @@ class CastingNumbersTest(unittest.TestCase):
         for row in catalog["spells"]:
             self.assertEqual(row["level"], 0)
             self.assertIn(row["id"], self.bundle.spell_list("dnd2024.class.druid"))
+
+
+WIZARD = "dnd2024.class.wizard"
+
+
+class SpellPlanTest(unittest.TestCase):
+    """P6a：准备法术落库（G5）。
+
+    在这之前 `max_prepared` 只报上限，「选哪 9 个」无处可存 —— 法术页只能看不能选。
+    现在配额与环级上限都走 `check_spell_picks`，界面与建角色共用一份规则。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _wizard(self, level=5):
+        return api.new_character(self.bundle, WIZARD, level, INT_SCORES)
+
+    def test_plan_reports_quota_and_chosen(self):
+        plan = api.spell_plan(self._wizard(), self.bundle)[0]
+        self.assertEqual(plan["prepared"]["max"], 9)      # 5 级法师准备表
+        self.assertEqual(plan["prepared"]["remaining"], 9)
+        self.assertEqual(plan["prepared"]["chosen"], [])
+        self.assertEqual(plan["dc"]["total"], 14)         # 8 + 3 熟练 + 3 智力
+
+    def test_prepare_and_recount(self):
+        actor = self._wizard()
+        options = [row["id"] for row in
+                   api.spell_plan(actor, self.bundle)[0]["prepared"]["options"]]
+        plan = api.plan_spells(actor, self.bundle, WIZARD, prepared=options[:3])
+        self.assertEqual([row["id"] for row in plan["prepared"]["chosen"]], options[:3])
+        self.assertEqual(plan["prepared"]["remaining"], 6)
+        self.assertEqual(actor.profile.spells_of(WIZARD), tuple(options[:3]))
+
+    def test_quota_rejected(self):
+        actor = self._wizard()
+        options = [row["id"] for row in
+                   api.spell_plan(actor, self.bundle)[0]["prepared"]["options"]]
+        with self.assertRaises(RuleError) as ctx:
+            api.plan_spells(actor, self.bundle, WIZARD, prepared=options[:10])
+        self.assertIn("超出上限", str(ctx.exception))
+        # 抛错不该留下半截状态
+        self.assertEqual(actor.profile.spells_of(WIZARD), ())
+
+    def test_spell_outside_class_list_rejected(self):
+        with self.assertRaises(RuleError):
+            api.plan_spells(self._wizard(), self.bundle, WIZARD,
+                            prepared=["dnd2024.spell.cure_wounds"])
+
+    def test_cantrip_cannot_be_prepared(self):
+        with self.assertRaises(RuleError) as ctx:
+            api.plan_spells(self._wizard(), self.bundle, WIZARD,
+                            prepared=["dnd2024.spell.fire_bolt"])
+        self.assertIn("戏法", str(ctx.exception))
+
+    def test_leveled_spell_cannot_be_cantrip(self):
+        with self.assertRaises(RuleError):
+            api.plan_spells(self._wizard(), self.bundle, WIZARD,
+                            cantrips=["dnd2024.spell.magic_missile"])
+
+    def test_too_high_level_rejected(self):
+        # 3 级法师最高 2 环，火球（3 环）不该能准备
+        actor = api.new_character(self.bundle, WIZARD, 3, INT_SCORES)
+        with self.assertRaises(RuleError) as ctx:
+            api.plan_spells(actor, self.bundle, WIZARD, prepared=["dnd2024.spell.fireball"])
+        self.assertIn("最高只有", str(ctx.exception))
+
+    def test_non_caster_rejected(self):
+        fighter = api.new_character(self.bundle, "dnd2024.class.fighter", 5,
+                                    {"str": 16, "dex": 14, "con": 14,
+                                     "int": 10, "wis": 12, "cha": 8})
+        self.assertEqual(api.spell_plan(fighter, self.bundle), [])
+        with self.assertRaises(RuleError):
+            api.plan_spells(fighter, self.bundle, "dnd2024.class.fighter",
+                            prepared=["dnd2024.spell.alarm"])
+
+    def test_build_actor_validates_spells(self):
+        with self.assertRaises(RuleError):
+            api.new_character(self.bundle, WIZARD, 5, INT_SCORES,
+                              prepared={WIZARD: ["dnd2024.spell.cure_wounds"]})
+        actor = api.new_character(self.bundle, WIZARD, 5, INT_SCORES,
+                                  prepared={WIZARD: ["dnd2024.spell.alarm"]},
+                                  cantrips={WIZARD: ["dnd2024.spell.fire_bolt"]})
+        self.assertEqual(actor.profile.spells_of(WIZARD), ("dnd2024.spell.alarm",))
+        self.assertEqual(actor.profile.cantrips_of(WIZARD), ("dnd2024.spell.fire_bolt",))
+
+    def test_sheet_carries_spell_plan(self):
+        actor = self._wizard()
+        api.plan_spells(actor, self.bundle, WIZARD, prepared=["dnd2024.spell.alarm"])
+        sheet = api.character_sheet(actor, self.bundle)
+        block = sheet["spellcasting"][0]
+        self.assertEqual(block["class"], WIZARD)
+        self.assertEqual([row["name"] for row in block["prepared"]["chosen"]], ["警报术"])
+
+    def test_profile_roundtrip_keeps_spells(self):
+        actor = api.new_character(self.bundle, WIZARD, 5, INT_SCORES,
+                                  prepared={WIZARD: ["dnd2024.spell.alarm"]},
+                                  cantrips={WIZARD: ["dnd2024.spell.fire_bolt"]})
+        again = Profile.from_dict(actor.profile.to_dict())
+        self.assertEqual(again.to_dict(), actor.profile.to_dict())
 
 
 if __name__ == "__main__":

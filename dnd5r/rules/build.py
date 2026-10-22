@@ -24,6 +24,7 @@ from .modifiers import resolve as resolve_modifiers
 from .morph import eligible_forms
 from .powers import Power
 from .progression import proficiency_bonus
+from .spellcasting import check_spell_picks
 from .scores import apply_score_bonuses, merge_bonuses, score_bonuses
 
 
@@ -126,6 +127,8 @@ def build_actor(
     subclass: str | None = None,
     feats: tuple[str, ...] = (),
     choices: Mapping[str, tuple[str, ...]] | None = None,
+    cantrips: Mapping[str, tuple[str, ...]] | None = None,
+    prepared: Mapping[str, tuple[str, ...]] | None = None,
 ) -> Actor:
     """建一个单职业角色。兼职在 P3 的 Session 里做（要合并位表与熟练来源）。
 
@@ -175,6 +178,14 @@ def build_actor(
     )
 
     saves = tuple("save.%s" % key for key in class_def.saves)
+    # 法术选择（戏法 / 准备法术）是玩家选择，与专长选择同一层：
+    # 建角色时校验配额与环级上限，选错当场炸，选不完不算错（界面显示剩余名额）。
+    spell_cantrips = {key: tuple(value) for key, value in (cantrips or {}).items()}
+    spell_prepared = {key: tuple(value) for key, value in (prepared or {}).items()}
+    spell_problems = check_spell_picks(
+        bundle, {class_id: level}, spell_cantrips, spell_prepared)
+    if spell_problems:
+        raise RuleError("法术选择有问题：" + "；".join(spell_problems))
     profile = Profile(
         classes=(ClassEntry.make(class_id, level),),
         subclasses=(sub.id,) if sub is not None else (),
@@ -186,6 +197,8 @@ def build_actor(
         feats=chosen_feats,
         choices=picked_choices,
         resistances=picks.resistances,
+        cantrips=spell_cantrips,
+        prepared=spell_prepared,
     )
 
     actor = Actor(

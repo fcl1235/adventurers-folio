@@ -361,5 +361,35 @@ class FeatAuthorityTest(unittest.TestCase):
         self.assertGreaterEqual(checked, 50, "只对上了 %d 条，数据源可能读错" % checked)
 
 
+class RepeatFeatTest(unittest.TestCase):
+    """G11：同一个专长登记两次时，两组选择各存各的。
+
+    属性提升 4 级一次、8 级一次。键只写专长 id 的话，第二次的 +2 会把第一次覆盖 ——
+    结果是「拿了两次属性提升只加了 2 点」，还查不出原因。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _fighter(self, level, feats, choices):
+        return api.new_character(
+            self.bundle, "dnd2024.class.fighter", level, dict(SCORES),
+            feats=feats, choices=choices)
+
+    def test_two_instances_do_not_overwrite(self):
+        actor = self._fighter(8, [ASI, ASI], {
+            ASI + ".boost": ("str", "str"),
+            ASI + "#1.boost": ("con", "con"),
+        })
+        self.assertEqual(actor.statblock.abilities.score("str"), SCORES["str"] + 2)
+        self.assertEqual(actor.statblock.abilities.score("con"), SCORES["con"] + 2)
+
+    def test_second_instance_pending_reported_by_index(self):
+        actor = self._fighter(8, [ASI, ASI], {ASI + ".boost": ("str", "str")})
+        needed = api.character_sheet(actor, self.bundle)["choices_needed"]
+        self.assertEqual(needed, [ASI + "#1.boost"])
+
+
 if __name__ == "__main__":
     unittest.main()

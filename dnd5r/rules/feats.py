@@ -59,10 +59,22 @@ def _label(feat: FeatDef, locale: str) -> str:
     return feat.name.get(locale) or feat.id
 
 
+def pick_key(feat_id: str, choice_id: str, index: int = 0) -> str:
+    """选择项在 `Profile.choices` 里的键。
+
+    同一个专长可以登记多次（属性提升：4 级一次、8 级一次）。第一次仍用
+    `<专长>.<选择项>`（旧档不用改），第二次起加 `#序号` ——
+    否则两次选择共用一格，第二次的 +2 会把第一次覆盖掉。
+    """
+    return ("%s#%d.%s" % (feat_id, index, choice_id) if index
+            else "%s.%s" % (feat_id, choice_id))
+
+
 def picks_for(
     feat: FeatDef,
     choices: Mapping[str, tuple[str, ...]],
     locale: str = "zh",
+    index: int = 0,
 ) -> FeatPicks:
     """结算一个专长的选择项。
 
@@ -76,8 +88,12 @@ def picks_for(
     pending: list[str] = []
 
     for choice in feat.choices:
-        key = "%s.%s" % (feat.id, choice.id)
+        key = pick_key(feat.id, choice.id, index)
         picked = tuple(str(item) for item in (choices.get(key) or ()))
+        if not picked and index == 0:
+            # 写成 `#0` 也认 —— 界面统一按序号生成键时不用特判第一条
+            picked = tuple(str(item) for item in
+                           (choices.get("%s#0.%s" % (feat.id, choice.id)) or ()))
         if not picked:
             pending.append(key)
             continue
@@ -147,8 +163,11 @@ def collect_picks(
     locale: str = "zh",
 ) -> FeatPicks:
     total = FeatPicks()
+    seen: dict[str, int] = {}
     for feat in feats:
-        total = total.merged(picks_for(feat, choices, locale))
+        index = seen.get(feat.id, 0)
+        seen[feat.id] = index + 1
+        total = total.merged(picks_for(feat, choices, locale, index=index))
     return total
 
 
@@ -224,6 +243,6 @@ def choice_prompt(feat: FeatDef, choice: FeatChoice, locale: str = "zh") -> Text
 
 
 __all__ = [
-    "FeatPicks", "picks_for", "collect_picks",
+    "FeatPicks", "picks_for", "collect_picks", "pick_key",
     "hard_problems", "soft_problems", "prereq_report", "choice_prompt",
 ]

@@ -14,13 +14,13 @@ from dataclasses import replace
 from typing import Any, Mapping, Sequence
 
 from ..content import ClassDef, ContentBundle, load_all
-from ..kernel.errors import DndError
+from ..kernel.errors import DndError, RuleError
 from ..kernel.events import Report
 from ..kernel.rng import Rng, SeededRng
 from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
 from ..model.levels import ClassLevel, TotalLevel
-from ..model.profile import ClassEntry, Profile
+from ..model.profile import ClassEntry, Profile, class_levels_of
 from ..model.statblock import Abilities, Statblock
 from ..rules.actioneconomy import ActionEconomy, ActionType
 from ..rules.armor import Loadout, ac_inputs, loadout_for
@@ -39,7 +39,7 @@ from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
 from ..rules.resolver import RefContext, Resolver, crit_text
 from ..rules.spellcasting import (
-    casting_summary, spell_detail, spell_options,
+    casting_summary, check_spell_picks, spell_detail, spell_options,
 )
 from ..rules.feats import choice_prompt, prereq_report
 from ..rules.scores import bonus_totals, merge_bonuses, score_bonuses
@@ -99,6 +99,58 @@ def spell_catalog(
 def spell_info(bundle: ContentBundle, spell_id: str, locale: str = "zh") -> dict:
     """单条法术的完整展示数据（含基础环的伤害骰式）。"""
     return spell_detail(bundle, spell_id, locale)
+
+
+def plan_spells(
+    actor: Actor,
+    content: ContentBundle,
+    class_id: str,
+    cantrips: Sequence[str] | None = None,
+    prepared: Sequence[str] | None = None,
+    locale: str = "zh",
+) -> dict:
+    """设定某职业的「已知戏法 / 准备法术」，校验通过后写回档案。
+
+    两个参数都给 `None` 就是只查询（返回当前摘要）。校验与建角色共用
+    `check_spell_picks`，所以「界面能选、记账时炸」这种不一致不会出现。
+    校验失败时**不改档案** —— 抛错的调用不该留下半截状态。
+    """
+    profile = actor.profile
+    if profile is None:
+        raise RuleError("角色没有职业档案")
+    if class_id not in profile.class_ids:
+        raise RuleError("角色没有职业 %s" % class_id)
+    updated = profile
+    if cantrips is not None:
+        updated = updated.with_cantrips(class_id, cantrips)
+    if prepared is not None:
+        updated = updated.with_prepared(class_id, prepared)
+
+    problems = check_spell_picks(content, class_levels_of(updated),
+                                 updated.cantrips, updated.prepared, locale)
+    if problems:
+        raise RuleError("法术选择有问题：" + "；".join(problems))
+
+    actor.profile = updated
+    return casting_summary(content, actor, class_id,
+                           class_levels_of(updated)[class_id],
+                           resolver_for(actor, content), locale)
+
+
+def spell_plan(actor: Actor, content: ContentBundle, locale: str = "zh") -> list[dict]:
+    """全部施法职业的施法摘要（法术页直接渲染这个）。"""
+    profile = actor.profile
+    if profile is None:
+        return []
+    resolver = resolver_for(actor, content)
+    rows = []
+    for entry in profile.classes:
+        class_def = content.classes.get(entry.class_id)
+        if class_def is None or not class_def.casting_ability:
+            continue
+        rows.append(casting_summary(content, actor, entry.class_id,
+                                    entry.class_level, resolver, locale))
+    return rows
 
 
 def subclass_options(
@@ -164,11 +216,17 @@ def new_character(
     subclass: str | None = None,
     feats: Sequence[str] = (),
     choices: Mapping[str, Sequence[str]] | None = None,
+    cantrips: Mapping[str, Sequence[str]] | None = None,
+    prepared: Mapping[str, Sequence[str]] | None = None,
 ) -> Actor:
     """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。
 
     `choices` 是专长的「选完还要选什么」：键 `<专长 id>.<选择项 id>`，
     值是被选中的项（如 `{"dnd2024.feat.ability_score_improvement.boost": ["dex", "dex"]}`）。
+    同一专长登记两次时，第二次起键写成 `<专长 id>#1.<选择项 id>`。
+
+    `cantrips` / `prepared` 是法术选择：键都是**职业 id**，值是法术 id。
+    数量与环级的校验在 `rules/spellcasting.check_spell_picks` 里，选错当场拒绝。
     """
     return build_actor(
         content,
@@ -181,6 +239,8 @@ def new_character(
         subclass=subclass,
         feats=tuple(feats),
         choices={key: tuple(value) for key, value in (choices or {}).items()},
+        cantrips={key: tuple(value) for key, value in (cantrips or {}).items()},
+        prepared={key: tuple(value) for key, value in (prepared or {}).items()},
     )
 
 

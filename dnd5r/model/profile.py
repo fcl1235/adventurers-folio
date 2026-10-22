@@ -49,6 +49,11 @@ class Profile:
     # 伤害抗性（传奇恩惠「能量抗性」这类）。这里存**伤害类型**（fire / cold），
     # 不存内容 id —— 它是规则词汇，不是某本书里的条目。
     resistances: frozenset[str] = frozenset()
+    # 已知戏法与准备法术：**按职业分开**（兼职时两个职业各有各的配额）。
+    # 值是法术内容 id；数量与环级上限由 `rules/spellcasting.check_spell_picks` 校验，
+    # 因为配额来自 ClassDef 的表，模型层看不到内容。
+    cantrips: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    prepared: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.classes:
@@ -135,6 +140,20 @@ class Profile:
     def with_resistances(self, add: Iterable[str] = ()) -> "Profile":
         return replace(self, resistances=self.resistances | frozenset(add))
 
+    # --- 法术选择 -----------------------------------------------------
+    def with_cantrips(self, class_id: str, spells: Iterable[str]) -> "Profile":
+        """设定某个职业的已知戏法。空列表 = 清掉这一职业的记录。"""
+        return replace(self, cantrips=_with_map(self.cantrips, class_id, spells))
+
+    def with_prepared(self, class_id: str, spells: Iterable[str]) -> "Profile":
+        return replace(self, prepared=_with_map(self.prepared, class_id, spells))
+
+    def spells_of(self, class_id: str) -> tuple[str, ...]:
+        return tuple(self.prepared.get(class_id, ()))
+
+    def cantrips_of(self, class_id: str) -> tuple[str, ...]:
+        return tuple(self.cantrips.get(class_id, ()))
+
     def to_dict(self) -> dict:
         """只写事实，总等级不写（C5）。"""
         return {
@@ -146,6 +165,8 @@ class Profile:
             "feats": list(self.feats),
             "choices": {key: list(value) for key, value in self.choices.items()},
             "resistances": sorted(self.resistances),
+            "cantrips": {key: list(value) for key, value in self.cantrips.items()},
+            "prepared": {key: list(value) for key, value in self.prepared.items()},
         }
 
     @classmethod
@@ -167,7 +188,21 @@ class Profile:
             feats=tuple(data.get("feats", ())),
             choices={key: tuple(value) for key, value in (data.get("choices") or {}).items()},
             resistances=frozenset(data.get("resistances", ())),
+            cantrips={key: tuple(value) for key, value in (data.get("cantrips") or {}).items()},
+            prepared={key: tuple(value) for key, value in (data.get("prepared") or {}).items()},
         )
+
+
+def _with_map(source: Mapping[str, tuple[str, ...]], class_id: str,
+              spells: Iterable[str]) -> dict[str, tuple[str, ...]]:
+    """按职业改写一张 法术表。**去重并保序**：顺序就是界面上的顺序。"""
+    updated = dict(source)
+    items = tuple(dict.fromkeys(str(item) for item in spells))
+    if items:
+        updated[class_id] = items
+    else:
+        updated.pop(class_id, None)
+    return updated
 
 
 def class_levels_of(profile: Profile) -> Mapping[str, ClassLevel]:

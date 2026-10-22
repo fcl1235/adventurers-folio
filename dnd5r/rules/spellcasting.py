@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from typing import Iterable, Mapping, Sequence
 
 from ..content import ClassDef, ContentBundle, SpellDef
 from ..kernel.errors import RuleError
@@ -117,6 +117,86 @@ def slot_rows(actor: Actor, class_id: str, locale: str = "zh") -> list[dict]:
     return sorted(rows, key=lambda item: item["level"])
 
 
+def highest_slot_table(class_def: ClassDef, class_level: ClassLevel) -> int:
+    """按**职业表**算最高环位。建角色时资源池还没建，不能读池子。"""
+    row = class_def.slots_at(class_level)
+    top = 0
+    for index, capacity in enumerate(row, start=1):
+        if int(capacity) > 0:
+            top = index
+    return top
+
+
+def _spell_of(bundle: ContentBundle, spell_id: str):
+    spell = bundle.spells.get(spell_id)
+    return spell
+
+
+def check_spell_picks(
+    bundle: ContentBundle,
+    classes: Mapping[str, ClassLevel],
+    cantrips: Mapping[str, Sequence[str]] | None = None,
+    prepared: Mapping[str, Sequence[str]] | None = None,
+    locale: str = "zh",
+) -> list[str]:
+    """校验「已知戏法 / 准备法术」，返回问题清单（空 = 通过）。
+
+    为什么不在 `Profile` 里校验：配额（`max_cantrips` / `max_prepared` / 最高环位）
+    全都来自 `ClassDef` 的表，模型层看不到内容。放在这里，界面与建角色共用一份规则，
+    也就不会出现「界面允许选、结算时爆掉」。
+    """
+    problems: list[str] = []
+    tables = (
+        ("戏法", cantrips or {}, True),
+        ("准备法术", prepared or {}, False),
+    )
+    for label, picks, is_cantrip in tables:
+        for class_id, spell_ids in picks.items():
+            class_level = classes.get(class_id)
+            if class_level is None:
+                problems.append("%s 里的职业 %s 不在角色档案中" % (label, class_id))
+                continue
+            class_def = bundle.classes.get(class_id)
+            if class_def is None:
+                problems.append("内容里没有职业 %s" % class_id)
+                continue
+            if not class_def.casting_ability:
+                problems.append("%s（%s）不是施法职业，不该有%s"
+                                % (class_def.name.get(locale), class_id, label))
+                continue
+            items = list(spell_ids)
+            if len(set(items)) != len(items):
+                duplicates = sorted({item for item in items if items.count(item) > 1})
+                problems.append("%s 里有重复法术：%s" % (label, "、".join(duplicates)))
+                continue
+            quota = (max_cantrips(class_def, class_level) if is_cantrip
+                     else max_prepared(class_def, class_level))
+            if len(items) > quota:
+                problems.append("%s 超出上限：选了 %d 个，上限 %d"
+                                % (label, len(items), quota))
+            allowed = set(bundle.spell_list(class_id))
+            top = highest_slot_table(class_def, class_level)
+            for spell_id in items:
+                spell = _spell_of(bundle, spell_id)
+                if spell is None:
+                    problems.append("%s 里的 %s 不存在" % (label, spell_id))
+                    continue
+                if spell.id not in allowed:
+                    problems.append("%s 不在 %s 的法术表里" % (spell.name.get(locale),
+                                                         class_def.name.get(locale)))
+                    continue
+                if is_cantrip and int(spell.level) != 0:
+                    problems.append("%s 不是戏法（%d 环），不能放进已知戏法"
+                                    % (spell.name.get(locale), int(spell.level)))
+                elif not is_cantrip:
+                    if int(spell.level) == 0:
+                        problems.append("%s 是戏法，不能准备" % spell.name.get(locale))
+                    elif int(spell.level) > top:
+                        problems.append("%s 是 %d 环，当前最高只有 %d 环"
+                                        % (spell.name.get(locale), int(spell.level), top))
+    return problems
+
+
 def casting_summary(
     bundle: ContentBundle,
     actor: Actor,
@@ -125,13 +205,24 @@ def casting_summary(
     resolver: Resolver,
     locale: str = "zh",
 ) -> dict:
-    """给界面用的一块数据：DC、攻击加值、法位、上限、可选法术。"""
+    """给界面用的一块数据：DC、攻击加值、法位、上限、可选法术、已选了什么。"""
     class_def = bundle.class_def(class_id)
     ability = casting_ability(class_def)
     dc = spell_dc(resolver, actor, ability)
     attack = spell_attack_bonus(resolver, actor, ability)
     spells = spell_options(bundle, actor, class_id, class_level)
     cantrips = cantrip_options(bundle, class_id)
+    profile = actor.profile
+    chosen_cantrips = profile.cantrips_of(class_id) if profile else ()
+    chosen_spells = profile.spells_of(class_id) if profile else ()
+    cap_cantrip = max_cantrips(class_def, class_level)
+    cap_prepared = max_prepared(class_def, class_level)
+
+    def _row(spell_id: str) -> dict:
+        spell = bundle.spells.get(spell_id)
+        return {"id": spell_id, "level": int(spell.level) if spell else 0,
+                "name": spell.name.get(locale) if spell else spell_id}
+
     return {
         "class": class_id,
         "ability": ability,
@@ -139,9 +230,13 @@ def casting_summary(
         "attack": {"total": attack.total, "detail": attack.describe()},
         "slots": slot_rows(actor, class_id, locale),
         "highest_slot": highest_slot(actor, class_id),
-        "cantrips": {"max": max_cantrips(class_def, class_level),
+        "cantrips": {"max": cap_cantrip,
+                     "chosen": [_row(item) for item in chosen_cantrips],
+                     "remaining": max(0, cap_cantrip - len(chosen_cantrips)),
                      "options": [item.to_dict(locale) for item in cantrips]},
-        "prepared": {"max": max_prepared(class_def, class_level),
+        "prepared": {"max": cap_prepared,
+                     "chosen": [_row(item) for item in chosen_spells],
+                     "remaining": max(0, cap_prepared - len(chosen_spells)),
                      "options": [item.to_dict(locale) for item in spells]},
     }
 
@@ -156,6 +251,7 @@ def spell_detail(bundle: ContentBundle, spell_id: str, locale: str = "zh") -> di
 
 __all__ = [
     "casting_ability", "spell_dc", "spell_attack_bonus", "max_cantrips",
-    "max_prepared", "highest_slot", "spell_options", "cantrip_options",
+    "max_prepared", "highest_slot", "highest_slot_table", "check_spell_picks",
+    "spell_options", "cantrip_options",
     "slot_rows", "casting_summary", "spell_detail",
 ]
