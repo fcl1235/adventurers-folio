@@ -81,9 +81,19 @@ class Effect:
     """效果原语基类。子类只实现 apply()，解析走 parse_effect()。"""
 
     op: ClassVar[str] = ""
+    # 这条效果被 patch 时是「整条替换」还是「按字段合并」。
+    # 默认整条替换（见 powers._patch_effects 的理由）；只有字段都是可选、
+    # 且能无损写成 payload 的原语才准打开（目前只有 morph）。
+    patch_merge: ClassVar[bool] = False
 
     def apply(self, ctx: EffectContext) -> None:  # pragma: no cover - 抽象
         raise NotImplementedError
+
+    def patch_payload(self) -> dict:
+        """给「按字段合并」用的原始参数。缺省就是 to_dict 去掉 op。"""
+        data = dict(self.to_dict())
+        data.pop("op", None)
+        return data
 
     def to_dict(self) -> dict:  # pragma: no cover - 调试用
         return {"op": self.op}

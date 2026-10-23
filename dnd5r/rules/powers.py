@@ -327,24 +327,38 @@ def _patch_effects(
     patch: Any,
     where: str,
 ) -> tuple[Effect, ...]:
-    """按 op 整条替换效果。
+    """改写目标能力的效果。
 
-    不做字段级合并 —— 那要求每个原语都能无损往返，现在不成立。
-    写成 `{morph: {forbid: []}}` 就是「把这条 morph 换成这一条」，
+    默认**按 op 整条替换** —— 不做字段级合并，那要求每个原语都能无损往返，
+    现在不成立。写成 `{morph: {forbid: []}}` 就是「把这条 morph 换成这一条」，
     缺的字段靠写全，不靠猜。
+
+    例外：原语自己声明了 `patch_merge`（只有 `morph`）。同一条效果可能被
+    **两个来源先后改写**（月环的 3 级圆月形态 + 德鲁伊的 18 级野兽施法），
+    整条替换会让后一条把前一条的临时 HP / AC / CR 轴一起冲掉 ——
+    那不是内容写错，是机制不允许叠加。
     """
     if not isinstance(patch, Mapping):
         raise PluginError("%s 的 patch.effects 必须是 {原语: 参数} 映射" % where)
-    replacements = {
-        str(op): parse_effect({str(op): payload}, where="%s patch.effects" % where)
-        for op, payload in patch.items()
-    }
-    found = {op: False for op in replacements}
+    replacements: dict[str, Effect] = {}
+    found = {str(op): False for op in patch}
     out: list[Effect] = []
     for effect in effects:
-        if effect.op in replacements:
-            out.append(replacements[effect.op])
+        if effect.op in patch:
+            payload = patch[effect.op]
+            if effect.patch_merge:
+                merged = effect.patch_payload()
+                if not isinstance(payload, Mapping):
+                    raise PluginError("%s 的 patch.effects.%s 必须是映射"
+                                      % (where, effect.op))
+                merged.update(payload)
+                replacements[effect.op] = parse_effect({effect.op: merged},
+                                                       where="%s patch.effects" % where)
+            else:
+                replacements[effect.op] = parse_effect({effect.op: payload},
+                                                       where="%s patch.effects" % where)
             found[effect.op] = True
+            out.append(replacements[effect.op])
         else:
             out.append(effect)
     missing = [op for op, seen in found.items() if not seen]

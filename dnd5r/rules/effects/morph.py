@@ -21,17 +21,24 @@ from .base import Effect, EffectContext, register
 @dataclass(frozen=True, slots=True)
 class Morph(Effect):
     op: ClassVar[str] = "morph"
+    # 变形参数可以被**多处**先后改写：月环 3 级改临时 HP / AC 下限 / CR 轴，
+    # 德鲁伊 18 级只解除施法禁令。整条替换会让后一条把前一条冲掉，所以按字段合并。
+    patch_merge: ClassVar[bool] = True
     temp_hp: Amount | None = None
     forbid: tuple[str, ...] = ()
     keep: tuple[str, ...] = ("int", "wis", "cha")
     ac_min: Amount | None = None
+    # 子职改写的 CR 轴（妖精/月环那类「上限按等级 ÷ 3」）。只存阈值表，
+    # 游泳/飞行解禁仍取职业的职业轴 —— 那两条不是子职能改的。
+    cr_by_level: Mapping[int, float] | None = None
 
     @classmethod
     def from_payload(cls, payload: Any, where: str = "") -> "Morph":
         if not isinstance(payload, Mapping):
             raise PluginError("%s morph 参数必须是映射" % where)
         unknown = [key for key in payload
-                   if key not in ("temp_hp", "forbid", "keep", "forms", "ac_min")]
+                   if key not in ("temp_hp", "forbid", "keep", "forms", "ac_min",
+                                  "cr_by_level")]
         if unknown:
             raise PluginError("%s morph 里有未知字段：%s" % (where, ", ".join(sorted(unknown))))
         temp = payload.get("temp_hp")
@@ -43,11 +50,20 @@ class Morph(Effect):
         bad = [key for key in keep if key not in ABILITY_KEYS]
         if bad:
             raise PluginError("%s morph.keep 里有未知属性：%s" % (where, ", ".join(sorted(bad))))
+        steps = payload.get("cr_by_level")
+        if steps is not None:
+            if not isinstance(steps, Mapping) or not steps:
+                raise PluginError("%s morph.cr_by_level 必须是 {等级: CR} 映射" % where)
+            try:
+                steps = {int(key): float(value) for key, value in steps.items()}
+            except (TypeError, ValueError):
+                raise PluginError("%s morph.cr_by_level 的值必须是数字" % where)
         return cls(
             temp_hp=parse_amount(temp, where="%s temp_hp" % where) if temp is not None else None,
             forbid=tuple(str(item) for item in forbid),
             keep=tuple(str(item) for item in keep),
             ac_min=parse_amount(ac_min, where="%s ac_min" % where) if ac_min is not None else None,
+            cr_by_level=steps,
         )
 
     def apply(self, ctx: EffectContext) -> None:
@@ -83,6 +99,21 @@ class Morph(Effect):
             "temp_hp": self.temp_hp.to_dict() if self.temp_hp else None,
             "forbid": list(self.forbid),
             "ac_min": self.ac_min.to_dict() if self.ac_min else None,
+            "cr_by_level": dict(self.cr_by_level or {}),
+        }
+
+    def patch_payload(self) -> dict:
+        """按字段合并时要回填的**完整**参数。
+
+        `to_dict` 是给人看的（缺省字段省略），这里必须写全 ——
+        少写一个字段，合并后那条 morph 就少了一条规则。
+        """
+        return {
+            "temp_hp": self.temp_hp.to_dict() if self.temp_hp else None,
+            "forbid": list(self.forbid),
+            "keep": list(self.keep),
+            "ac_min": self.ac_min.to_dict() if self.ac_min else None,
+            "cr_by_level": dict(self.cr_by_level) if self.cr_by_level else None,
         }
 
 

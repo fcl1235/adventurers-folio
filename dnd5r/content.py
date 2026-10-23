@@ -58,6 +58,11 @@ class ResourceDef:
     recover_on_short_rest: int = 0
     label: Text | None = None
     owner_class: str = ""
+    # 这个池几级才有。0 = 与所属内容同时解锁。
+    # 职业资源用 `by_level` 表达「2 级 2 次、6 级 3 次」，低等级自然算成 0；
+    # 但子职的池往往容量是常数或「属性调整值」，等级门槛得单独说一句 ——
+    # 否则 3 级德鲁伊的卡上会多出一个 10 级才解锁、还没有按钮的次数池。
+    level: ClassLevel = ClassLevel(0)
     # 「这个来源授予的**每一道有环级的法术**各建一个池，各 1 次」。
     # 妖精触碰的「两道法术各一次」按这道开关展开：合成一个 capacity 2 的池，
     # 玩家就能连放两次迷踪步 —— 那不是原文的意思。
@@ -67,6 +72,8 @@ class ResourceDef:
     def __post_init__(self) -> None:
         if not is_valid(self.id):
             raise PluginError("资源 id 不合规范：%r" % (self.id,))
+        if int(self.level) < 0:
+            raise PluginError("资源 %s 的解锁等级不能是负数" % self.id)
         if self.capacity is None and not self.by_level:
             raise PluginError("资源 %s 必须给 capacity 或 by_level" % self.id)
         if self.by_level:
@@ -85,6 +92,8 @@ class ResourceDef:
 
     def capacity_at(self, level: ClassLevel, ref_map: Mapping[str, Any] | None = None) -> int:
         """按「本职业等级」查表。兼职时次数按职业等级，不按总等级（G15）。"""
+        if int(self.level) and int(level) < int(self.level):
+            return 0                    # 还没解锁：调用方见到 0 就不建池
         if self.by_level:
             usable = [int(key) for key in self.by_level if int(key) <= int(level)]
             if not usable:
@@ -115,6 +124,7 @@ class ResourceDef:
             "id": self.id, "kind": self.kind.value, "refresh": self.refresh.value,
             "by_level": dict(self.by_level or {}),
             "recover_on_short_rest": self.recover_on_short_rest,
+            "level": int(self.level),
             "per_spell": self.per_spell,
         }
 
@@ -147,6 +157,12 @@ def parse_resource(data: Any, owner_class: str = "") -> ResourceDef:
     if data.get("label") is not None:
         label = Text.from_dict(data["label"], where="%s label" % ident)
 
+    # `level` 这里不能过 `as_class_level`：它要求 >= 1，而 0 在这里是
+    # 「与所属内容同时解锁」的哨兵值（与 `Power.level` 的默认值同一个意思）。
+    raw_level = data.get("level", 0)
+    if isinstance(raw_level, bool) or not isinstance(raw_level, int):
+        raise PluginError("%s 的 level 必须是整数：%r" % (ident, raw_level))
+
     return ResourceDef(
         id=str(ident),
         kind=RESOURCE_KINDS[kind_key],
@@ -156,6 +172,7 @@ def parse_resource(data: Any, owner_class: str = "") -> ResourceDef:
         recover_on_short_rest=int(data.get("recover_on_short_rest", 0)),
         label=label,
         owner_class=str(data.get("owner", owner_class)),
+        level=ClassLevel(raw_level),
         per_spell=bool(data.get("per_spell", False)),
     )
 
@@ -462,6 +479,10 @@ class SubclassDef:
     summary: Text
     unlock_level: ClassLevel = ClassLevel(3)
     powers: tuple[Power, ...] = ()
+    # 子职自己的资源池。规则里「使用次数等于你的感知调整值（至少 1 次）」
+    # 这类次数长在**子职特性**上，不属于职业 —— 借职业的资源表表达会让人
+    # 一换子职就莫名其妙多出/少掉池，而且同一职业的四个子职会互相串味。
+    resources: tuple[ResourceDef, ...] = ()
     source: str = ""
 
     def __post_init__(self) -> None:
@@ -474,12 +495,22 @@ class SubclassDef:
             if power.id in seen:
                 raise PluginError("子职 %s 的特性 id 重复：%s" % (self.id, power.id))
             seen.add(power.id)
+        for resource in self.resources:
+            if resource.id in seen:
+                raise PluginError("子职 %s 的资源 id 与特性重名：%s" % (self.id, resource.id))
+            seen.add(resource.id)
 
     def powers_at(self, class_level: ClassLevel) -> tuple[Power, ...]:
         """按**父职业等级**解锁的特性（含叠层）。"""
         if int(class_level) < int(self.unlock_level):
             return ()
         return powers_at_level(self.powers, class_level)
+
+    def resources_at(self, class_level: ClassLevel) -> tuple[ResourceDef, ...]:
+        """按**父职业等级**解锁的资源池：3 级之前选了子职也不该有池。"""
+        if int(class_level) < int(self.unlock_level):
+            return ()
+        return self.resources
 
     def to_dict(self) -> dict:
         return {
@@ -489,6 +520,7 @@ class SubclassDef:
             "summary": self.summary.to_dict(),
             "unlock_level": int(self.unlock_level),
             "powers": len(self.powers),
+            "resources": [item.to_dict() for item in self.resources],
         }
 
 
@@ -508,6 +540,10 @@ def parse_subclass(data: Any, source: str = "", unlock_level: int = 3) -> Subcla
         level = as_class_level(int(data.get("unlock_level", unlock_level)))
     except RuleError as exc:
         raise PluginError("%s 的子职解锁等级不合法：%s" % (ident, exc))
+    resources = tuple(
+        parse_resource(row, owner_class=ident)
+        for row in (data.get("resources") or ())
+    )
     return SubclassDef(
         id=ident,
         class_id=str(data["class"]),
@@ -517,6 +553,7 @@ def parse_subclass(data: Any, source: str = "", unlock_level: int = 3) -> Subcla
         if data.get("summary") else Text.from_dict(data["name"], where="%s name" % ident),
         unlock_level=level,
         powers=powers,
+        resources=resources,
         source=source,
     )
 

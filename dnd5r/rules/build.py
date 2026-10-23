@@ -10,7 +10,9 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Any, Mapping
 
-from ..content import ClassDef, ContentBundle, FeatDef, SubclassDef
+from ..content import (
+    ClassDef, ContentBundle, FeatDef, SubclassDef, powers_at_level,
+)
 from ..kernel.errors import RuleError
 from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
@@ -22,7 +24,7 @@ from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
 from .feats import check_feat_choices, collect_picks, feat_spells, hard_problems, picks_for
 from .health import hit_dice_pool, hit_points_max
 from .modifiers import resolve as resolve_modifiers
-from .morph import eligible_forms
+from .morph import CrAxis, eligible_forms
 from .powers import Power
 from .progression import proficiency_bonus
 from .spellcasting import check_spell_picks
@@ -276,6 +278,13 @@ def build_actor(
         if pool.capacity <= 0:
             continue  # 未解锁的资源不建池，避免界面上出现 0/0
         actor.resources.add(pool)
+    # 子职自己的池（月光步「感知调整值次，至少 1 次」）。次数按**父职业等级**查表，
+    # 池的 owner 是子职 —— 与专长的池同一个口径：owner 记「是哪个内容给的」。
+    for resource in (sub.resources_at(level) if sub is not None else ()):
+        pool = resource.build(level, ref)
+        if pool.capacity <= 0:
+            continue
+        actor.resources.add(pool)
     # 专长给的池（「每长休一次免费施放」）。容量按总等级查，一般写固定值。
     # 可重复选取的专长（魔法入门）登记两次就该有**两个**池 —— 每次登记是一次独立选择，
     # 合成一个会让人少一次施放。`feat_defs_` 是去重后的（同一专长只出现一次），
@@ -414,19 +423,22 @@ def available_powers(bundle: ContentBundle, actor: Actor):
     走 `powers_at` 而不是 `PowerBook.for_class`：前者会按等级把 patch 叠上去
     （18 级野兽施法解除变形施法禁令），后者是未叠层的原版。
 
-    子职特性用**父职业**的等级判定：「3 级才拿子职」由 `SubclassDef.powers_at`
-    的等级门槛表达，所以这里不需要先看职业几级再决定要不要加子职。
+    职业与子职的能力**先合并再叠层**：月环 3 级的「圆月形态」改写的是
+    德鲁伊的荒野变形，两个列表分开叠层时那条 patch 永远落不到目标上。
+    子职特性仍按**父职业**等级判定（`unlock_level` 先挡一道）。
     """
     if actor.profile is None:
         return ()
     found = []
     for entry in actor.profile.classes:
         class_def = bundle.classes.get(entry.class_id)
-        if class_def is not None:
-            found.extend(class_def.powers_at(entry.class_level))
+        if class_def is None:
+            continue
+        merged = list(class_def.powers)
         for sub in subclass_defs(bundle, actor.profile):
-            if sub.class_id == entry.class_id:
-                found.extend(sub.powers_at(entry.class_level))
+            if sub.class_id == entry.class_id and int(entry.class_level) >= int(sub.unlock_level):
+                merged.extend(sub.powers)
+        found.extend(powers_at_level(tuple(merged), entry.class_level))
     # 专长没有等级门槛（等级是**选取前提**，已在建角色时判过），全部生效
     for feat in feat_defs(bundle, actor.profile):
         found.extend(feat.powers)
@@ -462,11 +474,37 @@ def eligible_forms_for(actor: Actor, bundle: ContentBundle):
     if found is None:
         return []
     entry, class_def = found
-    unlocked = any(
-        getattr(effect, "op", "") == "morph"
-        for power in class_def.powers_at(entry.class_level)
-        for effect in power.effects
-    )
-    if not unlocked:
+    axis = morph_axis_for(actor, bundle, class_def)
+    if axis is None:
         return []
-    return eligible_forms(bundle.forms.values(), class_def.morph, entry.class_level)
+    return eligible_forms(bundle.forms.values(), axis, entry.class_level)
+
+
+def morph_axis_for(actor: Actor, bundle: ContentBundle, class_def=None):
+    """这个角色**实际生效**的 CR 轴。
+
+    默认取职业轴；子职改写变形（月环「圆月形态」：CR = 职业等级 ÷ 3）时，
+    改写后的 morph 效果里带着新的阈值表，两处必须是同一个来源 ——
+    否则界面上能选的形态与结算时能变的形态会不一致。
+    游泳/飞行解禁仍取职业轴：那两条不是子职能改的。
+    """
+    if actor.profile is None:
+        return None
+    if class_def is None:
+        found = morph_class_of(actor, bundle)
+        if found is None:
+            return None
+        class_def = found[1]
+    effect = None
+    for power in available_powers(bundle, actor):
+        for item in power.effects:
+            if getattr(item, "op", "") == "morph":
+                effect = item
+    if effect is None:
+        return None                     # 1 级德鲁伊还没有荒野变形
+    steps = getattr(effect, "cr_by_level", None)
+    base = class_def.morph
+    if steps:
+        return (replace(base, steps=dict(steps)) if base is not None
+                else CrAxis(steps=dict(steps)))
+    return base

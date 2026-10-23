@@ -34,7 +34,7 @@ RAW = ROOT / "data" / "raw"
 OUT = ROOT / "plugins" / "dnd2024-core" / "subclasses"
 
 # 手写过的子职：生成器绝不覆盖（一键 --force 把真实机制冲掉过一次）
-HAND_WRITTEN = {"champion", "draconic_sorcery"}
+HAND_WRITTEN = {"champion", "draconic_sorcery", "circle_of_the_moon"}
 
 CLASS_ZH = {
     "barbarian": "野蛮人", "bard": "吟游诗人", "cleric": "牧师", "druid": "德鲁伊",

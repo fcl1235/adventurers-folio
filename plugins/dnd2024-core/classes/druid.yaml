@@ -257,13 +257,12 @@ powers:
       - note:
           zh: 解除的是「不能在变形期间施法」这一条；成分限制由具体法术判断。
           en: This lifts the no-spellcasting clause of Wild Shape; component limits are per spell.
-    # 按 op 整条替换 morph，而不是字段级合并 —— 缺的字段写全，不靠猜。
+    # 按 op 改写 morph：这里只解禁施法，其余字段（临时生命 / AC 下限 / CR 轴）
+    # 由**字段合并**保留 —— 月亮结社 3 级的圆月形态改过它们，整条替换会把它冲掉。
     patch:
       effects:
         morph:
-          temp_hp: { plus: class_level }
           forbid: []
-          keep: [int, wis, cha]
 
   - id: dnd2024.class.druid.archdruid
     name: { zh: 大德鲁伊, en: Archdruid }

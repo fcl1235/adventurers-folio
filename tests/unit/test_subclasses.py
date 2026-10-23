@@ -60,7 +60,12 @@ class SubclassDataTest(unittest.TestCase):
             for power in subclass.powers:
                 self.assertTrue(power.name.zh and power.name.en, power.id)
                 self.assertTrue(power.text.zh and power.text.en, power.id)
-                self.assertTrue(power.effects, "%s 没有 effects" % power.id)
+                # 「有 effects」不是唯一的有实质内容：改写别的特性的能力用
+                # patch + augments 表达（月环「圆月形态」改的就是荒野变形的 morph）。
+                # 要挡的是「只有一段文字、什么也不做」的特性。
+                self.assertTrue(
+                    power.effects or power.patch or power.augments,
+                    "%s 既没有 effects 也没有 patch/augments" % power.id)
 
     def test_power_owner_is_subclass(self):
         for subclass in self.bundle.subclasses.values():

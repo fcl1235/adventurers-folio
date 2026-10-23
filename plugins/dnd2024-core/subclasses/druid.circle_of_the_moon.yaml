@@ -1,16 +1,30 @@
-# 由 tools/gen_subclasses.py 从 dnd55e_classes_detail.json + data/raw/subclasses.json 生成。
-# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
-# 特性目前一律是 passive + note：规则原文已登记，数值结算随后逐条落地。
+# hand-edited —— 本文件含真实机制（改写荒野变形的 morph 效果），生成器跳过。
+# 从 tools/gen_subclasses.py 的模板重来会把它冲掉。
+# 数值一律按 2024 英文原文（data/raw/_5e_class-druid.json 的 XPHB 条目）：
+#   圆月形态：CR = 德鲁伊等级 ÷ 3（向下取整）；AC = 13 + 感知调整值（若更高）；
+#             临时生命 = 德鲁伊等级 × 3。
 
 id: dnd2024.subclass.druid.circle_of_the_moon
 class: dnd2024.class.druid
 name: {zh: 月亮结社, en: Circle of the Moon}
 summary:
   zh: |-
-    最强变形德鲁伊：荒野变形能变更强野兽，靠野兽形态打前排。
+    借月之魔力变形的德鲁伊：荒野形态能变成更强的野兽，靠野兽身体打前排。
   en: |-
-    The Circle of the Moon subclass of the Druid.
+    Druids of the Circle of the Moon draw on lunar magic to transform themselves.
 unlock_level: 3
+
+# 子职自己的次数池（月光步）。次数按**父职业等级**求值，但「感知调整值」是角色属性，
+# 所以写 floor 而不是写死数字：感知 8 的德鲁伊也是 1 次（原文 "minimum of once"）。
+# id 走 `dnd2024.resource.` 命名空间（与职业资源同一条规矩），中间带上子职短名 ——
+# 两个子职各有一个「月光步」时也不会撞车。
+resources:
+  - id: dnd2024.resource.druid.circle_of_the_moon.moonlight_step
+    kind: charge
+    refresh: long_rest
+    level: 10
+    capacity: {plus: ability.wis, floor: 1}
+    label: {zh: 月光步使用次数, en: Moonlight Step uses}
 
 powers:
   - id: dnd2024.subclass.druid.circle_of_the_moon.circle_forms
@@ -18,17 +32,31 @@ powers:
     level: 3
     kind: passive
     target: self
+    # 改写的正是德鲁伊的荒野变形。三处数值各自独立：
+    #   临时生命 → 3 × 职业等级（基础规则是 1 × 等级）
+    #   AC 下限 → 13 + 感知调整值（形态 AC 更高时仍用形态的）
+    #   CR 轴   → 职业等级 ÷ 3，取代基础轴的 1/4、1/2、1
+    # forbid / keep 不写：字段合并会保留目标里的值（变形期间不能施法）
+    augments: [dnd2024.class.druid.wild_shape]
     text:
       zh: |-
-        荒野变形可变为挑战等级更高的野兽（上限随等级提升），且变形时保留你的熟练与部分特性。
+        化为荒野形态时引导月之魔力，获得以下好处：
+        【挑战等级】形态的挑战等级上限 = 你的德鲁伊等级 ÷ 3（向下取整）。
+        【护甲等级】离开形态前，若「13 + 你的感知调整值」高于野兽的 AC，则按该值计算 AC。
+        【临时生命】你获得相当于德鲁伊等级 3 倍的临时生命。
       en: |-
-        Circle Forms — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
-    effects:
-      - note:
-          zh: |-
-            本条尚未接入数值原语，规则原文如上。
-          en: |-
-            No numeric primitive is wired to this feature yet; the rule text above is the source.
+        You can channel lunar magic when you assume a Wild Shape form, granting you the
+        benefits below. Challenge Rating: the maximum Challenge Rating for the form equals
+        your Druid level divided by 3 (round down). Armor Class: until you leave the form,
+        your AC equals 13 plus your Wisdom modifier if that total is higher than the
+        Beast's AC. Temporary Hit Points: you gain a number of Temporary Hit Points equal
+        to three times your Druid level.
+    patch:
+      effects:
+        morph:
+          temp_hp: { flat: 3, times: class_level }
+          ac_min: { flat: 13, plus: ability.wis }
+          cr_by_level: { 3: 1, 6: 2, 9: 3, 12: 4, 15: 5, 18: 6 }
 
   - id: dnd2024.subclass.druid.circle_of_the_moon.improved_circle_forms
     name: {zh: 强化圆月形态, en: Improved Circle Forms}
@@ -37,32 +65,54 @@ powers:
     target: self
     text:
       zh: |-
-        野兽形态的 AC 提升，攻击视为魔法，且可用附赠动作变形。
+        处于荒野形态时获得：
+        【月之光耀】你的每次攻击可选择原本的伤害类型或光耀伤害，每次命中时单独决定。
+        【坚韧增强】你的体质豁免可以加上感知调整值。
       en: |-
-        Improved Circle Forms — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+        While in a Wild Shape form, you gain the following benefits. Lunar Radiance: each of
+        your attacks in a Wild Shape form can deal its normal damage type or Radiant damage.
+        You make this choice each time you hit with those attacks. Increased Toughness: you
+        can add your Wisdom modifier to your Constitution saving throws.
     effects:
+      - grant_modifier:
+          target: save.con
+          value: { plus: ability.wis }
+          when: { morphed: true }
       - note:
           zh: |-
-            本条尚未接入数值原语，规则原文如上。
+            「伤害类型可改为光耀」是每次命中的选项，属于攻击流程（G2），当前不结算。
           en: |-
-            No numeric primitive is wired to this feature yet; the rule text above is the source.
+            Choosing Radiant damage on each hit belongs to the attack pipeline, not
+            modelled yet.
 
   - id: dnd2024.subclass.druid.circle_of_the_moon.moonlight_step
     name: {zh: 月光步, en: Moonlight Step}
     level: 10
-    kind: passive
+    kind: activated
+    # 次数是子职自己的池（见文末 resources）：花附赠动作，再扣一次使用次数。
+    cost: { action: bonus, resource: dnd2024.resource.druid.circle_of_the_moon.moonlight_step, label: 月光步 }
     target: self
     text:
       zh: |-
-        附赠动作传送到 30 尺内可见位置并进入隐形，直至下回合开始。
+        附赠动作：传送到 30 尺内一个你能看见且未被占据的位置，并在本回合结束前
+        你的下一次攻击检定具有优势。
+        使用次数等于你的感知调整值（至少 1 次），完成长休后全部恢复；
+        也可以消耗一个 2 环或更高的法术位来恢复一次使用次数（无需动作）。
       en: |-
-        Moonlight Step — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+        As a Bonus Action, you teleport up to 30 feet to an unoccupied space you can see,
+        and you have Advantage on the next attack roll you make before the end of this turn.
+        You can use this feature a number of times equal to your Wisdom modifier (minimum
+        of once), and you regain all expended uses when you finish a Long Rest. You can also
+        regain uses by expending a level 2+ spell slot for each use you want to restore.
     effects:
       - note:
           zh: |-
-            本条尚未接入数值原语，规则原文如上。
+            传送与「下次攻击优势」需要战斗回合与位置模型（G2），不结算。
+            「用法术位换回次数」还没有「支付换恢复」这条通道，请手动加回。
           en: |-
-            No numeric primitive is wired to this feature yet; the rule text above is the source.
+            Teleporting and "Advantage on your next attack" need the combat turn model.
+            "Spend a slot to regain a use" has no payment-for-recovery channel yet;
+            restore the use by hand.
 
   - id: dnd2024.subclass.druid.circle_of_the_moon.lunar_form
     name: {zh: 月华形态, en: Lunar Form}
@@ -71,12 +121,17 @@ powers:
     target: self
     text:
       zh: |-
-        野兽形态下攻击额外造成 1d10 光耀伤害，且获得对应抗性。
+        【强化月之光耀】每回合一次，你可以对被你以荒野形态的攻击命中的目标额外造成 2d10 光耀伤害。
+        【共享月光】每当你使用月光步时，可以同时传送一个距你 10 尺内、且愿意的生物。
       en: |-
-        Lunar Form — the full rules text of this subclass is not part of SRD 5.2, so this plugin carries the normalized Chinese text as the authoritative copy.
+        Improved Lunar Radiance: once per turn, you can deal an extra 2d10 Radiant damage
+        to a target you hit with a Wild Shape form's attack. Shared Moonlight: whenever you
+        use Moonlight Step, you can also teleport one willing creature within 10 feet of you.
     effects:
       - note:
           zh: |-
-            本条尚未接入数值原语，规则原文如上。
+            「每回合一次 +2d10」要在攻击结算里加一条额外伤害通道（G2）；
+            「共享月光」依附于月光步的传送，同样等回合流程。
           en: |-
-            No numeric primitive is wired to this feature yet; the rule text above is the source.
+            "Once per turn, +2d10" needs an extra-damage channel in the attack pipeline;
+            Shared Moonlight rides on Moonlight Step's teleport. Both wait on the turn model.
