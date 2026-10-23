@@ -111,9 +111,14 @@ def target_from_actor(
     resolver = resolver_for(actor, bundle.armors)
     top = actor.top()
     proficient = _save_proficiencies(bundle, actor)
+    # 卡上印着豁免加值就直接用（怪物），否则按「属性 + 熟练」推（玩家）。
+    # 不分开这两条会出这种事：巨蜘蛛的敏捷豁免写 +5，按 +1 敏捷 +2 熟练推成 +3，
+    # 玩家扔火球时的 DC 差两点，而界面上两个数字都「看着对」。
+    printed = dict(top.statblock.saves)
     saves = {
-        ability: resolver.saving_throw(top, ability,
-                                       proficient=ability in proficient).total
+        ability: (int(printed[ability]) if ability in printed
+                  else resolver.saving_throw(top, ability,
+                                             proficient=ability in proficient).total)
         for ability in ABILITY_KEYS
     }
     resist, immune = passive_defenses(bundle, actor)

@@ -397,3 +397,132 @@ def _notes(outcome: str, profile: AttackProfile, segments: list[dict],
     if not apply:
         notes.append("预览：目标 HP、优势标记、每回合一次的记账都没有动")
     return notes
+
+
+# --- 怪物攻击 -----------------------------------------------------------
+def resolve_monster_attack(
+    attacker: Actor,
+    attack: "MonsterAttack",
+    target: Target,
+    rng: Rng | None = None,
+    apply: bool = False,
+    locale: str = "zh",
+) -> dict[str, Any]:
+    """掷一次怪物动作。
+
+    与 `resolve_attack` 的差别只有三处，都是「怪物不是玩家」带来的：
+
+    1. **命中加值直接用卡上的数**（`attack.attack_bonus`），不经过 Resolver ——
+       见 `rules/monsters.py` 开头的实测：85/95 条攻击推不出来。
+    2. **没有额外伤害、没有一次性标记**：那些通道是玩家能力的，怪物不挂。
+    3. **重击只看 20**：`attack.crit_min` 是玩家能力的通道，怪物没有。
+
+    豁免类动作（`kind="save"`）**不替你掷**：原文里「成功则半伤」「失败则被束缚」
+    这些后果写在说明里，不是结构化数据。硬编一个「失败全伤」就是编规则。
+    `multiattack` / `other` 同理 —— 只回报这是哪一类，不假装结算过。
+    """
+    from .monsters import MonsterAttack  # noqa: F401  仅为类型与取值
+
+    roller = rng or SeededRng()
+    name = attack.name.get(locale)
+    base = {
+        "attacker": {"id": attacker.id,
+                     "name": attacker.top().statblock.name.get(locale),
+                     "monster": True},
+        "action": {"key": "", "name": name, "kind": attack.kind,
+                   "attack_bonus": attack.attack_bonus,
+                   "reach": attack.reach, "range": attack.range,
+                   "long_range": attack.long_range,
+                   "save": attack.save, "save_dc": attack.save_dc},
+        "target": {"label": target.label or "目标", "ac": int(target.ac)},
+    }
+
+    if attack.kind in ("multiattack", "other"):
+        # 「多重攻击」本身不掷骰：真正的结算是它下面列的那几条。
+        base.update({
+            "rolled": False, "outcome": "not_rolled", "hit": False,
+            "damage": {"total": 0, "breakdown": [], "type": "", "defense": ""},
+            "hp": {"before": None, "after": None, "applied": None},
+            "notes": ["这条动作没有可掷的数值（%s）" % attack.kind],
+        })
+        return base
+
+    if attack.kind == "save":
+        base.update({
+            "rolled": False, "outcome": "save_required", "hit": False,
+            "damage": {"total": 0, "breakdown": [], "type": "", "defense": ""},
+            "hp": {"before": None, "after": None, "applied": None},
+            "notes": [
+                "要目标掷 %s 豁免（DC %d），后果写在说明里 —— 本程序不替你判"
+                % (attack.save.upper(), int(attack.save_dc)),
+            ],
+        })
+        return base
+
+    bonus = int(attack.attack_bonus or 0)
+    roll = roll_d20(roller, "flat")
+    total = roll.total + bonus
+    if roll.total == CRIT_ON_20:
+        outcome = "critical"
+    elif roll.total == 1 or total < int(target.ac):
+        outcome = "miss"
+    else:
+        outcome = "hit"
+    hit = outcome != "miss"
+
+    segments: list[dict] = []
+    if hit:
+        multiplier = 2 if outcome == "critical" else 1
+        for part in attack.damage:
+            segments.append(_segment(
+                label=name, dice=parse_dice(part.dice), bonus=0,
+                damage_type=part.type, multiplier=multiplier,
+                target=target, rng=roller, locale=locale,
+            ))
+    total_damage = sum(int(item["damage"]) for item in segments)
+
+    hp_before = hp_after = applied = None
+    if apply and target.actor is not None and total_damage:
+        pool = target.actor.root().hp
+        hp_before = pool.current + pool.temp
+        pool.damage(total_damage)
+        hp_after = pool.current + pool.temp
+        applied = hp_before - hp_after
+
+    notes: list[str] = []
+    if outcome == "miss":
+        notes.append("未命中，不掷伤害")
+    if outcome == "critical":
+        notes.append("重击：伤害骰翻倍，定值不翻")
+    if not attack.damage:
+        notes.append("这条动作没有登记伤害（原文可能只写了控制效果）")
+    for item in segments:
+        if item["defense"] == "resistance":
+            notes.append("%s 抗性：伤害减半" % item["damage_type_zh"])
+        if item["defense"] == "immunity":
+            notes.append("%s 免疫：伤害归零" % item["damage_type_zh"])
+    if not apply:
+        notes.append("预览：目标 HP 没有动")
+    notes.append("怪物的优势（群体战术这类特性）没有建模 —— 要优势请手动选掷骰模式")
+
+    base.update({
+        "rolled": True,
+        "attack": {
+            "bonus": bonus,
+            "die": roll.total,
+            "total": int(total),
+            "mode": "flat",
+            "crit_min": CRIT_ON_20,
+        },
+        "outcome": outcome,
+        "hit": hit,
+        "damage": {
+            "total": int(total_damage),
+            "breakdown": segments,
+            "type": damage_name(attack.damage[0].type, locale) if attack.damage else "",
+            "defense": segments[0]["defense"] if segments else "",
+        },
+        "hp": {"before": hp_before, "after": hp_after, "applied": applied},
+        "notes": notes,
+    })
+    return base

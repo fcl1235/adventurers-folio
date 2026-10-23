@@ -82,6 +82,10 @@ class Statblock:
     senses: Mapping[str, int] = field(default_factory=dict)
     size: str = "medium"
     cr: float = 0.0
+    # 卡上直接印着的豁免加值（怪物）。空 = 按「属性调整值 + 熟练」推。
+    # 为什么要这个字段：怪物的豁免熟练不总等于 `属性 + 熟练`，
+    # 推一遍会悄悄算错；模板上写多少就是多少。
+    saves: Mapping[str, int] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not isinstance(self.name, Text):
@@ -91,8 +95,12 @@ class Statblock:
         for mode, value in self.speeds.items():
             if value < 0:
                 raise RuleError("速度不能为负：%s=%r" % (mode, value))
+        bad = [key for key in self.saves if key not in ABILITY_KEYS]
+        if bad:
+            raise RuleError("豁免加值只能按 %s 写：%r" % ("/".join(ABILITY_KEYS), bad))
         object.__setattr__(self, "speeds", MappingProxyType(dict(self.speeds)))
         object.__setattr__(self, "senses", MappingProxyType(dict(self.senses)))
+        object.__setattr__(self, "saves", MappingProxyType(dict(self.saves)))
 
     def speed(self, mode: str = "walk") -> int:
         return int(self.speeds.get(mode, 0))

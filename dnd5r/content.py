@@ -26,6 +26,15 @@ from .plugin import Manifest, load_manifest
 from .rules.amount import Amount, parse_amount
 from .rules.effects import parse_effects
 from .rules.morph import CrAxis, FormSpec
+from .rules.monsters import (
+    ACTION_KINDS as MONSTER_ACTION_KINDS,
+)
+from .rules.monsters import (
+    MonsterAttack,
+    MonsterTrait,
+    parse_attack as parse_monster_attack,
+    parse_trait as parse_monster_trait,
+)
 from .rules.powers import Power, PowerBook, apply_patch, parse_power
 from .rules.progression import CasterKind, attacks_per_action
 from .rules.summon import (
@@ -904,6 +913,139 @@ def parse_summon(data: Any, source: str = "") -> SummonDef:
         condition_immunities=tuple(str(v).lower()
                                    for v in (data.get("condition_immunities") or ())),
         traits=actions("traits"),
+        actions=actions("actions"),
+        bonus_actions=actions("bonus_actions"),
+        reactions=actions("reactions"),
+        note=Text.from_dict(data["note"], where="%s note" % ident)
+        if data.get("note") else None,
+        source=source,
+    )
+
+
+@dataclass(frozen=True)
+class MonsterDef:
+    """一只怪物（可以拿来打的那种）。
+
+    **为什么不是 `FormSpec`**：形态（荒野变形）只回答「变成它以后我的属性是多少」，
+    没有任何动作数据 —— 熊变成熊以后照样按徒手算（P9b 的报告里明写过这件事）。
+    怪物要能反击，就必须有自己的命中加值、伤害骰、豁免 DC。
+
+    **为什么命中加值不是推出来的**：SRD 怪物的攻击加值不服从「属性调整值 + 熟练」，
+    91 只里 85 条对不上（`rules/monsters.py` 开头有实测）。所以 `attack_bonus`
+    原样存内容里，引擎不重算。
+
+    `saves` 是卡上印着的豁免加值（只有写了的那几项），进 `Statblock.saves`，
+    `target_from_actor` 优先读它 —— 玩家扔火球砸怪物时，DC 算错两点很难被发现。
+    """
+
+    id: str
+    name: Text
+    ac: int
+    hp: int
+    cr: float
+    abilities: Abilities
+    size: str = "medium"
+    hp_dice: str = ""
+    speeds: Mapping[str, int] = field(default_factory=dict)
+    senses: Mapping[str, int] = field(default_factory=dict)
+    passive_perception: int = 10
+    saves: Mapping[str, int] = field(default_factory=dict)
+    skills: Mapping[str, int] = field(default_factory=dict)
+    traits: tuple[MonsterTrait, ...] = ()
+    actions: tuple[MonsterAttack, ...] = ()
+    bonus_actions: tuple[MonsterAttack, ...] = ()
+    reactions: tuple[MonsterAttack, ...] = ()
+    note: Text | None = None
+    source: str = ""
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("怪物 id 不合规范：%r" % (self.id,))
+        if self.ac < 1:
+            raise PluginError("怪物 %s 的 AC 不合法：%r" % (self.id, self.ac))
+        if self.hp < 1:
+            raise PluginError("怪物 %s 的 HP 不合法：%r" % (self.id, self.hp))
+        if self.cr < 0:
+            raise PluginError("怪物 %s 的 CR 不能为负" % self.id)
+        if self.size not in SIZES:
+            raise PluginError("怪物 %s 的体型必须是 %s" % (self.id, "/".join(SIZES)))
+        bad = [key for key in self.speeds if key not in SPEED_KINDS]
+        if bad:
+            raise PluginError("怪物 %s 的速度类型不认识：%s（可选 %s）"
+                              % (self.id, ", ".join(bad), "/".join(SPEED_KINDS)))
+        bad = [key for key in self.senses if key not in SENSE_KINDS]
+        if bad:
+            raise PluginError("怪物 %s 的感官类型不认识：%s（可选 %s）"
+                              % (self.id, ", ".join(bad), "/".join(SENSE_KINDS)))
+        bad = [key for key in self.saves
+               if key not in ("str", "dex", "con", "int", "wis", "cha")]
+        if bad:
+            raise PluginError("怪物 %s 的豁免加值只能按 str/dex/con/int/wis/cha 写：%s"
+                              % (self.id, ", ".join(bad)))
+        # 没有动作的怪**允许**存在（剧情里确实有），只是界面上会显示「没有动作」。
+        # 不在这里报错：报错会让人以为数据坏了，其实是这一条本来就只会站着。
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {
+            "id": self.id,
+            "name": self.name.get(locale),
+            "size": self.size,
+            "ac": int(self.ac),
+            "hp": int(self.hp),
+            "hp_dice": self.hp_dice,
+            "cr": float(self.cr),
+            "saves": dict(self.saves),
+            "passive_perception": int(self.passive_perception),
+            "traits": [row.to_dict(locale) for row in self.traits],
+            "actions": [row.to_dict(locale) for row in self.actions],
+            "source": self.source,
+        }
+
+
+def parse_monster(data: Any, source: str = "") -> MonsterDef:
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的怪物定义必须是映射" % source)
+    for key in ("id", "name", "ac", "hp", "cr", "abilities"):
+        if key not in data:
+            raise PluginError("%s 的怪物定义缺少 %s（%s）" % (source, key, data.get("id", "?")))
+    ident = str(data["id"])
+    if not is_valid(ident):
+        raise PluginError("怪物 id 不合规范：%r" % ident)
+    try:
+        abilities = Abilities.of(**{str(key): int(value)
+                                    for key, value in data["abilities"].items()})
+    except RuleError as exc:
+        raise PluginError("%s 的属性不合法：%s" % (ident, exc))
+
+    def actions(key: str) -> tuple[MonsterAttack, ...]:
+        rows = data.get(key) or ()
+        if isinstance(rows, Mapping):
+            rows = [rows]
+        return tuple(parse_monster_attack(row, where="%s %s" % (ident, key))
+                     for row in rows)
+
+    def traits() -> tuple[MonsterTrait, ...]:
+        rows = data.get("traits") or ()
+        if isinstance(rows, Mapping):
+            rows = [rows]
+        return tuple(parse_monster_trait(row, where="%s traits" % ident) for row in rows)
+
+    return MonsterDef(
+        id=ident,
+        name=Text.from_dict(data["name"], where="%s name" % ident),
+        ac=int(data["ac"]),
+        hp=int(data["hp"]),
+        cr=float(data["cr"]),
+        abilities=abilities,
+        size=str(data.get("size", "medium")).lower(),
+        hp_dice=str(data.get("hp_dice", "")),
+        speeds={str(k).lower(): int(v)
+                for k, v in (data.get("speeds") or {"walk": 30}).items()},
+        senses={str(k).lower(): int(v) for k, v in (data.get("senses") or {}).items()},
+        passive_perception=int(data.get("passive_perception", 10)),
+        saves={str(k).lower(): int(v) for k, v in (data.get("saves") or {}).items()},
+        skills={str(k): int(v) for k, v in (data.get("skills") or {}).items()},
+        traits=traits(),
         actions=actions("actions"),
         bonus_actions=actions("bonus_actions"),
         reactions=actions("reactions"),
@@ -1835,6 +1977,7 @@ class PluginContent:
     skills: dict[str, SkillDef] = field(default_factory=dict)
     tools: dict[str, ToolDef] = field(default_factory=dict)
     summons: dict[str, "SummonDef"] = field(default_factory=dict)
+    monsters: dict[str, "MonsterDef"] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -1856,6 +1999,7 @@ class ContentBundle:
     skills: dict[str, SkillDef] = field(default_factory=dict)
     tools: dict[str, ToolDef] = field(default_factory=dict)
     summons: dict[str, "SummonDef"] = field(default_factory=dict)
+    monsters: dict[str, "MonsterDef"] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -1956,6 +2100,7 @@ class ContentBundle:
             "skills": len(self.skills),
             "tools": len(self.tools),
             "summons": len(self.summons),
+            "monsters": len(self.monsters),
             "by_kind": self.book.stats(),
             "errors": len(self.errors),
         }
@@ -2040,6 +2185,7 @@ def load_plugin(folder: str | Path) -> PluginContent:
     _load_skills(base, result)
     _load_tools(base, result)
     _load_summons(base, result)
+    _load_monsters(base, result)
     result.book.validate_augments()
     return result
 
@@ -2071,6 +2217,35 @@ def _load_summons(base: Path, result: PluginContent) -> None:
             result.errors.append("%s 的召唤物 id 重复：%s" % (rel, summon.id))
             continue
         result.summons[summon.id] = summon
+
+
+def _load_monsters(base: Path, result: PluginContent) -> None:
+    """怪物：一个插件一份 `monsters.yaml`（与 `summons.yaml` 同一个位置）。
+
+    为什么整表一个文件：怪物之间没有互相引用，按 id 取用，几十到上百条 ——
+    一条一文件只在「git diff 要人能读」时才值得（专长/子职），怪物看的是排序。
+    """
+    path = base / "monsters.yaml"
+    if not path.exists():
+        return
+    rel = "%s/monsters.yaml" % base.name
+    try:
+        rows = _read_yaml(path) or []
+    except PluginError as exc:
+        result.errors.append(str(exc))
+        return
+    if isinstance(rows, Mapping):
+        rows = [rows]
+    for row in rows:
+        try:
+            monster = parse_monster(row, source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if monster.id in result.monsters:
+            result.errors.append("%s 的怪物 id 重复：%s" % (rel, monster.id))
+            continue
+        result.monsters[monster.id] = monster
 
 
 def _load_tools(base: Path, result: PluginContent) -> None:
@@ -2284,6 +2459,11 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 bundle.errors.append("召唤物 %s 重复提供" % summon_id)
                 continue
             bundle.summons[summon_id] = summon
+        for monster_id, monster in content.monsters.items():
+            if monster_id in bundle.monsters:
+                bundle.errors.append("怪物 %s 重复提供" % monster_id)
+                continue
+            bundle.monsters[monster_id] = monster
         for subclass_id, subclass in content.subclasses.items():
             if subclass_id in bundle.subclasses:
                 bundle.errors.append("子职 %s 重复提供" % subclass_id)

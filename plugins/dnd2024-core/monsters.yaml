@@ -1,0 +1,3022 @@
+# 由 tools/gen_monsters.py 生成，别手改（改了就重跑生成器）。
+#
+# 来源：dnd55e/data/monsters.json（SRD 5.2，CR 0–6，91 只）。
+# 中文说明是旧程序的译文，本文件照抄。英文说明**尚未导入**，所以每个 `text.en`
+# 都是一句占位声明，不是翻译 —— 编一句英文比留空更糟（见 §14 / G8）。
+#
+# `attack_bonus` 是原文印在卡上的数，绝不由「属性调整值 + 熟练」推算：
+# 95 条攻击里 85 条推不出来（巨鳄啃咬 +8，力量 +5、敏捷 -1，凑不出来）。
+# `saves` 同理，是印着的豁免加值；引擎优先读它，读不到才按属性推。
+
+- id: dnd2024.monster.baboon
+  name: { zh: 狒狒, en: Baboon }
+  size: small
+  ac: 12
+  hp: 3
+  hp_dice: 1d6
+  cr: 0
+  abilities: { str: "8", dex: "14", con: "11", int: "4", wis: "12", cha: "6" }
+  speeds: { walk: "30", climb: "30" }
+  passive_perception: 11
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有狒狒的一个未失能盟友，狒狒对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 1
+      reach: 5
+      damage:
+        - { dice: 1d4-1, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +1，触及 5 尺，命中造成 1d4-1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.badger
+  name: { zh: 獾, en: Badger }
+  size: tiny
+  ac: 11
+  hp: 5
+  hp_dice: 1d4+3
+  cr: 0
+  abilities: { str: "10", dex: "11", con: "16", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "20", burrow: "5" }
+  senses: { darkvision: "30" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.bat
+  name: { zh: 蝙蝠, en: Bat }
+  size: tiny
+  ac: 12
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "2", dex: "15", con: "8", int: "2", wis: "12", cha: "4" }
+  speeds: { walk: "5", fly: "30" }
+  senses: { blindsight: "60" }
+  passive_perception: 11
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.beast_of_the_land
+  name: { zh: 陆行兽, en: Beast of the Land }
+  size: medium
+  ac: 13
+  hp: 5
+  hp_dice: 1d8
+  cr: 0
+  abilities: { str: "14", dex: "14", con: "15", int: "8", wis: "14", cha: "11" }
+  speeds: { walk: "40", climb: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 12
+  traits:
+    - name: { zh: 原始纽带, en: Primal Bond }
+      text:
+        zh: |-
+          你可以把熟练加值加到这只野兽的任何属性检定与豁免上。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 野兽打击, en: "Beast's Strike" }
+      kind: other
+      reach: 5
+      text:
+        zh: |-
+          命中 = 你的法术攻击加值，触及 5 尺，伤害 1d8+2+你的感知调整值（钝击、穿刺或挥砍任选）。若它在此次攻击前直线移动至少 20 尺靠近目标，额外造成 1d6 伤害，且目标（大型或更小）倒地。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.beast_of_the_sea
+  name: { zh: 海行兽, en: Beast of the Sea }
+  size: medium
+  ac: 13
+  hp: 5
+  hp_dice: 1d8
+  cr: 0
+  abilities: { str: "14", dex: "14", con: "15", int: "8", wis: "14", cha: "11" }
+  speeds: { walk: "5", swim: "60" }
+  senses: { darkvision: "90" }
+  passive_perception: 12
+  traits:
+    - name: { zh: 两栖, en: Amphibious }
+      text:
+        zh: |-
+          它可以在空气与水中呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 原始纽带, en: Primal Bond }
+      text:
+        zh: |-
+          你可以把熟练加值加到这只野兽的任何属性检定与豁免上。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 野兽打击, en: "Beast's Strike" }
+      kind: other
+      reach: 5
+      text:
+        zh: |-
+          命中 = 你的法术攻击加值，触及 5 尺，伤害 1d6+2+你的感知调整值（钝击或穿刺任选），命中后目标被擒抱（逃脱 DC = 你的法术豁免 DC）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.beast_of_the_sky
+  name: { zh: 飞行兽, en: Beast of the Sky }
+  size: small
+  ac: 13
+  hp: 4
+  hp_dice: 1d6
+  cr: 0
+  abilities: { str: "6", dex: "16", con: "13", int: "8", wis: "14", cha: "11" }
+  speeds: { walk: "10", fly: "60" }
+  senses: { darkvision: "60" }
+  passive_perception: 12
+  traits:
+    - name: { zh: 飞掠, en: Flyby }
+      text:
+        zh: |-
+          它飞离敌人的触及范围时，不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 原始纽带, en: Primal Bond }
+      text:
+        zh: |-
+          你可以把熟练加值加到这只野兽的任何属性检定与豁免上。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 野兽打击, en: "Beast's Strike" }
+      kind: other
+      reach: 5
+      text:
+        zh: |-
+          命中 = 你的法术攻击加值，触及 5 尺，伤害 1d4+3+你的感知调整值（挥砍）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.cat
+  name: { zh: 猫, en: Cat }
+  size: tiny
+  ac: 12
+  hp: 2
+  hp_dice: 1d4
+  cr: 0
+  abilities: { str: "3", dex: "15", con: "10", int: "3", wis: "12", cha: "7" }
+  speeds: { walk: "40", climb: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  saves: { dex: "4" }
+  skills: { perception: "3", stealth: "4" }
+  traits:
+    - name: { zh: 跳跃者, en: Jumper }
+      text:
+        zh: |-
+          猫的跳跃距离以敏捷而非力量计算。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 抓挠, en: Scratch }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: "1", type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.crab
+  name: { zh: 螃蟹, en: Crab }
+  size: tiny
+  ac: 11
+  hp: 3
+  hp_dice: 1d4+1
+  cr: 0
+  abilities: { str: "6", dex: "11", con: "12", int: "1", wis: "8", cha: "2" }
+  speeds: { walk: "20", swim: "20" }
+  senses: { blindsight: "30" }
+  passive_perception: 9
+  skills: { stealth: "2" }
+  traits:
+    - name: { zh: 水陆两栖, en: Amphibious }
+      text:
+        zh: |-
+          螃蟹可以在空气和水中呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 钳击, en: Claw }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: "1", type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.deer
+  name: { zh: 鹿, en: Deer }
+  size: medium
+  ac: 13
+  hp: 4
+  hp_dice: 1d8
+  cr: 0
+  abilities: { str: "11", dex: "16", con: "11", int: "2", wis: "14", cha: "5" }
+  speeds: { walk: "50" }
+  senses: { darkvision: "60" }
+  passive_perception: 14
+  skills: { perception: "4" }
+  traits:
+    - name: { zh: 灵巧, en: Agile }
+      text:
+        zh: |-
+          鹿移动离开敌人触及范围时不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 撞击, en: Ram }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: 1d4, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1d4 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.eagle
+  name: { zh: 鹰, en: Eagle }
+  size: small
+  ac: 12
+  hp: 4
+  hp_dice: 1d6+1
+  cr: 0
+  abilities: { str: "6", dex: "15", con: "12", int: "2", wis: "14", cha: "7" }
+  speeds: { walk: "10", fly: "60" }
+  passive_perception: 16
+  skills: { perception: "6" }
+  actions:
+    - name: { zh: 利爪, en: Talons }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d4+2, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.frog
+  name: { zh: 青蛙, en: Frog }
+  size: tiny
+  ac: 11
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "1", dex: "13", con: "8", int: "1", wis: "8", cha: "3" }
+  speeds: { walk: "20", swim: "20" }
+  senses: { darkvision: "30" }
+  passive_perception: 11
+  skills: { perception: "1", stealth: "3" }
+  traits:
+    - name: { zh: 水陆两栖, en: Amphibious }
+      text:
+        zh: |-
+          青蛙可以在空气和水中呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 立定跳跃, en: Standing Leap }
+      text:
+        zh: |-
+          青蛙的跳远距离至多 10 尺、跳高至多 5 尺，无论是否有助跑。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_fire_beetle
+  name: { zh: 巨型萤火虫, en: Giant Fire Beetle }
+  size: small
+  ac: 13
+  hp: 4
+  hp_dice: 1d6+1
+  cr: 0
+  abilities: { str: "8", dex: "10", con: "12", int: "1", wis: "7", cha: "3" }
+  speeds: { walk: "30", climb: "30" }
+  senses: { blindsight: "30" }
+  passive_perception: 8
+  traits:
+    - name: { zh: 发光, en: Illumination }
+      text:
+        zh: |-
+          巨型萤火虫散发 10 尺半径的明亮光照，以及其外 10 尺的微光光照。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 1
+      reach: 5
+      damage:
+        - { dice: "1", type: fire }
+      text:
+        zh: |-
+          近战攻击：命中 +1，触及 5 尺，命中造成 1 点火焰伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.goat
+  name: { zh: 山羊, en: Goat }
+  size: medium
+  ac: 10
+  hp: 4
+  hp_dice: 1d8
+  cr: 0
+  abilities: { str: "11", dex: "10", con: "11", int: "2", wis: "10", cha: "5" }
+  speeds: { walk: "40", climb: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 12
+  saves: { str: "2" }
+  skills: { perception: "2" }
+  actions:
+    - name: { zh: 撞击, en: Ram }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: 1d4, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1 点钝击伤害；若山羊在此次攻击前直线移动 20 尺以上靠近目标，则改为 2（1d4）点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.hawk
+  name: { zh: 隼, en: Hawk }
+  size: tiny
+  ac: 13
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "5", dex: "16", con: "8", int: "2", wis: "14", cha: "6" }
+  speeds: { walk: "10", fly: "60" }
+  passive_perception: 16
+  skills: { perception: "6" }
+  actions:
+    - name: { zh: 利爪, en: Talons }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: "1", type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.hyena
+  name: { zh: 鬣狗, en: Hyena }
+  size: medium
+  ac: 11
+  hp: 5
+  hp_dice: 1d8+1
+  cr: 0
+  abilities: { str: "11", dex: "13", con: "12", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "50" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有鬣狗的一个未失能盟友，鬣狗对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: 1d6, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1d6 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.jackal
+  name: { zh: 胡狼, en: Jackal }
+  size: small
+  ac: 12
+  hp: 3
+  hp_dice: 1d6
+  cr: 0
+  abilities: { str: "8", dex: "15", con: "11", int: "3", wis: "12", cha: "6" }
+  speeds: { walk: "40" }
+  senses: { darkvision: "90" }
+  passive_perception: 15
+  skills: { perception: "5", stealth: "4" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 1
+      reach: 5
+      damage:
+        - { dice: 1d4-1, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +1，触及 5 尺，命中造成 1d4-1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.lizard
+  name: { zh: 蜥蜴, en: Lizard }
+  size: tiny
+  ac: 10
+  hp: 2
+  hp_dice: 1d4
+  cr: 0
+  abilities: { str: "2", dex: "11", con: "10", int: "1", wis: "8", cha: "3" }
+  speeds: { walk: "20", climb: "20" }
+  senses: { darkvision: "30" }
+  passive_perception: 9
+  traits:
+    - name: { zh: 蛛行, en: Spider Climb }
+      text:
+        zh: |-
+          蜥蜴可以攀爬困难表面（包括沿天花板），无需进行属性检定。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.octopus
+  name: { zh: 章鱼, en: Octopus }
+  size: small
+  ac: 12
+  hp: 3
+  hp_dice: 1d6
+  cr: 0
+  abilities: { str: "4", dex: "15", con: "11", int: "3", wis: "10", cha: "4" }
+  speeds: { walk: "5", swim: "30" }
+  senses: { darkvision: "30" }
+  passive_perception: 12
+  skills: { perception: "2", stealth: "4" }
+  traits:
+    - name: { zh: 屏息, en: Hold Breath }
+      text:
+        zh: |-
+          章鱼可以屏息 30 分钟。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 水下伪装, en: Underwater Camouflage }
+      text:
+        zh: |-
+          章鱼在水下进行的敏捷（隐匿）检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          章鱼只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 触手, en: Tentacles }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: "1", type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1 点钝击伤害，且目标被擒抱（逃脱 DC 10）；擒抱结束前章鱼不能对其他目标使用触手。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 墨云, en: Ink Cloud }
+      kind: other
+      text:
+        zh: |-
+          若章鱼在水下，可在周身喷出 5 尺半径的墨云。该区域处于重度遮蔽，持续 1 分钟，强水流可将其驱散。喷墨后章鱼可以用附赠动作执行疾走。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.owl
+  name: { zh: 猫头鹰, en: Owl }
+  size: tiny
+  ac: 11
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "3", dex: "13", con: "8", int: "2", wis: "12", cha: "7" }
+  speeds: { walk: "5", fly: "60" }
+  senses: { darkvision: "120" }
+  passive_perception: 15
+  skills: { perception: "5", stealth: "5" }
+  traits:
+    - name: { zh: 飞掠, en: Flyby }
+      text:
+        zh: |-
+          猫头鹰飞离敌人触及范围时不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 利爪, en: Talons }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: "1", type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 1 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.piranha
+  name: { zh: 食人鱼, en: Piranha }
+  size: tiny
+  ac: 13
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "2", dex: "16", con: "9", int: "1", wis: "7", cha: "2" }
+  speeds: { walk: "5", swim: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 8
+  traits:
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          食人鱼只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1 点穿刺伤害。若目标 HP 未满，该攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.quipper
+  name: { zh: 食人鲤, en: Quipper }
+  size: tiny
+  ac: 13
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "2", dex: "16", con: "9", int: "1", wis: "7", cha: "2" }
+  speeds: { swim: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 8
+  traits:
+    - name: { zh: 血之狂热, en: Blood Frenzy }
+      text:
+        zh: |-
+          食人鲤对 HP 未满的生物进行近战攻击时具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          食人鲤只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.rat
+  name: { zh: 老鼠, en: Rat }
+  size: tiny
+  ac: 10
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "2", dex: "11", con: "9", int: "2", wis: "10", cha: "4" }
+  speeds: { walk: "20", climb: "20" }
+  senses: { darkvision: "30" }
+  passive_perception: 12
+  skills: { perception: "2" }
+  traits:
+    - name: { zh: 灵巧, en: Agile }
+      text:
+        zh: |-
+          老鼠移动离开敌人触及范围时不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.raven
+  name: { zh: 渡鸦, en: Raven }
+  size: tiny
+  ac: 12
+  hp: 2
+  hp_dice: 1d4
+  cr: 0
+  abilities: { str: "2", dex: "14", con: "10", int: "5", wis: "13", cha: "6" }
+  speeds: { walk: "10", fly: "50" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  traits:
+    - name: { zh: 模仿, en: Mimicry }
+      text:
+        zh: |-
+          渡鸦可以模仿听过的简单声音（如低语、虫鸣）；听者通过 DC 10 感知（洞悉）检定可辨出这是模仿。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 喙啄, en: Beak }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.scorpion
+  name: { zh: 蝎子, en: Scorpion }
+  size: tiny
+  ac: 11
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "2", dex: "11", con: "8", int: "1", wis: "8", cha: "2" }
+  speeds: { walk: "10" }
+  senses: { blindsight: "10" }
+  passive_perception: 9
+  actions:
+    - name: { zh: 尾刺, en: Sting }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1 点穿刺伤害，外加 1d6 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.seahorse
+  name: { zh: 海马, en: Seahorse }
+  size: tiny
+  ac: 12
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "1", dex: "12", con: "8", int: "1", wis: "10", cha: "2" }
+  speeds: { walk: "5", swim: "20" }
+  passive_perception: 12
+  skills: { perception: "2", stealth: "5" }
+  traits:
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          海马只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 气泡冲刺, en: Bubble Dash }
+      kind: other
+      text:
+        zh: |-
+          在水下时，海马可以移动至多其游泳速度的距离，且不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.spider
+  name: { zh: 蜘蛛, en: Spider }
+  size: tiny
+  ac: 12
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "2", dex: "14", con: "8", int: "1", wis: "10", cha: "2" }
+  speeds: { walk: "20", climb: "20" }
+  senses: { darkvision: "30" }
+  passive_perception: 10
+  skills: { stealth: "4" }
+  traits:
+    - name: { zh: 蛛行, en: Spider Climb }
+      text:
+        zh: |-
+          蜘蛛可以攀爬困难表面（包括沿天花板），无需进行属性检定。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 蛛网行者, en: Web Walker }
+      text:
+        zh: |-
+          蜘蛛无视蛛网造成的移动限制，并知晓任何接触同一蛛网的生物的位置。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1 点穿刺伤害，外加 1d4 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.vulture
+  name: { zh: 秃鹫, en: Vulture }
+  size: medium
+  ac: 10
+  hp: 5
+  hp_dice: 1d8+1
+  cr: 0
+  abilities: { str: "7", dex: "10", con: "13", int: "2", wis: "12", cha: "4" }
+  speeds: { walk: "10", fly: "50" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有秃鹫的一个未失能盟友，秃鹫对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 喙啄, en: Beak }
+      kind: melee
+      attack_bonus: 2
+      reach: 5
+      damage:
+        - { dice: 1d4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +2，触及 5 尺，命中造成 1d4 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.weasel
+  name: { zh: 鼬, en: Weasel }
+  size: tiny
+  ac: 13
+  hp: 1
+  hp_dice: 1d4-1
+  cr: 0
+  abilities: { str: "3", dex: "16", con: "8", int: "2", wis: "12", cha: "3" }
+  speeds: { walk: "30", climb: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { acrobatics: "5", perception: "3", stealth: "5" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.blood_hawk
+  name: { zh: 血鹰, en: Blood Hawk }
+  size: small
+  ac: 12
+  hp: 7
+  hp_dice: 2d6
+  cr: 0.125
+  abilities: { str: "6", dex: "14", con: "10", int: "3", wis: "14", cha: "5" }
+  speeds: { walk: "10", fly: "60" }
+  passive_perception: 16
+  skills: { perception: "6" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有血鹰的一个未失能盟友，血鹰对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 喙啄, en: Beak }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d4+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点穿刺伤害；若目标处于浴血状态，则改为 1d8+2 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.camel
+  name: { zh: 骆驼, en: Camel }
+  size: large
+  ac: 10
+  hp: 17
+  hp_dice: 2d10+6
+  cr: 0.125
+  abilities: { str: "15", dex: "8", con: "17", int: "2", wis: "11", cha: "5" }
+  speeds: { walk: "50" }
+  senses: { darkvision: "60" }
+  passive_perception: 10
+  saves: { con: "5" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d4+2, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.flying_snake
+  name: { zh: 飞天蛇, en: Flying Snake }
+  size: tiny
+  ac: 14
+  hp: 5
+  hp_dice: 2d4
+  cr: 0.125
+  abilities: { str: "4", dex: "18", con: "11", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "30", fly: "60", swim: "30" }
+  senses: { blindsight: "10" }
+  passive_perception: 11
+  traits:
+    - name: { zh: 飞掠, en: Flyby }
+      text:
+        zh: |-
+          飞天蛇飞离敌人触及范围时不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: "1", type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 1 点穿刺伤害，外加 3d4 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_crab
+  name: { zh: 巨型螃蟹, en: Giant Crab }
+  size: medium
+  ac: 15
+  hp: 13
+  hp_dice: 3d8
+  cr: 0.125
+  abilities: { str: "13", dex: "13", con: "11", int: "1", wis: "9", cha: "3" }
+  speeds: { walk: "30", swim: "30" }
+  senses: { blindsight: "30" }
+  passive_perception: 9
+  skills: { stealth: "3" }
+  traits:
+    - name: { zh: 水陆两栖, en: Amphibious }
+      text:
+        zh: |-
+          巨型螃蟹可以在空气和水中呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 钳击, en: Claw }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: 1d6+1, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 1d6+1 点钝击伤害。若目标为中型或更小生物，则被一只钳子擒抱（逃脱 DC 11）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_rat
+  name: { zh: 巨鼠, en: Giant Rat }
+  size: small
+  ac: 13
+  hp: 7
+  hp_dice: 2d6
+  cr: 0.125
+  abilities: { str: "7", dex: "16", con: "11", int: "2", wis: "10", cha: "4" }
+  speeds: { walk: "30", climb: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 12
+  saves: { dex: "5" }
+  skills: { perception: "2" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有巨鼠的一个未失能盟友，巨鼠对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d4+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_weasel
+  name: { zh: 巨鼬, en: Giant Weasel }
+  size: medium
+  ac: 13
+  hp: 9
+  hp_dice: 2d8
+  cr: 0.125
+  abilities: { str: "11", dex: "17", con: "10", int: "4", wis: "12", cha: "5" }
+  speeds: { walk: "40", climb: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { acrobatics: "5", perception: "3", stealth: "5" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d4+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.mastiff
+  name: { zh: 獒犬, en: Mastiff }
+  size: medium
+  ac: 12
+  hp: 5
+  hp_dice: 1d8+1
+  cr: 0.125
+  abilities: { str: "13", dex: "14", con: "12", int: "3", wis: "12", cha: "7" }
+  speeds: { walk: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 15
+  saves: { wis: "3" }
+  skills: { perception: "5" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: 1d6+1, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 1d6+1 点穿刺伤害。若目标为中型或更小生物，则陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.pony
+  name: { zh: 小马, en: Pony }
+  size: medium
+  ac: 10
+  hp: 11
+  hp_dice: 2d8+2
+  cr: 0.125
+  abilities: { str: "15", dex: "10", con: "13", int: "2", wis: "11", cha: "7" }
+  speeds: { walk: "40" }
+  passive_perception: 10
+  saves: { str: "4" }
+  actions:
+    - name: { zh: 蹄击, en: Hooves }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d4+2, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.venomous_snake
+  name: { zh: 毒蛇, en: Venomous Snake }
+  size: tiny
+  ac: 12
+  hp: 5
+  hp_dice: 2d4
+  cr: 0.125
+  abilities: { str: "2", dex: "15", con: "11", int: "1", wis: "10", cha: "3" }
+  speeds: { walk: "30", swim: "30" }
+  senses: { blindsight: "10" }
+  passive_perception: 10
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d4+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点穿刺伤害，外加 1d6 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.axe_beak
+  name: { zh: 斧嘴鸟, en: Axe Beak }
+  size: large
+  ac: 11
+  hp: 19
+  hp_dice: 3d10+3
+  cr: 0.25
+  abilities: { str: "14", dex: "12", con: "12", int: "2", wis: "10", cha: "5" }
+  speeds: { walk: "50" }
+  passive_perception: 10
+  actions:
+    - name: { zh: 喙啄, en: Beak }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d8+2, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.boar
+  name: { zh: 野猪, en: Boar }
+  size: medium
+  ac: 11
+  hp: 13
+  hp_dice: 2d8+4
+  cr: 0.25
+  abilities: { str: "13", dex: "11", con: "14", int: "2", wis: "9", cha: "5" }
+  speeds: { walk: "40" }
+  passive_perception: 9
+  traits:
+    - name: { zh: 浴血狂怒, en: Bloodied Fury }
+      text:
+        zh: |-
+          野猪处于浴血状态（HP 不足上限一半）时，其攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 抵撞, en: Gore }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: 1d6+1, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 1d6+1 点穿刺伤害。若目标为中型或更小生物，且野猪在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 1d6 点穿刺伤害并陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.constrictor_snake
+  name: { zh: 蟒蛇, en: Constrictor Snake }
+  size: large
+  ac: 13
+  hp: 13
+  hp_dice: 2d10+2
+  cr: 0.25
+  abilities: { str: "15", dex: "14", con: "12", int: "1", wis: "10", cha: "3" }
+  speeds: { walk: "30", swim: "30" }
+  senses: { blindsight: "10" }
+  passive_perception: 12
+  skills: { perception: "2", stealth: "4" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d8+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 紧勒, en: Constrict }
+      kind: save
+      save: str
+      save_dc: 12
+      damage:
+        - { dice: 3d4, type: bludgeoning }
+      text:
+        zh: |-
+          豁免：DC 12 力量豁免，5 尺内一个蟒蛇可见的中型或更小生物；失败则受到 3d4 点钝击伤害并陷入被擒抱状态（逃脱 DC 12）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.draft_horse
+  name: { zh: 役马, en: Draft Horse }
+  size: large
+  ac: 10
+  hp: 15
+  hp_dice: 2d10+4
+  cr: 0.25
+  abilities: { str: "18", dex: "10", con: "15", int: "2", wis: "11", cha: "7" }
+  speeds: { walk: "40" }
+  passive_perception: 10
+  actions:
+    - name: { zh: 蹄击, en: Hooves }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 1d4+4, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 1d4+4 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.elk
+  name: { zh: 麋鹿, en: Elk }
+  size: large
+  ac: 10
+  hp: 11
+  hp_dice: 2d10
+  cr: 0.25
+  abilities: { str: "16", dex: "10", con: "11", int: "2", wis: "10", cha: "6" }
+  speeds: { walk: "50" }
+  senses: { darkvision: "60" }
+  passive_perception: 12
+  skills: { perception: "2" }
+  actions:
+    - name: { zh: 撞击, en: Ram }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d6+3, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点钝击伤害。若目标为大型或更小生物，且麋鹿在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 1d6 点钝击伤害并陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_badger
+  name: { zh: 巨型獾, en: Giant Badger }
+  size: medium
+  ac: 13
+  hp: 15
+  hp_dice: 2d8+6
+  cr: 0.25
+  abilities: { str: "13", dex: "10", con: "17", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "30", burrow: "10" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: 2d4+1, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 2d4+1 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_bat
+  name: { zh: 巨蝠, en: Giant Bat }
+  size: large
+  ac: 13
+  hp: 22
+  hp_dice: 4d10
+  cr: 0.25
+  abilities: { str: "15", dex: "16", con: "11", int: "2", wis: "12", cha: "6" }
+  speeds: { walk: "10", fly: "60" }
+  senses: { blindsight: "120" }
+  passive_perception: 11
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d6+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_centipede
+  name: { zh: 巨型蜈蚣, en: Giant Centipede }
+  size: small
+  ac: 14
+  hp: 9
+  hp_dice: 2d6+2
+  cr: 0.25
+  abilities: { str: "5", dex: "14", con: "12", int: "1", wis: "7", cha: "3" }
+  speeds: { walk: "30", climb: "30" }
+  senses: { blindsight: "30" }
+  passive_perception: 8
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d4+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d4+2 点穿刺伤害。目标陷入中毒状态，直至巨型蜈蚣的下个回合开始。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_frog
+  name: { zh: 巨蛙, en: Giant Frog }
+  size: medium
+  ac: 11
+  hp: 18
+  hp_dice: 4d8
+  cr: 0.25
+  abilities: { str: "12", dex: "13", con: "11", int: "2", wis: "10", cha: "3" }
+  speeds: { walk: "30", swim: "30" }
+  senses: { darkvision: "30" }
+  passive_perception: 12
+  skills: { perception: "2", stealth: "4" }
+  traits:
+    - name: { zh: 水陆两栖, en: Amphibious }
+      text:
+        zh: |-
+          巨蛙可以在空气和水中呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 立定跳跃, en: Standing Leap }
+      text:
+        zh: |-
+          巨蛙的跳远距离至多 20 尺、跳高至多 10 尺，无论是否有助跑。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: 1d6+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 1d6+2 点穿刺伤害。若目标为中型或更小生物，则陷入被擒抱状态（逃脱 DC 11）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 吞咽, en: Swallow }
+      kind: other
+      damage:
+        - { dice: 2d4, type: acid }
+      text:
+        zh: |-
+          巨蛙吞咽一个正被它擒抱的小型或更小目标。被吞咽期间目标不再被擒抱，但处于目盲与束缚状态，对巨蛙体外的攻击与效果具有全身掩护。巨蛙吞咽时不能使用啃咬；巨蛙死亡时，被吞咽者不再束缚，可花费 5 尺移动从尸体中脱出并处于倒地状态。巨蛙下个回合结束时，被吞咽者受到 2d4 点强酸伤害；若未因此死亡，巨蛙将其吐出，吐出的目标处于倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_lizard
+  name: { zh: 巨蜥, en: Giant Lizard }
+  size: large
+  ac: 12
+  hp: 19
+  hp_dice: 3d10+3
+  cr: 0.25
+  abilities: { str: "15", dex: "12", con: "13", int: "2", wis: "10", cha: "5" }
+  speeds: { walk: "40", climb: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 10
+  saves: { dex: "3" }
+  traits:
+    - name: { zh: 蛛行, en: Spider Climb }
+      text:
+        zh: |-
+          巨蜥可以攀爬困难表面（包括沿天花板），无需进行属性检定。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d8+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_owl
+  name: { zh: 巨枭, en: Giant Owl }
+  size: large
+  ac: 12
+  hp: 19
+  hp_dice: 3d10+3
+  cr: 0.25
+  abilities: { str: "13", dex: "15", con: "12", int: "8", wis: "13", cha: "10" }
+  speeds: { walk: "5", fly: "60" }
+  senses: { darkvision: "120" }
+  passive_perception: 15
+  skills: { perception: "5", stealth: "4" }
+  traits:
+    - name: { zh: 飞掠, en: Flyby }
+      text:
+        zh: |-
+          巨枭飞离敌人触及范围时不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 敏锐听觉与视觉, en: Keen Hearing and Sight }
+      text:
+        zh: |-
+          巨枭依赖听觉或视觉的感知检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 利爪, en: Talons }
+      kind: melee
+      attack_bonus: 3
+      reach: 5
+      damage:
+        - { dice: 2d6+1, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +3，触及 5 尺，命中造成 2d6+1 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_venomous_snake
+  name: { zh: 巨型毒蛇, en: Giant Venomous Snake }
+  size: medium
+  ac: 14
+  hp: 11
+  hp_dice: 2d8+2
+  cr: 0.25
+  abilities: { str: "10", dex: "18", con: "13", int: "2", wis: "10", cha: "3" }
+  speeds: { walk: "40", swim: "40" }
+  senses: { blindsight: "10" }
+  passive_perception: 12
+  skills: { perception: "2" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 10
+      damage:
+        - { dice: 1d4+4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 10 尺，命中造成 1d4+4 点穿刺伤害，外加 1d8 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_wolf_spider
+  name: { zh: 巨狼蛛, en: Giant Wolf Spider }
+  size: medium
+  ac: 13
+  hp: 11
+  hp_dice: 2d8+2
+  cr: 0.25
+  abilities: { str: "12", dex: "16", con: "13", int: "3", wis: "12", cha: "4" }
+  speeds: { walk: "40", climb: "40" }
+  senses: { blindsight: "10", darkvision: "60" }
+  passive_perception: 13
+  skills: { perception: "3", stealth: "7" }
+  traits:
+    - name: { zh: 蛛行, en: Spider Climb }
+      text:
+        zh: |-
+          巨狼蛛可以攀爬困难表面（包括沿天花板），无需进行属性检定。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d4+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点穿刺伤害，外加 2d4 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.panther
+  name: { zh: 黑豹, en: Panther }
+  size: medium
+  ac: 13
+  hp: 13
+  hp_dice: 3d8
+  cr: 0.25
+  abilities: { str: "14", dex: "16", con: "10", int: "3", wis: "14", cha: "7" }
+  speeds: { walk: "50", climb: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 14
+  skills: { perception: "4", stealth: "7" }
+  actions:
+    - name: { zh: 撕抓, en: Rend }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d6+3, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  bonus_actions:
+    - name: { zh: 灵巧脱身, en: Nimble Escape }
+      kind: other
+      text:
+        zh: |-
+          黑豹执行撤离或躲藏动作。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.pteranodon
+  name: { zh: 无齿翼龙, en: Pteranodon }
+  size: medium
+  ac: 13
+  hp: 13
+  hp_dice: 3d8
+  cr: 0.25
+  abilities: { str: "12", dex: "15", con: "10", int: "2", wis: "9", cha: "5" }
+  speeds: { walk: "10", fly: "60" }
+  passive_perception: 11
+  skills: { perception: "1" }
+  traits:
+    - name: { zh: 飞掠, en: Flyby }
+      text:
+        zh: |-
+          无齿翼龙飞离敌人触及范围时不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d8+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.riding_horse
+  name: { zh: 乘马, en: Riding Horse }
+  size: large
+  ac: 11
+  hp: 13
+  hp_dice: 2d10+2
+  cr: 0.25
+  abilities: { str: "16", dex: "13", con: "12", int: "2", wis: "11", cha: "7" }
+  speeds: { walk: "60" }
+  passive_perception: 10
+  actions:
+    - name: { zh: 蹄击, en: Hooves }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d8+3, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.wolf
+  name: { zh: 狼, en: Wolf }
+  size: medium
+  ac: 12
+  hp: 11
+  hp_dice: 2d8+2
+  cr: 0.25
+  abilities: { str: "14", dex: "15", con: "12", int: "3", wis: "12", cha: "6" }
+  speeds: { walk: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 15
+  skills: { perception: "5", stealth: "4" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有狼的一个未失能盟友，狼对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d6+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点穿刺伤害。若目标为中型或更小生物，则陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.ape
+  name: { zh: 猿, en: Ape }
+  size: medium
+  ac: 12
+  hp: 19
+  hp_dice: 3d8+6
+  cr: 0.5
+  abilities: { str: "16", dex: "14", con: "14", int: "6", wis: "12", cha: "7" }
+  speeds: { walk: "30", climb: "30" }
+  passive_perception: 13
+  skills: { athletics: "5", perception: "3" }
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该猿发动两次拳击攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 拳击, en: Fist }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d4+3, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 投石, en: Rock }
+      kind: ranged
+      attack_bonus: 5
+      range: 25
+      long_range: 50
+      damage:
+        - { dice: 2d6+3, type: bludgeoning }
+      text:
+        zh: |-
+          远程攻击：命中 +5，射程 25/50 尺，命中造成 2d6+3 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.black_bear
+  name: { zh: 黑熊, en: Black Bear }
+  size: medium
+  ac: 11
+  hp: 19
+  hp_dice: 3d8+6
+  cr: 0.5
+  abilities: { str: "15", dex: "12", con: "14", int: "2", wis: "12", cha: "7" }
+  speeds: { walk: "30", climb: "30", swim: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 15
+  skills: { perception: "5" }
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该熊发动两次撕抓攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 撕抓, en: Rend }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d6+2, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.crocodile
+  name: { zh: 鳄鱼, en: Crocodile }
+  size: large
+  ac: 12
+  hp: 13
+  hp_dice: 2d10+2
+  cr: 0.5
+  abilities: { str: "15", dex: "10", con: "13", int: "2", wis: "10", cha: "5" }
+  speeds: { walk: "20", swim: "30" }
+  passive_perception: 10
+  saves: { con: "3" }
+  skills: { stealth: "2" }
+  traits:
+    - name: { zh: 屏息, en: Hold Breath }
+      text:
+        zh: |-
+          鳄鱼可以屏息 1 小时。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d8+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d8+2 点穿刺伤害。若目标为中型或更小生物，则陷入被擒抱状态（逃脱 DC 12）；被擒抱期间同时处于束缚状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_goat
+  name: { zh: 巨山羊, en: Giant Goat }
+  size: large
+  ac: 11
+  hp: 19
+  hp_dice: 3d10+3
+  cr: 0.5
+  abilities: { str: "17", dex: "13", con: "12", int: "3", wis: "12", cha: "6" }
+  speeds: { walk: "40", climb: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  saves: { str: "5" }
+  skills: { perception: "3" }
+  actions:
+    - name: { zh: 撞击, en: Ram }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d6+3, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点钝击伤害。若目标为大型或更小生物，且巨山羊在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d4 点钝击伤害并陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_seahorse
+  name: { zh: 巨型海马, en: Giant Seahorse }
+  size: large
+  ac: 14
+  hp: 16
+  hp_dice: 3d10
+  cr: 0.5
+  abilities: { str: "15", dex: "12", con: "11", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "5", swim: "40" }
+  passive_perception: 11
+  traits:
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          巨型海马只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 撞击, en: Ram }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 2d6+2, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 2d6+2 点钝击伤害；若巨型海马在此次攻击前直线移动 20 尺以上靠近目标，则改为 2d8+2 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  bonus_actions:
+    - name: { zh: 气泡冲刺, en: Bubble Dash }
+      kind: other
+      text:
+        zh: |-
+          在水下时，巨型海马可以移动至多其游泳速度一半的距离，且不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_wasp
+  name: { zh: 巨蜂, en: Giant Wasp }
+  size: medium
+  ac: 13
+  hp: 22
+  hp_dice: 5d8
+  cr: 0.5
+  abilities: { str: "10", dex: "14", con: "10", int: "1", wis: "10", cha: "3" }
+  speeds: { walk: "10", fly: "50" }
+  passive_perception: 10
+  traits:
+    - name: { zh: 飞掠, en: Flyby }
+      text:
+        zh: |-
+          巨蜂飞离敌人触及范围时不会引发借机攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 尾刺, en: Sting }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d6+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点穿刺伤害，外加 2d4 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.reef_shark
+  name: { zh: 礁鲨, en: Reef Shark }
+  size: medium
+  ac: 12
+  hp: 22
+  hp_dice: 4d8+4
+  cr: 0.5
+  abilities: { str: "14", dex: "15", con: "13", int: "1", wis: "10", cha: "4" }
+  speeds: { walk: "5", swim: "30" }
+  senses: { blindsight: "30" }
+  passive_perception: 12
+  skills: { perception: "2" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有礁鲨的一个未失能盟友，礁鲨对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          礁鲨只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 2d4+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 2d4+2 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.warhorse
+  name: { zh: 战马, en: Warhorse }
+  size: large
+  ac: 11
+  hp: 19
+  hp_dice: 3d10+3
+  cr: 0.5
+  abilities: { str: "18", dex: "12", con: "13", int: "2", wis: "12", cha: "7" }
+  speeds: { walk: "60" }
+  passive_perception: 11
+  saves: { wis: "3" }
+  actions:
+    - name: { zh: 蹄击, en: Hooves }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 2d4+4, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 2d4+4 点钝击伤害。若目标为大型或更小生物，且战马在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d4 点钝击伤害并陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.brown_bear
+  name: { zh: 棕熊, en: Brown Bear }
+  size: large
+  ac: 11
+  hp: 22
+  hp_dice: 3d10+6
+  cr: 1
+  abilities: { str: "17", dex: "12", con: "15", int: "2", wis: "13", cha: "7" }
+  speeds: { walk: "40", climb: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该熊发动一次啃咬攻击和一次爪击攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d8+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 爪击, en: Claw }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d4+3, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d4+3 点挥砍伤害。若目标为大型或更小生物，则陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.dire_wolf
+  name: { zh: 恐狼, en: Dire Wolf }
+  size: large
+  ac: 14
+  hp: 22
+  hp_dice: 3d10+6
+  cr: 1
+  abilities: { str: "17", dex: "15", con: "15", int: "3", wis: "12", cha: "7" }
+  speeds: { walk: "50" }
+  senses: { darkvision: "60" }
+  passive_perception: 15
+  skills: { perception: "5", stealth: "4" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有恐狼的一个未失能盟友，恐狼对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d10+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d10+3 点穿刺伤害。若目标为大型或更小生物，则陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_eagle
+  name: { zh: 巨鹰, en: Giant Eagle }
+  size: large
+  ac: 13
+  hp: 26
+  hp_dice: 4d10+4
+  cr: 1
+  abilities: { str: "16", dex: "17", con: "13", int: "8", wis: "14", cha: "10" }
+  speeds: { walk: "10", fly: "80" }
+  passive_perception: 14
+  skills: { perception: "4" }
+  traits:
+    - name: { zh: 敏锐视觉, en: Keen Sight }
+      text:
+        zh: |-
+          巨鹰依赖视觉的感知检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该鹰发动两次攻击：一次喙啄和一次爪击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 喙啄, en: Beak }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d6+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 爪击, en: Talons }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 2d6+3, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_hyena
+  name: { zh: 巨鬣狗, en: Giant Hyena }
+  size: large
+  ac: 12
+  hp: 45
+  hp_dice: 6d10+12
+  cr: 1
+  abilities: { str: "16", dex: "14", con: "14", int: "2", wis: "12", cha: "7" }
+  speeds: { walk: "50" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 2d6+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  bonus_actions:
+    - name: { zh: 暴走, en: Rampage }
+      kind: other
+      text:
+        zh: |-
+          对已经处于浴血状态的生物造成伤害后，巨鬣狗可以立即移动至多其速度一半的距离，并发动一次啃咬攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_octopus
+  name: { zh: 巨型章鱼, en: Giant Octopus }
+  size: large
+  ac: 11
+  hp: 45
+  hp_dice: 7d10+7
+  cr: 1
+  abilities: { str: "17", dex: "13", con: "13", int: "5", wis: "10", cha: "4" }
+  speeds: { walk: "10", swim: "60" }
+  senses: { darkvision: "60" }
+  passive_perception: 14
+  skills: { perception: "4", stealth: "5" }
+  traits:
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          巨型章鱼只能在水下呼吸。离开水面后可以屏息 1 小时。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 触手, en: Tentacles }
+      kind: melee
+      attack_bonus: 5
+      reach: 10
+      damage:
+        - { dice: 2d6+3, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 10 尺，命中造成 2d6+3 点钝击伤害。若目标为中型或更小生物，则被八条触手擒抱（逃脱 DC 13）；被擒抱期间同时处于束缚状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  reactions:
+    - name: { zh: 墨云, en: Ink Cloud }
+      kind: other
+      text:
+        zh: |-
+          触发：巨型章鱼在水下受到伤害。响应：它喷出墨水，填满以自身为中心的 10 尺立方区域，并移动至多其游泳速度。该区域处于重度遮蔽，持续 1 分钟，或被强水流等效果驱散。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_spider
+  name: { zh: 巨蜘蛛, en: Giant Spider }
+  size: large
+  ac: 14
+  hp: 26
+  hp_dice: 4d10+4
+  cr: 1
+  abilities: { str: "14", dex: "16", con: "12", int: "2", wis: "11", cha: "4" }
+  speeds: { walk: "30", climb: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 14
+  skills: { perception: "4", stealth: "7" }
+  traits:
+    - name: { zh: 蛛行, en: Spider Climb }
+      text:
+        zh: |-
+          巨蜘蛛可以攀爬困难表面（包括沿天花板），无需进行属性检定。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 蛛网行者, en: Web Walker }
+      text:
+        zh: |-
+          巨蜘蛛无视蛛网造成的移动限制，并知晓任何接触同一蛛网的生物的位置。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d8+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点穿刺伤害，外加 2d6 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 吐丝, en: Web }
+      kind: save
+      save: dex
+      save_dc: 13
+      text:
+        zh: |-
+          豁免：DC 13 敏捷豁免，60 尺内一个巨蜘蛛可见的生物；失败则陷入束缚状态，直至蛛网被摧毁（AC 10；HP 5；对火焰伤害易伤；免疫毒素与心灵伤害）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_toad
+  name: { zh: 巨蟾, en: Giant Toad }
+  size: large
+  ac: 11
+  hp: 39
+  hp_dice: 6d10+6
+  cr: 1
+  abilities: { str: "15", dex: "13", con: "13", int: "2", wis: "10", cha: "3" }
+  speeds: { walk: "30", swim: "30" }
+  senses: { darkvision: "60" }
+  passive_perception: 10
+  traits:
+    - name: { zh: 水陆两栖, en: Amphibious }
+      text:
+        zh: |-
+          巨蟾可以在空气和水中呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 立定跳跃, en: Standing Leap }
+      text:
+        zh: |-
+          巨蟾的跳远距离至多 20 尺、跳高至多 10 尺，无论是否有助跑。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 1d6+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 1d6+2 点穿刺伤害，外加 2d4 点毒素伤害。若目标为中型或更小生物，则陷入被擒抱状态（逃脱 DC 12）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 吞咽, en: Swallow }
+      kind: other
+      damage:
+        - { dice: 3d6, type: acid }
+      text:
+        zh: |-
+          巨蟾吞咽一个正被它擒抱的中型或更小目标。被吞咽期间目标不再被擒抱，但处于目盲与束缚状态，对巨蟾体外的攻击与效果具有全身掩护。目标在巨蟾每个回合结束时受到 3d6 点强酸伤害。巨蟾同时只能吞咽一个目标，且吞咽期间不能使用啃咬；巨蟾死亡时，被吞咽者不再束缚，可花费 5 尺移动从尸体中脱出并处于倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_vulture
+  name: { zh: 巨秃鹫, en: Giant Vulture }
+  size: large
+  ac: 10
+  hp: 22
+  hp_dice: 3d10+6
+  cr: 1
+  abilities: { str: "15", dex: "10", con: "15", int: "6", wis: "12", cha: "7" }
+  speeds: { walk: "10", fly: "60" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  traits:
+    - name: { zh: 敏锐视觉与嗅觉, en: Keen Sight and Smell }
+      text:
+        zh: |-
+          巨秃鹫依赖视觉或嗅觉的感知检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有巨秃鹫的一个未失能盟友，巨秃鹫对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该秃鹫发动两次攻击：一次喙啄和一次爪击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 喙啄, en: Beak }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 2d4+2, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 2d4+2 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 爪击, en: Talons }
+      kind: melee
+      attack_bonus: 4
+      reach: 5
+      damage:
+        - { dice: 2d6+2, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +4，触及 5 尺，命中造成 2d6+2 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.lion
+  name: { zh: 狮, en: Lion }
+  size: large
+  ac: 12
+  hp: 22
+  hp_dice: 4d10
+  cr: 1
+  abilities: { str: "17", dex: "15", con: "11", int: "3", wis: "12", cha: "8" }
+  speeds: { walk: "50" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { perception: "3", stealth: "4" }
+  traits:
+    - name: { zh: 群体战术, en: Pack Tactics }
+      text:
+        zh: |-
+          若目标 5 尺内至少有狮的一个未失能盟友，狮对该目标的攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 助跑跳跃, en: Running Leap }
+      text:
+        zh: |-
+          有 10 尺助跑时，狮的跳远距离至多 25 尺。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该狮发动两次撕抓攻击；可将其中一次替换为一次咆哮。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 撕抓, en: Rend }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d8+3, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 咆哮, en: Roar }
+      kind: save
+      save: wis
+      save_dc: 11
+      text:
+        zh: |-
+          豁免：DC 11 感知豁免，15 尺内一个生物；失败则陷入恐惧状态，直至狮的下个回合开始。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.tiger
+  name: { zh: 虎, en: Tiger }
+  size: large
+  ac: 13
+  hp: 30
+  hp_dice: 4d10+8
+  cr: 1
+  abilities: { str: "17", dex: "16", con: "14", int: "3", wis: "12", cha: "8" }
+  speeds: { walk: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 13
+  skills: { perception: "3", stealth: "7" }
+  actions:
+    - name: { zh: 撕抓, en: Rend }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 2d6+3, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点挥砍伤害。若目标为大型或更小生物，则陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  bonus_actions:
+    - name: { zh: 灵巧脱身, en: Nimble Escape }
+      kind: other
+      text:
+        zh: |-
+          虎执行撤离或躲藏动作。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.allosaurus
+  name: { zh: 异特龙, en: Allosaurus }
+  size: large
+  ac: 13
+  hp: 51
+  hp_dice: 6d10+18
+  cr: 2
+  abilities: { str: "19", dex: "13", con: "17", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "60" }
+  passive_perception: 15
+  skills: { perception: "5" }
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 2d10+4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 2d10+4 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 爪击, en: Claws }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 1d8+4, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 1d8+4 点挥砍伤害。若目标为大型或更小生物，且异特龙在此次攻击前直线移动 30 尺以上靠近它，则目标陷入倒地状态，异特龙还可对它发动一次啃咬攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_boar
+  name: { zh: 巨野猪, en: Giant Boar }
+  size: large
+  ac: 13
+  hp: 42
+  hp_dice: 5d10+15
+  cr: 2
+  abilities: { str: "17", dex: "10", con: "16", int: "2", wis: "7", cha: "5" }
+  speeds: { walk: "40" }
+  passive_perception: 8
+  saves: { str: "5" }
+  traits:
+    - name: { zh: 浴血狂怒, en: Bloodied Fury }
+      text:
+        zh: |-
+          巨野猪处于浴血状态（HP 不足上限一半）时，其攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 抵撞, en: Gore }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 2d6+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 2d6+3 点穿刺伤害。若目标为大型或更小生物，且巨野猪在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d6 点穿刺伤害并陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_constrictor_snake
+  name: { zh: 巨型蟒蛇, en: Giant Constrictor Snake }
+  size: huge
+  ac: 12
+  hp: 60
+  hp_dice: 8d12+8
+  cr: 2
+  abilities: { str: "19", dex: "14", con: "12", int: "1", wis: "10", cha: "3" }
+  speeds: { walk: "30", swim: "30" }
+  senses: { blindsight: "10" }
+  passive_perception: 12
+  skills: { perception: "2" }
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该蛇发动一次啃咬攻击，并使用紧勒。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 10
+      damage:
+        - { dice: 2d6+4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 10 尺，命中造成 2d6+4 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 紧勒, en: Constrict }
+      kind: save
+      save: str
+      save_dc: 14
+      damage:
+        - { dice: 2d8+4, type: bludgeoning }
+      text:
+        zh: |-
+          豁免：DC 14 力量豁免，10 尺内一个巨型蟒蛇可见的大型或更小生物；失败则受到 2d8+4 点钝击伤害并陷入被擒抱状态（逃脱 DC 14）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_elk
+  name: { zh: 巨麋鹿, en: Giant Elk }
+  size: huge
+  ac: 14
+  hp: 42
+  hp_dice: 5d12+10
+  cr: 2
+  abilities: { str: "19", dex: "16", con: "14", int: "7", wis: "14", cha: "10" }
+  speeds: { walk: "60" }
+  passive_perception: 14
+  skills: { perception: "4" }
+  traits:
+    - name: { zh: 冲锋, en: Charge }
+      text:
+        zh: |-
+          若巨麋鹿直线移动至少 20 尺后在同回合以撞击命中目标，目标额外受到 7（2d6）点伤害；若目标是生物，须通过 DC 14 力量豁免，否则倒地。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 撞击, en: Ram }
+      kind: melee
+      attack_bonus: 6
+      reach: 10
+      damage:
+        - { dice: 2d6+4, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 10 尺，命中造成 2d6+4 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 蹄击, en: Hooves }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 4d8+4, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，只能以处于倒地状态的生物为目标，命中造成 4d8+4 点钝击伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.hunter_shark
+  name: { zh: 猎鲨, en: Hunter Shark }
+  size: large
+  ac: 12
+  hp: 45
+  hp_dice: 6d10+12
+  cr: 2
+  abilities: { str: "18", dex: "14", con: "15", int: "1", wis: "10", cha: "4" }
+  speeds: { walk: "5", swim: "40" }
+  senses: { blindsight: "60" }
+  passive_perception: 12
+  skills: { perception: "2" }
+  traits:
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          猎鲨只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 3d6+4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 3d6+4 点穿刺伤害。若目标 HP 未满，该攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.plesiosaurus
+  name: { zh: 蛇颈龙, en: Plesiosaurus }
+  size: large
+  ac: 13
+  hp: 68
+  hp_dice: 8d10+24
+  cr: 2
+  abilities: { str: "18", dex: "15", con: "16", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "20", swim: "40" }
+  passive_perception: 13
+  skills: { perception: "3", stealth: "4" }
+  traits:
+    - name: { zh: 屏息, en: Hold Breath }
+      text:
+        zh: |-
+          蛇颈龙可以屏息 1 小时。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 10
+      damage:
+        - { dice: 2d6+4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 10 尺，命中造成 2d6+4 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.polar_bear
+  name: { zh: 北极熊, en: Polar Bear }
+  size: large
+  ac: 12
+  hp: 42
+  hp_dice: 5d10+15
+  cr: 2
+  abilities: { str: "20", dex: "14", con: "16", int: "2", wis: "13", cha: "7" }
+  speeds: { walk: "40", swim: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 15
+  skills: { perception: "5", stealth: "4" }
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该熊发动两次撕抓攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 撕抓, en: Rend }
+      kind: melee
+      attack_bonus: 7
+      reach: 5
+      damage:
+        - { dice: 1d8+5, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +7，触及 5 尺，命中造成 1d8+5 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.rhinoceros
+  name: { zh: 犀牛, en: Rhinoceros }
+  size: large
+  ac: 13
+  hp: 45
+  hp_dice: 6d10+12
+  cr: 2
+  abilities: { str: "21", dex: "8", con: "15", int: "2", wis: "12", cha: "6" }
+  speeds: { walk: "40" }
+  passive_perception: 11
+  actions:
+    - name: { zh: 抵撞, en: Gore }
+      kind: melee
+      attack_bonus: 7
+      reach: 5
+      damage:
+        - { dice: 2d8+5, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +7，触及 5 尺，命中造成 2d8+5 点穿刺伤害。若目标为大型或更小生物，且犀牛在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d8 点穿刺伤害并陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.saber_toothed_tiger
+  name: { zh: 剑齿虎, en: Saber-Toothed Tiger }
+  size: large
+  ac: 13
+  hp: 52
+  hp_dice: 7d10+14
+  cr: 2
+  abilities: { str: "18", dex: "17", con: "15", int: "3", wis: "12", cha: "8" }
+  speeds: { walk: "40" }
+  senses: { darkvision: "60" }
+  passive_perception: 15
+  saves: { str: "6", dex: "5" }
+  skills: { perception: "5", stealth: "7" }
+  traits:
+    - name: { zh: 助跑跳跃, en: Running Leap }
+      text:
+        zh: |-
+          有 10 尺助跑时，剑齿虎的跳远距离至多 25 尺。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该虎发动两次撕抓攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 撕抓, en: Rend }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 2d6+4, type: slashing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 2d6+4 点挥砍伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  bonus_actions:
+    - name: { zh: 灵巧脱身, en: Nimble Escape }
+      kind: other
+      text:
+        zh: |-
+          剑齿虎执行撤离或躲藏动作。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.ankylosaurus
+  name: { zh: 甲龙, en: Ankylosaurus }
+  size: huge
+  ac: 15
+  hp: 68
+  hp_dice: 8d12+16
+  cr: 3
+  abilities: { str: "19", dex: "11", con: "15", int: "2", wis: "12", cha: "5" }
+  speeds: { walk: "30" }
+  passive_perception: 11
+  saves: { str: "6" }
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该甲龙发动两次尾击攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 尾击, en: Tail }
+      kind: melee
+      attack_bonus: 6
+      reach: 10
+      damage:
+        - { dice: 1d10+4, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 10 尺，命中造成 1d10+4 点钝击伤害。若目标为巨型或更小生物，则陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_scorpion
+  name: { zh: 巨蝎, en: Giant Scorpion }
+  size: large
+  ac: 15
+  hp: 52
+  hp_dice: 7d10+14
+  cr: 3
+  abilities: { str: "16", dex: "13", con: "15", int: "1", wis: "9", cha: "3" }
+  speeds: { walk: "40" }
+  senses: { blindsight: "60" }
+  passive_perception: 9
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该蝎发动两次钳击攻击和一次尾刺攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 钳击, en: Claw }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d6+3, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d6+3 点钝击伤害。若目标为大型或更小生物，则被一只钳子擒抱（逃脱 DC 13）。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 尾刺, en: Sting }
+      kind: melee
+      attack_bonus: 5
+      reach: 5
+      damage:
+        - { dice: 1d8+3, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +5，触及 5 尺，命中造成 1d8+3 点穿刺伤害，外加 2d10 点毒素伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.killer_whale
+  name: { zh: 虎鲸, en: Killer Whale }
+  size: huge
+  ac: 12
+  hp: 90
+  hp_dice: 12d12+12
+  cr: 3
+  abilities: { str: "19", dex: "14", con: "13", int: "3", wis: "12", cha: "7" }
+  speeds: { walk: "5", swim: "60" }
+  senses: { blindsight: "120" }
+  passive_perception: 13
+  skills: { perception: "3", stealth: "4" }
+  traits:
+    - name: { zh: 屏息, en: Hold Breath }
+      text:
+        zh: |-
+          虎鲸可以屏息 30 分钟。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 5d6+4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 5d6+4 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.archelon
+  name: { zh: 古巨龟, en: Archelon }
+  size: huge
+  ac: 17
+  hp: 90
+  hp_dice: 12d12+12
+  cr: 4
+  abilities: { str: "18", dex: "16", con: "13", int: "4", wis: "14", cha: "6" }
+  speeds: { walk: "20", swim: "80" }
+  passive_perception: 12
+  skills: { stealth: "5" }
+  traits:
+    - name: { zh: 水陆两栖, en: Amphibious }
+      text:
+        zh: |-
+          古巨龟可以在空气和水中呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该古巨龟发动两次啃咬攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 6
+      reach: 5
+      damage:
+        - { dice: 3d6+4, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +6，触及 5 尺，命中造成 3d6+4 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.elephant
+  name: { zh: 象, en: Elephant }
+  size: huge
+  ac: 12
+  hp: 76
+  hp_dice: 8d12+24
+  cr: 4
+  abilities: { str: "22", dex: "9", con: "17", int: "3", wis: "11", cha: "6" }
+  speeds: { walk: "40" }
+  passive_perception: 10
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该象发动两次抵撞攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 抵撞, en: Gore }
+      kind: melee
+      attack_bonus: 8
+      reach: 5
+      damage:
+        - { dice: 2d8+6, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +8，触及 5 尺，命中造成 2d8+6 点穿刺伤害。若目标为巨型或更小生物，且象在此次攻击前直线移动 20 尺以上靠近它，则目标陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  bonus_actions:
+    - name: { zh: 践踏, en: Trample }
+      kind: save
+      save: dex
+      save_dc: 16
+      damage:
+        - { dice: 2d10+6, type: bludgeoning }
+      text:
+        zh: |-
+          豁免：DC 16 敏捷豁免，5 尺内一个处于倒地状态的生物；失败则受到 2d10+6 点钝击伤害，成功则伤害减半。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.hippopotamus
+  name: { zh: 河马, en: Hippopotamus }
+  size: large
+  ac: 14
+  hp: 82
+  hp_dice: 11d10+22
+  cr: 4
+  abilities: { str: "21", dex: "7", con: "15", int: "2", wis: "12", cha: "4" }
+  speeds: { walk: "30", swim: "30" }
+  passive_perception: 13
+  saves: { str: "7" }
+  skills: { perception: "3" }
+  traits:
+    - name: { zh: 屏息, en: Hold Breath }
+      text:
+        zh: |-
+          河马可以屏息 10 分钟。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该河马发动两次啃咬攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 7
+      reach: 5
+      damage:
+        - { dice: 2d10+5, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +7，触及 5 尺，命中造成 2d10+5 点穿刺伤害。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_crocodile
+  name: { zh: 巨鳄, en: Giant Crocodile }
+  size: huge
+  ac: 14
+  hp: 85
+  hp_dice: 9d12+27
+  cr: 5
+  abilities: { str: "21", dex: "9", con: "17", int: "2", wis: "10", cha: "7" }
+  speeds: { walk: "30", swim: "50" }
+  passive_perception: 10
+  skills: { stealth: "5" }
+  traits:
+    - name: { zh: 屏息, en: Hold Breath }
+      text:
+        zh: |-
+          巨鳄可以屏息 1 小时。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该鳄发动一次啃咬攻击和一次尾击攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 8
+      reach: 5
+      damage:
+        - { dice: 3d10+5, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +8，触及 5 尺，命中造成 3d10+5 点穿刺伤害。若目标为大型或更小生物，则陷入被擒抱状态（逃脱 DC 15）；被擒抱期间同时处于束缚状态，且不能被巨鳄的尾击选为目标。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 尾击, en: Tail }
+      kind: melee
+      attack_bonus: 8
+      reach: 10
+      damage:
+        - { dice: 3d8+5, type: bludgeoning }
+      text:
+        zh: |-
+          近战攻击：命中 +8，触及 10 尺，命中造成 3d8+5 点钝击伤害。若目标为大型或更小生物，则陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.giant_shark
+  name: { zh: 巨鲨, en: Giant Shark }
+  size: huge
+  ac: 13
+  hp: 92
+  hp_dice: 8d12+40
+  cr: 5
+  abilities: { str: "23", dex: "11", con: "21", int: "1", wis: "10", cha: "5" }
+  speeds: { walk: "5", swim: "60" }
+  senses: { blindsight: "60" }
+  passive_perception: 13
+  skills: { perception: "3" }
+  traits:
+    - name: { zh: 水下呼吸, en: Water Breathing }
+      text:
+        zh: |-
+          巨鲨只能在水下呼吸。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该鲨发动两次啃咬攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 啃咬, en: Bite }
+      kind: melee
+      attack_bonus: 9
+      reach: 5
+      damage:
+        - { dice: 3d10+6, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +9，触及 5 尺，命中造成 3d10+6 点穿刺伤害。若目标 HP 未满，该攻击检定具有优势。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.triceratops
+  name: { zh: 三角龙, en: Triceratops }
+  size: huge
+  ac: 14
+  hp: 114
+  hp_dice: 12d12+36
+  cr: 5
+  abilities: { str: "22", dex: "9", con: "17", int: "2", wis: "11", cha: "5" }
+  speeds: { walk: "50" }
+  passive_perception: 10
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该三角龙发动两次抵撞攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 抵撞, en: Gore }
+      kind: melee
+      attack_bonus: 9
+      reach: 5
+      damage:
+        - { dice: 2d12+6, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +9，触及 5 尺，命中造成 2d12+6 点穿刺伤害。若目标为巨型或更小生物，且三角龙在此次攻击前直线移动 20 尺以上靠近它，则目标额外受到 2d8 点穿刺伤害并陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+
+- id: dnd2024.monster.mammoth
+  name: { zh: 猛犸象, en: Mammoth }
+  size: huge
+  ac: 13
+  hp: 126
+  hp_dice: 11d12+55
+  cr: 6
+  abilities: { str: "24", dex: "9", con: "21", int: "3", wis: "11", cha: "6" }
+  speeds: { walk: "50" }
+  passive_perception: 10
+  saves: { str: "10", con: "8" }
+  actions:
+    - name: { zh: 多重攻击, en: Multiattack }
+      kind: multiattack
+      text:
+        zh: |-
+          该猛犸发动两次抵撞攻击。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+    - name: { zh: 抵撞, en: Gore }
+      kind: melee
+      attack_bonus: 10
+      reach: 10
+      damage:
+        - { dice: 2d10+7, type: piercing }
+      text:
+        zh: |-
+          近战攻击：命中 +10，触及 10 尺，命中造成 2d10+7 点穿刺伤害。若目标为巨型或更小生物，且猛犸在此次攻击前直线移动 20 尺以上靠近它，则目标陷入倒地状态。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+  bonus_actions:
+    - name: { zh: 践踏, en: Trample }
+      kind: save
+      save: dex
+      save_dc: 18
+      damage:
+        - { dice: 4d10+7, type: bludgeoning }
+      text:
+        zh: |-
+          豁免：DC 18 敏捷豁免，5 尺内一个处于倒地状态的生物；失败则受到 4d10+7 点钝击伤害，成功则伤害减半。
+        en: |-
+          (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)

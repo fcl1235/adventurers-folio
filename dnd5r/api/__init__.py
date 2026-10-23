@@ -1117,6 +1117,160 @@ def opportunity_attack(
     return result
 
 
+# --- 怪物 ---------------------------------------------------------------
+def monster_catalog(
+    content: ContentBundle,
+    locale: str = "zh",
+    max_cr: float | None = None,
+) -> list[dict]:
+    """可选怪物清单（按 CR、再按 id 排序）。
+
+    `max_cr` 只用来筛「这一队打得动什么」，不替 DM 决定放几只 ——
+    遭遇难度不是这只程序算得出来的东西。
+    """
+    from ..rules.monsters import cr_text
+
+    rows = []
+    for ident, monster in content.monsters.items():
+        if max_cr is not None and float(monster.cr) > float(max_cr) + 1e-9:
+            continue
+        rows.append({
+            "id": ident,
+            "name": monster.name.get(locale),
+            "size": monster.size,
+            "ac": int(monster.ac),
+            "hp": int(monster.hp),
+            "cr": float(monster.cr),
+            "cr_text": cr_text(monster.cr),
+            "has_actions": bool(monster.actions),
+        })
+    return sorted(rows, key=lambda row: (row["cr"], row["id"]))
+
+
+def spawn_monster(
+    content: ContentBundle,
+    monster_id: str,
+    index: int = 1,
+) -> Actor:
+    """照内容造一只怪物，交给 `new_encounter` 或 `Encounter.add`。
+
+    `index` 是同种第几只：三只哥布林要有三个不同的 id，否则 `add` 会以
+    「参与者重复」拒绝（而且三段血会记到同一只身上）。
+    """
+    from ..rules.monsters import build_monster
+
+    if monster_id not in content.monsters:
+        raise PluginError("没有这只怪物：%s（已加载 %d 只，例如 %s）"
+                          % (monster_id, len(content.monsters),
+                             "、".join(sorted(content.monsters)[:3]) or "无"))
+    return build_monster(content.monsters[monster_id], index)
+
+
+def _monster_def(content: ContentBundle, actor: Actor):
+    """从 Actor 找回它的怪物条目。`#2` 这类序号后缀不属于内容 id。"""
+    base = str(actor.id).split("#", 1)[0]
+    if base not in content.monsters:
+        raise RuleError("%s 不是内容里的怪物（找不到 %s）" % (actor.id, base))
+    return content.monsters[base]
+
+
+def monster_sheet(
+    content: ContentBundle,
+    monster_or_actor: Any,
+    index: int = 1,
+    locale: str = "zh",
+) -> dict:
+    """一张怪物卡：ac / hp / 属性 / 特性 / 动作。缺省按内容现造一只来读。"""
+    from ..rules.monsters import monster_stats
+
+    if isinstance(monster_or_actor, str):
+        actor = spawn_monster(content, monster_or_actor, index)
+    elif isinstance(monster_or_actor, Actor):
+        actor = monster_or_actor
+    else:
+        raise RuleError("monster_sheet 要怪物 id 或 Actor：%r" % (monster_or_actor,))
+    return monster_stats(_monster_def(content, actor), actor, locale)
+
+
+def monster_actions(
+    content: ContentBundle,
+    monster_id: str,
+    locale: str = "zh",
+) -> list[dict]:
+    """这只怪物能做什么（给界面列按钮）。"""
+    from ..rules.monsters import attack_options
+
+    if monster_id not in content.monsters:
+        raise PluginError("没有这只怪物：%s" % monster_id)
+    return attack_options(content.monsters[monster_id], locale)
+
+
+def monster_attack(
+    encounter: Encounter,
+    content: ContentBundle,
+    who: Any,
+    key: str,
+    target: Any,
+    rng: Rng | None = None,
+    seed: int | None = None,
+    locale: str = "zh",
+    apply: bool = False,
+) -> dict:
+    """怪物打一次：`key` 是 `monster_actions` 里的 `action:0` 这种键。
+
+    三条与玩家攻击不同的地方，都是「怪物不是玩家」带来的：
+
+    1. **命中加值用卡上的数**（见 `rules/monsters.py`），不经过 Resolver
+    2. **没有优势/劣势通道**：怪物的「群体战术」这类特性还没建模，报告里会说
+    3. **动作额度按槽位付**：`action` / `bonus` / `reaction`。反应可以在别人回合用，
+       动作与附赠必须是自己回合 —— 与玩家同一条规矩。
+
+    `apply=False` 预览：掷骰但不扣额度、不扣血。
+    """
+    from ..rules.actioneconomy import ActionType
+    from ..rules.attack import resolve_monster_attack
+    from ..rules.combat import Target, target_from_actor
+    from ..rules.monsters import find_attack
+
+    combatant = encounter.get(who)
+    monster = _monster_def(content, combatant.actor)
+    try:
+        slot, raw_index = str(key).split(":", 1)
+        attack = find_attack(monster, slot, int(raw_index))
+    except (ValueError, PluginError) as exc:
+        raise RuleError("动作键不认识：%r（应形如 action:0，原因：%s）" % (key, exc))
+
+    kind = {"action": ActionType.ACTION, "bonus": ActionType.BONUS,
+            "reaction": ActionType.REACTION}.get(slot, ActionType.NONE)
+    # 「多重攻击」「其余」只是一句说明，不是一次行动 —— 不替 DM 记账。
+    pays = attack.kind in ("melee", "ranged", "save")
+    if kind is not ActionType.REACTION and encounter.current() is not combatant:
+        raise IllegalAction("现在不是 %s 的回合；只有反应能在别人回合里用"
+                            % combatant.label)
+    if apply and pays and not combatant.economy.can_pay(kind):
+        raise IllegalAction("%s 没有可用的%s" % (combatant.label, kind.value))
+
+    prepared = target if isinstance(target, Target) \
+        else target_from_actor(content, target, locale)
+    result = resolve_monster_attack(
+        combatant.actor, attack, prepared, rng or SeededRng(seed),
+        apply=apply, locale=locale)
+    result["action"]["key"] = key
+    result["action"]["slot"] = slot
+    if pays:
+        if apply:
+            combatant.economy.pay(kind, combatant.label)
+        result["economy"] = {"kind": kind.value,
+                             "after": combatant.economy.to_dict(),
+                             "preview": not apply}
+    else:
+        result["economy"] = {"kind": "", "after": combatant.economy.to_dict(),
+                             "preview": not apply}
+        result["notes"] = list(result["notes"]) + [
+            "这条只是说明（%s），没有占用动作额度" % attack.kind]
+    return result
+
+
 def attack_options(actor: Actor, content: ContentBundle, locale: str = "zh") -> dict:
     """出手前能选什么：额外伤害清单 + 身上待用的一次性标记。
 
