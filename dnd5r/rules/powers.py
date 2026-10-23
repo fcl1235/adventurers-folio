@@ -26,6 +26,7 @@ from ..kernel.text import Text
 from ..model.levels import ClassLevel, as_class_level
 from .actioneconomy import ActionEconomy, ActionType
 from .effects import Effect, EffectContext, parse_effect, parse_effects
+from .spellcasting import lowest_slot, spend_slot
 
 
 class PowerKind(str, Enum):
@@ -428,6 +429,9 @@ def can_use(
             elif not root.resources.get(cost.resource).can_spend(cost.amount):
                 pool = root.resources.get(cost.resource)
                 reasons.append("%s 剩余 %d，不足 %d" % (cost.resource, pool.available, cost.amount))
+        if cost.slot_level:
+            if lowest_slot(ctx.actor.root(), cost.slot_level) is None:
+                reasons.append("没有 %d 环或更高的法术位" % cost.slot_level)
 
     if power.prereq:
         facts = _facts(ctx)
@@ -475,6 +479,14 @@ def use_power(
             economy.pay(cost.action, label=power.name.zh)
         if cost.resource:
             ctx.actor.root().resources.spend(cost.resource, cost.amount)
+        if cost.slot_level:
+            # 「2 环或更高」：挑**最低**的可付环级，别把 5 环位先烧掉。
+            # 位不认职业：一个法术位就是一个法术位，兼职时按环级最低先花。
+            level = lowest_slot(ctx.actor.root(), cost.slot_level)
+            if level is None:
+                raise IllegalAction("%s 需要 %d 环或更高的法术位"
+                                    % (power.name.zh, cost.slot_level))
+            spend_slot(ctx.actor.root(), level)
 
     for effect in power.effects:
         effect.apply(ctx)
