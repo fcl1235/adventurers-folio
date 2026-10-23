@@ -1053,6 +1053,7 @@ def attack_roll(
     locale: str = "zh",
     apply: bool = False,
     extras: Any = (),
+    encounter: "Encounter | None" = None,
 ) -> dict:
     """掷一次武器攻击：命中 → 伤害 → 额外伤害 → 抗性 →（可选）落到 HP。
 
@@ -1064,15 +1065,36 @@ def attack_roll(
     `extras` 是这次要不要加额外伤害（月华形态的「每回合一次 +2d10」这类）。
     默认**不加**，只把可用项列在 `extras.available` 里：原文写的是
     "you can deal an extra 2d10"，加不加是玩家的选择。
+
+    传了 `encounter` 就**必须用它的动作额度**：自己回合、还有动作（副手用附赠）。
+    不传 = 不记账（老调用方与单测都还在用这条路），报告里 `economy.preview=True`。
     """
+    from ..rules.actioneconomy import ActionType
     from ..rules.attack import resolve_attack
     from ..rules.combat import Target, target_from_actor
 
     prepared = target if isinstance(target, Target) \
         else target_from_actor(content, target, locale)
-    return resolve_attack(
+    kind = ActionType.BONUS if off_hand else ActionType.ACTION
+    combatant = None
+    if encounter is not None:
+        combatant = encounter.get(attacker)
+        if encounter.current() is not combatant:
+            raise IllegalAction("现在不是 %s 的回合" % combatant.label)
+        if apply and not combatant.economy.can_pay(kind):
+            raise IllegalAction("%s 没有可用的%s" % (combatant.label, kind.value))
+    result = resolve_attack(
         content, attacker, prepared, weapon, off_hand,
         rng or SeededRng(seed), apply=apply, locale=locale, extras=extras)
+    if combatant is not None:
+        if apply:
+            combatant.economy.pay(kind, combatant.label)
+        result["economy"] = {"kind": kind.value,
+                             "after": combatant.economy.to_dict(),
+                             "preview": not apply}
+    else:
+        result["economy"] = {"kind": "", "after": None, "preview": True}
+    return result
 
 
 def opportunity_attack(
@@ -1118,6 +1140,30 @@ def opportunity_attack(
 
 
 # --- 怪物 ---------------------------------------------------------------
+def join_encounter(
+    encounter: Encounter,
+    content: ContentBundle,
+    actor: Actor,
+    rng: Rng | None = None,
+    seed: int | None = None,
+    x: int = 0,
+    y: int = 0,
+) -> dict:
+    """中途加入一个人（增援、召唤物、DM 临时放进来的怪）。
+
+    `content` 只为与其它入口保持一致（现在不需要查内容），保留这个参数
+    是为了以后要按内容算「加入时的先攻加值」时不用改调用方。
+    """
+    combatant = encounter.join(actor, rng or SeededRng(seed), x, y)
+    return {
+        "id": combatant.id,
+        "label": combatant.label,
+        "initiative": int(combatant.initiative),
+        "current": (encounter.current().id if encounter.current() else ""),
+        "order": encounter.order(),
+    }
+
+
 def monster_catalog(
     content: ContentBundle,
     locale: str = "zh",
@@ -1437,9 +1483,27 @@ def new_encounter(
     return encounter
 
 
-def encounter_view(encounter: Encounter) -> dict:
-    """给界面的先攻条。`distance_hint` 非空时，说明距离现在没有意义。"""
+def encounter_view(
+    encounter: Encounter,
+    content: ContentBundle | None = None,
+    locale: str = "zh",
+) -> dict:
+    """给界面的先攻条。`distance_hint` 非空时，说明距离现在没有意义。
+
+    传了 `content` 就顺手把每个人的 **AC 与 HP** 填进 `order` 行：
+    先攻条上不显示血量的话，界面只能自己算一遍，那必然与角色卡分叉。
+    不传时这些键不出现（引擎层与单测不需要它们）。
+    """
+    from ..rules.combat import target_from_actor
+
     view = encounter.to_dict()
+    if content is not None:
+        for row in view["order"]:
+            combatant = encounter.get(row["id"])
+            target = target_from_actor(content, combatant.actor, locale)
+            row["ac"] = int(target.ac)
+            row["hp"] = combatant.actor.root().hp.to_dict()
+            row["kind"] = combatant.actor.kind.value
     placed = int(view["placed"])
     view["distance_hint"] = (
         "" if placed >= 2

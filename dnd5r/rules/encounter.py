@@ -109,6 +109,29 @@ class Encounter:
     def _walk_speed(actor: Actor) -> int:
         return int(actor.top().statblock.speed("walk") or 30)
 
+    def join(self, actor: Actor, rng: Rng, x: int = 0, y: int = 0) -> Combatant:
+        """中途加入一个人（增援、召唤物、DM 临时放进来的一只）。
+
+        三件事必须一起做，少一件就出鬼：
+
+        1. **掷先攻**：新来的人用 1d20 + 敏捷调整值，与开场同一条规则；
+        2. **重新排序**：他可能插在中间；
+        3. **把回合指针挪回原来那个人**：排序会改变下标，不重新定位的话
+           「当前回合」会毫无理由地跳到别人身上 —— 这是最容易漏的一步。
+        """
+        combatant = self.add(actor, x, y)
+        if not self.round:
+            return combatant
+        if actor.root().hp.is_down:
+            combatant.initiative = -1
+        else:
+            combatant.initiative = int(rng.randint(1, 20)) + _dex_mod(actor)
+        held = self.current()
+        self._sort()
+        if held is not None:
+            self.turn = self.combatants.index(held)
+        return combatant
+
     def roll_initiative(self, rng: Rng) -> list[Combatant]:
         """每人掷 d20 + 敏捷调整值。
 

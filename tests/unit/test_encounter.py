@@ -297,5 +297,49 @@ class SessionTests(Base):
         self.assertIs(encounter.get(session.character).economy, shared)
 
 
+
+class JoinTest(Base):
+    """中途加入：新来的人掷先攻、插进队列，但**当前回合不能跟着跳**。
+
+    这是最容易写错的一步：`_sort()` 会改下标，指针还指着老下标的话，
+    「现在轮到谁」会毫无理由地换人 —— 表现为「放了只增援，回合就乱了」。
+    """
+
+    def test_join_keeps_the_current_turn(self):
+        hero = self.druid()
+        foe = self.foe()
+        encounter = api.new_encounter([hero, foe], rng=ScriptedRng([15, 5]))
+        current = api.encounter_view(encounter)["current"]
+        newcomer = api.spawn_monster(self.bundle, "dnd2024.monster.wolf", 2)
+        info = api.join_encounter(encounter, self.bundle, newcomer,
+                                  rng=ScriptedRng([20]))
+        # 新来的先攻 20+2=22，插到第一位，但当前回合还是原来那个人
+        self.assertEqual(info["initiative"], 22)
+        self.assertEqual(info["current"], current)
+        self.assertEqual(info["order"][0]["id"], newcomer.id)
+        self.assertEqual(encounter.current().id, current)
+
+    def test_join_before_begin_just_adds(self):
+        hero = self.druid()
+        encounter = Encounter.of([hero])
+        newcomer = api.spawn_monster(self.bundle, "dnd2024.monster.wolf")
+        info = api.join_encounter(encounter, self.bundle, newcomer)
+        self.assertEqual(len(info["order"]), 2)
+        self.assertEqual(info["current"], "")
+
+    def test_view_with_content_carries_ac_and_hp(self):
+        """先攻条要显示 AC 与 HP —— 界面不能自己再算一遍。"""
+        hero = self.druid()
+        foe = api.spawn_monster(self.bundle, "dnd2024.monster.wolf")
+        encounter = api.new_encounter([hero, foe], rng=ScriptedRng([15, 5]))
+        view = api.encounter_view(encounter, self.bundle)
+        rows = {row["id"]: row for row in view["order"]}
+        self.assertIn("ac", rows[foe.id])
+        self.assertEqual(rows[foe.id]["hp"]["maximum"], foe.hp.maximum)
+        self.assertEqual(rows[foe.id]["kind"], "monster")
+        # 不传 content 时这几个键不出现（引擎层不需要它们）
+        plain = api.encounter_view(encounter)
+        self.assertNotIn("ac", plain["order"][0])
+
 if __name__ == "__main__":
     unittest.main()

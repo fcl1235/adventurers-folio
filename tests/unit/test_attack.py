@@ -386,5 +386,61 @@ class ReactionStrikeTest(Base):
         self.assertEqual(encounter.get(foe).economy.reaction, 1)
 
 
+
+class EconomyTest(Base):
+    """传了 `encounter` 的攻击必须花掉动作额度 —— 否则界面上「打完了」但还能再打。
+
+    这是 P9d 补的一条：`attack_roll` 之前只掷骰，不管额度。界面一接上，
+    「点了十次都没用完动作」就会立刻暴露。副手攻击花附赠，不是动作。
+    """
+
+    def duel(self, rng_values=(20, 5)):
+        hero = self.fighter()
+        foe = self.fighter()
+        foe.id = "npc.dummy"
+        encounter = api.new_encounter([hero, foe], rng=ScriptedRng(list(rng_values)))
+        while api.encounter_view(encounter)["current"] != hero.id:
+            api.advance_turn(encounter)
+        return hero, foe, encounter
+
+    def test_roll_spends_the_action(self):
+        hero, foe, encounter = self.duel()
+        result = api.attack_roll(hero, self.bundle, foe, rng=ScriptedRng([15, 5]),
+                                 apply=True, encounter=encounter)
+        self.assertEqual(result["economy"]["kind"], "action")
+        self.assertEqual(result["economy"]["after"]["action"], 0)
+        self.assertEqual(encounter.get(hero).economy.action, 0)
+
+    def test_preview_spends_nothing(self):
+        hero, foe, encounter = self.duel()
+        api.attack_roll(hero, self.bundle, foe, rng=ScriptedRng([15, 5]),
+                        apply=False, encounter=encounter)
+        self.assertEqual(encounter.get(hero).economy.action, 1)
+
+    def test_second_attack_is_refused(self):
+        hero, foe, encounter = self.duel()
+        api.attack_roll(hero, self.bundle, foe, rng=ScriptedRng([15, 5]),
+                        apply=True, encounter=encounter)
+        with self.assertRaises(IllegalAction):
+            api.attack_roll(hero, self.bundle, foe, rng=ScriptedRng([15, 5]),
+                            apply=True, encounter=encounter)
+
+    def test_off_hand_spends_the_bonus_action(self):
+        hero, foe, encounter = self.duel()
+        hero.inventory.equip(EquipSlot.OFF_HAND, LONGSWORD)
+        result = api.attack_roll(hero, self.bundle, foe, off_hand=True,
+                                 rng=ScriptedRng([15, 5]), apply=True,
+                                 encounter=encounter)
+        self.assertEqual(result["economy"]["kind"], "bonus")
+        self.assertEqual(encounter.get(hero).economy.bonus, 0)
+        self.assertEqual(encounter.get(hero).economy.action, 1)
+
+    def test_out_of_turn_is_refused(self):
+        hero, foe, encounter = self.duel()
+        api.advance_turn(encounter)          # 轮到对手
+        with self.assertRaises(IllegalAction):
+            api.attack_roll(hero, self.bundle, foe, rng=ScriptedRng([15, 5]),
+                            apply=True, encounter=encounter)
+
 if __name__ == "__main__":
     unittest.main()
