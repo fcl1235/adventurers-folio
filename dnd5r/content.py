@@ -48,7 +48,7 @@ from .rules.summon import (
 )
 from .model.levels import ClassLevel, as_class_level
 from .model.resources import Pool, PoolKind, Refresh
-from .model.statblock import Abilities
+from .model.statblock import ABILITY_KEYS, Abilities
 
 RESOURCE_KINDS = {item.value: item for item in PoolKind}
 REFRESH_KINDS = {item.value: item for item in Refresh}
@@ -1351,6 +1351,18 @@ def parse_form(data: Any, source: str = "") -> FormSpec:
         raise PluginError("%s 的属性不合法：%s" % (ident, exc))
     speeds = {str(key): int(value) for key, value in (data.get("speeds") or {"walk": 30}).items()}
     senses = {str(key): int(value) for key, value in (data.get("senses") or {}).items()}
+    saves = {str(key): int(value) for key, value in (data.get("saves") or {}).items()}
+    for key in saves:
+        if key not in ABILITY_KEYS:
+            raise PluginError("%s 的豁免加值写给了不存在的属性：%r" % (ident, key))
+
+    def rows(key: str) -> tuple[MonsterAttack, ...]:
+        raw = data.get(key) or ()
+        if isinstance(raw, Mapping):
+            raw = [raw]
+        return tuple(parse_monster_attack(row, where="%s %s" % (ident, key))
+                     for row in raw)
+
     return FormSpec(
         id=ident,
         name=Text.from_dict(data["name"], where="%s name" % ident),
@@ -1361,6 +1373,12 @@ def parse_form(data: Any, source: str = "") -> FormSpec:
         speeds=speeds,
         senses=senses,
         size=str(data.get("size", "medium")),
+        saves=saves,
+        traits=tuple(parse_monster_trait(row, where="%s traits" % ident)
+                     for row in (data.get("traits") or ())),
+        actions=rows("actions"),
+        bonus_actions=rows("bonus_actions"),
+        reactions=rows("reactions"),
     )
 
 

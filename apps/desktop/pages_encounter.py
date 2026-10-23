@@ -57,6 +57,7 @@ class EncounterPage(ttk.Frame):
         self._target_id = ""
         self._action_key = ""
         self._action_rows: list[dict] = []
+        self._form_noted: tuple[str, str] | None = None
         self._mode = tk.StringVar(value="place")
         self._log: list[str] = []
         self._build()
@@ -224,12 +225,18 @@ class EncounterPage(ttk.Frame):
             self.target_pane.select_id(self._target_id)
 
     def _fill_actions(self) -> None:
-        """出手的人能做什么：玩家给武器，怪物给动作。两边都是 api 算好的。"""
+        """出手的人能做什么：玩家给武器，变形中的玩家给形态的天然武器，怪物给动作。
+
+        三条来源都是 api 算好的，界面只拼标签 —— 命中加值、伤害骰一个都不自己算。
+        """
         combatant = self._combatant(self._attacker_id)
         rows: list[dict] = []
+        form: dict = {"morphed": False}
         if combatant is not None:
             actor = combatant["actor"]
-            if api.actor_view(actor, self.app.locale).get("kind") == "pc":
+            kind = api.actor_view(actor, self.app.locale).get("kind")
+            form = api.form_view(actor, self.app.bundle, self.app.locale)
+            if kind == "pc" and not form.get("morphed"):
                 for row in (self.app.sheet.get("attacks") or []):
                     rows.append({
                         "key": row["weapon"],
@@ -237,25 +244,41 @@ class EncounterPage(ttk.Frame):
                                 % (row["name"], int(row["attack"]), row["damage"],
                                    int(row["damage_bonus"]), row["damage_type"]),
                     })
+            elif form.get("morphed"):
+                # 变形中：天然武器照形态卡上的数走（与怪物同一条结算）
+                rows = _attack_rows(form.get("actions") or [])
+                self._note_form(actor, form)
             else:
                 sheet = api.monster_sheet(self.app.bundle, actor, locale=self.app.locale)
-                for row in (sheet.get("actions") or []):
-                    label = row["name"]
-                    if row.get("attack_bonus") is not None:
-                        label += " %+d" % int(row["attack_bonus"])
-                    if row.get("save"):
-                        label += "（%s 豁免 DC %d）" % (row["save"].upper(),
-                                                    int(row["save_dc"]))
-                    rows.append({"key": row["key"], "name": label,
-                                 "kind": row.get("kind")})
+                rows = _attack_rows(sheet.get("actions") or [])
         self._action_rows = rows
         self.action_pane.fill([(row["key"], row["name"]) for row in rows])
         if self._action_key not in {row["key"] for row in rows}:
             self._action_key = rows[0]["key"] if rows else ""
         if self._action_key:
             self.action_pane.select_id(self._action_key)
-        self.attacker_var.set("出手的人：%s" % (combatant["label"] if combatant
-                                             else "（先攻条里选）"))
+        label = combatant["label"] if combatant else "（先攻条里选）"
+        if form.get("morphed"):
+            label = "%s（形态 %s · AC %d · HP %d）" % (
+                label, form.get("name") or form.get("id"),
+                int(form.get("ac") or 0), int(form.get("hp") or 0))
+        self.attacker_var.set("出手的人：%s" % label)
+
+    def _note_form(self, actor, form: dict) -> None:
+        """换了个形态就说一句：这是它的卡，特性只有文字（G23 未修）。
+
+        放在状态行而不是新控件里 —— 右栏高度是预算内的，多一行 Label
+        会把下面的按钮挤出窗口（布局铁律）。同一个人同一个形态只说一次。
+        """
+        key = (self._attacker_id, form.get("id"))
+        if self._form_noted == key:
+            return
+        self._form_noted = key
+        traits = "、".join("%s（文字，未建模）" % row["name"]
+                           for row in (form.get("traits") or ()))
+        self._say("形态 %s：天然武器按卡上的数算%s"
+                  % (form.get("name") or form.get("id"),
+                     "；特性 " + traits if traits else "；这个形态没有特性"))
 
     def _combatant(self, ident: str):
         if not self.encounter or not ident:
@@ -298,6 +321,7 @@ class EncounterPage(ttk.Frame):
         self._attacker_id = ""
         self._target_id = ""
         self._action_key = ""
+        self._form_noted = None
         self._log = []
         self.log.set_text("")
         self._say("已清空。")
@@ -439,13 +463,16 @@ class EncounterPage(ttk.Frame):
             return False
         actor = attacker["actor"]
         kind = api.actor_view(actor, self.app.locale).get("kind")
+        morphed = bool(api.form_view(actor, self.app.bundle,
+                                     self.app.locale).get("morphed"))
         try:
-            if kind == "pc":
+            if kind == "pc" and not morphed:
                 result = api.attack_roll(
                     actor, self.app.bundle, target["actor"],
                     weapon=self._action_key, apply=apply, rng=rng,
                     encounter=self.encounter)
             else:
+                # 怪物与变形中的角色走同一条：命中加值取卡上的数、按槽位付额度
                 result = api.monster_attack(
                     self.encounter, self.app.bundle, actor, self._action_key,
                     target["actor"], rng=rng, apply=apply)
@@ -468,6 +495,23 @@ class EncounterPage(ttk.Frame):
     def _say(self, text: str, error: bool = False) -> None:
         self.status_var.set(text)
         self.status.configure(foreground="#a33" if error else "#666666")
+
+
+def _attack_rows(actions: list[dict]) -> list[dict]:
+    """把 `attack_options` 的行拼成「名字 +命中（豁免 DC）」。
+
+    怪物与形态给的是同一个形状（`slot:index` 键 + `attack_bonus` / `save`），
+    所以这里只管标字，不管它来自哪张卡。
+    """
+    rows: list[dict] = []
+    for row in actions:
+        label = row["name"]
+        if row.get("attack_bonus") is not None:
+            label += " %+d" % int(row["attack_bonus"])
+        if row.get("save"):
+            label += "（%s 豁免 DC %d）" % (row["save"].upper(), int(row["save_dc"]))
+        rows.append({"key": row["key"], "name": label, "kind": row.get("kind")})
+    return rows
 
 
 def _outcome_zh(result: dict) -> str:

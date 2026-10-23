@@ -41,7 +41,7 @@ from ..rules.combat import (
     RESOLUTION_KINDS, Casting, Target, casting_for, target_from_actor,
 )
 from ..rules.health import hit_dice_average
-from ..rules.morph import reasons_for
+from ..rules.morph import form_id, reasons_for
 from ..rules.powers import Power, can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus, validate_total
 from ..rules.resolver import RefContext, Resolver, crit_text
@@ -744,6 +744,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "attacks_per_action": attacks_per_action,
         "conditions": list(actor.conditions.ids()),
         "morphed": actor.top().layer is not None,
+        # 形态的整张卡（含它自己的攻击）：变形后界面要照着它出手，
+        # 不然熊只会用徒手 1 + 力量调整值 —— 内容里的 1d8+3 等于没写。
+        "form": form_view(actor, content, locale),
         "forms": [
             {"id": form.id, "name": form.name.get(locale), "cr": form.cr,
              "ac": form.ac, "hp": form.hp, "speeds": dict(form.speeds)}
@@ -1220,6 +1223,58 @@ def _monster_def(content: ContentBundle, actor: Actor):
     return content.monsters[base]
 
 
+def _action_table(content: ContentBundle, actor: Actor):
+    """这个 Actor 从哪里拿「它自己的攻击」：怪物卡，或变形后的形态卡。
+
+    变形中的角色是**玩家**（`kind` 还是 pc），动作却在形态层上。按 `kind`
+    分支会漏掉这一支 —— 德鲁伊变熊以后被当成「还在挥长剑」。
+    所以这里看的是**最上层**（`top()`），不是本体的 kind。
+    """
+    top = actor.top()
+    if top.kind is ActorKind.FORM:
+        ident = form_id(actor)
+        if ident not in content.forms:
+            raise RuleError("当前形态 %s 不在内容里" % ident)
+        return content.forms[ident]
+    if top.kind is ActorKind.MONSTER:
+        return _monster_def(content, top)
+    raise RuleError("%s 没有天然武器清单；只有怪物与变形中的角色才有"
+                    % actor.display_name)
+
+
+def form_view(actor: Actor, content: ContentBundle, locale: str = "zh") -> dict:
+    """当前形态的整张卡（没变形时只有 `{"morphed": False}`）。
+
+    界面拿它画形态的攻击按钮 —— 不传它就只剩徒手 1 + 力量调整值，
+    熊的啃咬 1d8+3 就白写在内容里了（G22）。
+
+    `actions` 的形状与 `monster_actions` 完全一致（`slot:index` 键），
+    所以界面点它的时候走的还是 `monster_attack` / `resolve_monster_attack`。
+    """
+    from ..rules.monsters import attack_options
+
+    ident = form_id(actor)
+    if ident is None:
+        return {"morphed": False}
+    form = content.forms.get(ident)
+    if form is None:
+        # 内容里没有这条形态（比如换了一套插件）：如实说缺，不假装是空卡
+        return {"morphed": True, "id": ident, "name": "", "missing": True,
+                "actions": [], "traits": []}
+    return {
+        "morphed": True,
+        "id": ident,
+        "name": form.name.get(locale),
+        "ac": int(form.ac),
+        "hp": int(form.hp),
+        "cr": float(form.cr),
+        "size": form.size,
+        "saves": dict(form.saves or {}),
+        "traits": [row.to_dict(locale) for row in form.traits],
+        "actions": attack_options(form, locale),
+    }
+
+
 def monster_sheet(
     content: ContentBundle,
     monster_or_actor: Any,
@@ -1262,14 +1317,18 @@ def monster_attack(
     locale: str = "zh",
     apply: bool = False,
 ) -> dict:
-    """怪物打一次：`key` 是 `monster_actions` 里的 `action:0` 这种键。
+    """怪物（或变形中的角色）打一次：`key` 是 `monster_actions` 里的 `action:0` 这种键。
 
-    三条与玩家攻击不同的地方，都是「怪物不是玩家」带来的：
+    三条与玩家武器攻击不同的地方，都是「怪物不是玩家」带来的：
 
     1. **命中加值用卡上的数**（见 `rules/monsters.py`），不经过 Resolver
     2. **没有优势/劣势通道**：怪物的「群体战术」这类特性还没建模，报告里会说
     3. **动作额度按槽位付**：`action` / `bonus` / `reaction`。反应可以在别人回合用，
        动作与附赠必须是自己回合 —— 与玩家同一条规矩。
+
+    **变形中的角色也走这一条**：荒野变形的天然武器是三槽动作里的一种，
+    与怪物同一套形状、同一条结算。所以这里看的是 `actor.top()`（谁现在长着爪子），
+    不是本体是 pc 还是 monster。
 
     `apply=False` 预览：掷骰但不扣额度、不扣血。
     """
@@ -1279,7 +1338,7 @@ def monster_attack(
     from ..rules.monsters import find_attack
 
     combatant = encounter.get(who)
-    monster = _monster_def(content, combatant.actor)
+    monster = _action_table(content, combatant.actor)
     try:
         slot, raw_index = str(key).split(":", 1)
         attack = find_attack(monster, slot, int(raw_index))
@@ -1585,7 +1644,7 @@ __all__ = [
     "RESOLUTION_KINDS", "free_casts",
     "find_power", "use_power", "plugin_summary",
     "spell_info", "summon_info",
-    "eligible_forms_for", "morph_class_of", "form_options",
+    "eligible_forms_for", "morph_class_of", "form_options", "form_view",
     # 遭遇战（P9a）：回合容器、先攻、距离。对象进出，不落档。
     "Encounter", "Combatant", "FOOT",
     "new_encounter", "encounter_view", "advance_turn", "place_combatant",

@@ -428,7 +428,10 @@ def resolve_monster_attack(
     base = {
         "attacker": {"id": attacker.id,
                      "name": attacker.top().statblock.name.get(locale),
-                     "monster": True},
+                     # 变形中的角色也走这条结算，所以「怪物」这个标志要按要求算，
+                     # 不能写死 True —— 报告是给人核对的，先得自己不撒谎。
+                     "monster": attacker.top().kind.value == "monster",
+                     "kind": attacker.top().kind.value},
         "action": {"key": "", "name": name, "kind": attack.kind,
                    "attack_bonus": attack.attack_bonus,
                    "reach": attack.reach, "range": attack.range,

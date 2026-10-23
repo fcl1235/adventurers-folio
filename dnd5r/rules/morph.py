@@ -19,7 +19,8 @@ from ..kernel.errors import IllegalAction, RuleError
 from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
 from ..model.levels import ClassLevel
-from ..model.statblock import Abilities, Statblock
+from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
+from .monsters import MonsterAttack, MonsterTrait
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,7 +53,21 @@ class CrAxis:
 
 @dataclass(frozen=True, slots=True)
 class FormSpec:
-    """一只可选形态。字段与 Statblock 一一对应，但不含任何派生值。"""
+    """一只可选形态。
+
+    **形态就是那只野兽的整张卡**，不只是「变成它以后我的属性是多少」。
+    所以除了 Statblock 要的字段，还带 `saves` 与 `traits` 与三槽动作：
+
+    - `saves` 是**卡上印着的**豁免加值（猫的敏捷豁免 +4，敏捷只有 +2）。
+      变形后的角色被人放法术时，`target_from_actor` 读的就是这一份 ——
+      不带上它，德鲁伊变猫以后会用一个规则里没有的数去豁免。
+    - `traits` 与动作都只有文字/数字，没有判定语义（G23 未修）。
+    - 动作的**形状与怪物完全一样**（`MonsterAttack`），结算也走同一条
+      `resolve_monster_attack` —— 两头各写一套的话，命中加值迟早对不上。
+
+    `keep` 名单（荒野变形固定 int/wis/cha）在 `build_form` 里生效，
+    所以这里存的六项属性是形态的原值，不是混合后的结果。
+    """
 
     id: str
     name: Text
@@ -63,6 +78,11 @@ class FormSpec:
     speeds: Mapping[str, int]
     senses: Mapping[str, int] = None  # type: ignore[assignment]
     size: str = "medium"
+    saves: Mapping[str, int] = None  # type: ignore[assignment]
+    traits: tuple[MonsterTrait, ...] = ()
+    actions: tuple[MonsterAttack, ...] = ()
+    bonus_actions: tuple[MonsterAttack, ...] = ()
+    reactions: tuple[MonsterAttack, ...] = ()
 
     def __post_init__(self) -> None:
         if self.ac < 1:
@@ -73,6 +93,11 @@ class FormSpec:
             raise RuleError("%s 的 CR 不能为负" % self.id)
         if self.senses is None:
             object.__setattr__(self, "senses", {})
+        if self.saves is None:
+            object.__setattr__(self, "saves", {})
+        for key in self.saves:
+            if key not in ABILITY_KEYS:
+                raise RuleError("%s 的豁免加值写给了不存在的属性：%r" % (self.id, key))
 
     @property
     def can_swim(self) -> bool:
@@ -144,6 +169,9 @@ def build_form(
 
     ac_min 是「最终 AC 的下限」——月之环用 `13 + 感知调整值` 顶掉偏低的形态 AC。
     形态自带更高的 AC 时保留形态值，所以是 max 不是覆盖。
+
+    `saves` 原样带进 Statblock（与 `build_monster` 同一个做法）：形态卡上印着的
+    豁免加值不属于「保留本体」的那三项，它跟着形态走。
     """
     abilities = form.abilities
     if keep and keep_scores:
@@ -163,9 +191,10 @@ def build_form(
         senses=dict(form.senses or {}),
         size=form.size,
         cr=form.cr,
+        saves=dict(form.saves or {}),
     )
     return Actor(
-        id="form.%s" % form.id,
+        id="%s%s" % (FORM_PREFIX, form.id),
         kind=ActorKind.FORM,
         statblock=statblock,
         hp=HpPool(maximum=form.hp),
@@ -204,6 +233,22 @@ def leave_form(actor: Actor) -> Actor:
 
 def is_morphed(actor: Actor) -> bool:
     return actor.top().layer is not None
+
+
+FORM_PREFIX = "form."
+
+
+def form_id(actor: Actor) -> str | None:
+    """变形中的角色对应哪一条形态内容；没变形返回 None。
+
+    `build_form` 把层 Actor 的 id 写成 `form.<形态 id>`，因为层不是内容里的东西
+    （同一只熊变成两次得到的是两个层），不能直接占用内容 id。这里拆回去。
+    """
+    top = actor.top()
+    if top.kind is not ActorKind.FORM:
+        return None
+    ident = str(top.id)
+    return ident[len(FORM_PREFIX):] if ident.startswith(FORM_PREFIX) else ident
 
 
 def forbidden(actor: Actor, action: str) -> bool:
