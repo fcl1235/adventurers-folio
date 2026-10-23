@@ -14,7 +14,7 @@ from dataclasses import replace
 from typing import Any, Mapping, Sequence
 
 from ..content import ClassDef, ContentBundle, load_all
-from ..kernel.errors import DndError, PluginError, RuleError
+from ..kernel.errors import DndError, IllegalAction, PluginError, RuleError
 from ..kernel.events import Report
 from ..kernel.rng import Rng, SeededRng
 from ..kernel.text import Text
@@ -1073,6 +1073,48 @@ def attack_roll(
     return resolve_attack(
         content, attacker, prepared, weapon, off_hand,
         rng or SeededRng(seed), apply=apply, locale=locale, extras=extras)
+
+
+def opportunity_attack(
+    encounter: Encounter,
+    content: ContentBundle,
+    attacker: Actor,
+    target: Any,
+    rng: Rng | None = None,
+    seed: int | None = None,
+    locale: str = "zh",
+    apply: bool = False,
+    extras: Any = (),
+) -> dict:
+    """借机攻击：花掉攻击者的**反应**，掷一次武器攻击。
+
+    触发条件（走出触及范围）由 `move()` 报的 `left_reach` 判断 —— **这里不再判距离**：
+    移动已经发生，两人现在多半已经超过 5 尺，用现在的位置判会永远说「够不着」。
+    这是「借机攻击」最容易写错的一点，所以把判断留在移动那一步。
+
+    `apply=False` 预览：掷骰但不扣反应、不扣血。
+    """
+    from ..rules.actioneconomy import ActionType
+    from ..rules.attack import resolve_attack
+    from ..rules.combat import Target, target_from_actor
+
+    combatant = encounter.get(attacker)
+    if int(combatant.economy.reaction) <= 0:
+        raise IllegalAction("%s 这一轮的反应已经用掉了" % combatant.label)
+    prepared = target if isinstance(target, Target) \
+        else target_from_actor(content, target, locale)
+    result = resolve_attack(
+        content, attacker, prepared, "", False,
+        rng or SeededRng(seed), apply=apply, locale=locale, extras=extras)
+    before = int(combatant.economy.reaction)
+    if apply:
+        combatant.economy.pay(ActionType.REACTION, combatant.label)
+    result["reaction"] = {"before": before,
+                          "after": int(combatant.economy.reaction),
+                          "preview": not apply}
+    result["notes"] = list(result["notes"]) + [
+        "借机攻击走反应额度，不占动作" + ("（预览：反应未扣）" if not apply else "")]
+    return result
 
 
 def attack_options(actor: Actor, content: ContentBundle, locale: str = "zh") -> dict:

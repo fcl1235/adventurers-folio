@@ -23,6 +23,7 @@ sys.path.insert(0, str(ROOT))
 from tools.inject_common import run  # noqa: E402
 
 ATTACK = ROOT / "dnd5r/rules/attack.py"
+API = ROOT / "dnd5r/api/__init__.py"
 
 CASES = [
     (
@@ -61,7 +62,28 @@ CASES = [
         """    if not extras:
         return [row for row in options if row["available"]]""",
     ),
+    (
+        "借机攻击不扣反应",
+        API,
+        """    if apply:
+        combatant.economy.pay(ActionType.REACTION, combatant.label)""",
+        """    if apply:
+        pass""",
+    ),
+    (
+        "借机攻击预览也扣反应",
+        API,
+        """    if apply:
+        combatant.economy.pay(ActionType.REACTION, combatant.label)""",
+        """    if True:
+        combatant.economy.pay(ActionType.REACTION, combatant.label)""",
+    ),
 ]
+
+# 撤掉过一条「把反应检查改成 if False」的注入：`ActionEconomy.pay` 自己就
+# 会拒绝 reaction<=0，删掉显式检查行为完全一样，测试照旧通过（GREEN 是对的）。
+# 显式检查留着只是为了错误信息更好读（「这一轮的反应已经用掉了」），
+# 它不是唯一的护栏 —— 所以这里注入它证明不了任何事。
 
 TESTS = ["tests.unit.test_attack"]
 

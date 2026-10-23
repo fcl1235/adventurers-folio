@@ -24,7 +24,7 @@ import unittest
 from pathlib import Path
 
 import dnd5r.api as api
-from dnd5r.kernel.errors import RuleError
+from dnd5r.kernel.errors import IllegalAction, RuleError
 from dnd5r.kernel.rng import ScriptedRng
 from dnd5r.model.inventory import EquipSlot
 from dnd5r.rules.combat import Target
@@ -339,6 +339,51 @@ class OpportunityTest(Base):
         hero, foe, encounter = self.setup_pair()
         result = encounter.teleport(hero, 4, 0, 30)
         self.assertNotIn("left_reach", result)
+
+
+class ReactionStrikeTest(Base):
+    """借机攻击的结算：花反应、掷一次攻击；预览不动额度。"""
+
+    def setup_pair(self):
+        hero = self.fighter()
+        foe = api.new_character(self.bundle, FIGHTER, 5, SOLDIER,
+                                name_zh="对手", name_en="Foe", actor_id="npc.foe")
+        foe.inventory.equip(EquipSlot.MAIN_HAND, LONGSWORD)
+        encounter = Encounter.of([hero, foe])
+        encounter.roll_initiative(ScriptedRng([20, 1]))
+        encounter.begin()
+        encounter.place(hero, 0, 0)
+        encounter.place(foe, 1, 0)
+        return hero, foe, encounter
+
+    def test_spends_the_reaction(self):
+        hero, foe, encounter = self.setup_pair()
+        left = encounter.move(hero, 4, 0)["left_reach"]
+        self.assertEqual([row["id"] for row in left], [foe.id])
+        actions_before = encounter.get(foe).economy.action
+        result = api.opportunity_attack(
+            encounter, self.bundle, foe, hero, rng=ScriptedRng([18, 6]), apply=True)
+        self.assertTrue(result["hit"])
+        self.assertEqual(result["reaction"]["before"], 1)
+        self.assertEqual(result["reaction"]["after"], 0)
+        self.assertEqual(encounter.get(foe).economy.reaction, 0)
+        # 动作没被动过 —— 借机攻击只花反应（此刻还没轮到 foe，动作本来就是 0）
+        self.assertEqual(encounter.get(foe).economy.action, actions_before)
+
+    def test_no_reaction_left_is_refused(self):
+        hero, foe, encounter = self.setup_pair()
+        encounter.get(foe).economy.reaction = 0
+        with self.assertRaises(IllegalAction):
+            api.opportunity_attack(
+                encounter, self.bundle, foe, hero, rng=ScriptedRng([18, 6]), apply=True)
+
+    def test_preview_does_not_spend_the_reaction(self):
+        hero, foe, encounter = self.setup_pair()
+        result = api.opportunity_attack(
+            encounter, self.bundle, foe, hero, rng=ScriptedRng([18, 6]))
+        self.assertEqual(result["reaction"]["after"], 1)
+        self.assertTrue(result["reaction"]["preview"])
+        self.assertEqual(encounter.get(foe).economy.reaction, 1)
 
 
 if __name__ == "__main__":
