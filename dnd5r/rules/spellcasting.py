@@ -15,14 +15,25 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING, Iterable, Mapping, Sequence
 
-from ..content import ClassDef, ContentBundle, SpellDef
-from ..kernel.errors import RuleError
+from ..kernel.errors import IllegalAction, RuleError
 from ..model.actor import Actor
 from ..model.levels import ClassLevel
 from ..rules.resolver import Resolver
 from .summon import slot_curve
+
+if TYPE_CHECKING:               # 只在注解里用到，见下方说明
+    from ..content import ClassDef, ContentBundle, SpellDef
+
+# 这里**不能**在运行期 import `content`：`content` 为了解析能力要 import
+# `rules.powers`，而 `powers` 要用本模块的法位函数（`lowest_slot` / `spend_slot`）。
+# 三者一成环，`import dnd5r.api` 就直接炸。本文件只用到这三个类型做注解，
+# 而 `from __future__ import annotations` 已经把注解变成字符串，运行期不需要它们。
+
+# 法术位池的 id 前缀。位是建角色时统一建的（`build_actor`），
+# 这里只读不建 —— 否则「算一次 DC」会顺手改角色状态。
+SLOT_PREFIX = "dnd2024.slot."
 
 
 def casting_ability(class_def: ClassDef) -> str:
@@ -79,7 +90,7 @@ def highest_slot(actor: Actor, class_id: str) -> int:
     for pool in actor.root().resources.pools.values():
         if pool.owner_class and pool.owner_class != class_id:
             continue
-        if not pool.id.startswith("dnd2024.slot."):
+        if not pool.id.startswith(SLOT_PREFIX):
             continue
         level = int(pool.id.rsplit(".", 1)[-1])
         if pool.capacity > 0:
@@ -120,7 +131,7 @@ def slot_rows(actor: Actor, class_id: str, locale: str = "zh") -> list[dict]:
     """法位余量表：[(环级, 剩余, 上限)]，按环级升序。"""
     rows = []
     for pool in actor.root().resources.pools.values():
-        if not pool.id.startswith("dnd2024.slot."):
+        if not pool.id.startswith(SLOT_PREFIX):
             continue
         if pool.owner_class and pool.owner_class != class_id:
             continue
@@ -128,6 +139,57 @@ def slot_rows(actor: Actor, class_id: str, locale: str = "zh") -> list[dict]:
         rows.append({"level": level, "left": pool.available, "max": pool.capacity,
                      "label": pool.label.get(locale) if pool.label else ""})
     return sorted(rows, key=lambda item: item["level"])
+
+
+def slot_pools(actor: Actor, class_id: str = "") -> list[tuple[int, object]]:
+    """[(环级, 池)]，按环级升序。
+
+    `class_id` 为空时收**全部职业**的位（兼职的位是分开记的，但花的时候
+    哪个环级有余量就花哪个 —— 环级本身已经决定了该扣谁）。
+    """
+    found = []
+    for pool in actor.root().resources.pools.values():
+        if not pool.id.startswith(SLOT_PREFIX):
+            continue
+        if class_id and pool.owner_class and pool.owner_class != class_id:
+            continue
+        found.append((int(pool.id.rsplit(".", 1)[-1]), pool))
+    return sorted(found, key=lambda item: item[0])
+
+
+def lowest_slot(actor: Actor, min_level: int, class_id: str = "") -> int | None:
+    """最低的、有余量的、且不低于 `min_level` 的环级。没有就返回 None。
+
+    这条是给「消耗一个 2 环或更高的法术位」这类原文用的：原文说「或更高」，
+    所以不能挑最高的那个把人坑了。
+    """
+    for level, pool in slot_pools(actor, class_id):
+        if level >= int(min_level) and pool.available > 0:
+            return level
+    return None
+
+
+def spend_slot(actor: Actor, slot_level: int, class_id: str = ""):
+    """扣掉**指定环级**的一个法术位，返回被扣的池。
+
+    `slot_level` 是「用几环放」这件事的答案：升环施法时玩家选了 3 环，
+    就扣 3 环。想表达「2 环或更高」先用 `lowest_slot()` 挑出环级。
+
+    **没有任何位池的角色不拦**：怪物、召唤物、只能随意施法的存在本来就没有
+    法术位账本，拦下来只会让「掷一次施法结算」对他们失效。有账本但没有这个
+    环级才是错 —— 那说明界面让人选了一个没有的环位。
+    """
+    pools = slot_pools(actor, class_id)
+    if not pools:
+        return None
+    index = int(slot_level)
+    for level, pool in pools:
+        if level == index:
+            if not pool.can_spend(1):
+                raise IllegalAction("没有可用的 %d 环法术位（已用光）" % index)
+            pool.spend(1)
+            return pool
+    raise IllegalAction("没有 %d 环法术位" % index)
 
 
 def highest_slot_table(class_def: ClassDef, class_level: ClassLevel) -> int:
