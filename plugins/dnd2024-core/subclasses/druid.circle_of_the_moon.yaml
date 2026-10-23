@@ -108,11 +108,29 @@ powers:
       - note:
           zh: |-
             传送与「下次攻击优势」需要战斗回合与位置模型（G2），不结算。
-            「用法术位换回次数」还没有「支付换恢复」这条通道，请手动加回。
           en: |-
             Teleporting and "Advantage on your next attack" need the combat turn model.
-            "Spend a slot to regain a use" has no payment-for-recovery channel yet;
-            restore the use by hand.
+
+  # 原文最后一句是**独立的操作**（无需动作，花一个 2 环以上的位换回一次次数），
+  # 不是「使用月光步」的一部分 —— 所以是一条单独的能力，不是一个附带效果。
+  - id: dnd2024.subclass.druid.circle_of_the_moon.moonlight_step_recover
+    name: {zh: 月光步 · 以法术位回气, en: Moonlight Step (Spend a Slot)}
+    level: 10
+    kind: activated
+    cost: { slot_level: 2, label: 月光步 }
+    target: self
+    text:
+      zh: |-
+        无需动作：消耗一个 2 环或更高的法术位，恢复一次月光步的使用次数。
+        想恢复几次就重复几次；程序每次只扣**最低**的可付环级，不会先烧掉高环位。
+      en: |-
+        No action required: expend one level 2+ spell slot to regain one use of
+        Moonlight Step. Repeat for each use you want to restore. The program always
+        spends the lowest slot that qualifies, never a higher one.
+    effects:
+      - recover_resource:
+          pool: dnd2024.resource.druid.circle_of_the_moon.moonlight_step
+          amount: 1
 
   - id: dnd2024.subclass.druid.circle_of_the_moon.lunar_form
     name: {zh: 月华形态, en: Lunar Form}

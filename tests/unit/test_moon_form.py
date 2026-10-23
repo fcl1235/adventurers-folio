@@ -165,13 +165,14 @@ class MoonlightStepTest(Base):
                    if item["id"].endswith("moonlight_step"))
         self.assertTrue(row["button"])
         # 有按钮、确实花一个附赠动作 = `active`（不是「算过了」也不是「没算」）。
-        # 次数不建池，所以能力原文里必须写清「手动记」。
+        # 次数已经有真池（P8g），所以 note 只剩「传送与优势还没结算」这一条；
+        # 池自己的断言在 `test_subclass_resources.py`。
         self.assertEqual(row["status"], "active")
         power = next(item for item in api.available_powers(self.bundle, actor)
                      if item.id.endswith("moonlight_step"))
         notes = " ".join(effect.text.zh for effect in power.effects
                          if getattr(effect, "op", "") == "note")
-        self.assertIn("手动", notes)
+        self.assertIn("战斗回合", notes)
         # 反证：6 级还没有这个能力
         early = api.character_sheet(self.druid(6), self.bundle)["powers"]
         self.assertFalse([item for item in early if item["id"].endswith("moonlight_step")])
