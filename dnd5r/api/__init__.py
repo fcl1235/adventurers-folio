@@ -36,6 +36,7 @@ from ..rules.contributions import (
 )
 from ..rules.effects import EffectContext
 from ..rules.derived import resolver_for as _resolver_for
+from ..rules.encounter import FOOT, Combatant, Encounter
 from ..rules.combat import (
     RESOLUTION_KINDS, Casting, Target, casting_for, target_from_actor,
 )
@@ -828,6 +829,7 @@ def _context(
     rng: Rng | None = None,
     power: Power | None = None,
     content: ContentBundle | None = None,
+    encounter: Encounter | None = None,
 ) -> EffectContext:
     resolver = resolver_for(actor)
     profile = actor.profile
@@ -848,6 +850,7 @@ def _context(
         total_level=total,
         class_level=class_level,
         source=power.id if power else "",
+        encounter=encounter,
     )
 
 
@@ -1057,14 +1060,21 @@ def use_power(
     seed: int | None = None,
     locale: str = "zh",
     choice: Mapping[str, Any] | None = None,
+    encounter: Encounter | None = None,
 ) -> dict:
     """执行主动能力，返回 {ok, message, events, rolls, sheet} 供前端直接渲染。
 
-    `choice` 是这次操作要玩家做的选择：变形要传 `{"form_id": ...}`。
+    `choice` 是这次操作要玩家做的选择：变形要传 `{"form_id": ...}`，
+    带传送的能力要传 `{"to": (x, y)}`（格坐标）。
+    传了 `encounter` 才会真的挪位置 —— 不传就是「没结算」，报告里会说。
     """
     power = find_power(content, power_id, actor)
+    if economy is None and encounter is not None and encounter.has(actor):
+        # 遭遇战里每个人的额度就在 Combatant 上。这里另建一份的话，
+        # 界面会「扣了次数、附赠动作还剩着」，下一回合又能白用一次。
+        economy = encounter.get(actor).economy
     economy = economy if economy is not None else ActionEconomy()
-    ctx = _context(actor, locale, SeededRng(seed), power, content)
+    ctx = _context(actor, locale, SeededRng(seed), power, content, encounter=encounter)
     ctx.scratch.update(choice or {})
     if any(getattr(effect, "op", "") == "morph" for effect in power.effects):
         ctx.scratch["forms"] = {form.id: form for form in eligible_forms_for(actor, content)}
@@ -1136,6 +1146,84 @@ def form_options(actor: Actor, content: ContentBundle, locale: str = "zh") -> di
     }
 
 
+# --- 遭遇战 -----------------------------------------------------------
+# 这里返回的是**对象**而不是 dict：前端要连着做一串操作（下一回合、移动、传送），
+# 每步传 dict 回来既啰嗦，又容易只改到副本。前端把它当不透明句柄拿着就行，
+# 不需要（也不应该）知道它的类型 —— C3 检查的是 import，不是返回值的类。
+
+def new_encounter(
+    actors: Sequence[Actor],
+    rng: Rng | None = None,
+    begin: bool = True,
+) -> Encounter:
+    """建一场遭遇战：加入参与者 → 掷先攻 → 开始第一轮。"""
+    encounter = Encounter.of(actors)
+    if not encounter.combatants:
+        raise RuleError("遭遇战里没有人")
+    encounter.roll_initiative(rng or SeededRng())
+    if begin:
+        encounter.begin()
+    return encounter
+
+
+def encounter_view(encounter: Encounter) -> dict:
+    """给界面的先攻条。`distance_hint` 非空时，说明距离现在没有意义。"""
+    view = encounter.to_dict()
+    placed = int(view["placed"])
+    view["distance_hint"] = (
+        "" if placed >= 2
+        else "位置还没摆，所有人按 (0,0) 算 —— 距离为 0，"
+             "「30 尺内」会一律成立。要判距离请先摆位。"
+    )
+    return view
+
+
+def advance_turn(encounter: Encounter) -> dict:
+    """结束当前回合，轮到下一个人（走完末尾就进下一轮）。"""
+    who = encounter.next_turn()
+    return {
+        "round": int(encounter.round),
+        "current": who.id if who else "",
+        "label": who.label if who else "",
+        "order": encounter.order(),
+    }
+
+
+def place_combatant(encounter: Encounter, who: Any, x: int, y: int) -> dict:
+    """摆位：不花移动力（开场布阵、DM 改判）。"""
+    return encounter.place(who, x, y).to_dict()
+
+
+def move_combatant(encounter: Encounter, who: Any, x: int, y: int) -> dict:
+    """走过去：消耗移动力 = 直线格数 × 5 尺，不做寻路。"""
+    return encounter.move(who, x, y)
+
+
+def teleport_combatant(
+    encounter: Encounter, who: Any, x: int, y: int, max_feet: int,
+) -> dict:
+    """传送：不花移动力，但要过距离与占位两道检查。"""
+    return encounter.teleport(who, x, y, max_feet)
+
+
+def encounter_distance(encounter: Encounter, one: Any, other: Any) -> int:
+    """两人相距多少尺（5 尺一格，斜着走不算远）。"""
+    return encounter.distance_between(one, other)
+
+
+def nearby(encounter: Encounter, who: Any, feet: int) -> list[dict]:
+    """`feet` 尺内的人。共享月光这类「捎一个」的能力用它列候选。"""
+    source = encounter.get(who)
+    return [
+        {
+            "id": item.id,
+            "label": item.label,
+            "feet": encounter.distance(source, item),
+        }
+        for item in encounter.nearest_within(who, feet)
+    ]
+
+
 def plugin_summary(root: str = "plugins", locale: str = "zh") -> list[dict]:
     """给前端看的插件列表；坏掉的插件只记录不抛出。"""
     from ..loader import discover
@@ -1163,6 +1251,10 @@ __all__ = [
     "find_power", "use_power", "plugin_summary",
     "spell_info", "summon_info",
     "eligible_forms_for", "morph_class_of", "form_options",
+    # 遭遇战（P9a）：回合容器、先攻、距离。对象进出，不落档。
+    "Encounter", "Combatant", "FOOT",
+    "new_encounter", "encounter_view", "advance_turn", "place_combatant",
+    "move_combatant", "teleport_combatant", "encounter_distance", "nearby",
     # 前端要 catch 的是「调用失败」这件事，所以异常类型属于 api 的契约 ——
     # 不让 apps 去 import kernel.errors（C3），否则拦错误都得越界。
     "DndError", "RuleError", "PluginError",

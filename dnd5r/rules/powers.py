@@ -18,7 +18,7 @@ from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Any, Iterable, Mapping
 
-from ..kernel.errors import IllegalAction, PluginError, RuleError
+from ..kernel.errors import DndError, IllegalAction, PluginError, RuleError
 from ..kernel.events import Report
 from ..kernel.predicate import evaluate as eval_when
 from ..kernel.predicate import explain as explain_when
@@ -464,7 +464,13 @@ def use_power(
     ctx: EffectContext,
     economy: ActionEconomy | None = None,
 ) -> Report:
-    """执行一个主动能力。检查 → 付费 → 按序跑效果 → 汇总报告。"""
+    """执行一个主动能力。检查 → 付费 → 按序跑效果 → 汇总报告。
+
+    效果跑到一半失败（传送超距、目标格有人这类）会**退回刚付的代价**再抛错 ——
+    能力没用成却扣掉次数和法术位，桌上没人会认这笔账。
+    已经生效的效果不回滚（改血量那种没法还原），所以效果顺序仍然重要：
+    把会失败的那一条放前面。
+    """
     reasons = can_use(power, ctx, economy)
     if reasons:
         raise IllegalAction("%s 无法使用：%s" % (power.name.zh, "；".join(reasons)))
@@ -473,12 +479,18 @@ def use_power(
         raise IllegalAction("%s 的触发条件不满足：%s"
                             % (power.name.zh, "；".join(explain_when(power.when, _facts(ctx)))))
 
+    paid_actions: list[tuple[ActionType, int]] = []
+    paid_pools: list[tuple[object, int]] = []
+
     cost = power.cost
     if cost is not None:
         if economy is not None:
             economy.pay(cost.action, label=power.name.zh)
+            paid_actions.append((cost.action, 1))
         if cost.resource:
-            ctx.actor.root().resources.spend(cost.resource, cost.amount)
+            pool = ctx.actor.root().resources.get(cost.resource)
+            pool.spend(cost.amount)
+            paid_pools.append((pool, cost.amount))
         if cost.slot_level:
             # 「2 环或更高」：挑**最低**的可付环级，别把 5 环位先烧掉。
             # 位不认职业：一个法术位就是一个法术位，兼职时按环级最低先花。
@@ -486,9 +498,17 @@ def use_power(
             if level is None:
                 raise IllegalAction("%s 需要 %d 环或更高的法术位"
                                     % (power.name.zh, cost.slot_level))
-            spend_slot(ctx.actor.root(), level)
+            paid_pools.append((spend_slot(ctx.actor.root(), level), 1))
 
-    for effect in power.effects:
-        effect.apply(ctx)
+    try:
+        for effect in power.effects:
+            effect.apply(ctx)
+    except DndError:
+        for kind, amount in paid_actions:
+            if economy is not None:
+                economy.refund(kind, amount)
+        for pool, amount in paid_pools:
+            pool.recover(amount)
+        raise
 
     return ctx.report()

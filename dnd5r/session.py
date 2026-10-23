@@ -32,6 +32,7 @@ from .rules.contributions import (
     facts_for, modifiers_for, passive_modifiers, passive_proficiencies,
 )
 from .rules.effects import EffectContext
+from .rules.encounter import Encounter
 from .rules.morph import FormSpec, is_morphed
 from .rules.powers import Power, can_use, phase_label, use_power
 from .rules.progression import proficiency_bonus
@@ -90,6 +91,7 @@ class Session:
         self.locale = locale
         self.rng = rng or SeededRng(seed)
         self.economy = ActionEconomy()
+        self.encounter: Encounter | None = None
         self.actor: Actor | None = None
         self.log: list[str] = []
         self.last_report: Report = Report()
@@ -114,9 +116,28 @@ class Session:
             scores=scores, name_zh=name_zh, name_en=name_en, actor_id=actor_id,
             subclass=subclass,
         )
-        self.economy = ActionEconomy(movement=self.actor.statblock.speed("walk"))
+        self.economy.reset(movement=self.actor.statblock.speed("walk"))
+        self.encounter = None
         self.log = []
         return self.actor
+
+    def start_encounter(
+        self,
+        others: Sequence[Actor] = (),
+        rng: Rng | None = None,
+    ) -> Encounter:
+        """把主角和 `others` 拉进一场遭遇战：掷先攻，开始第一轮。
+
+        主角的额度对象**就是** `self.economy` 那一份（同一个引用），不是另建一套。
+        两份各记一套的结果是「角色卡上写着动作还在，遭遇战里说他用完了」。
+        """
+        actor = self.character
+        encounter = Encounter.of([actor, *others])
+        encounter.get(actor).economy = self.economy
+        encounter.roll_initiative(rng or self.rng)
+        encounter.begin()
+        self.encounter = encounter
+        return encounter
 
     @property
     def character(self) -> Actor:
@@ -187,6 +208,8 @@ class Session:
             total_level=total,
             class_level=class_level,
             source=power.id if power else "",
+            # 位置型原语要用它改坐标；没有遭遇战时是 None，效果会明说没结算
+            encounter=self.encounter,
         )
 
     # --- 派发 ---------------------------------------------------------
@@ -209,6 +232,13 @@ class Session:
         if isinstance(command, LongRest):
             return self._rest(long_rest(self.character))
         if isinstance(command, NewTurn):
+            if self.encounter is not None:
+                who = self.encounter.next_turn()
+                if who is None:
+                    return Report(ok=False, message="遭遇战里没有人")
+                note = "" if who.actor is self.character else "（还没轮到你）"
+                return Report(ok=True, message="第 %d 轮 · 轮到 %s%s"
+                              % (self.encounter.round, who.label, note))
             self.economy.start_turn(movement=self.character.statblock.speed("walk"))
             return Report(ok=True, message="新回合：动作与附赠动作已恢复")
         if isinstance(command, TakeDamage):
@@ -251,7 +281,9 @@ class Session:
         return scratch
 
     def _rest(self, result: RestResult) -> Report:
-        self.economy = ActionEconomy(movement=self.character.statblock.speed("walk"))
+        # 用 reset 而不是换新对象：遭遇战里的 Combatant 拿着同一个引用，
+        # 换了对象会出现「休息完还能再动一次」。
+        self.economy.reset(movement=self.character.statblock.speed("walk"))
         return Report(ok=True, message=result.summary)
 
     # --- 投影 ---------------------------------------------------------

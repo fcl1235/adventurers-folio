@@ -27,6 +27,7 @@ from .grants import (
 )
 from .morph import Morph, Revert
 from .numeric import Damage, GrantTempHp, Heal, ReduceDamage
+from .position import Teleport
 from .state import (
     ApplyCondition,
     ModifyRoll,
@@ -42,5 +43,5 @@ __all__ = [
     "Heal", "Damage", "GrantTempHp", "ReduceDamage", "Morph", "Revert",
     "GrantModifier", "GrantDefense", "GrantProficiency", "GrantAdvantage", "GrantAction",
     "ApplyCondition", "RemoveCondition", "SpendResource", "RecoverResource",
-    "ModifyRoll", "NoteEffect",
+    "ModifyRoll", "NoteEffect", "Teleport",
 ]

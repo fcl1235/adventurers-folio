@@ -35,6 +35,9 @@ class EffectContext:
     class_level: ClassLevel | None = None
     source: str = ""
     subject: Actor | None = None
+    # 遭遇战（rules/encounter.py）。位置型原语要用它改坐标；
+    # 角色卡单独打开时是 None，那时候「传送」这类效果应当明说没结算。
+    encounter: Any = None
     events: list[Event] = field(default_factory=list)
     rolls: list[RollEvent] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)

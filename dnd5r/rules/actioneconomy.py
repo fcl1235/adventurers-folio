@@ -102,6 +102,19 @@ class ActionEconomy:
         self.bonus = 0
         self.movement = 0
 
+    def reset(self, movement: int | None = None) -> None:
+        """把额度恢复到一回合的初始值，**复用同一个对象**。
+
+        换新对象的写法（`self.economy = ActionEconomy(...)`）有个坑：
+        遭遇战里的 `Combatant` 拿着的是旧引用，休息之后两边就各记一套额度，
+        表现为「休息完还能再动一次」。所以凡是「重置」都走这里。
+        """
+        self.action = 1
+        self.bonus = 1
+        self.reaction = 1
+        if movement is not None:
+            self.movement = int(movement)
+
     def to_dict(self) -> dict:
         return {
             "action": self.action, "bonus": self.bonus,
