@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -24,10 +25,13 @@ if str(ROOT) not in sys.path:
 import dnd5r.api as api                      # noqa: E402
 from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
+from apps.desktop.pages_encounter import EncounterPage  # noqa: E402
 from apps.desktop.pages_feats import FeatPage  # noqa: E402
 from apps.desktop.pages_powers import PowersPage  # noqa: E402
 from apps.desktop.pages_spells import SpellPage, _chosen_ids  # noqa: E402
 from apps.desktop.widgets import COL_MID, COL_RIGHT  # noqa: E402
+from dnd5r.kernel.rng import ScriptedRng            # noqa: E402
+from dnd5r.model.inventory import EquipSlot         # noqa: E402
 
 SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
 INT_SCORES = {"str": 8, "dex": 14, "con": 14, "int": 17, "wis": 12, "cha": 10}
@@ -214,6 +218,139 @@ def _pool_left(page: PowersPage, row: dict):
     return None
 
 
+def _check_encounter(label: str, page: EncounterPage, stats: dict) -> list[str]:
+    """战斗页：清单与候选一致、先攻条与 api 一致、**算的数真落到血上**。
+
+    最后一条是这一页的全部意义。前几页的错只是显示错，这一页的错会让
+    玩家把血记错 —— 所以断言「报告里说打了多少，血就少了多少」，
+    并且预览与结算分开验（预览动了血比不显示更糟）。
+    """
+    problems: list[str] = []
+    bundle = page.app.bundle
+    catalog = api.monster_catalog(bundle)
+    if page.roster_pane.row_count != len(catalog):
+        problems.append("%s：怪物名单 %d 行，候选 %d 只"
+                        % (label, page.roster_pane.row_count, len(catalog)))
+        return problems
+
+    # 先给角色一把真武器：法师默认是徒手（1-1 → 0 点），
+    # 用徒手来验「血有没有动」等于验了个寂寞。
+    page.app.actor.inventory.equip(EquipSlot.MAIN_HAND,
+                                   "dnd2024.item.weapon.longsword")
+    page.app.refresh()
+
+    page.roster_pane.select_id("dnd2024.monster.wolf")
+    if not page.add_monster(rng=ScriptedRng([10])):
+        problems.append("%s：加不了怪物（%s）" % (label, page.status_var.get()))
+        return problems
+    if not page.start(rng=ScriptedRng([20, 5])):
+        problems.append("%s：开不了战（%s）" % (label, page.status_var.get()))
+        return problems
+    stats["encounters"] = stats.get("encounters", 0) + 1
+
+    encounter = page.encounter
+    view = api.encounter_view(encounter, bundle)
+
+    def check_bars(stage: str) -> None:
+        """先攻条与目标栏的每个数都要等于 api 的当前值。
+
+        必须在**打完一次之后**再跑一遍：满血时 `current == maximum`，
+        把 current 写成 maximum 也能通过 —— 那种检查等于没检查（F10 的老坑）。
+        """
+        fresh = api.encounter_view(encounter, bundle)
+        if page.order_pane.row_count != len(fresh["order"]):
+            problems.append("%s（%s）：先攻条 %d 行，场上有 %d 人"
+                            % (label, stage, page.order_pane.row_count,
+                               len(fresh["order"])))
+            return
+        for index, row in enumerate(fresh["order"]):
+            shown = page.order_pane.text_at(index)
+            if row["label"] not in shown:
+                problems.append("%s（%s）：先攻条第 %d 行没有名字（%r）"
+                                % (label, stage, index, shown))
+            if "HP %d/%d" % (row["hp"]["current"], row["hp"]["maximum"]) not in shown:
+                problems.append("%s（%s）：先攻条第 %d 行血量与 api 不一致（%r，应为 %d/%d）"
+                                % (label, stage, index, shown,
+                                   row["hp"]["current"], row["hp"]["maximum"]))
+            slot = page.target_pane.index_of(row["id"])
+            if slot >= 0 and "AC %d" % row["ac"] not in page.target_pane.text_at(slot):
+                problems.append("%s（%s）：目标行第 %d 条的 AC 与 api 不一致"
+                                % (label, stage, index))
+
+    check_bars("开战")
+
+    page.order_pane.select_id(view["current"])
+    page._select_attacker()
+    page._attacker_id = view["current"]
+    page._fill_targets()
+    page._fill_actions()
+    if not page.action_pane.row_count:
+        problems.append("%s：出手的人没有任何可用动作" % label)
+        return problems
+    page.action_pane.select_id(page.action_pane.selected_id() or
+                               page._action_rows[0]["key"])
+    page._select_action()
+    if not page.target_pane.row_count:
+        problems.append("%s：没有可选目标" % label)
+        return problems
+    target_id = page._target_id
+
+    def hp_of(ident: str) -> int:
+        for row in api.encounter_view(encounter, bundle)["order"]:
+            if row["id"] == ident:
+                return int(row["hp"]["current"])
+        return -1
+
+    # 掷 20 = 必中，且**重击**（伤害骰翻倍）—— 这样「血没动」一定是程序的问题，
+    # 不是「刚好掷了个空的」。值给多一点：3d10 翻倍要 6 颗。
+    rolls = [20, 2, 2, 2, 2, 2, 2, 2]
+    before = hp_of(target_id)
+    if not page.roll(False, rng=ScriptedRng(list(rolls))):
+        problems.append("%s：预览失败（%s）" % (label, page.status_var.get()))
+        return problems
+    if hp_of(target_id) != before:
+        problems.append("%s：预览就改了血（%d → %d）"
+                        % (label, before, hp_of(target_id)))
+    if encounter.get(page._attacker_id).economy.action != 1:
+        problems.append("%s：预览就把动作额度用掉了" % label)
+
+    if not page.roll(True, rng=ScriptedRng(list(rolls))):
+        problems.append("%s：结算失败（%s）" % (label, page.status_var.get()))
+        return problems
+    stats["attacks"] = stats.get("attacks", 0) + 1
+    after = hp_of(target_id)
+    reported = page.log.text.get("1.0", "end")
+    said = re.findall(r"结果：.*?(\d+) 点伤害", reported)
+    if not said:
+        problems.append("%s：结算后没有把「结果」写进战斗记录" % label)
+    else:
+        # 报告说打了多少，血就得少多少 —— 这一页的全部意义就在这一条
+        if int(said[-1]) != before - after:
+            problems.append("%s：报告说 %s 点伤害，血只少了 %d（%d → %d）"
+                            % (label, said[-1], before - after, before, after))
+    if not reported.strip():
+        problems.append("%s：战斗记录是空的" % label)
+    check_bars("打完")
+
+    # 地图：摆位一次，位置要进 api 的视图
+    page._mode.set("place")
+    page.order_pane.select_id(page._attacker_id)
+    page._on_canvas_click(type("E", (), {"x": 80, "y": 120})())
+    placed = {row["id"]: (row["x"], row["y"])
+              for row in api.encounter_view(encounter, bundle)["order"]}
+    if placed.get(page._attacker_id) != (2, 3):
+        problems.append("%s：点了 (2,3) 但位置是 %r"
+                        % (label, placed.get(page._attacker_id)))
+
+    # 下一回合：当前指针必须换人
+    current = api.encounter_view(encounter)["current"]
+    if not page.next_turn():
+        problems.append("%s：推进回合失败（%s）" % (label, page.status_var.get()))
+    elif api.encounter_view(encounter)["current"] == current and len(view["order"]) > 1:
+        problems.append("%s：点了下一回合但指针没动" % label)
+    return problems
+
+
 def main() -> int:
     bundle = api.load_content(ROOT / "plugins")
     if bundle.errors:
@@ -260,6 +397,8 @@ def main() -> int:
                     problems.extend(_check_feats(label, page, stats))
                 elif isinstance(page, PowersPage):
                     problems.extend(_check_powers(label, page, stats))
+                elif isinstance(page, EncounterPage):
+                    problems.extend(_check_encounter(label, page, stats))
             if app.winfo_ismapped():
                 problems.append("%s：窗口被映射了（零弹窗铁律）" % label)
         finally:
@@ -270,9 +409,10 @@ def main() -> int:
             print("[FAIL] %s" % item)
         return 1
     print("LAYOUT OK —— %d 个角色 × %d 页全部在预算内；"
-          "法术 %d / 专长 %d / 能力 %d 次写库"
+          "法术 %d / 专长 %d / 能力 %d 次写库；遭遇战 %d 场 / 攻击 %d 次"
           % (len(CASES), page_count, stats.get("toggles", 0),
-             stats.get("feat_picks", 0), stats.get("power_uses", 0)))
+             stats.get("feat_picks", 0), stats.get("power_uses", 0),
+             stats.get("encounters", 0), stats.get("attacks", 0)))
     return 0
 
 

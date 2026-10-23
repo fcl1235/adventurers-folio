@@ -77,7 +77,11 @@ class PluginIsolationTest(unittest.TestCase):
 
         app = self._app(bundle, actor)
         self.assertFalse(app.winfo_ismapped(), "selftest 模式不许把窗口弹出来")
-        self.assertEqual(len(app.pages), 4)
+        # 页数写成「等于标签页数」而不是写死 4/5：以后加页面不该改这条测试，
+        # 真正要盯的是「每个标签都有页面、且都建出来了」
+        self.assertEqual(len(app.pages), len(app.book.tabs()))
+        # 战斗页在空内容下也得建得出来：怪物名单是空的，但不许崩
+        self.assertEqual(app.encounter_page.roster_pane.row_count, 0)
 
     # --- 2. 缺法术 ------------------------------------------------------
     def test_missing_spells_still_starts(self):
