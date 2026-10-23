@@ -36,7 +36,9 @@ from .contributions import passive_advantage_modes, passive_defenses, passive_pr
 from .build import feat_spell_grants
 from .derived import resolver_for
 from .resolver import CRIT_ON_20
-from .spellcasting import casting_ability, free_cast_pool
+from .spellcasting import (
+    casting_ability, free_cast_pool, slot_pools, spend_slot,
+)
 
 # 结算的四种形状。`manual` 不是「没结算」，是「原文里没有可自动判的结论」——
 # 界面上必须与「这道法术本来就不掷伤害」分开写。
@@ -350,6 +352,9 @@ def resolve_spell(
     shots = _shots(caster, spell)
     roller = rng or SeededRng()
     picked = list(targets)
+    # 法术位在**这里**记账：一次施放不管打没打中都要花掉那一环。
+    # 与免费次数同一条规矩 —— `apply=False` 只报「会扣哪一环」，不动状态。
+    slot_block = _slot_block(caster, spell, slot, class_id, casting, apply, free)
 
     rows: list[dict[str, Any]] = []
     for target in picked:
@@ -382,10 +387,45 @@ def resolve_spell(
         "shots": shots,
         # 不消耗法术位的那一次：池 id、这次有没有真的扣、还剩几次
         "free": free_block,
+        # 法术位的记账：扣了哪一环、还剩几个。戏法与免费施放为 None
+        "slot_spend": slot_block,
         "rows": rows,
         "total_damage": sum(int(row["damage"] or 0) for row in rows),
         "notes": notes,
     }
+
+
+def _slot_block(
+    caster: Actor,
+    spell: SpellDef,
+    slot: int,
+    class_id: str,
+    casting,
+    apply: bool,
+    free: bool,
+) -> dict[str, Any] | None:
+    """法术位的记账。`apply=False` 时**不扣** —— 与伤害、免费次数同一条规矩。
+
+    戏法没有位、免费施放用的也不是位，两种都返回 None（界面据此不显示这一行）。
+    主动施法却「找不到这个环级」是错，要当场报：让它可以免费放出去，
+    是比报错更糟的沉默。
+    """
+    if free or spell.is_cantrip:
+        return None
+    owner = casting.class_id or class_id
+    if apply:
+        pool = spend_slot(caster, int(slot), owner)
+        if pool is None:
+            return None                 # 没有位账本的角色（怪物、随意施法）
+        return {"pool": pool.id, "level": int(slot), "spent": 1,
+                "left": pool.available, "capacity": pool.capacity}
+    # 预览：只说会扣哪一环、扣完还剩几个，不动状态
+    for level, pool in slot_pools(caster, owner):
+        if level == int(slot):
+            return {"pool": pool.id, "level": level, "spent": 0,
+                    "left": pool.available, "capacity": pool.capacity,
+                    "preview": True}
+    return None
 
 
 def _free_block(spell: SpellDef, pool, apply: bool) -> dict[str, Any] | None:
