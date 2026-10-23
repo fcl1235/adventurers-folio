@@ -33,9 +33,10 @@ from ..kernel.rng import Rng, SeededRng
 from ..model.actor import Actor
 from ..model.statblock import ABILITY_KEYS
 from .contributions import passive_advantage_modes, passive_defenses, passive_proficiencies
+from .build import feat_spell_grants
 from .derived import resolver_for
 from .resolver import CRIT_ON_20
-from .spellcasting import casting_ability
+from .spellcasting import casting_ability, free_cast_pool
 
 # 结算的四种形状。`manual` 不是「没结算」，是「原文里没有可自动判的结论」——
 # 界面上必须与「这道法术本来就不掷伤害」分开写。
@@ -78,7 +79,12 @@ class Target:
 
 @dataclass(frozen=True)
 class Casting:
-    """施法者这一侧的三个数。法术 DC 与攻击加值都取决于**用哪个职业施放**。"""
+    """施法者这一侧的三个数。法术 DC 与攻击加值都取决于**用哪个职业施放**。
+
+    `class_id` 与 `source` 至少有一个非空：前者是职业施法，后者是专长给的法术
+    （妖精触碰的迷踪步、魔法入门的 1 环法术）。专长施法时属性由专长定，
+    与角色的职业无关 —— 战士拿了妖精触碰，迷踪步照样按魅力算 DC。
+    """
 
     class_id: str
     ability: str
@@ -86,6 +92,7 @@ class Casting:
     attack: int
     dc_detail: str = ""
     attack_detail: str = ""
+    source: str = ""
 
 
 # --- 目标 ---------------------------------------------------------------
@@ -136,30 +143,50 @@ def casting_for(
     spell: SpellDef,
     class_id: str = "",
     locale: str = "zh",
+    source: str = "",
 ) -> Casting:
     """这道法术该用哪个职业的 DC / 攻击加值。
 
     兼职角色可能有两个职业都能放同一道法术（两个职业表都收录了它），
     这时 DC 与攻击加值**不一样** —— 猜一个就是给玩家一个错的数。
     所以宁可报错让他指定，也不挑「最高的那个」。
+
+    `source` 是「由哪个专长授予的」：专长给的法术按**专长**的施法属性算
+    （原文写「施法属性为你以此专长提升的属性」），跟角色有没有施法职业无关。
+    一个只会挥剑的战士拿了妖精触碰，迷踪步的 DC 也是魅力 DC。
     """
     profile = caster.profile
     if profile is None:
         raise RuleError("caster 没有职业档案，算不出法术 DC：%r" % (caster.id,))
+    name = spell.name.get(locale) or spell.id
+
+    if source:
+        grants = [item for item in feat_spell_grants(bundle, profile, locale)
+                  if item.feat == source]
+        if not any(item.spell == spell.id for item in grants):
+            raise RuleError("《%s》不是 %s 给的法术" % (name, source))
+        return _feat_casting(bundle, caster, name, grants)
+
     holders = [entry.class_id for entry in profile.classes
                if spell.id in bundle.spell_list(entry.class_id)]
-    name = spell.name.get(locale) or spell.id
     if class_id:
         if class_id not in holders:
             raise RuleError("《%s》不在 %s 的法术表里" % (name, class_id))
         picked = class_id
-    elif not holders:
-        raise RuleError("这个角色没有能施放《%s》的职业（不在任何已选职业的法术表里）" % name)
     elif len(holders) > 1:
         raise RuleError("《%s》同时在 %s 的法术表里，请指定用哪个职业施放"
                         % (name, "／".join(holders)))
-    else:
+    elif holders:
         picked = holders[0]
+    else:
+        # 没有职业能放它 —— 那它只可能是专长给的（战士的妖精触碰迷踪步）。
+        # 这条兜底不是「猜」：属性由内容里的 casting_ability 决定，没写就报错。
+        grants = [item for item in feat_spell_grants(bundle, profile, locale)
+                  if item.spell == spell.id]
+        if not grants:
+            raise RuleError("这个角色没有能施放《%s》的职业（不在任何已选职业的法术表里）"
+                            "也没有专长授予它" % name)
+        return _feat_casting(bundle, caster, name, grants)
 
     ability = casting_ability(bundle.class_def(picked))
     resolver = resolver_for(caster, bundle.armors)
@@ -172,6 +199,40 @@ def casting_for(
         attack=attack.total,
         dc_detail=dc.describe(),
         attack_detail=attack.describe(),
+    )
+
+
+def _feat_casting(bundle: ContentBundle, caster: Actor, name: str,
+                  grants) -> Casting:
+    """专长给的法术：属性由 `casting_ability` 定，没写就不许猜。"""
+    abilities = sorted({item.ability for item in grants if item.ability})
+    if not abilities:
+        feat = bundle.feats.get(grants[0].feat)
+        token = feat.casting_ability if feat is not None else ""
+        if token in ("boost", "choose"):
+            # 「还没选」不是数据错误，是玩家还没做完选择 —— 界面显示待办，
+            # 这里也不该说成「内容缺字段」
+            raise RuleError("《%s》是专长 %s 给的法术，但这个专长的施法属性还没选"
+                            "（先选完专长的选择项）" % (name, grants[0].feat))
+        raise RuleError("《%s》是专长 %s 给的法术，但这个专长没有声明施法属性"
+                        "（内容里补 casting_ability），算不出 DC"
+                        % (name, grants[0].feat))
+    if len(abilities) > 1:
+        raise RuleError("《%s》同时被 %s 授予，且施法属性不同（%s），请指定来源"
+                        % (name, "／".join(sorted({item.feat for item in grants})),
+                           "／".join(abilities)))
+    ability = abilities[0]
+    resolver = resolver_for(caster, bundle.armors)
+    dc = resolver.spell_dc(caster.top(), ability)
+    attack = resolver.spell_attack(caster.top(), ability)
+    return Casting(
+        class_id="",
+        ability=ability,
+        dc=dc.total,
+        attack=attack.total,
+        dc_detail=dc.describe(),
+        attack_detail=attack.describe(),
+        source=grants[0].feat,
     )
 
 
@@ -257,16 +318,32 @@ def resolve_spell(
     locale: str = "zh",
     class_id: str = "",
     apply: bool = False,
+    free: bool = False,
 ) -> dict[str, Any]:
     """掷一次施法结算。
 
     `apply=False`（缺省）**只算不落库** —— 界面预览「这一发打出去会怎样」；
-    `apply=True` 才把伤害扣到目标 HP 上。默认不改状态，是因为误点一下就改了
-    别人的角色卡，比多点一次麻烦得多。
+    `apply=True` 才把伤害扣到目标 HP 上、把免费施放次数记上。默认不改状态，
+    是因为误点一下就改了别人的角色卡，比多点一次麻烦得多。
+
+    `free=True` 表示**不消耗法术位**：用专长给的那一次（妖精触碰、魔法入门）。
+    它按法术自身环级结算（没有位就没法升环），属性用专长的施法属性。
     """
+    if free and slot_level is not None:
+        raise RuleError("免费施放按法术自身环级结算，不能同时指定环位")
+    if free and class_id:
+        raise RuleError("免费施放用的是专长给的次数，不能同时指定用某个职业施放")
     spell = bundle.spell(spell_id)
     slot = _slot_for(spell, slot_level)
-    casting = casting_for(bundle, caster, spell, class_id, locale)
+    pool = None
+    if free:
+        pool = free_cast_pool(caster, spell.id)
+        if pool is None:
+            raise RuleError("《%s》没有可用的免费施放次数（长休恢复）"
+                            % (spell.name.get(locale) or spell.id))
+        casting = casting_for(bundle, caster, spell, "", locale, source=pool.source)
+    else:
+        casting = casting_for(bundle, caster, spell, class_id, locale)
     kind = resolution_kind(spell)
     dice_text = damage_expression(caster, spell, slot)
     dice = parse_dice(dice_text) if dice_text else None
@@ -281,6 +358,9 @@ def resolve_spell(
                                  shot, shots, roller, apply, locale))
 
     notes = _notes(spell, kind, dice is not None, shots)
+    free_block = _free_block(spell, pool, apply)
+    if free_block is not None and not free_block["spent"]:
+        notes.append("预览：这次免费施放还没记账（确认后才会扣除次数）")
     return {
         "spell": {"id": spell.id,
                   "name": spell.name.get(locale),
@@ -290,7 +370,8 @@ def resolve_spell(
         "casting": {"class": casting.class_id, "ability": casting.ability,
                     "dc": casting.dc, "attack": casting.attack,
                     "dc_detail": casting.dc_detail,
-                    "attack_detail": casting.attack_detail},
+                    "attack_detail": casting.attack_detail,
+                    "source": casting.source},
         "kind": kind,
         "dice": dice_text,
         "damage_type": spell.damage_type,
@@ -299,9 +380,29 @@ def resolve_spell(
         "attack_kind": spell.attack,
         "concentration": bool(spell.concentration),
         "shots": shots,
+        # 不消耗法术位的那一次：池 id、这次有没有真的扣、还剩几次
+        "free": free_block,
         "rows": rows,
         "total_damage": sum(int(row["damage"] or 0) for row in rows),
         "notes": notes,
+    }
+
+
+def _free_block(spell: SpellDef, pool, apply: bool) -> dict[str, Any] | None:
+    """免费施放的记账。`apply=False` 时**不扣** —— 与伤害同一条规矩。"""
+    if pool is None:
+        return None
+    spent = 0
+    if apply:
+        pool.spend(1)
+        spent = 1
+    return {
+        "pool": pool.id,
+        "spell": spell.id,
+        "capacity": int(pool.capacity),
+        "spent": spent,
+        "left": int(pool.available),
+        "refresh": pool.refresh.value,
     }
 
 

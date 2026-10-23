@@ -19,7 +19,7 @@ from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
 from ..model.resources import Pool, PoolKind, Refresh
 from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
-from .feats import check_feat_choices, collect_picks, hard_problems
+from .feats import check_feat_choices, collect_picks, feat_spells, hard_problems, picks_for
 from .health import hit_dice_pool, hit_points_max
 from .modifiers import resolve as resolve_modifiers
 from .morph import eligible_forms
@@ -67,6 +67,20 @@ def feat_picks(bundle: ContentBundle, profile: Profile | None, locale: str = "zh
     return collect_picks(feat_defs(bundle, profile), profile.choices if profile else {}, locale)
 
 
+def feat_spell_grants(bundle: ContentBundle, profile: Profile | None,
+                      locale: str = "zh"):
+    """档案里**专长授予的法术**：谁给的、用哪个属性施放、第几次登记。
+
+    建资源池与战斗结算共用这一份 —— 一边按「迷踪步有一次免费施放」建池，
+    另一边按「迷踪步是妖精触碰给的、用魅力施放」算 DC，两处各算一遍必然分叉。
+    """
+    feats = feat_defs(bundle, profile)
+    if not feats:
+        return ()
+    repeats = {feat.id: profile.feats.count(feat.id) for feat in feats}
+    return feat_spells(feats, profile.choices if profile else {}, repeats, locale)
+
+
 def _check_feats(
     bundle: ContentBundle,
     feats: tuple[str, ...],
@@ -96,6 +110,41 @@ def _check_feats(
                             % (feat.name.get("zh"), "；".join(problems)))
         found.append(feat)
     return tuple(found)
+
+
+def _per_spell_pools(
+    bundle: ContentBundle,
+    resource,
+    feat: FeatDef,
+    copy: int,
+    choices: Mapping[str, tuple[str, ...]],
+    ref: Mapping[str, Any],
+) -> list[Pool]:
+    """把「每道法术各一次」展开成**每道法术一个池**。
+
+    只有**有环级的**法术建池：戏法本来就能无限施放，给它一个 1 次的池
+    等于凭空加了个限制。选择项还没选好时一道法术都没有 —— 也就不建池，
+    界面那边显示的是「这条专长还差一项没选」，不是「你有 1 次用不掉」。
+
+    池标签用**法术名**而不是内容里的通用名：专长页上并列两行「免费施放次数」
+    却都是「妖精触碰的免费施法」，玩家分不出哪一行是迷踪步。
+    """
+    level = ClassLevel(int(ref.get("total_level") or 1))
+    base = resource.id if copy == 0 else "%s_%d" % (resource.id, copy + 1)
+    pools: list[Pool] = []
+    for spell_id in picks_for(feat, choices, index=copy).spells:
+        spell = bundle.spells.get(spell_id)
+        if spell is None or int(spell.level) < 1:
+            continue
+        built = resource.build(level, ref)
+        pools.append(replace(
+            built,
+            id="%s.%s" % (base, spell_id.rsplit(".", 1)[-1]),
+            label=spell.name,
+            spell=spell.id,
+            source=feat.id,
+        ))
+    return pools
 
 
 def _hp_bonus(powers, target: str, ref: Mapping[str, Any]) -> int:
@@ -237,6 +286,11 @@ def build_actor(
         copy = feat_copies.get(feat.id, 0)
         feat_copies[feat.id] = copy + 1
         for resource in feat.resources:
+            if resource.per_spell:
+                for pool in _per_spell_pools(bundle, resource, feat, copy,
+                                             picked_choices, ref):
+                    actor.resources.add(pool)
+                continue
             built = (resource if copy == 0
                      else replace(resource, id="%s_%d" % (resource.id, copy + 1)))
             pool = built.build(ClassLevel(int(total)), ref)

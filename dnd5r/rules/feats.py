@@ -181,6 +181,10 @@ def _land(
     elif choice.kind == "proficiency":
         # 混选：`skill.stealth` 与 `tool.thieves_tools` 都已经是完整 token
         prof.update(picked)
+    elif choice.kind == "casting_ability":
+        # 不加属性值、也不给熟练：它只决定这些专长法术的 DC 与攻击加值，
+        # 由 `casting_ability_of` 直接读选择项（见那里的注释）。
+        pass
 
 
 def collect_picks(
@@ -195,6 +199,95 @@ def collect_picks(
         seen[feat.id] = index + 1
         total = total.merged(picks_for(feat, choices, locale, index=index))
     return total
+
+
+# --- 专长给的法术：谁给的、用哪个属性施放 ---------------------------------
+@dataclass(frozen=True)
+class FeatSpell:
+    """一道由专长授予的法术。
+
+    `copy` 是「第几次登记这个专长」（0 起）：魔法入门可重复选取，两次登记
+    各有一道法术、各有一次免费施放，不能合并成一条。
+    `ability` 为空 = 内容没声明施法属性 —— 这时只有职业自己的施法属性可用，
+    不能猜一个（猜错就是 DC 差 2 点，卡上不会显示任何异常）。
+    """
+
+    feat: str
+    spell: str
+    ability: str = ""
+    copy: int = 0
+
+
+def _picked_of(
+    feat: FeatDef,
+    choice_id: str,
+    choices: Mapping[str, tuple[str, ...]],
+    index: int = 0,
+) -> tuple[str, ...]:
+    """取某个选择项的已选值（认 `#0` 这种带序号的写法）。"""
+    picked = tuple(str(item) for item in (choices.get(pick_key(feat.id, choice_id, index)) or ()))
+    if not picked:
+        picked = tuple(str(item) for item in
+                       (choices.get("%s#0.%s" % (feat.id, choice_id)) or ()))
+    return picked
+
+
+def casting_ability_of(
+    feat: FeatDef,
+    choices: Mapping[str, tuple[str, ...]],
+    index: int = 0,
+) -> str:
+    """专长法术的施法属性。
+
+    三种来源，都在内容里写明，猜不得：
+      `boost`  —— 「施法属性为你以此专长提升的属性」（妖精触碰一族）
+      `choose` —— 「选专长时挑一项」（魔法入门）
+      具体属性 —— 原文写死的那一个
+    读选择项而不复用 `picks_for` 的结果：那里只有加值，没有「是谁给的」。
+    """
+    token = feat.casting_ability
+    if not token:
+        return ""
+    if token == "boost":
+        for choice in feat.choices:
+            if choice.kind != "ability_boost" or int(choice.count) != 1:
+                continue
+            picked = _picked_of(feat, choice.id, choices, index)
+            if picked:
+                return picked[0]
+        return ""
+    if token == "choose":
+        for choice in feat.choices:
+            if choice.kind != "casting_ability":
+                continue
+            picked = _picked_of(feat, choice.id, choices, index)
+            if picked:
+                return picked[0]
+        return ""
+    return token
+
+
+def feat_spells(
+    feats: Iterable[FeatDef],
+    choices: Mapping[str, tuple[str, ...]],
+    repeats: Mapping[str, int] | None = None,
+    locale: str = "zh",
+) -> tuple[FeatSpell, ...]:
+    """把「专长给的法术」摊平成一条条 (专长, 法术, 属性, 第几次)。
+
+    可重复登记的专长按 `repeats` 展开 —— `feats` 是去重后的，遍历它数不出次数
+    （与建角色时建资源池同一条理由）。
+    """
+    out: list[FeatSpell] = []
+    for feat in feats:
+        count = int((repeats or {}).get(feat.id, 1))
+        for index in range(count):
+            ability = casting_ability_of(feat, choices, index)
+            picks = picks_for(feat, choices, locale, index=index)
+            for spell_id in picks.spells:
+                out.append(FeatSpell(feat=feat.id, spell=spell_id,
+                                     ability=ability, copy=index))
+    return tuple(out)
 
 
 def spell_pool(bundle: ContentBundle, choice: FeatChoice) -> tuple[str, ...]:
@@ -360,10 +453,14 @@ def choice_prompt(feat: FeatDef, choice: FeatChoice, locale: str = "zh") -> Text
     if choice.kind == "resistance":
         return Text.of("选 %d 种伤害抗性" % choice.count,
                        "Choose %d damage resistances" % choice.count)
+    if choice.kind == "casting_ability":
+        return Text.of("选这项专长法术的施法属性",
+                       "Choose the spellcasting ability for this feat's spells")
     return Text.of(feat.name.get(locale), feat.name.get("en"))
 
 
 __all__ = [
-    "FeatPicks", "picks_for", "collect_picks", "pick_key",
+    "FeatPicks", "FeatSpell", "picks_for", "collect_picks", "pick_key",
+    "casting_ability_of", "feat_spells",
     "hard_problems", "soft_problems", "proficiency_pool", "check_feat_choices", "prereq_report", "choice_prompt",
 ]

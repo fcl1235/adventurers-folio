@@ -13,6 +13,14 @@ text:
 choices:
   - {id: boost, kind: ability_boost, count: 1, amount: 1, cap: 20, from: [int, wis, cha], label: {zh: 任选一项属性 +1（上限 20）, en: Increase one ability score by 1 (maximum 20)}}
 spells: [dnd2024.spell.detect_thoughts]
+casting_ability: boost
+resources:
+  - id: dnd2024.feat.telepathic.free_cast
+    kind: charge
+    refresh: long_rest
+    capacity: 1
+    per_spell: true
+    label: {zh: 心灵感应的免费施法, en: Telepathic free casting}
 
 powers:
   - id: dnd2024.feat.telepathic.note
@@ -21,8 +29,8 @@ powers:
     target: self
     text:
       zh: |-
-        侦测思想可免法术位与法术成分施放一次，长休恢复；这道法术是写死的，不是选择项。
+        侦测思想每长休可免法术位施放一次（原文还免除法术成分；本程序不建模施法成分，按原文手动处理）。
       en: |-
-        Detect Thoughts can be cast once without a spell slot or components; the spell itself is fixed.
+        Detect Thoughts can be cast once per long rest without a spell slot (the original also waives components; components are not modelled here, handle them by the book).
     effects:
-      - note: {zh: 侦测思想可免法术位与法术成分施放一次，长休恢复；这道法术是写死的，不是选择项。, en: Detect Thoughts can be cast once without a spell slot or components; the spell itself is fixed.}
+      - note: {zh: 侦测思想每长休可免法术位施放一次（原文还免除法术成分；本程序不建模施法成分，按原文手动处理）。, en: Detect Thoughts can be cast once per long rest without a spell slot (the original also waives components; components are not modelled here, handle them by the book).}

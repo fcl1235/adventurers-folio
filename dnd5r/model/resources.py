@@ -42,6 +42,11 @@ class Pool:
     refresh: Refresh = Refresh.LONG_REST
     # 2024 的「短休恢复 1 次」不能靠 refresh 表达：回气是短休回 1、长休全回
     recover_on_short_rest: int = 0
+    # 「这道法术可免法术位施放一次」—— 次数**绑在具体法术上**（妖精触碰的
+    # 「两道法术各一次」）。空 = 通用池，谁都能花。有两个名字是为了两种查询
+    # 都便宜：按法术找（施法时该不该扣）、按来源找（界面上归到哪个专长）。
+    spell: str = ""
+    source: str = ""
 
     def __post_init__(self) -> None:
         if self.capacity < 0:
@@ -50,6 +55,14 @@ class Pool:
             raise RuleError("资源类型必须是 PoolKind：%r" % (self.kind,))
         if not isinstance(self.refresh, Refresh):
             raise RuleError("恢复方式必须是 Refresh：%r" % (self.refresh,))
+        # 绑定法术的池只能是「次数」：把它做成点数池，界面上会冒出
+        # 「1/3 点 迷踪步」这种规则里不存在的东西
+        if self.spell and self.kind is not PoolKind.CHARGE:
+            raise RuleError("绑定法术的池只能是次数池：%s" % self.id)
+
+    def pays_for(self, spell_id: str) -> bool:
+        """这个池能不能替某道法术付账（不看余量）。"""
+        return bool(self.spell) and self.spell == spell_id
 
     @property
     def available(self) -> int:
@@ -87,6 +100,7 @@ class Pool:
             "used": self.used, "owner_class": self.owner_class,
             "refresh": self.refresh.value,
             "recover_on_short_rest": self.recover_on_short_rest,
+            "spell": self.spell, "source": self.source,
         }
 
 
@@ -181,5 +195,7 @@ class ResourcePool:
                 owner_class=row.get("owner_class"),
                 refresh=Refresh(row.get("refresh", "long_rest")),
                 recover_on_short_rest=int(row.get("recover_on_short_rest", 0)),
+                spell=str(row.get("spell") or ""),
+                source=str(row.get("source") or ""),
             ))
         return pool

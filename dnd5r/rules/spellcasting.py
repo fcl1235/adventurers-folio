@@ -37,6 +37,18 @@ def spell_dc(resolver: Resolver, actor: Actor, ability: str):
     return resolver.spell_dc(actor, ability)
 
 
+def free_cast_pool(actor: Actor, spell_id: str):
+    """这道法术还能不能「不消耗法术位」放一次 —— 能就返回付账的那个池。
+
+    池是**按法术绑的**（妖精触碰的「两道法术各一次」），所以这里只认
+    `pool.spell == spell_id`。「还有几次」由池的余量回答，不另存一个计数器。
+    多个池都能付时按 id 排序取第一个：同一份角色状态必须算出同一个结果。
+    """
+    pools = [pool for pool in actor.root().resources.pools.values()
+             if pool.pays_for(spell_id) and pool.available > 0]
+    return sorted(pools, key=lambda item: item.id)[0] if pools else None
+
+
 def spell_attack_bonus(resolver: Resolver, actor: Actor, ability: str):
     return resolver.spell_attack(actor, ability)
 
@@ -295,6 +307,6 @@ def _summon_rows(bundle: ContentBundle, spell: SpellDef, locale: str) -> list[di
 __all__ = [
     "casting_ability", "spell_dc", "spell_attack_bonus", "max_cantrips",
     "max_prepared", "highest_slot", "highest_slot_table", "check_spell_picks",
-    "spell_options", "cantrip_options",
+    "spell_options", "cantrip_options", "free_cast_pool",
     "slot_rows", "casting_summary", "spell_detail",
 ]

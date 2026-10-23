@@ -107,8 +107,14 @@ class FeatSpellPoolTest(unittest.TestCase):
         pool = feat.resources[0]
         self.assertEqual(pool.id, "dnd2024.feat.magic_initiate_cleric.free_cast")
         self.assertEqual(pool.refresh.value, "long_rest")
-        # 「两道法术各一次」的专长**不许**建池 —— 合成 2 次会让人连放两次同一道
-        self.assertEqual(self.bundle.feats[FEY].resources, ())
+        # 「两道法术各一次」**不是**合成一个 capacity 2 的池 —— 那会让人连放两次
+        # 同一道。内容里只有一个 `per_spell` 资源，建角色时才按法术展开成两个池（G16）。
+        self.assertTrue(pool.per_spell)
+        self.assertEqual(pool.capacity.flat, 1)
+        fey = self.bundle.feats[FEY]
+        self.assertEqual(len(fey.resources), 1)
+        self.assertTrue(fey.resources[0].per_spell)
+        self.assertEqual(fey.casting_ability, "boost")
 
 
 class FeatSpellPickTest(unittest.TestCase):

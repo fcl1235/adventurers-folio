@@ -14,9 +14,12 @@ text:
 choices:
   - {id: cantrips, kind: spell, count: 2, spell_list: druid, spell_level: 0, label: {zh: 从德鲁伊法术表的戏法里选 2 道, en: Choose 2 cantrips from the druid spell list}}
   - {id: spell, kind: spell, count: 1, spell_list: druid, spell_level: 1, label: {zh: 从德鲁伊法术表的 1 环法术里选 1 道, en: Choose 1 level 1 spell from the druid spell list}}
+  - {id: casting_ability, kind: casting_ability, count: 1, from: [int, wis, cha], label: {zh: 选这些法术的施法属性, en: Choose the spellcasting ability for these spells}}
+casting_ability: choose
 resources:
   - id: dnd2024.feat.magic_initiate_druid.free_cast
     kind: charge
     refresh: long_rest
     capacity: 1
+    per_spell: true
     label: {zh: 魔法入门的免费施法, en: Magic Initiate free casting}

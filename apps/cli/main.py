@@ -183,11 +183,26 @@ def cmd_cast(args) -> int:
     report = api.roll_spell(
         actor, bundle, args.spell, args.slot, [target],
         locale=args.lang, class_id=args.cast_as or "", apply=args.apply,
-        seed=args.seed,
+        seed=args.seed, free=args.free,
     )
     casting = report["casting"]
-    print("%s（%d 环，用 %s 施放）"
-          % (report["spell"]["name"], report["slot"], casting["class"].rsplit(".", 1)[-1]))
+    if not args.free:
+        # 有免费次数却不知道是这类最好查的浪费 —— 直接把提示打在结算前面
+        spare = [row for row in api.free_casts(actor, bundle, args.lang)
+                 if row["spell"] == args.spell and row["left"] > 0]
+        if spare:
+            print("提示：《%s》还有 %d 次免法术位施放（加 --free 用它）"
+                  % (spare[0]["name"], spare[0]["left"]))
+    holder = (casting["class"] or casting["source"] or "?").rsplit(".", 1)[-1]
+    kind_note = "免费施放" if report["free"] else ""
+    print("%s（%d 环，用 %s 施放%s）"
+          % (report["spell"]["name"], report["slot"], holder,
+             "，" + kind_note if kind_note else ""))
+    free = report["free"]
+    if free:
+        print("免费施放次数 %d/%d%s"
+              % (free["left"], free["capacity"],
+                 "" if free["spent"] else "（预览：未扣除，加 --apply 才记账）"))
     print("法术 DC %d%s · 法术攻击 +%d%s"
           % (casting["dc"], _detail(casting["dc_detail"], casting["dc"]),
              casting["attack"], _detail(casting["attack_detail"], casting["attack"])))
@@ -266,6 +281,13 @@ def cmd_feat(args) -> int:
         print("  选择项 %-10s %-14s 选 %d 项  候选 %s"
               % (choice["id"], choice["kind"], choice["count"],
                  "/".join(choice["options"]) or "见规则"))
+    for row in data["resources"]:
+        print("  资源   %-40s %s/%s%s"
+              % (row["id"], row["kind"], row["refresh"],
+                 "（按法术各一次）" if row["per_spell"] else ""))
+    if data["casting_ability"]:
+        print("施法属性 %s（boost = 本专长提升的那项，choose = 玩家选）"
+              % data["casting_ability"])
     print("静态能力 %d 条" % data["powers"])
     return 0
 
@@ -444,6 +466,8 @@ def main(argv=None) -> int:
     cast.add_argument("--resist", default="", help="伤害抗性，逗号分隔（如 fire,cold）")
     cast.add_argument("--immune", default="", help="伤害免疫，逗号分隔")
     cast.add_argument("--apply", action="store_true", help="真的扣血（缺省只算不落库）")
+    cast.add_argument("--free", action="store_true",
+                      help="用专长给的那一次免费施放（不消耗法术位，按自身环级结算）")
     cast.add_argument("--seed", type=int, default=None)
     _add_character_args(cast)
     cast.set_defaults(func=cmd_cast)

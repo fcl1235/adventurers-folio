@@ -190,7 +190,11 @@ class FeatPage(ttk.Frame):
                 for row in spells)
         pools = feat.get("resources") or []
         if pools:
-            body += "\n\n免费施放次数：\n" + "\n".join(
+            # 按法术绑定的池（妖精触碰「两道法术各一次」）逐条列名，
+            # 否则两行都是「免费施放次数」，玩家分不出哪行是迷踪步
+            per_spell = all(row.get("spell") for row in pools)
+            body += "\n\n免费施放次数%s：\n" % ("（每道法术各一次）" if per_spell else "")
+            body += "\n".join(
                 "　· %s：%d/%d（长休恢复）"
                 % (row["label"], int(row["capacity"]) - int(row["used"]), int(row["capacity"]))
                 for row in pools)

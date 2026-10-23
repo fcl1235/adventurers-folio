@@ -392,43 +392,54 @@ CLASS_ZH = {"cleric": "牧师", "druid": "德鲁伊", "wizard": "法师"}
 HAND_GRANTS = {
     "Magic Initiate (Cleric)": {
         "list": "cleric", "cantrips": 2, "level1": 1,
-        # 「可不用法术位施放 1 次，长休后恢复」—— 就一道法术，所以池容量是精确的 1
+        # 「可不用法术位施放 1 次，长休后恢复」—— 按**法术**记次（G16）
         "resource": {"id": "free_cast", "zh": "魔法入门的免费施法",
-                     "en": "Magic Initiate free casting"},
+                     "en": "Magic Initiate free casting", "per_spell": True},
+        # 原文：「Intelligence, Wisdom, or Charisma is your spellcasting ability for
+        # this feat's spells (choose when you select this feat)」—— 是**选**的，
+        # 不跟法术表走（2014 才是跟表）。所以这条必须由玩家选。
+        "casting": "choose", "casting_from": ["int", "wis", "cha"],
     },
     "Magic Initiate (Druid)": {
         "list": "druid", "cantrips": 2, "level1": 1,
         "resource": {"id": "free_cast", "zh": "魔法入门的免费施法",
-                     "en": "Magic Initiate free casting"},
+                     "en": "Magic Initiate free casting", "per_spell": True},
+        "casting": "choose", "casting_from": ["int", "wis", "cha"],
     },
     "Magic Initiate (Wizard)": {
         "list": "wizard", "cantrips": 2, "level1": 1,
         "resource": {"id": "free_cast", "zh": "魔法入门的免费施法",
-                     "en": "Magic Initiate free casting"},
+                     "en": "Magic Initiate free casting", "per_spell": True},
+        "casting": "choose", "casting_from": ["int", "wis", "cha"],
     },
     "Fey-Touched": {
         "list": "any", "level1": 1, "schools": ["divination", "enchantment"],
         "fixed": ["misty_step"],
         # 「两道法术各自可免费施放一次」= **按法术计次**，不是共享的一格。
-        # 合成 capacity 2 会让人能连放两次迷踪步 —— 宁可先不建池，留给回合流程（G16）。
-        "note_zh": "迷踪步与你选的那道法术各可免法术位施放一次，长休恢复；"
-                   "「各一次」是按法术记的次数，现在没有按法术计次的池，先手动记。",
-        "note_en": "Each of the two spells can be cast once without a spell slot; "
-                   "per-spell uses are not modelled yet, track them by hand.",
+        # 合成 capacity 2 会让人连放两次迷踪步。现在 per_spell 展开成两个池，
+        # 每道法术各扣各的（G16）。
+        "casting": "boost",   # 施法属性 = 本专长提升的那项属性
+        "resource": {"id": "free_cast", "zh": "妖精触碰的免费施法",
+                     "en": "Fey-Touched free casting", "per_spell": True},
     },
     "Shadow-Touched": {
         "list": "any", "level1": 1, "schools": ["illusion", "necromancy"],
         "fixed": ["invisibility"],
-        "note_zh": "隐形术与你选的那道法术各可免法术位施放一次，长休恢复；"
-                   "「各一次」是按法术记的次数，现在没有按法术计次的池，先手动记。",
-        "note_en": "Each of the two spells can be cast once without a spell slot; "
-                   "per-spell uses are not modelled yet, track them by hand.",
+        "casting": "boost",
+        "resource": {"id": "free_cast", "zh": "影界触碰的免费施法",
+                     "en": "Shadow-Touched free casting", "per_spell": True},
     },
     "Telepathic": {
         "fixed": ["detect_thoughts"],
-        "note_zh": "侦测思想可免法术位与法术成分施放一次，长休恢复；这道法术是写死的，不是选择项。",
-        "note_en": "Detect Thoughts can be cast once without a spell slot or components; "
-                   "the spell itself is fixed.",
+        "casting": "boost",
+        "resource": {"id": "free_cast", "zh": "心灵感应的免费施法",
+                     "en": "Telepathic free casting", "per_spell": True},
+        # 原文还免除法术成分。本程序不建模施法成分 —— 写清楚，别让它看着像算过了
+        "note_zh": "侦测思想每长休可免法术位施放一次（原文还免除法术成分；"
+                   "本程序不建模施法成分，按原文手动处理）。",
+        "note_en": "Detect Thoughts can be cast once per long rest without a spell slot "
+                   "(the original also waives components; components are not modelled "
+                   "here, handle them by the book).",
     },
 }
 
@@ -517,6 +528,14 @@ def build_choices(row: dict) -> list[dict]:
                          " (%s)" % "/".join(schools) if schools else ""),
             }
             found.append(choice)
+        if grants.get("casting") == "choose":
+            # 「选专长时挑一项属性」——它不加属性值，只决定这些法术的 DC / 攻击加值
+            found.append({
+                "id": "casting_ability", "kind": "casting_ability", "count": 1,
+                "from": [str(item) for item in (grants.get("casting_from") or ())],
+                "label": {"zh": "选这些法术的施法属性",
+                          "en": "Choose the spellcasting ability for these spells"},
+            })
     if not effects.get("ability_boost") and not authoritative:
         parsed = parse_boost_from_text(row["text_zh"])
         if parsed:
@@ -590,22 +609,28 @@ def render(row: dict, english: dict[str, dict]) -> str:
     fixed = [spell_id(item) for item in (grants.get("fixed") or ())]
     if fixed:
         out.append("spells: [%s]" % ", ".join(fixed))
+    if grants.get("casting"):
+        # 「施法属性为你以此专长提升的属性」——`boost` 是特殊值，
+        # 由建角色时读 ability_boost 选择项决定，不在这里写死一个属性
+        out.append("casting_ability: %s" % grants["casting"])
     resource = grants.get("resource")
     if resource:
-        # 「每长休可不耗法术位施放一次」。只给**恰好一道法术**的专长建池 ——
-        # 两道法术「各一次」是按法术计次，合并成一个 2 次的池会算错（见 HAND_GRANTS）。
+        # 「每长休可不耗法术位施放一次」。`per_spell` 让「两道法术各一次」展开成
+        # **两个各 1 次的池**；合成一个 2 次的池会让人连放两次同一道（G16）。
         out += [
             "resources:",
             "  - id: %s.%s" % (ident, resource["id"]),
             "    kind: charge",
             "    refresh: long_rest",
             "    capacity: 1",
-            "    label: %s" % flow([("zh", resource["zh"]), ("en", resource["en"])]),
         ]
+        if resource.get("per_spell"):
+            out.append("    per_spell: true")
+        out.append("    label: %s" % flow([("zh", resource["zh"]), ("en", resource["en"])]))
 
     powers = build_powers(ident, row)
     if grants.get("note_zh"):
-        # 「各一次」这种暂时算不了的效果写成显式提示，状态是 text 而不是假装算过了
+        # 算不出来的部分（免法术成分这类）写成显式提示，状态是 text 而不是假装算过了
         note = flow([("zh", grants["note_zh"]), ("en", grants.get("note_en", ""))])
         powers.append(("note", "      - note: %s" % note,
                        (grants["note_zh"], grants.get("note_en", ""))))

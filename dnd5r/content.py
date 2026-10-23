@@ -58,6 +58,11 @@ class ResourceDef:
     recover_on_short_rest: int = 0
     label: Text | None = None
     owner_class: str = ""
+    # 「这个来源授予的**每一道有环级的法术**各建一个池，各 1 次」。
+    # 妖精触碰的「两道法术各一次」按这道开关展开：合成一个 capacity 2 的池，
+    # 玩家就能连放两次迷踪步 —— 那不是原文的意思。
+    # 戏法不建池：戏法本来就能无限施放，给一个「1 次」的池是凭空多出一个限制。
+    per_spell: bool = False
 
     def __post_init__(self) -> None:
         if not is_valid(self.id):
@@ -68,6 +73,15 @@ class ResourceDef:
             for key, value in self.by_level.items():
                 if int(key) < 1 or int(value) < 0:
                     raise PluginError("资源 %s 的等级表不合法：%r=%r" % (self.id, key, value))
+        if self.per_spell and self.kind is not PoolKind.CHARGE:
+            raise PluginError("资源 %s 写了 per_spell，只能是次数（charge）池" % self.id)
+        if self.per_spell:
+            # 每个法术恰好一次 —— 别的数字原文里没有，写出来就是编的
+            cap = self.capacity
+            if self.by_level or cap is None or cap.dice is not None \
+                    or cap.table is not None or cap.flat != 1 \
+                    or cap.plus is not None or cap.times is not None:
+                raise PluginError("资源 %s 的 per_spell 只能写 capacity: 1" % self.id)
 
     def capacity_at(self, level: ClassLevel, ref_map: Mapping[str, Any] | None = None) -> int:
         """按「本职业等级」查表。兼职时次数按职业等级，不按总等级（G15）。"""
@@ -101,6 +115,7 @@ class ResourceDef:
             "id": self.id, "kind": self.kind.value, "refresh": self.refresh.value,
             "by_level": dict(self.by_level or {}),
             "recover_on_short_rest": self.recover_on_short_rest,
+            "per_spell": self.per_spell,
         }
 
 
@@ -141,6 +156,7 @@ def parse_resource(data: Any, owner_class: str = "") -> ResourceDef:
         recover_on_short_rest=int(data.get("recover_on_short_rest", 0)),
         label=label,
         owner_class=str(data.get("owner", owner_class)),
+        per_spell=bool(data.get("per_spell", False)),
     )
 
 
@@ -513,7 +529,7 @@ FEAT_KINDS = ("origin", "general", "fighting_style", "epic_boon")
 # 选择项的语义集合。故意封闭：内容里写一个内核不认识的 kind，
 # 界面上就会变成一个「选了没反应」的下拉框，比报错难查得多。
 CHOICE_KINDS = ("ability_boost", "save", "skill", "expertise", "resistance",
-                "spell", "proficiency")
+                "spell", "proficiency", "casting_ability")
 # `spell_list` 的「不限法术表」哨兵值。2024 版有些专长（妖精触碰一族）说的是
 # 「任选一道某学派的 1 环法术」，没有职业限制 —— 硬塞给某张表就是改规则。
 SPELL_LIST_ANY = "any"
@@ -530,6 +546,9 @@ CHOICE_UNIVERSE = {
     "skill": SKILL_KEYS,
     # 专精的候选与技能同一套；「必须是已熟练」由 Profile 的集合约束兜底
     "expertise": SKILL_KEYS,
+    # 「这些法术用哪个属性施放」—— 2024 魔法入门的原文是「选专长时挑一项」，
+    # 不是跟着法术表走。它不加属性值，只决定 DC 与攻击加值。
+    "casting_ability": ("str", "dex", "con", "int", "wis", "cha"),
 }
 
 
@@ -1014,6 +1033,10 @@ class FeatDef:
     # 专长也能给资源池（「每长休一次免费施放」这类每日一次的次数）。
     # 容量按**总等级**查（专长没有「专长等级」这种轴），一般写固定值 1。
     resources: tuple[ResourceDef, ...] = ()
+    # 「这道专长的法术用哪个属性施放」。空 = 内容没声明（那就只能靠职业的施法属性）。
+    # 特殊值 `boost` = 取本专长 ability_boost 选择项提升的那项属性 ——
+    # 妖精触碰/影界触碰的原文就是「施法属性为你以此专长提升的属性」。
+    casting_ability: str = ""
     source: str = ""
 
     def __post_init__(self) -> None:
@@ -1032,6 +1055,23 @@ class FeatDef:
             if power.id in seen:
                 raise PluginError("专长 %s 的特性 id 重复：%s" % (self.id, power.id))
             seen.add(power.id)
+        if self.casting_ability:
+            if self.casting_ability == "boost":
+                boosts = [item for item in self.choices if item.kind == "ability_boost"]
+                if not boosts or any(int(item.count) != 1 for item in boosts):
+                    raise PluginError(
+                        "专长 %s 写 casting_ability: boost，就必须有一个「选 1 项属性」的提升项"
+                        % self.id)
+            elif self.casting_ability == "choose":
+                picks = [item for item in self.choices if item.kind == "casting_ability"]
+                if not picks:
+                    raise PluginError(
+                        "专长 %s 写 casting_ability: choose，就必须有一个 casting_ability 选择项"
+                        % self.id)
+            elif self.casting_ability not in CHOICE_UNIVERSE["casting_ability"]:
+                raise PluginError("专长 %s 的 casting_ability 只能是 %s、boost 或 choose：%r"
+                                  % (self.id, "/".join(CHOICE_UNIVERSE["casting_ability"]),
+                                     self.casting_ability))
 
     def choice(self, choice_id: str) -> FeatChoice:
         for item in self.choices:
@@ -1056,6 +1096,8 @@ class FeatDef:
             "repeatable": self.repeatable,
             "choices": [item.to_dict(locale) for item in self.choices],
             "spells": list(self.spells),
+            "casting_ability": self.casting_ability,
+            "resources": [item.to_dict() for item in self.resources],
             "powers": len(self.powers),
         }
 
@@ -1086,6 +1128,7 @@ def parse_feat(data: Any, source: str = "") -> FeatDef:
         resources=tuple(parse_resource(row, owner_class=ident)
                         for row in (data.get("resources") or ())),
         spells=tuple(str(item) for item in (data.get("spells") or ())),
+        casting_ability=str(data.get("casting_ability") or "").lower(),
         powers=tuple(
             parse_power(row, owner=ident, source=source)
             for row in (data.get("powers") or ())

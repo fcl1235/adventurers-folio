@@ -515,6 +515,9 @@ def _feat_pool_row(pool, locale: str = "zh") -> dict:
         "label": pool.label.get(locale) if pool.label else pool.id,
         "used": int(pool.used),
         "capacity": int(pool.capacity),
+        # 空 = 通用池（「每长休一次免费施放」，哪道法术都行）；
+        # 非空 = 只给这一道法术用（「两道法术各一次」，各记各的）
+        "spell": pool.spell,
     }
 
 
@@ -749,7 +752,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
             {"id": pool.id, "left": pool.available, "max": pool.capacity,
              "kind": pool.kind.value, "refresh": pool.refresh.value,
              # 显示名来自内容（「回气」「狂暴」），没有就退回 id —— 界面不该自己编名字
-             "label": pool.label.get(locale) if pool.label else pool.id}
+             "label": pool.label.get(locale) if pool.label else pool.id,
+             # 绑在具体法术上的次数（妖精触碰的第几次迷踪步）：界面据此标「可免位施放」
+             "spell": pool.spell, "source": pool.source}
             for pool in root.resources.pools.values()
             if pool.kind.value != "dice"
         ],
@@ -983,6 +988,7 @@ def roll_spell(
     class_id: str = "",
     apply: bool = False,
     seed: int | None = None,
+    free: bool = False,
 ) -> dict:
     """掷一次施法结算：命中/豁免 → 伤害骰 → 抗性 → （可选）落到 HP。
 
@@ -990,8 +996,11 @@ def roll_spell(
     （建好的怪、召唤物、队友）。
 
     `apply=False` 是**只算不落库**：界面预览「这一发打出去会怎样」，
-    点确认才用 `apply=True` 真扣血。默认不改状态，是因为误点一下就动了
-    别人的血条，比多点一次麻烦得多。
+    点确认才用 `apply=True` 真扣血、真记免费施放次数。默认不改状态，是因为
+    误点一下就动了别人的血条，比多点一次麻烦得多。
+
+    `free=True` 用专长给的那一次免费施放（不消耗法术位）：扣的是
+    `resources` 里**绑在这道法术上**的那个池。
     """
     from ..rules.combat import Target, resolve_spell, target_from_actor
 
@@ -999,7 +1008,31 @@ def roll_spell(
                 else target_from_actor(content, item, locale)
                 for item in targets]
     return resolve_spell(content, actor, spell_id, slot, prepared,
-                         rng or SeededRng(seed), locale, class_id, apply)
+                         rng or SeededRng(seed), locale, class_id, apply, free)
+
+
+def free_casts(actor: Actor, content: ContentBundle, locale: str = "zh") -> list[dict]:
+    """这个角色「不消耗法术位还能放几次」的清单，给界面直接列。
+
+    数据来源就是资源池本身（`Pool.spell`），不另存一份计数器 ——
+    否则用掉一次以后，两个地方各说各话。
+    """
+    rows = []
+    for pool in actor.root().resources.pools.values():
+        if not pool.spell:
+            continue
+        spell = content.spells.get(pool.spell)
+        rows.append({
+            "pool": pool.id,
+            "spell": pool.spell,
+            "name": spell.name.get(locale) if spell is not None else pool.spell,
+            "level": int(spell.level) if spell is not None else 0,
+            "left": int(pool.available),
+            "capacity": int(pool.capacity),
+            "source": pool.source,
+            "refresh": pool.refresh.value,
+        })
+    return sorted(rows, key=lambda row: (row["level"], row["pool"]))
 
 
 def _need_ability(ability: str) -> None:
@@ -1126,7 +1159,7 @@ __all__ = [
     "set_feat_choice", "save_character", "load_character", "SAVE_VERSION",
     "character_sheet", "actor_view", "roll_check", "CHECK_KINDS",
     "roll_spell", "Target", "Casting", "target_from_actor", "casting_for",
-    "RESOLUTION_KINDS",
+    "RESOLUTION_KINDS", "free_casts",
     "find_power", "use_power", "plugin_summary",
     "spell_info", "summon_info",
     "eligible_forms_for", "morph_class_of", "form_options",
