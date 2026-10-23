@@ -400,7 +400,7 @@ class HonestyMarkTest(unittest.TestCase):
     「只有文字」的那一档真的存在（不是空集合）。
     """
 
-    STATUSES = {"counted", "active", "manual", "text"}
+    STATUSES = {"counted", "active", "onhit", "dice", "manual", "text"}
 
     @classmethod
     def setUpClass(cls):

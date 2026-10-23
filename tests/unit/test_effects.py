@@ -65,6 +65,8 @@ class ContractTest(unittest.TestCase):
             "apply_condition", "remove_condition", "spend_resource",
             "recover_resource", "modify_roll", "note",
             "morph", "revert", "teleport",
+            # P9b：一次性标记（待消费的优势）与命中时结算的额外伤害
+            "mark", "extra_damage",
         }
         self.assertEqual(set(known_ops()), expected)
 

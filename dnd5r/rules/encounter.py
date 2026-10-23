@@ -29,6 +29,9 @@ from .actioneconomy import ActionEconomy
 
 # 一格 = 5 尺。对内算格数，对外一律报尺 —— 规则书里说的是尺。
 FOOT = 5
+# 触及范围：暂时固定 5 尺。内容里「触及 10 尺」的怪物还没建模，
+# 所以这里不能假装知道 —— 报告里照实说这是 5 尺口径。
+REACH_FEET = 5
 
 
 def _dex_mod(actor: Actor) -> int:
@@ -208,7 +211,12 @@ class Encounter:
         return combatant
 
     def move(self, who, x: int, y: int) -> dict:
-        """走过去：消耗移动力 = 直线格数 × 5 尺。**不做寻路**，绕障碍请分段走。"""
+        """走过去：消耗移动力 = 直线格数 × 5 尺。**不做寻路**，绕障碍请分段走。
+
+        走出别人的触及范围时，报告里会列出「谁可以对他借机攻击」——
+        **不自动扣反应、也不自动掷骰**：打不打是桌上决定的，
+        程序只负责算准「谁够得着、谁还留着反应」。
+        """
         combatant = self.get(who)
         if combatant.actor.root().hp.is_down:
             raise IllegalAction("%s 已经倒地，不能移动" % combatant.label)
@@ -223,6 +231,8 @@ class Encounter:
         if feet > left:
             raise IllegalAction("%s 只剩 %d 尺移动力，走不过去 %d 尺"
                                 % (combatant.label, left, feet))
+        before = {item.id: self.distance(combatant, item)
+                  for item in self.combatants if item is not combatant}
         combatant.economy.movement = left - feet
         combatant.x, combatant.y = target
         combatant.placed = True
@@ -230,7 +240,31 @@ class Encounter:
             "id": combatant.id, "label": combatant.label,
             "x": target[0], "y": target[1],
             "feet": feet, "left": int(combatant.economy.movement),
+            "left_reach": self._left_reach(combatant, before),
         }
+
+    def _left_reach(self, combatant: Combatant, before: dict[str, int]) -> list[dict]:
+        """移动前在 5 尺内、移动后不在的人 —— 借机攻击的候选。
+
+        `reaction` 为 False 也要列出来（只是打不了）：界面上「够得着但没反应」
+        与「够不着」是两件不同的事，混成一条会让人以为距离算错了。
+        """
+        found: list[dict] = []
+        for item in self.combatants:
+            if item is combatant or item.id not in before:
+                continue
+            if item.actor.root().hp.is_down:
+                continue
+            if before[item.id] > REACH_FEET:
+                continue
+            if self.distance(combatant, item) <= REACH_FEET:
+                continue
+            found.append({
+                "id": item.id,
+                "label": item.label,
+                "reaction": int(item.economy.reaction) > 0,
+            })
+        return found
 
     def teleport(self, who, x: int, y: int, max_feet: int) -> dict:
         """传送：**不花移动力**，但要过距离与占位两道检查。
@@ -271,8 +305,9 @@ class Encounter:
     def next_turn(self) -> Combatant | None:
         """结束当前回合，轮到下一个人；走完最后一个人就进下一轮。
 
-        回合结束只清**未用完的额度**（动作/附赠/移动不能攒），
-        反应不在回合结束清 —— 它按轮恢复，见 `_start_round`。
+        回合结束只清**未用完的额度**（动作/附赠/移动不能攒）与**本回合到期的一次性标记**
+        （「本回合结束前下一次攻击优势」就在这里失效）。反应不在回合结束清 ——
+        它按轮恢复，见 `_start_round`。
         """
         if not self.combatants:
             return None
@@ -281,6 +316,7 @@ class Encounter:
         current = self.current()
         if current is not None:
             current.economy.end_turn()
+            current.actor.root().marks.end_turn()
         index = self.turn + 1
         if index >= len(self.combatants):
             index = 0
@@ -299,6 +335,8 @@ class Encounter:
         """一轮开始：所有人的反应恢复（自己的回合还没轮到时也能借机攻击）。"""
         for combatant in self.combatants:
             combatant.economy.start_round()
+            # `round` 作用域的标记（在别人回合里被挂上的）到这一轮结束就失效
+            combatant.actor.root().marks.end_round()
 
     # --- 输出 ---------------------------------------------------------
     def order(self) -> list[dict]:

@@ -131,15 +131,17 @@ def modifiers_for(modifiers, target: str) -> list[Modifier]:
 def passive_advantage_modes(bundle, actor: Actor, query: str) -> tuple[str, tuple[str, ...]]:
     """被动能力给的掷骰模式：`query` 是这次检定的名字（`save.dex` / `initiative` / …）。
 
-    三条来源合并成一次判断（`rules/advantage.merge`）：
+    四条来源合并成一次判断（`rules/advantage.merge`）：
 
       1. 常驻能力里的 `grant_advantage`
       2. 能力的 `when` 条件 —— 在**这里**判，用 `facts_for` 的事实（含失能状态）
       3. 运行期挂在角色身上、还没过期的标记（狂暴、法术效果）
+      4. 一次性标记（`Actor.marks`，如「本回合下一次攻击优势」）—— 只读，
+         消费发生在真正掷过之后（`advantage.consume_marks`）
 
     返回 (模式, 来源列表)。`flat` 就是「什么都没发生」。
     """
-    from .advantage import merge, modes_from_effects, target_matches
+    from .advantage import merge, mark_modes, modes_from_effects, target_matches
     from .effects.grants import GrantAdvantage
 
     facts = facts_for(actor)
@@ -158,6 +160,9 @@ def passive_advantage_modes(bundle, actor: Actor, query: str) -> tuple[str, tupl
     runtime_mode, runtime_sources = modes_from_effects(actor, query)
     modes.append(runtime_mode)
     sources.extend(runtime_sources)
+    marked_mode, marked_sources = mark_modes(actor, query)
+    modes.append(marked_mode)
+    sources.extend(marked_sources)
     return merge(modes), tuple(sources)
 
 
@@ -183,13 +188,16 @@ APPLIED_CHANNELS = ("defense", "modifier", "proficiency", "score")
 # （`rules/advantage.py` + `api.roll_check`），但它永远不进合计 ——
 # 所以既不能报「已计入数值」，也不能再报「没人消费」。
 ROLL_CHANNELS = ("advantage",)
+# 命中时才结算的通道（`extra_damage`）。它没有按钮，但也不是「没算」——
+# 攻击结算（`rules/attack`）会把它列进「可以加的额外伤害」。
+HIT_CHANNELS = ("on_hit",)
 # 认得出来但**还没有消费方**的通道。P7 之前这里是 `("advantage",)` ——
 # 优势有了掷骰消费方以后就空了。留着这个空元组是为了让 `power_status` 的分支
 # 与将来新出现的「认得但没算」通道共用一条路，而不是临时加 if。
 MANUAL_CHANNELS: tuple[str, ...] = ()
 CHANNEL_ZH = {"modifier": "加值", "score": "属性", "proficiency": "熟练",
               "defense": "抗性/免疫", "advantage": "优势/劣势（掷骰时生效）",
-              "text": "说明文字"}
+              "on_hit": "命中时结算", "text": "说明文字"}
 
 
 def power_channels(power: Power) -> tuple[str, ...]:
@@ -197,6 +205,8 @@ def power_channels(power: Power) -> tuple[str, ...]:
     from .effects.grants import (      # 局部导入：effects 会 import 本包的 Modifier
         GrantAdvantage, GrantDefense, GrantModifier, GrantProficiency,
     )
+    from .effects.onhit import ExtraDamage
+    from .effects.state import MarkAdvantage
 
     found: set[str] = set()
     for effect in power.effects:
@@ -209,30 +219,44 @@ def power_channels(power: Power) -> tuple[str, ...]:
             found.add("proficiency")
         elif isinstance(effect, GrantDefense):
             found.add("defense")
-        elif isinstance(effect, GrantAdvantage):
+        elif isinstance(effect, (GrantAdvantage, MarkAdvantage)):
+            # 一次性标记与常驻优势是同一条掷骰形状通道，只是有没有「用完即消」
             found.add("advantage")
+        elif isinstance(effect, ExtraDamage):
+            found.add("on_hit")
     return tuple(sorted(found))
 
 
 def power_status(power: Power) -> str:
-    """五种状态，别合并：
+    """六种状态，别合并：
 
     - `counted` 已经进了常驻数值（加值/属性/熟练/抗性）
     - `dice`    影响掷骰形状（优势/劣势）——**不进合计**，但掷骰时会生效
     - `active`  有按钮，数值在**使用那一刻**结算（回气、行动激增）
+    - `onhit`   命中时结算（`extra_damage`，「每回合一次 +2d10」那种）——
+                没有按钮，也不进常驻数值，攻击结算里会列出来
     - `manual`  认得出但还没有消费方
     - `text`    只有说明文字，什么都没算
 
     `dice` 必须与 `counted` 分开：把优势算进数值加成会直接算错（那不是 +5），
     而归进 `text` 又是另一种撒谎（它明明已经生效了）。
+
+    `onhit` 必须与 `active` 分开：`active` 的界面文案是「点按钮才结算」，
+    而月华形态根本没有按钮 —— 归进 `active` 会让玩家到处找那个按钮。
+
+    **有按钮的排在最前**：玩家最需要知道的是「这个能力现在能不能点」，
+    点下去之后优势会自己生效。月光步既挂一次性优势（dice）又是按钮，
+    标成 dice 会让人以为它是被动能力。
     """
     channels = set(power_channels(power))
+    if power.is_button:
+        return "active"
+    if channels & set(HIT_CHANNELS):
+        return "onhit"
     if channels & set(ROLL_CHANNELS):
         return "dice"
     if channels & set(APPLIED_CHANNELS):
         return "counted"
-    if power.is_button:
-        return "active"
     if channels & set(MANUAL_CHANNELS):
         return "manual"
     return "text"
@@ -243,6 +267,6 @@ __all__ = [
     "modifiers_for", "save_modifiers", "skill_modifiers",
     "ScoreBonus", "score_bonuses", "score_bonus_of", "apply_score_bonuses",
     "passive_advantage_modes", "power_channels", "power_status",
-    "APPLIED_CHANNELS", "ROLL_CHANNELS",
+    "APPLIED_CHANNELS", "ROLL_CHANNELS", "HIT_CHANNELS",
     "MANUAL_CHANNELS", "CHANNEL_ZH",
 ]

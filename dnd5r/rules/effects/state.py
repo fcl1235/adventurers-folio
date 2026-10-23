@@ -14,6 +14,7 @@ from typing import Any, ClassVar, Mapping
 from ...kernel.errors import IllegalAction, PluginError
 from ...kernel.text import Text
 from ...model.effect_instance import Duration, DurationKind
+from ...model.marks import SCOPES, Mark
 from ..amount import Amount, parse_amount
 from .base import Effect, EffectContext, register
 
@@ -190,6 +191,80 @@ class ModifyRoll(Effect):
 
 
 @dataclass(frozen=True, slots=True)
+class MarkAdvantage(Effect):
+    """挂一条**一次性**的优势/劣势（"本回合结束前下一次攻击优势"）。
+
+    与 `grant_advantage` 的区别只有一条，但很关键：那条是**一直有效**的
+    （被动增益），这条挂上以后会被**消费掉**。所以它落在 `Actor.marks`，
+    不进 `Actor.effects`。
+
+    `expires: turn` 是默认：原文绝大多数写「本回合结束前」。写 `round`
+    表示「这一轮内」，`never` 表示只能显式移除（诅咒那种）。
+    """
+
+    op: ClassVar[str] = "mark"
+    target: str = "attack.all"
+    mode: str = "adv"
+    uses: int = 1
+    expires: str = "turn"
+    label: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.target:
+            raise PluginError("mark 缺少作用目标（如 attack.all）")
+        if self.mode not in ("adv", "dis"):
+            raise PluginError("mark.mode 只能是 adv 或 dis：%r" % (self.mode,))
+        if self.expires not in SCOPES:
+            raise PluginError("mark.expires 只能是 %s：%r"
+                              % ("/".join(SCOPES), self.expires))
+        if int(self.uses) < 1:
+            raise PluginError("mark.uses 必须 >= 1：%r" % (self.uses,))
+
+    @classmethod
+    def from_payload(cls, payload: Any, where: str = "") -> "MarkAdvantage":
+        if isinstance(payload, str):
+            return cls(target=payload)
+        if not isinstance(payload, Mapping):
+            raise PluginError("%s mark 参数必须是目标或映射" % where)
+        # 两种写法都认：`mark: {advantage: attack.all}` 与
+        # `mark: {target: attack.all, mode: dis}`
+        target = payload.get("advantage") or payload.get("target") or payload.get("on")
+        if not target:
+            raise PluginError("%s mark 缺少 advantage / target" % where)
+        return cls(
+            target=str(target),
+            mode=str(payload.get("mode", "adv")).lower(),
+            uses=int(payload.get("uses", 1)),
+            expires=str(payload.get("expires", "turn")).lower(),
+            label=str(payload.get("label", "")),
+        )
+
+    def apply(self, ctx: EffectContext) -> None:
+        source = ctx.source or self.op
+        token = "%s.%s" % (self.mode, self.target)
+        ctx.subject.root().marks.add(Mark(
+            id="%s:%s" % (source, token),
+            kind="advantage",
+            target=self.target,
+            mode=self.mode,
+            source=source,
+            label=self.label,
+            uses=int(self.uses),
+            expires=self.expires,
+        ))
+        word = "优势" if self.mode == "adv" else "劣势"
+        scope = {"turn": "本回合结束前", "round": "本轮结束前",
+                 "never": "直到被移除"}[self.expires]
+        ctx.note(Text.of("%s：%s（%s，%d 次）" % (word, self.target, scope, self.uses),
+                         "%s on %s (%s, x%d)" % (word, self.target, self.expires, self.uses)),
+                 self.op)
+
+    def to_dict(self) -> dict:
+        return {"op": self.op, "target": self.target, "mode": self.mode,
+                "uses": int(self.uses), "expires": self.expires}
+
+
+@dataclass(frozen=True, slots=True)
 class NoteEffect(Effect):
     """显式「仅提示」。语言、黑话、衰老这类确实无法数值化的内容用它，
     而不是塞进一个 note_only 垃圾桶里假装算过了。"""
@@ -212,5 +287,6 @@ class NoteEffect(Effect):
         return {"op": self.op, "text": self.text.to_dict()}
 
 
-for _cls in (ApplyCondition, RemoveCondition, SpendResource, RecoverResource, ModifyRoll, NoteEffect):
+for _cls in (ApplyCondition, RemoveCondition, SpendResource, RecoverResource, ModifyRoll,
+             MarkAdvantage, NoteEffect):
     register(_cls)

@@ -538,7 +538,7 @@ def _spell_row(content: ContentBundle, spell_id: str, locale: str = "zh") -> dic
 
 
 def _feat_status(feat) -> str:
-    """专长的诚实标记。与能力同一套词汇（counted/active/manual/text）。
+    """专长的诚实标记。与能力同一套词汇（counted/dice/active/onhit/manual/text）。
 
     有选择项的专长一定算数（选完就落属性/熟练/抗性），所以直接算 counted；
     剩下的看它挂的能力里有没有真被消费的通道。
@@ -547,7 +547,7 @@ def _feat_status(feat) -> str:
         return "counted"
     statuses = {power_status(power) for power in feat.powers}
     # dice 排在 counted 之后：优势/劣势改的是掷骰形状，不是加值，但它确实被消费了
-    for level in ("counted", "dice", "active", "manual"):
+    for level in ("counted", "dice", "active", "onhit", "manual"):
         if level in statuses:
             return level
     return "text"
@@ -977,6 +977,10 @@ def roll_check(
         "modifier": resolution.total,
         "total": roll.total + resolution.total,
         "detail": resolution.describe(),
+        # 一次性标记**不在这里消费**：这是通用的掷骰工具（预览、补掷都用它），
+        # 悄悄改状态会让人「随便掷一下就丢了优势」。真打要走 `attack_roll`。
+        # 但优势确实按标记算进去了，所以必须提示它还在。
+        "marks_pending": marks_of(actor) if kind == "attack" else [],
     }
 
 
@@ -1036,6 +1040,77 @@ def free_casts(actor: Actor, content: ContentBundle, locale: str = "zh") -> list
             "refresh": pool.refresh.value,
         })
     return sorted(rows, key=lambda row: (row["level"], row["pool"]))
+
+
+def attack_roll(
+    attacker: Actor,
+    content: ContentBundle,
+    target: Any,
+    weapon: str = "",
+    off_hand: bool = False,
+    rng: Rng | None = None,
+    seed: int | None = None,
+    locale: str = "zh",
+    apply: bool = False,
+    extras: Any = (),
+) -> dict:
+    """掷一次武器攻击：命中 → 伤害 → 额外伤害 → 抗性 →（可选）落到 HP。
+
+    `target` 既收 `Target`（DM 手填的「AC 15」），也收 `Actor`（建好的怪、队友）。
+
+    `apply=False` 是**只算不落库**：不扣血、不消耗优势标记、不记「每回合一次」的账。
+    这与 `roll_spell` 同一条规矩 —— 误点一下就动了别人的血条，比多点一次麻烦。
+
+    `extras` 是这次要不要加额外伤害（月华形态的「每回合一次 +2d10」这类）。
+    默认**不加**，只把可用项列在 `extras.available` 里：原文写的是
+    "you can deal an extra 2d10"，加不加是玩家的选择。
+    """
+    from ..rules.attack import resolve_attack
+    from ..rules.combat import Target, target_from_actor
+
+    prepared = target if isinstance(target, Target) \
+        else target_from_actor(content, target, locale)
+    return resolve_attack(
+        content, attacker, prepared, weapon, off_hand,
+        rng or SeededRng(seed), apply=apply, locale=locale, extras=extras)
+
+
+def attack_options(actor: Actor, content: ContentBundle, locale: str = "zh") -> dict:
+    """出手前能选什么：额外伤害清单 + 身上待用的一次性标记。
+
+    界面拿它画「勾选项」与「优势待用」的提示。两边读的是同一份状态
+    （`Actor.marks` + 常驻能力的 `extra_damage`），不另存计数器。
+    """
+    from ..rules.attack import extra_damage_options
+
+    return {
+        "extras": extra_damage_options(content, actor, locale),
+        "marks": marks_of(actor),
+    }
+
+
+def marks_of(actor: Actor) -> list[dict]:
+    """身上还没用掉的一次性标记（本回合的下一次攻击优势这类）。"""
+    labels = {
+        "turn": "本回合结束前", "round": "本轮结束前", "never": "直到被移除",
+    }
+    rows: list[dict] = []
+    for mark in actor.root().marks.active():
+        word = "优势" if mark.mode == "adv" else "劣势"
+        rows.append({
+            "id": mark.id,
+            "kind": mark.kind,
+            "target": mark.target,
+            "mode": mark.mode,
+            "source": mark.source,
+            "label": mark.label,
+            "uses": int(mark.uses),
+            "expires": mark.expires,
+            "text": "%s：%s（%s，%d 次）"
+                    % (word, mark.target, labels.get(mark.expires, mark.expires),
+                       int(mark.uses)),
+        })
+    return rows
 
 
 def _need_ability(ability: str) -> None:

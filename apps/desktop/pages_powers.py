@@ -25,9 +25,10 @@ REFRESH_ZH = {"long_rest": "长休恢复", "short_rest": "短休恢复",
               "initiative": "遭遇开始", "never": "不自动恢复", "turn": "每回合"}
 SENSE_ZH = {"darkvision": "黑暗视觉", "blindsight": "盲视",
             "tremorsense": "震颤感知", "truesight": "真实视觉"}
-STATUS_MARK = {"counted": "✓", "dice": "◆", "active": "▶", "manual": "△", "text": "□"}
+STATUS_MARK = {"counted": "✓", "dice": "◆", "active": "▶",
+               "onhit": "◈", "manual": "△", "text": "□"}
 STATUS_ZH = {"counted": "已计入数值", "dice": "改掷骰", "active": "使用时结算",
-             "manual": "待手动处理", "text": "仅规则文字"}
+             "onhit": "命中时结算", "manual": "待手动处理", "text": "仅规则文字"}
 KIND_ZH = {"passive": "被动", "activated": "主动", "reaction": "反应",
            "triggered": "触发"}
 

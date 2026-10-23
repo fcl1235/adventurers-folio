@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from ..model.marks import MarkSet
+
 FLAT = "flat"
 ADV = "adv"
 DIS = "dis"
@@ -91,6 +93,35 @@ def modes_for(actor, query: str) -> tuple[str, tuple[str, ...]]:
     return modes_from_effects(actor, query)
 
 
+# --- 一次性标记 -------------------------------------------------------
+# 「本回合结束前下一次攻击优势」是**待消费**的：掷过一次攻击就该消失。
+# 所以它不在 effects 里（那一类是一直有效的），读和消费分成两个函数 ——
+# 读的时候不能顺手扣掉（预览一次攻击不该消耗标记），扣的时候要明确说扣了谁。
+def mark_modes(actor, query: str) -> tuple[str, tuple[str, ...]]:
+    """一次性标记里的优势/劣势。**只读**，不消费。"""
+    modes: list[str] = []
+    sources: list[str] = []
+    for mark in _marks(actor).matching(
+            lambda item: item.kind == "advantage" and target_matches(item.target, query)):
+        modes.append(mark.mode)
+        sources.append(mark.label or mark.source or mark.target)
+    return merge(modes), tuple(sources)
+
+
+def consume_marks(actor, query: str) -> list:
+    """掷过之后用掉匹配的一次性标记。返回这次被消费的标记。"""
+    return _marks(actor).consume(
+        lambda item: item.kind == "advantage" and target_matches(item.target, query))
+
+
+def _marks(actor):
+    """标记挂在本体上（一次性状态不属于某一层形态）。"""
+    root = getattr(actor, "root", None)
+    node = root() if callable(root) else actor
+    found = getattr(node, "marks", None)
+    return found if found is not None else MarkSet()
+
+
 def _layers(actor):
     """角色本体 + 所有叠加层（变形）。没有 top() 的模型退化成它自己。"""
     top = getattr(actor, "top", None)
@@ -101,4 +132,4 @@ def _layers(actor):
 
 
 __all__ = ["FLAT", "ADV", "DIS", "MODES", "PREFIX", "parse_label", "target_matches",
-           "merge", "modes_for"]
+           "merge", "modes_for", "mark_modes", "consume_marks"]

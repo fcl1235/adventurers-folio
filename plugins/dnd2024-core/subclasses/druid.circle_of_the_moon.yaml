@@ -108,19 +108,21 @@ powers:
       # 传送走真结算：距离上限、目标格占位都由 Encounter 检查。
       # 界面点哪一格就把它放进 choice 的 `to`；没有遭遇战时不结算并说明。
       - teleport: { max_feet: 30 }
+      # 「本回合结束前下一次攻击优势」= 一次性标记：掷过一次攻击就用掉，
+      # 自己回合结束也会失效（见 model/marks.py）。它不是加值，不进合计。
+      - mark: { advantage: attack.all, uses: 1, expires: turn }
       - note:
           zh: |-
             传送走遭遇战结算：30 尺上限、目标格不能有人。只在「有遭遇战 + 点了目标格」
             时才会真的移动，其余情况会明确说未结算。
-            「本回合结束前下一次攻击的优势」还没有通道 —— 优势是一次性的掷骰形状，
-            不是加值，得等一次性标记那一层（G2b），请手动记。
+            「本回合结束前下一次攻击的优势」已挂成一次性标记：下次攻击掷骰（`attack_roll`）
+            会按优势掷，掷完即失效；不掷的话，自己回合结束也会清掉。
           en: |-
             The teleport is resolved against the encounter (30 ft, unoccupied target).
             It only moves anyone when an encounter is running and a destination was
             picked; otherwise the program says so explicitly.
-            "Advantage on the next attack before the end of this turn" has no channel yet:
-            Advantage is a dice shape rather than a bonus, and needs the one-shot marker
-            layer (G2b). Track it by hand.
+            The Advantage on your next attack roll is now a one-shot marker: the next
+            attack roll uses it and consumes it, and your own turn ending clears it.
 
   # 原文最后一句是**独立的操作**（无需动作，花一个 2 环以上的位换回一次次数），
   # 不是「使用月光步」的一部分 —— 所以是一条单独的能力，不是一个附带效果。
@@ -157,15 +159,28 @@ powers:
         to a target you hit with a Wild Shape form's attack. Shared Moonlight: whenever you
         use Moonlight Step, you can also teleport one willing creature within 10 feet of you.
     effects:
+      # 「每回合一次 +2d10」是**命中时**的通道，不是点一下就掉血：
+      # `extra_damage` 只在攻击结算（`attack_roll`）里被取用，且 `limit: turn`
+      # 让它在同一回合只能用一次（记账在 Actor.marks.spent，回合结束清）。
+      # `when` 按原文：只有以荒野形态的攻击才算。
+      - extra_damage:
+          dice: 2d10
+          type: radiant
+          limit: turn
+          when: { morphed: true }
       - note:
           zh: |-
-            「每回合一次 +2d10」要等攻击结算里的额外伤害通道（G2b），尚未接。
+            额外伤害在攻击掷骰里结算：`attack_roll` 默认**不自动加**这 2d10，
+            要把它的 key 放进 `extras`（或传 `all`）才会加 —— 原文是「你可以」，
+            加不加由玩家决定。同一回合第二次攻击时它不再列出。
             「共享月光」的自身传送已随月光步结算；要捎同伴，先看 10 尺内还有谁
             （遭遇战的 `nearby`），再把那人挪过去。原文没写同伴落在哪一格，
             所以程序不替他挑位置。
           en: |-
-            "Once per turn, +2d10" waits on an extra-damage channel in the attack
-            pipeline (G2b) and is not wired yet. Shared Moonlight's own teleport already
-            rides on Moonlight Step; to bring a companion, check who is within 10 feet
+            The extra damage is resolved in the attack roll: `attack_roll` does not
+            add the 2d10 automatically; pass its key in `extras` (or "all") to use it,
+            because the text says "you can". On a second attack in the same turn it
+            is no longer offered. Shared Moonlight's own teleport already rides on
+            Moonlight Step; to bring a companion, check who is within 10 feet
             (the encounter's `nearby`) and move them. The text never says which square
             the companion lands on, so the program does not pick one.

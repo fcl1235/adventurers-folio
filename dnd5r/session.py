@@ -239,6 +239,9 @@ class Session:
                 note = "" if who.actor is self.character else "（还没轮到你）"
                 return Report(ok=True, message="第 %d 轮 · 轮到 %s%s"
                               % (self.encounter.round, who.label, note))
+            # 没有遭遇战时没有别人可以推进 —— 只推进自己的回合，
+            # 「本回合结束前」的一次性标记（下一次攻击优势）在这里失效
+            self.character.root().marks.end_turn()
             self.economy.start_turn(movement=self.character.statblock.speed("walk"))
             return Report(ok=True, message="新回合：动作与附赠动作已恢复")
         if isinstance(command, TakeDamage):
@@ -284,6 +287,11 @@ class Session:
         # 用 reset 而不是换新对象：遭遇战里的 Combatant 拿着同一个引用，
         # 换了对象会出现「休息完还能再动一次」。
         self.economy.reset(movement=self.character.statblock.speed("walk"))
+        # 休息之后「本回合」的标记都没有意义了；`never` 作用域的（诅咒）
+        # 不该被一次短休清掉，所以只清两个有时限的作用域。
+        marks = self.character.root().marks
+        marks.end_turn()
+        marks.end_round()
         return Report(ok=True, message=result.summary)
 
     # --- 投影 ---------------------------------------------------------

@@ -13,6 +13,7 @@ from enum import Enum
 from ..kernel.errors import RuleError
 from .conditions import ConditionSet
 from .inventory import Inventory
+from .marks import MarkSet
 from .profile import Profile
 from .resources import ResourcePool
 from .statblock import Statblock
@@ -91,6 +92,9 @@ class Actor:
     morph_temp: int = 0
     # 变形期间的禁令（如 spellcasting）；空表示没有额外限制
     forbid: tuple[str, ...] = ()
+    # 一次性标记（本回合的下一次攻击优势、待用的额外伤害）与「每回合一次」的记账。
+    # **不进存档**：关掉程序就不该记得上一轮那个优势还没用（见 model/marks.py）。
+    marks: MarkSet = field(default_factory=MarkSet)
 
     def __post_init__(self) -> None:
         if not self.id:
