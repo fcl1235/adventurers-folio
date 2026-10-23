@@ -105,11 +105,22 @@ powers:
         of once), and you regain all expended uses when you finish a Long Rest. You can also
         regain uses by expending a level 2+ spell slot for each use you want to restore.
     effects:
+      # 传送走真结算：距离上限、目标格占位都由 Encounter 检查。
+      # 界面点哪一格就把它放进 choice 的 `to`；没有遭遇战时不结算并说明。
+      - teleport: { max_feet: 30 }
       - note:
           zh: |-
-            传送与「下次攻击优势」需要战斗回合与位置模型（G2），不结算。
+            传送走遭遇战结算：30 尺上限、目标格不能有人。只在「有遭遇战 + 点了目标格」
+            时才会真的移动，其余情况会明确说未结算。
+            「本回合结束前下一次攻击的优势」还没有通道 —— 优势是一次性的掷骰形状，
+            不是加值，得等一次性标记那一层（G2b），请手动记。
           en: |-
-            Teleporting and "Advantage on your next attack" need the combat turn model.
+            The teleport is resolved against the encounter (30 ft, unoccupied target).
+            It only moves anyone when an encounter is running and a destination was
+            picked; otherwise the program says so explicitly.
+            "Advantage on the next attack before the end of this turn" has no channel yet:
+            Advantage is a dice shape rather than a bonus, and needs the one-shot marker
+            layer (G2b). Track it by hand.
 
   # 原文最后一句是**独立的操作**（无需动作，花一个 2 环以上的位换回一次次数），
   # 不是「使用月光步」的一部分 —— 所以是一条单独的能力，不是一个附带效果。
@@ -148,8 +159,13 @@ powers:
     effects:
       - note:
           zh: |-
-            「每回合一次 +2d10」要在攻击结算里加一条额外伤害通道（G2）；
-            「共享月光」依附于月光步的传送，同样等回合流程。
+            「每回合一次 +2d10」要等攻击结算里的额外伤害通道（G2b），尚未接。
+            「共享月光」的自身传送已随月光步结算；要捎同伴，先看 10 尺内还有谁
+            （遭遇战的 `nearby`），再把那人挪过去。原文没写同伴落在哪一格，
+            所以程序不替他挑位置。
           en: |-
-            "Once per turn, +2d10" needs an extra-damage channel in the attack pipeline;
-            Shared Moonlight rides on Moonlight Step's teleport. Both wait on the turn model.
+            "Once per turn, +2d10" waits on an extra-damage channel in the attack
+            pipeline (G2b) and is not wired yet. Shared Moonlight's own teleport already
+            rides on Moonlight Step; to bring a companion, check who is within 10 feet
+            (the encounter's `nearby`) and move them. The text never says which square
+            the companion lands on, so the program does not pick one.

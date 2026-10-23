@@ -170,9 +170,13 @@ class MoonlightStepTest(Base):
         self.assertEqual(row["status"], "active")
         power = next(item for item in api.available_powers(self.bundle, actor)
                      if item.id.endswith("moonlight_step"))
+        ops = [getattr(effect, "op", "") for effect in power.effects]
+        # 传送在 P9a 之后走真结算（遭遇战里的坐标 + 30 尺上限），不再只是一句 note；
+        # 优势仍缺一次性标记那层，所以 note 只该剩它。
+        self.assertIn("teleport", ops)
         notes = " ".join(effect.text.zh for effect in power.effects
                          if getattr(effect, "op", "") == "note")
-        self.assertIn("战斗回合", notes)
+        self.assertIn("优势", notes)
         # 反证：6 级还没有这个能力
         early = api.character_sheet(self.druid(6), self.bundle)["powers"]
         self.assertFalse([item for item in early if item["id"].endswith("moonlight_step")])

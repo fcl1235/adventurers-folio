@@ -64,7 +64,7 @@ class ContractTest(unittest.TestCase):
             "grant_advantage", "grant_action",
             "apply_condition", "remove_condition", "spend_resource",
             "recover_resource", "modify_roll", "note",
-            "morph", "revert",
+            "morph", "revert", "teleport",
         }
         self.assertEqual(set(known_ops()), expected)
 
@@ -78,8 +78,10 @@ class ContractTest(unittest.TestCase):
                     parse_effect({op: object()})
 
     def test_unknown_op_lists_available(self):
+        # 别拿真原语当例子：`teleport` 在 P9a 之后是合法 op 了，
+        # 这条测试就会从「未知 op 要报错」悄悄变成「已知 op 不该报错」。
         with self.assertRaises(PluginError) as caught:
-            parse_effect({"teleport": {}})
+            parse_effect({"summon": {}})
         self.assertIn("heal", str(caught.exception))
 
     def test_multi_key_mapping_rejected(self):
