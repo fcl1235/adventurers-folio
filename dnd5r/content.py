@@ -17,6 +17,7 @@ from typing import Any, Mapping
 import yaml
 
 from .kernel.dice import parse as parse_dice
+from .kernel.dice import stack as stack_dice
 from .kernel.errors import DiceError, DndError, PluginError, RuleError
 from .kernel.ids import is_valid
 from .kernel.text import Text
@@ -1264,6 +1265,8 @@ SPELL_SCHOOLS = (
 CAST_KINDS = ("action", "bonus", "reaction", "time", "special")
 DURATION_KINDS = ("instant", "time", "permanent", "special")
 AREA_SHAPES = ("sphere", "cube", "cone", "cylinder", "line", "emanation")
+# 豁免成功后的伤害：半伤 / 无伤。**留空 = 未判定**，见 SpellDef.save_effect。
+SAVE_EFFECTS = ("half", "none")
 
 
 def _parse_cast_kind(data: Any, where: str) -> tuple[str, str, str]:
@@ -1343,6 +1346,36 @@ def _parse_damage_table(data: Any, where: str) -> tuple[dict[int, str], str, str
     return table, kind, str(data.get("upcast", ""))
 
 
+def _parse_upcast_dice(data: Any, where: str) -> tuple[str, int]:
+    """升环加骰：`{dice: 1d6, above: 3}`（也收裸字符串，环级默认取法术自身环级）。
+
+    这是**会不会算错数**的字段，所以坏数据当场拒绝，不做「猜一个」的兜底。
+    """
+    if not data:
+        return "", 0
+    if isinstance(data, str):
+        try:
+            parse_dice(data)
+        except DiceError as exc:
+            raise PluginError("%s 的升环骰式不合法：%r（%s）" % (where, data, exc))
+        return data, 0
+    if not isinstance(data, Mapping):
+        raise PluginError("%s 的 upcast_dice 必须是映射或骰式字符串" % where)
+    dice = str(data.get("dice") or "")
+    if not dice:
+        raise PluginError("%s 的 upcast_dice 缺少 dice" % where)
+    try:
+        parse_dice(dice)
+    except DiceError as exc:
+        raise PluginError("%s 的升环骰式不合法：%r（%s）" % (where, dice, exc))
+    try:
+        above = int(data.get("above") or 0)
+    except (TypeError, ValueError):
+        raise PluginError("%s 的 upcast_dice.above 必须是整数：%r"
+                          % (where, data.get("above")))
+    return dice, above
+
+
 @dataclass(frozen=True)
 class SpellDef:
     """一个法术。**只管规则，不管界面**：能算的都解析成字段，算不了的留在 text 里。
@@ -1370,11 +1403,34 @@ class SpellDef:
     concentration: bool = False
     ritual: bool = False
     save: str = ""
+    # 豁免成功时吃什么：`half` 半伤 / `none` 无伤 / **空串 = 未判定**。
+    #
+    # 第三种状态不是偷懒。有些法术的 `save` 与 `damage` 是**两件独立的事**：
+    # 灼热金属的伤害是接触就吃、豁免只管「能不能拿住」；荆棘丛生的伤害来自移动；
+    # 寒冰锥这类「攻击命中 + 另一次豁免爆裂」的法术两条线都有。
+    # 把它们一律写成 `none`，结算时会算出规则里不存在的 0 点伤害 ——
+    # 比「不知道」更糟，因为它看上去像个答案。
+    save_effect: str = ""
+    # **必中伤害**（没有攻击、没有豁免，掷下去就是伤害）。
+    #
+    # 必须内容显式声明，不能从「有伤害骰 + 没有 save/attack」推出来：
+    # 那些带「命中后追加」的增益（斩击、诅咒、印记）伤害表里也有骰子，
+    # 但它们**不是**「施放即结算」—— 推出来的 `auto` 会在施法瞬间
+    # 给目标扣一次根本还没发生的伤害。
+    auto_damage: bool = False
     attack: str = ""
     area: tuple[str, int] | None = None
     damage: Mapping[int, str] = field(default_factory=dict)
     damage_type: str = ""
     upcast: str = ""
+    # 升环加骰：`upcast_dice` 每提升一环加一次，从 `upcast_above` 环起算。
+    #
+    # 数据源只给「基础环」的骰式，升环写在英文正文里（"increases by 1d6 for
+    # each spell slot level above 3"）。不解析它，用 4 环放火球会算出 8d6 ——
+    # 一个不少不多、但就是错的数。解析不出来的（改成「多一道射线」那种）
+    # 留空，宁可只给基础骰也不给错的。
+    upcast_dice: str = ""
+    upcast_above: int = 0
     # **戏法的成长档**：角色等级 → 值。和 `damage`（按环位查）是两条轴，
     # 混成一张表会让 5 级角色用 0 环位施法时查到错误的骰子。
     # `scaling_kind` 说明这个值是什么：伤害骰 / 额外伤害 / 光束数 / 射程 / 武器骰。
@@ -1398,11 +1454,35 @@ class SpellDef:
                               % (self.id, "/".join(DURATION_KINDS)))
         if self.save and self.save not in ("str", "dex", "con", "int", "wis", "cha"):
             raise PluginError("%s 的豁免属性不合法：%r" % (self.id, self.save))
+        if self.save_effect and self.save_effect not in SAVE_EFFECTS:
+            raise PluginError("%s 的 save_effect 必须是 %s（或留空表示未判定）"
+                              % (self.id, "/".join(SAVE_EFFECTS)))
+        if self.save_effect and not self.save:
+            raise PluginError("%s 写了 save_effect 却没写 save" % self.id)
+        if self.save_effect and not self.damage:
+            raise PluginError("%s 写了 save_effect 却没有伤害骰" % self.id)
+        if self.auto_damage:
+            if not self.damage:
+                raise PluginError("%s 标了 auto_damage 却没有伤害骰" % self.id)
+            if self.save or self.attack:
+                raise PluginError("%s 标了 auto_damage，不该同时有 save / attack "
+                                  "（必中与判定只能二选一）" % self.id)
         for token in self.components:
             if token not in ("v", "s", "m"):
                 raise PluginError("%s 的成分只能是 v/s/m：%r" % (self.id, token))
         if self.level == 0 and self.damage and 0 not in self.damage:
             raise PluginError("%s 是戏法，damage 表必须从 0 档开始" % self.id)
+        if self.upcast_dice:
+            try:
+                parse_dice(self.upcast_dice)
+            except DiceError as exc:
+                raise PluginError("%s 的升环骰式不合法：%r（%s）"
+                                  % (self.id, self.upcast_dice, exc))
+            if not 0 <= int(self.upcast_above) <= 9:
+                raise PluginError("%s 的 upcast_above 必须在 0–9：%r"
+                                  % (self.id, self.upcast_above))
+            if not self.damage:
+                raise PluginError("%s 写了升环骰式却没有基础伤害表" % self.id)
         _check_scaling(self)
 
     @property
@@ -1415,8 +1495,19 @@ class SpellDef:
         return self.cast_kind in ("action", "bonus")
 
     def damage_at(self, slot_level: int) -> str:
-        """在该环位施放时的伤害骰式；查不到就返回空串（不是 0）。"""
-        return lookup_dice(self.damage, int(slot_level))
+        """在该环位施放时的伤害骰式；查不到就返回空串（不是 0）。
+
+        表里通常只有基础环，更高的环位靠 `upcast_dice` 叠上去：火球 3 环 8d6、
+        4 环 9d6。叠不出来（升环是「多一道射线」这类）就只给基础骰 ——
+        少一个骰子还能被玩家看出来，凭空多一个就看不出来了。
+        """
+        base = lookup_dice(self.damage, int(slot_level))
+        if not base or not self.upcast_dice:
+            return base
+        above = int(slot_level) - int(self.upcast_above or self.level)
+        if above <= 0:
+            return base
+        return stack_dice(base, self.upcast_dice, above)
 
     def scaling_at(self, character_level: int) -> str:
         """**角色等级**达到哪一档就取哪一档（5 / 11 / 17）。没写成长就返回空串。
@@ -1445,11 +1536,15 @@ class SpellDef:
             "concentration": self.concentration,
             "ritual": self.ritual,
             "save": self.save,
+            "save_effect": self.save_effect,
+            "auto_damage": self.auto_damage,
             "attack": self.attack,
             "area": None if self.area is None else {"shape": self.area[0], "feet": self.area[1]},
             "damage": {int(key): value for key, value in self.damage.items()},
             "damage_type": self.damage_type,
             "upcast": self.upcast,
+            "upcast_dice": ({"dice": self.upcast_dice, "above": int(self.upcast_above)}
+                            if self.upcast_dice else None),
             "scaling": {"kind": self.scaling_kind,
                         "levels": {int(key): value for key, value in self.scaling.items()}},
         }
@@ -1582,6 +1677,7 @@ def parse_spell(data: Any, source: str = "") -> SpellDef:
     duration_kind, dur_zh, dur_en = _parse_duration_kind(data.get("duration"), ident)
     range_feet, range_zh, range_en = _parse_spell_range(data.get("range"), ident)
     damage, damage_type, upcast = _parse_damage_table(data.get("damage"), ident)
+    upcast_dice, upcast_above = _parse_upcast_dice(data.get("upcast_dice"), ident)
     scaling, scaling_kind = _parse_scaling(data.get("scaling"), ident)
     components = tuple(str(item).lower() for item in (data.get("components") or ()))
 
@@ -1605,11 +1701,15 @@ def parse_spell(data: Any, source: str = "") -> SpellDef:
         concentration=bool(data.get("concentration", False)),
         ritual=bool(data.get("ritual", False)),
         save=str(data.get("save", "")).lower(),
+        save_effect=str(data.get("save_effect", "")).lower(),
+        auto_damage=bool(data.get("auto_damage", False)),
         attack=str(data.get("attack", "")).lower(),
         area=_parse_area(data.get("area"), ident),
         damage=damage,
         damage_type=damage_type,
         upcast=upcast,
+        upcast_dice=upcast_dice,
+        upcast_above=upcast_above,
         scaling=scaling,
         scaling_kind=scaling_kind,
         source=source,

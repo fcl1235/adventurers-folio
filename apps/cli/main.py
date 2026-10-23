@@ -157,6 +157,81 @@ def cmd_spell(args) -> int:
     return 0
 
 
+def cmd_cast(args) -> int:
+    """掷一次施法结算。目标由命令行给（AC / 豁免加值 / 抗性），不需要建怪物。
+
+    这是「没有战斗面板时也真的能用」的那条路：DM 手上有哥布林的 AC 与豁免，
+    敲进来就能算出这一发打掉多少 —— 而不是看着法术页自己心算。
+    """
+    bundle, actor = _character(args)
+    saves = {}
+    for raw in args.save or ():
+        key, _, value = raw.partition("=")
+        key = key.strip().lower()
+        if not key or not value.strip():
+            raise SystemExit("--save 的写法是 <属性>=<加值>，实际：%r" % raw)
+        saves[key] = int(value)
+    target = api.Target(
+        label=args.target,
+        ac=args.ac,
+        saves=saves,
+        resistances=frozenset(item.strip().lower()
+                             for item in (args.resist or "").split(",") if item.strip()),
+        immunities=frozenset(item.strip().lower()
+                             for item in (args.immune or "").split(",") if item.strip()),
+    )
+    report = api.roll_spell(
+        actor, bundle, args.spell, args.slot, [target],
+        locale=args.lang, class_id=args.cast_as or "", apply=args.apply,
+        seed=args.seed,
+    )
+    casting = report["casting"]
+    print("%s（%d 环，用 %s 施放）"
+          % (report["spell"]["name"], report["slot"], casting["class"].rsplit(".", 1)[-1]))
+    print("法术 DC %d%s · 法术攻击 +%d%s"
+          % (casting["dc"], _detail(casting["dc_detail"], casting["dc"]),
+             casting["attack"], _detail(casting["attack_detail"], casting["attack"])))
+    print("骰式 %s%s" % (report["dice"] or "—",
+                        "（%s）" % report["damage_type"] if report["damage_type"] else ""))
+    print()
+    for row in report["rows"]:
+        if row["kind"] == "none":
+            print("%s：%s" % (row["target"], row["note"]))
+            continue
+        shot = "第 %d 道 " % row["shot"] if report["shots"] > 1 else ""
+        print("%s%s：d20 %d + %d = %d vs %s %d → %s"
+              % (shot, row["target"], row["die"], row["bonus"],
+                 row["die"] + row["bonus"], row["against"], row["target_number"],
+                 _OUTCOME_ZH.get(row["outcome"], row["outcome"])))
+        if row["damage_dice"]:
+            print("    伤害 %s = %d%s → %d%s"
+                  % (row["damage_dice"], row["raw"],
+                     "（%s）" % _DEFENSE_ZH[row["defense"]] if row["defense"] else "",
+                     row["damage"],
+                     "（已扣血：%d → %d）" % (row["hp_before"], row["hp_after"])
+                     if row["applied"] is not None else ""))
+        if row["note"]:
+            print("    %s" % row["note"])
+    if report["notes"]:
+        print()
+        for line in report["notes"]:
+            print("注：%s" % line)
+    if report["total_damage"]:
+        print("\n合计伤害 %d" % report["total_damage"])
+    return 0
+
+
+def _detail(text: str, total: int) -> str:
+    """明细与合计一样就不重复印（法术 DC 没有加值可拆时 `describe()` 只回一个数）。"""
+    return "" if not text or text.strip() == str(total) else "（%s）" % text
+
+
+_OUTCOME_ZH = {"critical": "重击", "hit": "命中", "miss": "未命中",
+               "failed": "豁免失败", "succeeded": "豁免成功",
+               "auto": "必中", "none": "不结算"}
+_DEFENSE_ZH = {"resistance": "抗性减半", "immunity": "免疫"}
+
+
 def cmd_feats(args) -> int:
     """专长目录：按类别分组，标出 19 级恩惠这类等级门槛。"""
     bundle = api.load_content(args.root)
@@ -356,6 +431,22 @@ def main(argv=None) -> int:
     spell.add_argument("--root", default="plugins")
     spell.add_argument("--lang", default="zh", choices=["zh", "en"])
     spell.set_defaults(func=cmd_spell)
+
+    cast = sub.add_parser("cast", help="掷一次施法结算（目标由命令行给）")
+    cast.add_argument("--spell", required=True)
+    cast.add_argument("--slot", type=int, default=None, help="用几环位施放（缺省按法术自身环级）")
+    cast.add_argument("--cast-as", dest="cast_as", default=None,
+                      help="兼职时指定用哪个职业施放（决定 DC 与攻击加值）")
+    cast.add_argument("--target", default="目标")
+    cast.add_argument("--ac", type=int, default=13)
+    cast.add_argument("--save", action="append", default=None,
+                      help="目标的豁免加值：<属性>=<加值>，可重复（如 --save dex=2）")
+    cast.add_argument("--resist", default="", help="伤害抗性，逗号分隔（如 fire,cold）")
+    cast.add_argument("--immune", default="", help="伤害免疫，逗号分隔")
+    cast.add_argument("--apply", action="store_true", help="真的扣血（缺省只算不落库）")
+    cast.add_argument("--seed", type=int, default=None)
+    _add_character_args(cast)
+    cast.set_defaults(func=cmd_cast)
 
     subs = sub.add_parser("subclasses", help="列出子职（可按职业过滤）")
     subs.add_argument("--class", dest="cls", default=None)

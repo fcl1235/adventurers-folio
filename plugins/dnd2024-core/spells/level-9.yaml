@@ -86,6 +86,7 @@
     components: [v, s]
     duration: instant
     save: dex
+    save_effect: half
     area: {shape: sphere, feet: 40}
     damage: {type: fire, 9: 20d6}
     text:
@@ -132,6 +133,7 @@
     components: [v, s]
     duration: {kind: time, zh: 10 分钟, en: 10 minutes}
     save: con
+    save_effect: half
     damage: {type: acid, 9: 12d6}
     text:
       zh: |-
@@ -165,6 +167,7 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: con
+    save_effect: half
     damage: {type: thunder, 9: 2d6}
     text:
       zh: |-
@@ -228,6 +231,7 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: wis
+    save_effect: half
     area: {shape: sphere, feet: 30}
     damage: {type: psychic, 9: 10d10}
     text:

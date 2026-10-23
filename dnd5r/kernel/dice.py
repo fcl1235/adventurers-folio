@@ -84,13 +84,25 @@ class Dice:
         return RollResult(total=total, parts=tuple(parts))
 
     def __str__(self) -> str:
-        bits = ["%dd%d" % (d.count, d.sides) for d in self.dice]
+        """同面数的骰子合并着写（`1d10` + `1d10` → `2d10`）。
+
+        重击是把骰子翻倍得来的，两段同面骰若原样拼成 `1d10+1d10`，
+        既长又容易读成「两种伤害」。合并之后 `2d10` 就是玩家认得的写法。
+        """
+        counts: dict[int, int] = {}
+        order: list[int] = []
+        for die in self.dice:
+            if die.sides not in counts:
+                counts[die.sides] = 0
+                order.append(die.sides)
+            counts[die.sides] += die.count
+        bits = ["%dd%d" % (counts[sides], sides) for sides in order]
+        text = "+".join(bits)
         if self.flat:
-            if bits:
-                bits.append(("+" if self.flat > 0 else "") + str(self.flat))
-            else:
-                bits.append(str(self.flat))   # 纯定值（徒手 1 点）不要写成 "+1"
-        return "".join(bits) if bits else "0"
+            if not text:
+                return str(self.flat)          # 纯定值（徒手 1 点）不要写成 "+1"
+            text += ("+" if self.flat > 0 else "-") + str(abs(self.flat))
+        return text or "0"
 
 
 def parse(expr: str) -> Dice:
@@ -127,6 +139,24 @@ def parse(expr: str) -> Dice:
     if not dice and flat == 0 and text not in ("0", "+0", "-0"):
         raise DiceError("骰式解析结果为空：%r" % expr)
     return Dice(dice=tuple(dice), flat=flat)
+
+
+def stack(expr: str, extra: str, times: int = 1) -> str:
+    """`expr` 叠 `times` 份 `extra`：`8d6` + 2 × `1d6` → `10d6`。
+
+    升环就是这么算的 —— 「每提升一环 +1d6」是**同一颗骰子多掷几次**，
+    不是把合计乘上去：写成 ×2 会连定值一起翻倍（`2d6+3` 会变成 14 + 6）。
+    """
+    if times <= 0 or not extra:
+        return expr
+    if not expr:
+        return extra
+    parts = [parse(expr), parse(extra)]
+    flat = parts[0].flat + parts[1].flat * times
+    dice: list[Die] = list(parts[0].dice)
+    for _ in range(times):
+        dice.extend(parts[1].dice)
+    return str(Dice(dice=tuple(dice), flat=flat))
 
 
 def roll_d20(rng: Rng, mode: str = "flat") -> RollResult:

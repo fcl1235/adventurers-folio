@@ -49,6 +49,10 @@ def _chosen_ids(bucket: dict) -> list[str]:
 
 SCALING_ZH = {"damage": "伤害骰", "extra_damage": "额外伤害",
               "beams": "光束数", "range": "射程（尺）", "weapon_die": "武器骰"}
+# 豁免成功后的伤害。「未判定」那一档必须写成一句人话，
+# 留空会让人以为是「豁免成功也没事」——那是另一条规则。
+SAVE_EFFECT_ZH = {"half": "豁免成功半伤", "none": "豁免成功无伤",
+                  "": "豁免成功的伤害见原文"}
 
 # --- 召唤物 stat block 的词汇表 ---------------------------------------
 # 放前端而不是内核：这是**显示**用的对照表，内核只认英文键（约束 C1/C3）。
@@ -234,10 +238,17 @@ def spell_text(row: dict, info: dict | None = None) -> str:
         extra.append("仪式")
     if row.get("save"):
         extra.append("%s 豁免" % ABILITY_ZH.get(str(row["save"]), str(row["save"])))
+        # 「豁免成功吃多少」是能算出来的，就别让玩家再去英文原文里找。
+        # 控制类法术（没有伤害表）不写这一句：那里根本没有「伤害多少」这回事。
+        effect = str(row.get("save_effect") or "")
+        if effect:
+            extra.append(SAVE_EFFECT_ZH[effect])
+        elif row.get("damage"):
+            extra.append(SAVE_EFFECT_ZH[""])
     if row.get("attack"):
         extra.append("法术攻击")
     if extra:
-        parts.append(" / ".join(extra))
+        parts.append(" / ".join(item for item in extra if item))
     if row.get("text"):
         parts.append("")
         parts.append(str(row["text"]))

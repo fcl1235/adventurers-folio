@@ -11,6 +11,7 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: force, 6: 6d10}
     text:
       zh: |-
@@ -28,6 +29,7 @@
     material: "three silver pins"
     duration: instant
     save: dex
+    save_effect: half
     damage: {type: lightning, 6: 10d8}
     upcast: "One additional bolt leaps from the first target to another target for each spell slot level above 6."
     text:
@@ -46,9 +48,11 @@
     material: "the powder of a crushed black, pearl worth 500+ GP"
     duration: instant
     save: con
+    save_effect: half
     area: {shape: sphere, feet: 60}
     damage: {type: necrotic, 6: 8d8}
     upcast: "The damage increases by 2d8 for each spell slot level above 6."
+    upcast_dice: {dice: 2d8, above: 6}
     text:
       zh: |-
         60 尺半径负能量, 8d6 黯蚀伤害(体质豁免减半)。
@@ -195,9 +199,11 @@
     material: "a miniature crystal sphere"
     duration: instant
     save: con
+    save_effect: half
     area: {shape: sphere, feet: 60}
     damage: {type: cold, 6: 10d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 6."
+    upcast_dice: {dice: 1d6, above: 6}
     text:
       zh: |-
         60 尺半径冰爆, 10d6 寒冷(体质豁免减半)。
@@ -245,6 +251,7 @@
     components: [v, s]
     duration: instant
     save: con
+    save_effect: half
     damage: {type: necrotic, 6: 14d6}
     text:
       zh: |-
@@ -405,6 +412,7 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: con
+    save_effect: half
     damage: {type: radiant, 6: 6d8}
     text:
       zh: |-
@@ -452,8 +460,10 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: cold, 6: 10d6}
     upcast: "The damage the wall deals when it appears increases by 2d6 and the damage from passing through the sheet of frigid air increases by 1d6 for each spell slot level above 6."
+    upcast_dice: {dice: 1d6, above: 6}
     text:
       zh: |-
         造出冰墙, 可造成寒冷伤害。
@@ -471,8 +481,10 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: piercing, 6: 7d8}
     upcast: "Both types of damage increase by 1d8 for each spell slot level above 6."
+    upcast_dice: {dice: 1d8, above: 6}
     text:
       zh: |-
         造出荆棘墙, 穿过者受 7d8 穿刺并减速。

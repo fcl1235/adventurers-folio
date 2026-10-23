@@ -47,6 +47,7 @@
     attack: melee
     damage: {type: force, 5: 5d8}
     upcast: "The damage of the Clenched Fist increases by 2d8 and the damage of the Grasping Hand increases by 2d6 for each spell slot level above 5."
+    upcast_dice: {dice: 2d6, above: 5}
     text:
       zh: |-
         造出巨大的力场手, 可抓握/推击(专注 1 分钟)。
@@ -78,9 +79,11 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: con
+    save_effect: half
     area: {shape: sphere, feet: 20}
     damage: {type: poison, 5: 5d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 5."
+    upcast_dice: {dice: 1d8, above: 5}
     text:
       zh: |-
         20 尺半径毒云, 体质豁免失败受 5d8 毒素伤害(专注 10 分钟)。
@@ -128,9 +131,11 @@
     material: "a small crystal or glass cone"
     duration: instant
     save: con
+    save_effect: half
     area: {shape: cone, feet: 60}
     damage: {type: cold, 5: 8d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 5."
+    upcast_dice: {dice: 1d8, above: 5}
     text:
       zh: |-
         60 尺锥形, 8d8 寒冷伤害(体质豁免减半)。
@@ -164,6 +169,7 @@
     duration: {kind: time, zh: 1 分钟, en: 1 minute}
     ritual: true
     save: int
+    save_effect: none
     damage: {type: psychic, 5: 6d6}
     text:
       zh: |-
@@ -180,6 +186,7 @@
     components: []
     duration: {kind: time, zh: 7 天, en: 7 days}
     save: con
+    save_effect: none
     damage: {type: necrotic, 5: 11d8}
     text:
       zh: |-
@@ -248,6 +255,7 @@
     material: "a handful of sand"
     duration: {kind: time, zh: 8 小时, en: 8 hours}
     save: wis
+    save_effect: none
     damage: {type: psychic, 5: 3d6}
     text:
       zh: |-
@@ -265,8 +273,10 @@
     material: "a pinch of sulfur"
     duration: instant
     save: dex
+    save_effect: half
     damage: {type: fire, 5: 5d6}
     upcast: "The Fire damage and the Radiant damage increase by 1d6 for each spell slot level above 5."
+    upcast_dice: {dice: 1d6, above: 5}
     text:
       zh: |-
         10 尺半径火柱, 5d6 火焰 + 5d6 光耀(敏捷豁免减半)。
@@ -349,9 +359,11 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: con
+    save_effect: half
     area: {shape: sphere, feet: 20}
     damage: {type: piercing, 5: 4d10}
     upcast: "The damage increases by 1d10 for each spell slot level above 5."
+    upcast_dice: {dice: 1d10, above: 5}
     text:
       zh: |-
         20 尺半径虫群, 4d10 穿刺伤害(体质豁免减半)。

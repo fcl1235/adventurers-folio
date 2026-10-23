@@ -79,9 +79,11 @@
     components: [v, s]
     duration: instant
     save: dex
+    save_effect: half
     area: {shape: cone, feet: 15}
     damage: {type: fire, 1: 3d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 1."
+    upcast_dice: {dice: 1d6, above: 1}
     text:
       zh: |-
         15 尺锥形, 2d6 火焰伤害(敏捷豁免减半)。
@@ -272,8 +274,10 @@
     components: [v]
     duration: instant
     save: wis
+    save_effect: half
     damage: {type: psychic, 1: 3d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 1."
+    upcast_dice: {dice: 1d6, above: 1}
     text:
       zh: |-
         目标感知豁免失败: 3d6 心灵伤害并用反应逃离。
@@ -305,6 +309,7 @@
     duration: instant
     damage: {type: radiant, 1: 2d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 1."
+    upcast_dice: {dice: 1d8, above: 1}
     text:
       zh: |-
         命中后消耗法术位追加 2d8 光耀伤害(不死/邪魔 +1d8)。
@@ -323,6 +328,7 @@
     save: str
     damage: {type: piercing, 1: 1d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 1."
+    upcast_dice: {dice: 1d6, above: 1}
     text:
       zh: |-
         命中后目标力量豁免, 失败被藤蔓束缚(专注)。
@@ -499,6 +505,7 @@
     attack: ranged
     damage: {type: radiant, 1: 4d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 1."
+    upcast_dice: {dice: 1d6, above: 1}
     text:
       zh: |-
         远程法术攻击, 4d6 光耀, 下次对该目标攻击优势。
@@ -529,8 +536,10 @@
     components: [v, s]
     duration: instant
     save: dex
+    save_effect: half
     damage: {type: fire, 1: 2d10}
     upcast: "The damage increases by 1d10 for each spell slot level above 1."
+    upcast_dice: {dice: 1d10, above: 1}
     text:
       zh: |-
         反应: 受到伤害时反伤 2d10 火焰(敏捷豁免减半)。
@@ -619,6 +628,7 @@
     attack: ranged
     damage: {type: piercing, 1: 1d10}
     upcast: "The Cold damage increases by 1d6 for each spell slot level above 1."
+    upcast_dice: {dice: 1d6, above: 1}
     text:
       zh: |-
         1d10 穿刺 + 爆炸 2d6 寒冷(敏捷豁免)。
@@ -666,8 +676,10 @@
     components: [v, s]
     duration: instant
     save: con
+    save_effect: half
     damage: {type: necrotic, 1: 2d10}
     upcast: "The damage increases by 1d10 for each spell slot level above 1."
+    upcast_dice: {dice: 1d10, above: 1}
     text:
       zh: |-
         近战法术攻击, 2d10 黯蚀伤害。
@@ -810,6 +822,7 @@
     save: con
     damage: {type: fire, 1: 1d6}
     upcast: "All the damage increases by 1d6 for each spell slot level above 1."
+    upcast_dice: {dice: 1d6, above: 1}
     text:
       zh: |-
         命中后追加 1d6 火焰, 并每回合持续燃烧(专注)。
@@ -905,6 +918,7 @@
     components: [v, s]
     duration: instant
     save: con
+    save_effect: half
     area: {shape: cube, feet: 15}
     damage: {type: thunder, 1: 2d8}
     text:

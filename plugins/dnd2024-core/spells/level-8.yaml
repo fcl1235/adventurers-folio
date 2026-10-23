@@ -58,6 +58,7 @@
     material: "a key ring with no keys"
     duration: instant
     save: int
+    save_effect: half
     damage: {type: psychic, 8: 10d12}
     text:
       zh: |-
@@ -138,6 +139,7 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: bludgeoning, 8: 12d6}
     text:
       zh: |-
@@ -187,6 +189,7 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: dex
+    save_effect: half
     area: {shape: sphere, feet: 20}
     damage: {type: fire, 8: 10d8}
     text:
@@ -249,6 +252,7 @@
     material: "a piece of sunstone"
     duration: instant
     save: con
+    save_effect: half
     area: {shape: sphere, feet: 60}
     damage: {type: radiant, 8: 12d6}
     text:
@@ -267,6 +271,7 @@
     duration: {kind: time, zh: 专注，最多 6 轮, en: up to 6 rounds}
     concentration: true
     save: str
+    save_effect: half
     damage: {type: bludgeoning, 8: 6d10}
     text:
       zh: |-

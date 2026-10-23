@@ -28,8 +28,10 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: radiant, 7: 6d12}
     upcast: "The healing and damage increase by 1d12 for each spell slot level above 7."
+    upcast_dice: {dice: 1d12, above: 7}
     text:
       zh: |-
         召唤天界生物为你作战(专注 1 小时)。
@@ -109,6 +111,7 @@
     components: [v, s]
     duration: instant
     save: dex
+    save_effect: half
     area: {shape: cube, feet: 10}
     damage: {type: fire, 7: 7d10}
     text:
@@ -188,6 +191,7 @@
     components: [v, s]
     duration: instant
     save: dex
+    save_effect: half
     area: {shape: cone, feet: 60}
     damage: {type: acid, 7: 12d6}
     text:
@@ -299,6 +303,7 @@
     material: "powdered diamond worth 1,000+ GP, which the spell consumes"
     duration: {kind: special, zh: 直到被驱散, en: Until dispelled or triggered}
     save: con
+    save_effect: half
     area: {shape: sphere, feet: 60}
     damage: {type: necrotic, 7: 10d10}
     text:

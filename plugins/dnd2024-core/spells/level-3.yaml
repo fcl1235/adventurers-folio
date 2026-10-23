@@ -75,8 +75,10 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: lightning, 3: 3d10}
     upcast: "The damage increases by 1d10 for each spell slot level above 3."
+    upcast_dice: {dice: 1d10, above: 3}
     text:
       zh: |-
         专注 10 分钟, 每回合召雷 3d10 闪电伤害(敏捷豁免)。
@@ -109,8 +111,10 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: str
+    save_effect: none
     damage: {type: slashing, 3: 3d10}
     upcast: "The damage increases by 1d10 for each spell slot level above 3."
+    upcast_dice: {dice: 1d10, above: 3}
     text:
       zh: |-
         召唤精魂兽群, 造成 3d10 伤害或提供骑乘(专注 10 分钟)。
@@ -204,9 +208,11 @@
     material: "a ball of bat guano and sulfur"
     duration: instant
     save: dex
+    save_effect: half
     area: {shape: sphere, feet: 20}
     damage: {type: fire, 3: 8d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 3."
+    upcast_dice: {dice: 1d6, above: 3}
     text:
       zh: |-
         20 尺半径爆炸, 8d6 火焰伤害(敏捷豁免减半)。
@@ -311,8 +317,10 @@
     material: "a bit of fur and a crystal rod"
     duration: instant
     save: dex
+    save_effect: half
     damage: {type: lightning, 3: 8d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 3."
+    upcast_dice: {dice: 1d6, above: 3}
     text:
       zh: |-
         100 尺直线, 8d6 闪电伤害(敏捷豁免减半)。
@@ -566,9 +574,11 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: wis
+    save_effect: half
     area: {shape: emanation, feet: 15}
     damage: {type: radiant, 3: 3d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 3."
+    upcast_dice: {dice: 1d8, above: 3}
     text:
       zh: |-
         15 尺半径灵体环绕, 敌人受 3d8 光耀/黯蚀伤害(专注 10 分钟)。
@@ -637,6 +647,7 @@
     attack: melee
     damage: {type: necrotic, 3: 3d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 3."
+    upcast_dice: {dice: 1d6, above: 3}
     text:
       zh: |-
         近战法术攻击, 3d6 黯蚀伤害并回复等量 HP(专注 1 分钟)。
@@ -686,6 +697,7 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: str
+    save_effect: half
     damage: {type: bludgeoning, 3: 4d8}
     text:
       zh: |-

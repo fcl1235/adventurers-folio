@@ -62,6 +62,7 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: str
+    save_effect: none
     damage: {type: bludgeoning, 4: 3d6}
     text:
       zh: |-
@@ -78,8 +79,10 @@
     components: [v, s]
     duration: instant
     save: con
+    save_effect: half
     damage: {type: necrotic, 4: 8d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 4."
+    upcast_dice: {dice: 1d8, above: 4}
     text:
       zh: |-
         目标体质豁免失败受 8d8 黯蚀伤害(植物劣势)。
@@ -164,9 +167,11 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: wis
+    save_effect: half
     area: {shape: emanation, feet: 10}
     damage: {type: force, 4: 5d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 4."
+    upcast_dice: {dice: 1d8, above: 4}
     text:
       zh: |-
         召唤精魂精类, 可传送并造成伤害(专注 10 分钟)。
@@ -184,6 +189,7 @@
     duration: {kind: time, zh: 专注，最多 10 分钟, en: up to 10 minutes}
     concentration: true
     save: str
+    save_effect: half
     damage: {type: bludgeoning, 4: 2d8}
     text:
       zh: |-
@@ -278,6 +284,7 @@
     material: "a silver whistle"
     duration: {kind: time, zh: 8 小时, en: 8 hours}
     save: dex
+    save_effect: none
     damage: {type: force, 4: 4d8}
     text:
       zh: |-
@@ -389,8 +396,10 @@
     material: "a mitten"
     duration: instant
     save: dex
+    save_effect: half
     damage: {type: bludgeoning, 4: 2d10}
     upcast: "The Bludgeoning damage increases by 1d10 for each spell slot level above 4."
+    upcast_dice: {dice: 1d10, above: 4}
     text:
       zh: |-
         20 尺半径冰雹, 2d8 钝击 + 4d6 寒冷(敏捷豁免减半)。
@@ -423,8 +432,10 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: wis
+    save_effect: half
     damage: {type: psychic, 4: 4d10}
     upcast: "The damage increases by 1d10 for each spell slot level above 4."
+    upcast_dice: {dice: 1d10, above: 4}
     text:
       zh: |-
         目标感知豁免失败则恐惧并每回合受 4d10 心灵伤害(专注 1 分钟)。
@@ -537,9 +548,11 @@
     material: "a drop of bile"
     duration: instant
     save: dex
+    save_effect: half
     area: {shape: sphere, feet: 20}
     damage: {type: acid, 4: 10d4}
     upcast: "The initial damage increases by 2d4 for each spell slot level above 4."
+    upcast_dice: {dice: 2d4, above: 4}
     text:
       zh: |-
         15 尺半径强酸, 10d4 强酸伤害(敏捷豁免减半)。
@@ -557,8 +570,10 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: fire, 4: 5d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 4."
+    upcast_dice: {dice: 1d8, above: 4}
     text:
       zh: |-
         造出火墙, 穿过者受 5d8 火焰伤害(专注 1 分钟)。

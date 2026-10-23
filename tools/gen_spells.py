@@ -55,6 +55,12 @@ AREA_RE = re.compile(
     r"(\d+)-foot(?:-radius)?\s+(Sphere|Cube|Cone|Cylinder|Line|Emanation)", re.I)
 SAVE_RE = re.compile(
     r"(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw", re.I)
+# 豁免成功吃多少 —— 只有**明确写出了**才敢落字段，判不出来就留空（未判定）。
+# 2024 的法术条目里同一个意思有四五种写法，逐条列举是为了「漏判 = 空」而不是「漏判 = 无伤」。
+_HALF_RE = re.compile(r"half (?:as much|the (?:initial )?damage|damage)", re.I)
+_FAIL_DICE_RE = re.compile(
+    r"(?:failed save|fails?)[^.]{0,120}?\b\d+d\d+\b", re.I)
+_OR_TAKE_RE = re.compile(r"or take \d+d\d+", re.I)
 TIME_RE = re.compile(r"^(up to\s+)?(\d+)\s+(round|minute|hour|day)s?$", re.I)
 
 
@@ -131,6 +137,29 @@ def parse_save(description: str) -> str:
     return "" if not match else match.group(1)[:3].lower()
 
 
+def parse_save_effect(row: dict, save: str, table: dict[int, str]) -> str:
+    """豁免成功后的伤害：`half` / `none` / 空串（未判定）。
+
+    三态里最难的是「空」。两类法术必须留空，不能硬填 `none`：
+
+      1. **伤害与豁免是两件事** —— 灼热金属的伤害是接触就吃，豁免只管能不能
+         拿住；荆棘丛生 / 灼热斩 / 纠缠打击的伤害来自「之后每回合」。
+      2. **攻击命中 + 另一次豁免** —— 寒冰锥先掷攻击（1d10 穿刺），命中与否
+         都会炸开一次敏捷豁免（2d6 寒冷）。内容里只有一条伤害表，一个字段
+         表达不了两条线，写 `none` 会让「豁免成功 = 0 伤害」这句假话成立。
+    """
+    if not save or not table:
+        return ""
+    if row.get("attack_type"):
+        return ""                      # 见上面第 2 条
+    text = row.get("description") or ""
+    if _HALF_RE.search(text):
+        return "half"
+    if _FAIL_DICE_RE.search(text) or _OR_TAKE_RE.search(text):
+        return "none"
+    return ""                          # 见上面第 1 条
+
+
 def parse_area(description: str) -> tuple[str, int] | None:
     match = AREA_RE.search(description or "")
     if not match:
@@ -149,6 +178,23 @@ def parse_damage(data: Any) -> tuple[dict[int, str], str]:
             continue
     kind = ((data.get("damage_type") or {}).get("index") or "").lower()
     return table, kind
+
+
+# --- 升环加骰 ---------------------------------------------------------
+# 数据源的 `damage_at_slot_level` 只有**基础环**一格，更高的环位只写在
+# `higher_level` 这句英文里。不解析它，用 4 环放火球会算出 8d6：
+# 一个不多不少、但就是错的数。只认「+XdY 每提升一环」这一种说法；
+# 升环改成「多一道射线 / 多一发飞弹」的不硬猜（骰式对不上，硬写会错得更离谱）。
+_UPCAST_DICE_RE = re.compile(
+    r"increases? by (\d+d\d+) for each (?:spell )?slot level above (\d+)", re.I)
+
+
+def parse_upcast_dice(row: dict) -> tuple[str, int]:
+    text = clean(row.get("higher_level") or "")
+    match = _UPCAST_DICE_RE.search(text)
+    if not match:
+        return "", 0
+    return match.group(1), int(match.group(2))
 
 
 # --- 戏法成长 ---------------------------------------------------------
@@ -222,6 +268,8 @@ def render_spell(row: dict, zh: dict) -> str:
     table, dmg_type = parse_damage(row.get("damage"))
     area = parse_area(row.get("description", ""))
     save = parse_save(row.get("description", ""))
+    save_effect = parse_save_effect(row, save, table)
+    upcast_dice, upcast_above = parse_upcast_dice(row)
 
     out = ["  - id: %s" % ident,
            "    name: %s" % flow([("zh", zh["name"]), ("en", row["name"])]),
@@ -257,6 +305,8 @@ def render_spell(row: dict, zh: dict) -> str:
         out.append("    ritual: true")
     if save:
         out.append("    save: %s" % save)
+    if save_effect:
+        out.append("    save_effect: %s" % save_effect)
     if row.get("attack_type"):
         out.append("    attack: %s" % str(row["attack_type"]).lower())
     if area:
@@ -271,6 +321,10 @@ def render_spell(row: dict, zh: dict) -> str:
         out.append("    scaling: {%s}" % ", ".join("%s: %s" % pair for pair in pairs))
     if row.get("higher_level"):
         out.append("    upcast: %s" % json.dumps(clean(row["higher_level"]), ensure_ascii=False))
+    # 只有**伤害**表存在时升环加骰才有意义：治疗术的 "increases by 1d4"
+    # 加的是回复量，写成伤害骰会让以后的治疗管道读到错的数。
+    if upcast_dice and table:
+        out.append("    upcast_dice: {dice: %s, above: %d}" % (upcast_dice, upcast_above))
 
     out.append("    text:")
     out.append("      zh: " + block(zh.get("desc") or clean(row["description"]), 8))

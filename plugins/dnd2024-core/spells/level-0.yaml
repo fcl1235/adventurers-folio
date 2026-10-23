@@ -10,6 +10,7 @@
     components: [v, s]
     duration: instant
     save: dex
+    save_effect: none
     area: {shape: sphere, feet: 5}
     damage: {type: acid, 0: 1d6}
     scaling: {kind: damage, 5: 2d6, 11: 3d6, 17: 4d6}
@@ -295,6 +296,7 @@
     components: [v, s]
     duration: instant
     save: dex
+    save_effect: none
     damage: {type: radiant, 0: 1d8}
     scaling: {kind: damage, 5: 2d8, 11: 3d8, 17: 4d8}
     text:
@@ -423,6 +425,7 @@
     components: [v]
     duration: instant
     save: wis
+    save_effect: none
     damage: {type: psychic, 0: 1d6}
     scaling: {kind: damage, 5: 2d6, 11: 3d6, 17: 4d6}
     text:

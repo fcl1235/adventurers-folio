@@ -13,6 +13,7 @@
     attack: ranged
     damage: {type: acid, 2: 4d4}
     upcast: "The damage (both initial and later) increases by 1d4 for each spell slot level above 2."
+    upcast_dice: {dice: 1d4, above: 2}
     text:
       zh: |-
         远程法术攻击, 4d4 强酸, 下回合再受 2d4。
@@ -367,8 +368,10 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: dex
+    save_effect: half
     damage: {type: fire, 2: 2d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 2."
+    upcast_dice: {dice: 1d6, above: 2}
     text:
       zh: |-
         滚动的火球, 2d6 火焰伤害(敏捷豁免, 专注 1 分钟)。
@@ -421,6 +424,7 @@
     save: con
     damage: {type: fire, 2: 2d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 2."
+    upcast_dice: {dice: 1d8, above: 2}
     text:
       zh: |-
         加热金属物件, 触碰者受 2d8 火焰伤害(专注 1 分钟)。
@@ -580,8 +584,10 @@
     duration: {kind: time, zh: 专注，最多 1 小时, en: up to 1 hour}
     concentration: true
     save: wis
+    save_effect: half
     damage: {type: psychic, 2: 3d8}
     upcast: "The damage increases by 1d8 for each spell slot level above 2."
+    upcast_dice: {dice: 1d8, above: 2}
     text:
       zh: |-
         目标感知豁免失败受 3d8 心灵伤害, 且你能感知其位置。
@@ -627,8 +633,10 @@
     duration: {kind: time, zh: 专注，最多 1 分钟, en: up to 1 minute}
     concentration: true
     save: con
+    save_effect: half
     damage: {type: radiant, 2: 2d10}
     upcast: "The damage increases by 1d10 for each spell slot level above 2."
+    upcast_dice: {dice: 1d10, above: 2}
     text:
       zh: |-
         5 尺半径光柱, 2d10 光耀伤害(体质豁免, 专注 1 分钟)。
@@ -772,6 +780,7 @@
     material: "a chip of mica"
     duration: instant
     save: con
+    save_effect: half
     area: {shape: sphere, feet: 10}
     damage: {type: thunder, 2: 3d8}
     text:
@@ -791,6 +800,7 @@
     concentration: true
     damage: {type: radiant, 2: 2d6}
     upcast: "The damage increases by 1d6 for each spell slot level above 2."
+    upcast_dice: {dice: 1d6, above: 2}
     text:
       zh: |-
         命中后目标被光标记, 下次攻击对其优势(专注 1 分钟)。

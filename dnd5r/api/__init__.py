@@ -35,6 +35,10 @@ from ..rules.contributions import (
     save_modifiers, skill_modifiers,
 )
 from ..rules.effects import EffectContext
+from ..rules.derived import resolver_for as _resolver_for
+from ..rules.combat import (
+    RESOLUTION_KINDS, Casting, Target, casting_for, target_from_actor,
+)
 from ..rules.health import hit_dice_average
 from ..rules.morph import reasons_for
 from ..rules.powers import Power, can_use
@@ -368,23 +372,12 @@ def new_character(
 
 # --- 派生值 -----------------------------------------------------------
 def resolver_for(actor: Actor, content: ContentBundle | None = None) -> Resolver:
-    """派生值求解器。给了内容包才会读装备（护甲 / 盾）与真实的无甲事实。"""
-    profile = actor.profile
-    total = profile.total if profile else TotalLevel(1)
-    class_level = None
-    if profile and len(profile.classes) == 1:
-        class_level = ClassLevel(int(profile.classes[0].class_level))
-    top = actor.top()
-    loadout = loadout_for(actor, content.armors) if content is not None else Loadout()
-    ctx = RefContext(
-        prof_bonus=proficiency_bonus(total),
-        total_level=total,
-        class_level=class_level,
-        abilities=top.statblock.abilities,
-        speeds=dict(top.statblock.speeds),
-        facts=facts_for(actor, class_level, loadout),
-    )
-    return Resolver(ctx)
+    """派生值求解器。给了内容包才会读装备（护甲 / 盾）与真实的无甲事实。
+
+    装配在 `rules/derived.py`：施法结算那边要用同一份，
+    两边各写一遍的话，「界面按穿了甲算、结算按没穿算」这种错不会有任何报错。
+    """
+    return _resolver_for(actor, None if content is None else content.armors)
 
 
 def _proficient_saves(actor: Actor) -> set[str]:
@@ -979,6 +972,36 @@ def roll_check(
     }
 
 
+def roll_spell(
+    actor: Actor,
+    content: ContentBundle,
+    spell_id: str,
+    slot: int | None = None,
+    targets: Sequence[Any] = (),
+    rng: Rng | None = None,
+    locale: str = "zh",
+    class_id: str = "",
+    apply: bool = False,
+    seed: int | None = None,
+) -> dict:
+    """掷一次施法结算：命中/豁免 → 伤害骰 → 抗性 → （可选）落到 HP。
+
+    `targets` 既收 `Target`（DM 手填的「AC 15、敏捷 +2」），也收 `Actor`
+    （建好的怪、召唤物、队友）。
+
+    `apply=False` 是**只算不落库**：界面预览「这一发打出去会怎样」，
+    点确认才用 `apply=True` 真扣血。默认不改状态，是因为误点一下就动了
+    别人的血条，比多点一次麻烦得多。
+    """
+    from ..rules.combat import Target, resolve_spell, target_from_actor
+
+    prepared = [item if isinstance(item, Target)
+                else target_from_actor(content, item, locale)
+                for item in targets]
+    return resolve_spell(content, actor, spell_id, slot, prepared,
+                         rng or SeededRng(seed), locale, class_id, apply)
+
+
 def _need_ability(ability: str) -> None:
     if ability not in ABILITY_KEYS:
         raise RuleError("不认识的属性：%r（可选 %s）" % (ability, "/".join(ABILITY_KEYS)))
@@ -1102,6 +1125,8 @@ __all__ = [
     "create_actor", "new_character", "resolver_for", "build_from_profile",
     "set_feat_choice", "save_character", "load_character", "SAVE_VERSION",
     "character_sheet", "actor_view", "roll_check", "CHECK_KINDS",
+    "roll_spell", "Target", "Casting", "target_from_actor", "casting_for",
+    "RESOLUTION_KINDS",
     "find_power", "use_power", "plugin_summary",
     "spell_info", "summon_info",
     "eligible_forms_for", "morph_class_of", "form_options",
