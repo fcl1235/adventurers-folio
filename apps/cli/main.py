@@ -203,6 +203,12 @@ def cmd_cast(args) -> int:
         print("免费施放次数 %d/%d%s"
               % (free["left"], free["capacity"],
                  "" if free["spent"] else "（预览：未扣除，加 --apply 才记账）"))
+    spent = report["slot_spend"]
+    if spent:
+        # 法术位也是钱：不加 --apply 时不扣，所以要说清「这是预览」
+        print("法术位 %d 环 %d/%d%s"
+              % (spent["level"], spent["left"], spent["capacity"],
+                 "" if spent["spent"] else "（预览：未扣除，加 --apply 才记账）"))
     print("法术 DC %d%s · 法术攻击 +%d%s"
           % (casting["dc"], _detail(casting["dc_detail"], casting["dc"]),
              casting["attack"], _detail(casting["attack_detail"], casting["attack"])))
