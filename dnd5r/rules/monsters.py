@@ -19,14 +19,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 
 from ..kernel.dice import DiceError
 from ..kernel.dice import parse as parse_dice
-from ..kernel.errors import PluginError
+from ..kernel.errors import PluginError, RuleError
 from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
 from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
+from .advantage import merge
+
+if TYPE_CHECKING:
+    from .encounter import Encounter
 
 SIZES: tuple[str, ...] = ("tiny", "small", "medium", "large", "huge", "gargantuan")
 SPEED_KINDS: tuple[str, ...] = ("walk", "climb", "swim", "fly", "burrow")
@@ -34,6 +38,11 @@ SENSE_KINDS: tuple[str, ...] = ("blindsight", "darkvision", "tremorsense", "true
 # 一条动作用哪种方式结算，五种就够：掷命中 / 掷命中（远程）/ 对面豁免 /
 # 只是「多重攻击」的说明（真正的结算在它列的那几条攻击里）/ 其余（纯文字）。
 ACTION_KINDS: tuple[str, ...] = ("melee", "ranged", "save", "multiattack", "other")
+
+# 特性可以改变的掷骰形状。`flat` 不写进内容（写了等于「无条件平掷」的废话）。
+MODE_VALUES: tuple[str, ...] = ("adv", "dis")
+# 三种事实：两种问 HP、一种问位置。都不是内容能自答的。
+MODE_FACTS: tuple[str, ...] = ("ally_near_target", "target_wounded", "self_bloodied")
 
 
 @dataclass(frozen=True, slots=True)
@@ -118,17 +127,49 @@ class MonsterAttack:
 
 @dataclass(frozen=True, slots=True)
 class MonsterTrait:
-    """被动特性。**只有文字** —— 它们改的是判定条件，不是数字。
+    """被动特性。
 
-    真要算（「群体战术」给优势）需要「谁站在谁旁边」的判定，
-    那是 `Encounter` 的事，不是内容的事。
+    大多数特性**只有文字** —— 它们改的是环境（能不能在水下呼吸）、
+    惩罚谁（阳光敏感），不是这一掷的数字。硬把它们变成字段就是在编规则。
+
+    但有一类例外是**算得出来的**，而且不算就会明着错：改变这一掷的
+    **掷骰形状**（优势/劣势）。所以 `attack_mode` + `when` 两个字段：
+
+        attack_mode: { mode: adv, when: ally_near_target }
+
+    `when` 只认三种事实，都得由 `Encounter` / `Actor` 回答，不是内容自己说了算：
+
+      ally_near_target  目标的 5 尺内有没有**它这一伙**的人（阵营 + 位置）
+      target_wounded    目标 HP 未满（`current < maximum`）
+      self_bloodied     自己浴血（`current * 2 <= maximum`，2024 的 Bloodied）
+
+    留空 = 无条件（数据里没有这种条目，通道先留着）。
+    **算不出来就说算不出来**（`unknown`），不许默认「不成立」——
+    那会把「不知道谁站在旁边」悄悄变成「没有盟友」。
     """
 
     name: Text
     text: Text
+    attack_mode: str = ""
+    when: str = ""
+
+    def __post_init__(self) -> None:
+        if self.attack_mode and self.attack_mode not in MODE_VALUES:
+            raise PluginError("%s 的攻击掷骰模式只能是 %s：%r"
+                              % (self.name.zh, "/".join(MODE_VALUES), self.attack_mode))
+        if self.when and self.when not in MODE_FACTS:
+            raise PluginError("%s 的触发事实不认识：%r（只认 %s）"
+                              % (self.name.zh, self.when, "/".join(MODE_FACTS)))
+        if self.when and not self.attack_mode:
+            raise PluginError("%s 写了 when 却没有 attack_mode —— 那句条件不会生效"
+                              % self.name.zh)
 
     def to_dict(self, locale: str = "zh") -> dict:
-        return {"name": self.name.get(locale), "text": self.text.get(locale)}
+        row = {"name": self.name.get(locale), "text": self.text.get(locale)}
+        if self.attack_mode:
+            row["attack_mode"] = self.attack_mode
+            row["when"] = self.when
+        return row
 
 
 def parse_damage_roll(data: Any, where: str = "") -> DamageRoll:
@@ -169,10 +210,99 @@ def parse_trait(data: Any, where: str = "") -> MonsterTrait:
     for key in ("name", "text"):
         if key not in data:
             raise PluginError("%s 的怪物特性缺少 %s" % (where, key))
+    # `attack_mode` 两种写法都收：结构式 `{mode: adv, when: ...}`（生成器用）
+    # 与平铺的 `attack_mode: adv` + `when: ...`（手写内容顺手）。
+    # 值域校验在 `MonsterTrait.__post_init__`，这里的职责只是把字段读出来。
+    mode_data = data.get("attack_mode")
+    attack_mode = when = ""
+    if isinstance(mode_data, Mapping):
+        attack_mode = str(mode_data.get("mode", "")).strip().lower()
+        when = str(mode_data.get("when", "")).strip().lower()
+    elif mode_data:
+        attack_mode = str(mode_data).strip().lower()
+        when = str(data.get("when", "")).strip().lower()
     return MonsterTrait(
         name=Text.from_dict(data["name"], where="%s name" % where),
         text=Text.from_dict(data["text"], where="%s text" % where),
+        attack_mode=attack_mode,
+        when=when,
     )
+
+
+# --- 特性事实（G23 / P10b）-----------------------------------------------
+UNKNOWN = "unknown"
+
+_FACT_ZH = {
+    "ally_near_target": "目标的 5 尺内有没有它这一伙的人",
+    "target_wounded": "目标 HP 是否未满",
+    "self_bloodied": "自己是否浴血",
+}
+
+
+def _fact_value(
+    fact: str,
+    encounter: "Encounter | None",
+    attacker: Actor,
+    target: Actor | None,
+) -> str:
+    """回答一个事实：`true` / `false` / `unknown`。
+
+    **unknown 不许折叠成 false** ——「不知道谁站在旁边」和「没有盟友」是两句话，
+    折叠了就会把玩家实打实的优势悄悄吃掉。算不出的分支全部显式返回 unknown。
+    """
+    if fact == "self_bloodied":
+        hp = attacker.root().hp
+        return "true" if hp.current * 2 <= hp.maximum else "false"
+    if fact == "target_wounded":
+        if target is None:
+            return UNKNOWN          # 手填的 Target 没有 HP，看得见 AC 看不见血
+        hp = target.root().hp
+        return "true" if hp.current < hp.maximum else "false"
+    if fact == "ally_near_target":
+        if encounter is None or target is None:
+            return UNKNOWN          # 没有场，就没有「站在谁旁边」
+        try:
+            source = encounter.get(attacker)
+            mark = encounter.get(target)
+        except RuleError:
+            return UNKNOWN          # 打人或挨打的那个不在场上
+        if not mark.placed:
+            return UNKNOWN          # 目标没摆位，5 尺无从量起
+        allies = encounter.allies_of(source)
+        if any(not item.placed for item in allies):
+            return UNKNOWN          # 有盟友没摆位：他可能就站在旁边
+        return "true" if encounter.allies_near(source, mark) else "false"
+    raise PluginError("不认识的触发事实：%r（只认 %s）"
+                      % (fact, "/".join(MODE_FACTS)))
+
+
+def trait_attack_mode(
+    traits: tuple[MonsterTrait, ...],
+    encounter: "Encounter | None",
+    attacker: Actor,
+    target: Actor | None = None,
+    locale: str = "zh",
+) -> tuple[str, tuple[str, ...], tuple[str, ...]]:
+    """把一张特性表折成（掷骰模式, 给了模式的特性名, 无法判定的说明）。
+
+    优势与劣势同时成立 = 平掷（与玩家通道同一条规则，走 `advantage.merge`）。
+    unknown 的特性**不猜**：按平掷走，把话说出来让 DM 自己选掷骰模式。
+    """
+    modes: list[str] = []
+    sources: list[str] = []
+    unknowns: list[str] = []
+    for trait in traits:
+        if not trait.attack_mode:
+            continue
+        name = trait.name.get(locale)
+        value = _fact_value(trait.when, encounter, attacker, target)
+        if value == "true":
+            modes.append(trait.attack_mode)
+            sources.append(name)
+        elif value == "unknown":
+            unknowns.append("%s 判不了（%s：位置或血量算不出来），本次按平掷；"
+                            "要改请手动指定掷骰模式" % (name, _FACT_ZH.get(trait.when, trait.when)))
+    return merge(modes), tuple(sources), tuple(unknowns)
 
 
 # --- 出场 ---------------------------------------------------------------
@@ -289,8 +419,10 @@ def monster_stats(monster, actor: Actor, locale: str = "zh") -> dict:
 
 __all__ = [
     "SIZES", "SPEED_KINDS", "SENSE_KINDS", "ACTION_KINDS",
+    "MODE_VALUES", "MODE_FACTS", "UNKNOWN",
     "DamageRoll", "MonsterAttack", "MonsterTrait",
     "parse_damage_roll", "parse_attack", "parse_trait",
+    "trait_attack_mode", "_fact_value",
     "build_monster", "label_for", "cr_text",
     "find_attack", "attack_options", "monster_stats",
 ]

@@ -407,14 +407,18 @@ def resolve_monster_attack(
     rng: Rng | None = None,
     apply: bool = False,
     locale: str = "zh",
+    mode: str = "flat",
+    mode_sources: Sequence[str] = (),
 ) -> dict[str, Any]:
     """掷一次怪物动作。
 
     与 `resolve_attack` 的差别只有三处，都是「怪物不是玩家」带来的：
 
     1. **命中加值直接用卡上的数**（`attack.attack_bonus`），不经过 Resolver ——
-       见 `rules/monsters.py` 开头的实测：85/95 条攻击推不出来。
-    2. **没有额外伤害、没有一次性标记**：那些通道是玩家能力的，怪物不挂。
+       见 `rules/monsters.py` 开头的实测：85/95 条推不出来。
+    2. **优势/劣势由调用方算好传入**（`mode` / `mode_sources`）：特性的
+       「群体战术」要问遭遇战的阵营与位置，那部分在 api 层折算
+       （`rules.monsters.trait_attack_mode`），这里只管按模式掷骰。
     3. **重击只看 20**：`attack.crit_min` 是玩家能力的通道，怪物没有。
 
     豁免类动作（`kind="save"`）**不替你掷**：原文里「成功则半伤」「失败则被束缚」
@@ -463,7 +467,7 @@ def resolve_monster_attack(
         return base
 
     bonus = int(attack.attack_bonus or 0)
-    roll = roll_d20(roller, "flat")
+    roll = roll_d20(roller, mode)
     total = roll.total + bonus
     if roll.total == CRIT_ON_20:
         outcome = "critical"
@@ -499,6 +503,9 @@ def resolve_monster_attack(
         notes.append("重击：伤害骰翻倍，定值不翻")
     if not attack.damage:
         notes.append("这条动作没有登记伤害（原文可能只写了控制效果）")
+    if mode_sources and mode != "flat":
+        word = "优势" if mode == "adv" else "劣势"
+        notes.append("本次攻击带%s（来自：%s）" % (word, "、".join(mode_sources)))
     for item in segments:
         if item["defense"] == "resistance":
             notes.append("%s 抗性：伤害减半" % item["damage_type_zh"])
@@ -506,7 +513,6 @@ def resolve_monster_attack(
             notes.append("%s 免疫：伤害归零" % item["damage_type_zh"])
     if not apply:
         notes.append("预览：目标 HP 没有动")
-    notes.append("怪物的优势（群体战术这类特性）没有建模 —— 要优势请手动选掷骰模式")
 
     base.update({
         "rolled": True,
@@ -514,7 +520,10 @@ def resolve_monster_attack(
             "bonus": bonus,
             "die": roll.total,
             "total": int(total),
-            "mode": "flat",
+            "mode": mode,
+            "mode_sources": list(mode_sources),
+            "kept": list(roll.parts[0].rolls),
+            "dropped": list(roll.parts[0].dropped),
             "crit_min": CRIT_ON_20,
         },
         "outcome": outcome,

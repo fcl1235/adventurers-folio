@@ -143,6 +143,7 @@
           若目标 5 尺内至少有巨鼠的一个未失能盟友，巨鼠对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 啃咬, en: Bite }
       kind: melee
@@ -274,6 +275,7 @@
           若目标 5 尺内至少有狼的一个未失能盟友，狼对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 啃咬, en: Bite }
       kind: melee
@@ -361,6 +363,7 @@
           若目标 5 尺内至少有礁鲨的一个未失能盟友，礁鲨对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
     - name: { zh: 水下呼吸, en: Water Breathing }
       text:
         zh: |-

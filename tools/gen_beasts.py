@@ -98,6 +98,13 @@ def render_trait(row: dict, indent: str = "    ") -> list[str]:
     lines = ["%s- name: %s" % (indent, inline(row["name"]))]
     lines.extend(bilingual_text("text", text.get("zh", ""), text.get("en", ""),
                                 indent + "  "))
+    # 掷骰形状（G23 / P10b）原样带过去：变狼的德鲁伊，群体战术判的是
+    # 「变形这一层」的阵营与位置（root 是 pc，阵营默认我方）。
+    mode = row.get("attack_mode") or {}
+    if isinstance(mode, dict) and mode.get("mode"):
+        lines.append("%s  attack_mode: %s"
+                     % (indent, inline({"mode": mode.get("mode", ""),
+                                        "when": mode.get("when", "")})))
     return lines
 
 

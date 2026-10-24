@@ -25,6 +25,7 @@
           若目标 5 尺内至少有狒狒的一个未失能盟友，狒狒对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 啃咬, en: Bite }
       kind: melee
@@ -442,6 +443,7 @@
           若目标 5 尺内至少有鬣狗的一个未失能盟友，鬣狗对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 啃咬, en: Bite }
       kind: melee
@@ -832,6 +834,7 @@
           若目标 5 尺内至少有秃鹫的一个未失能盟友，秃鹫对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 喙啄, en: Beak }
       kind: melee
@@ -888,6 +891,7 @@
           若目标 5 尺内至少有血鹰的一个未失能盟友，血鹰对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 喙啄, en: Beak }
       kind: melee
@@ -1009,6 +1013,7 @@
           若目标 5 尺内至少有巨鼠的一个未失能盟友，巨鼠对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 啃咬, en: Bite }
       kind: melee
@@ -1611,6 +1616,7 @@
           若目标 5 尺内至少有狼的一个未失能盟友，狼对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 啃咬, en: Bite }
       kind: melee
@@ -1844,6 +1850,7 @@
           若目标 5 尺内至少有礁鲨的一个未失能盟友，礁鲨对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
     - name: { zh: 水下呼吸, en: Water Breathing }
       text:
         zh: |-
@@ -1949,6 +1956,7 @@
           若目标 5 尺内至少有恐狼的一个未失能盟友，恐狼对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 啃咬, en: Bite }
       kind: melee
@@ -2201,6 +2209,7 @@
           若目标 5 尺内至少有巨秃鹫的一个未失能盟友，巨秃鹫对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
   actions:
     - name: { zh: 多重攻击, en: Multiattack }
       kind: multiattack
@@ -2251,6 +2260,7 @@
           若目标 5 尺内至少有狮的一个未失能盟友，狮对该目标的攻击检定具有优势。
         en: |-
           (SRD 5.2 — the English wording has not been imported; the Chinese line is this plugin's working text.)
+      attack_mode: { mode: adv, when: ally_near_target }
     - name: { zh: 助跑跳跃, en: Running Leap }
       text:
         zh: |-

@@ -58,6 +58,12 @@ NO_ENGLISH = (
     "this plugin's working text.)"
 )
 
+# 特性 → 掷骰形状（G23 / P10b）。**只映射算得出来的那一类**：
+# 群体战术问「目标的 5 尺内有没有它这一伙未失能的盟友」，
+# 阵营（Combatant.side）与位置（Encounter）都能回答，`when: ally_near_target`。
+# 灵巧脱身（Nimble Escape）是附赠动作撤离/躲藏，不改这一掷 —— 留文字。
+TRAIT_MODES = {"Pack Tactics": ("adv", "ally_near_target")}
+
 _CJK = re.compile(r"[\u4e00-\u9fff]")
 
 
@@ -156,6 +162,10 @@ def render_trait(trait: dict, indent: str = "    ") -> list[str]:
     lines = ["%s- name: %s" % (indent, inline({"zh": zh, "en": en or zh}))]
     lines.extend(bilingual_text("text", str(trait.get("desc") or "").strip(),
                                 NO_ENGLISH, indent + "  "))
+    mapping = TRAIT_MODES.get(en)
+    if mapping:
+        lines.append("%s  attack_mode: %s"
+                     % (indent, inline({"mode": mapping[0], "when": mapping[1]})))
     return lines
 
 

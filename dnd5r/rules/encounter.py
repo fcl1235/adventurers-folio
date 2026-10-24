@@ -15,6 +15,10 @@
 3. **位置默认 (0,0)**。所有人挤在原点时距离为 0，于是「30 尺内」
    一律成立 —— 这是**宽松**的默认：宁可放过，不可误拦。报告里会写
    `placed=False`，让界面有机会说「位置还没摆」。
+4. **阵营是一条输入，不是判断**。「盟友」在 `Actor` 上不存在（同 `willing`），
+   所以 `Combatant.side` 按本体类型给默认值、界面上看得见、DM 能改。
+   群体战术这类「盟友站在目标旁边」的特性只认它，不猜「怪物都是同伙」。
+   反过来，**没摆位就不算相邻** —— 这条默认是收紧的：宽的那条会白送优势。
 """
 
 from __future__ import annotations
@@ -24,7 +28,7 @@ from typing import Iterable
 
 from ..kernel.errors import IllegalAction, RuleError
 from ..kernel.rng import Rng
-from ..model.actor import Actor
+from ..model.actor import Actor, ActorKind
 from .actioneconomy import ActionEconomy
 
 # 一格 = 5 尺。对内算格数，对外一律报尺 —— 规则书里说的是尺。
@@ -32,6 +36,18 @@ FOOT = 5
 # 触及范围：暂时固定 5 尺。内容里「触及 10 尺」的怪物还没建模，
 # 所以这里不能假装知道 —— 报告里照实说这是 5 尺口径。
 REACH_FEET = 5
+
+# 阵营：只有两边。**不是**「好人/坏人」，是「谁的盟友算谁的」——
+# 群体战术（G23）要回答「目标旁边有没有这只狼的盟友」，而「盟友」这个词
+# 在 `Actor` 上不存在（与 `willing` 同一条理由：心意由 DM 定）。
+# 所以它是一条**摆明了的**输入：加入时按本体类型给个默认值（玩家→我方、
+# 怪物→敌方），先攻条上看得见，DM 随时能改。默认值不是判断，是起点。
+SIDES: tuple[str, ...] = ("party", "foes")
+
+
+def _default_side(actor: Actor) -> str:
+    """默认阵营看**本体**：变熊的德鲁伊还是玩家这边的人（形态层不算另一伙）。"""
+    return "party" if actor.root().kind is ActorKind.PC else "foes"
 
 
 def _dex_mod(actor: Actor) -> int:
@@ -52,6 +68,14 @@ class Combatant:
     # 加入顺序。排序的最后一档 tiebreak 用它，而不是「当前列表里的位置」——
     # 后者在第二次排序时已经变了，会让同分的人来回换位。
     seq: int = 0
+    # 阵营：`party` / `foes`。默认按本体类型给，`Encounter.set_side` 可改。
+    side: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.side:
+            self.side = _default_side(self.actor)
+        elif self.side not in SIDES:
+            raise RuleError("阵营只能是 %s：%r" % ("/".join(SIDES), self.side))
 
     @property
     def id(self) -> str:
@@ -69,6 +93,7 @@ class Combatant:
             "x": int(self.x),
             "y": int(self.y),
             "placed": self.placed,
+            "side": self.side,
             "economy": self.economy.to_dict(),
             "down": self.actor.root().hp.is_down,
         }
@@ -94,22 +119,31 @@ class Encounter:
             found.add(actor)
         return found
 
-    def add(self, actor: Actor, x: int = 0, y: int = 0) -> Combatant:
+    def add(self, actor: Actor, x: int = 0, y: int = 0, side: str = "") -> Combatant:
         if any(item.id == actor.id for item in self.combatants):
             raise RuleError("参与者重复：%s" % actor.id)
         combatant = Combatant(
-            actor=actor, x=int(x), y=int(y), placed=False,
+            actor=actor, x=int(x), y=int(y), placed=False, side=side,
             economy=ActionEconomy(movement=self._walk_speed(actor)),
             seq=len(self.combatants),
         )
         self.combatants.append(combatant)
         return combatant
 
+    def set_side(self, who, side: str) -> Combatant:
+        """改阵营。**不猜**：谁跟谁是一伙的只有桌上知道，程序只负责记住。"""
+        if side not in SIDES:
+            raise RuleError("阵营只能是 %s：%r" % ("/".join(SIDES), side))
+        combatant = self.get(who)
+        combatant.side = side
+        return combatant
+
     @staticmethod
     def _walk_speed(actor: Actor) -> int:
         return int(actor.top().statblock.speed("walk") or 30)
 
-    def join(self, actor: Actor, rng: Rng, x: int = 0, y: int = 0) -> Combatant:
+    def join(self, actor: Actor, rng: Rng, x: int = 0, y: int = 0,
+             side: str = "") -> Combatant:
         """中途加入一个人（增援、召唤物、DM 临时放进来的一只）。
 
         三件事必须一起做，少一件就出鬼：
@@ -119,7 +153,7 @@ class Encounter:
         3. **把回合指针挪回原来那个人**：排序会改变下标，不重新定位的话
            「当前回合」会毫无理由地跳到别人身上 —— 这是最容易漏的一步。
         """
-        combatant = self.add(actor, x, y)
+        combatant = self.add(actor, x, y, side)
         if not self.round:
             return combatant
         if actor.root().hp.is_down:
@@ -323,6 +357,30 @@ class Encounter:
             and not item.actor.root().hp.is_down
             and self.distance(source, item) <= int(feet)
         ]
+
+    def allies_of(self, who) -> list[Combatant]:
+        """同阵营、没倒地、不是自己。**阵营是输入**（见 `SIDES`），不是判断。"""
+        source = self.get(who)
+        return [
+            item for item in self.combatants
+            if item is not source
+            and item.side == source.side
+            and not item.actor.root().hp.is_down
+        ]
+
+    def allies_near(self, who, target, feet: int = REACH_FEET) -> list[Combatant]:
+        """「谁站在**目标**旁边」—— 不是站在自己旁边。
+
+        群体战术的原文是 "an ally is within 5 feet of that creature"，
+        判的是目标身边，写成「自己身边」在双方贴身时会碰巧一样，
+        一旦分成两堆就全错，而且错得看不出来（G23 的原文坑）。
+
+        只算**摆过位**的人：默认全员挤在 (0,0) 时人人相邻，
+        那会让每只狼白拿优势 —— 宁可算不了，也不能算错。
+        """
+        mark = self.get(target)
+        return [item for item in self.allies_of(who)
+                if item.placed and self.distance(mark, item) <= int(feet)]
 
     # --- 推进 ---------------------------------------------------------
     def next_turn(self) -> Combatant | None:

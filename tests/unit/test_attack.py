@@ -302,6 +302,43 @@ class ExtraDamageTest(Base):
         self.assertTrue(options[0]["available"])
 
 
+class EncounterQuotaTest(Base):
+    """传了 `encounter` 的玩家武器攻击：额度与预览。
+
+    这条与怪物侧（`test_monsters` 的 `test_preview_pays_nothing`）是**两段代码**，
+    必须各验一次 —— 只验一边，另一边悄悄开始「预览也扣动作」是看不出来的。
+    """
+
+    def setup_turn(self):
+        hero = self.fighter()
+        foe = api.new_character(self.bundle, FIGHTER, 1, SOLDIER,
+                                name_zh="对手", name_en="Foe", actor_id="npc.foe")
+        encounter = Encounter.of([hero, foe])
+        encounter.roll_initiative(ScriptedRng([20, 1]))
+        encounter.begin()
+        guard = 0
+        while encounter.current().actor is not hero:
+            encounter.next_turn()
+            guard += 1
+            assert guard < 4
+        return hero, foe, encounter
+
+    def test_preview_pays_no_quota(self):
+        hero, foe, encounter = self.setup_turn()
+        result = api.attack_roll(hero, self.bundle, foe,
+                                 rng=ScriptedRng([15, 8]), encounter=encounter)
+        self.assertTrue(result["economy"]["preview"])
+        self.assertEqual(result["economy"]["after"]["action"], 1)
+
+    def test_apply_pays_the_action(self):
+        hero, foe, encounter = self.setup_turn()
+        result = api.attack_roll(hero, self.bundle, foe,
+                                 rng=ScriptedRng([15, 8]), encounter=encounter,
+                                 apply=True)
+        self.assertFalse(result["economy"]["preview"])
+        self.assertEqual(encounter.get(hero).economy.action, 0)
+
+
 class OpportunityTest(Base):
     """借机攻击：走出触及范围时报告「谁够得着、谁还有反应」。"""
 

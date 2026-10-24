@@ -5,7 +5,7 @@
 但不会还手 —— 因为全项目没有一处存着怪物的动作。`bestiary/beasts.yaml` 是
 荒野变形的形态表（16 只，只有属性/AC/HP），熊变成熊以后照样按徒手算。
 
-这组测试盯六件事：
+这组测试盯七件事：
 
   1. 91 只怪物都进得了 `bundle.monsters`，且每条 `text` 双语齐全；
   2. **命中加值取内容里的原值**，不按「属性 + 熟练」推（巨蜘蛛咬 +5，力量 +1）；
@@ -15,6 +15,9 @@
   5. 怪物攻击照玩家的规矩：命中 → 分段伤害 → 抗性 → 落 HP，
      预览不扣血不扣额度，动作/附赠只有自己回合能用、反应可以借别人的回合；
   6. 豁免类与「多重攻击」**不假装结算**：只回报是哪一类。
+  7. **群体战术（G23 / P10b）**：阵营是输入（DM 能改）、优势按「目标 5 尺内
+     有没有它这一伙**摆过位**的人」判定；判不了（unknown）就平掷并说明，
+     **不许折叠成 false** —— 那会把玩家实打实的优势悄悄吃掉。
 
 第 2 条是这一阶段的理由本身。实测 91 只里 85 条攻击推不出来 ——
 如果这里改成推算，测试必须变红。
@@ -27,10 +30,12 @@ import unittest
 from pathlib import Path
 
 import dnd5r.api as api
-from dnd5r.kernel.errors import IllegalAction, RuleError
+from dnd5r.kernel.errors import IllegalAction, PluginError, RuleError
 from dnd5r.kernel.rng import ScriptedRng
+from dnd5r.kernel.text import Text
 from dnd5r.model.inventory import EquipSlot
 from dnd5r.rules.combat import Target, target_from_actor
+from dnd5r.rules.monsters import MonsterTrait
 
 ROOT = Path(__file__).resolve().parents[2]
 PLUGINS = ROOT / "plugins"
@@ -363,6 +368,212 @@ class MonsterAgainstPlayerAttackTest(Base):
         self.assertEqual(result["outcome"], "hit")
         self.assertLess(wolf.hp.current, wolf.hp.maximum)
         self.assertEqual(wolf.hp.current, 11 - result["damage"]["total"])
+
+
+class TraitModeContentTest(Base):
+    """第 7 条（G23 / P10b）内容侧：特性的掷骰形状进得来、非法写法进不来。"""
+
+    def test_pack_tactics_carries_attack_mode(self):
+        wolf = self.bundle.monsters[WOLF]
+        trait = wolf.traits[0]
+        self.assertEqual(trait.attack_mode, "adv")
+        self.assertEqual(trait.when, "ally_near_target")
+        counted = [monster.id for monster in self.bundle.monsters.values()
+                   if any(item.attack_mode for item in monster.traits)]
+        self.assertEqual(len(counted), 10)      # 源数据里带群体战术的正好 10 只
+        self.assertIn(WOLF, counted)
+
+    def test_wolf_form_carries_the_same_mode(self):
+        """狼形由怪物条目派生 —— 掷骰形状要一起带过去，变狼的德鲁伊才用得上。"""
+        form = self.bundle.forms["dnd2024.form.beast.wolf"]
+        self.assertEqual(form.traits[0].attack_mode, "adv")
+        self.assertEqual(form.traits[0].when, "ally_near_target")
+
+    def test_bad_mode_value_is_rejected(self):
+        with self.assertRaises(PluginError):
+            MonsterTrait(name=Text.of("怪特性", "Odd"),
+                         text=Text.of("说明", "text"),
+                         attack_mode="super", when="ally_near_target")
+
+    def test_unknown_fact_is_rejected(self):
+        with self.assertRaises(PluginError):
+            MonsterTrait(name=Text.of("怪特性", "Odd"),
+                         text=Text.of("说明", "text"),
+                         attack_mode="adv", when="the_moon_is_full")
+
+    def test_when_without_mode_is_rejected(self):
+        with self.assertRaises(PluginError):
+            MonsterTrait(name=Text.of("怪特性", "Odd"),
+                         text=Text.of("说明", "text"),
+                         when="ally_near_target")
+
+    def test_lone_baboon_trait_still_bilingual(self):
+        """带模式的特性，text 仍要双语齐全（C7 不因新字段豁免）。"""
+        trait = self.bundle.monsters["dnd2024.monster.baboon"].traits[0]
+        self.assertEqual(trait.name.zh, "群体战术")
+        self.assertIn("SRD 5.2", trait.text.en)
+
+
+class SideTest(Base):
+    """第 7 条（G23 / P10b）阵营侧：它是一条输入，不是判断。"""
+
+    def test_default_side_follows_the_body(self):
+        hero = self.fighter()
+        wolf = self.monster()
+        encounter = api.new_encounter([hero, wolf], rng=ScriptedRng([10, 15]))
+        self.assertEqual(encounter.get(hero).side, "party")
+        self.assertEqual(encounter.get(wolf).side, "foes")
+
+    def test_set_side_roundtrip_and_validation(self):
+        hero = self.fighter()
+        wolf = self.monster()
+        encounter = api.new_encounter([hero, wolf], rng=ScriptedRng([10, 15]))
+        info = api.set_combatant_side(encounter, wolf, "party")
+        self.assertEqual(info["side"], "party")     # 魅惑倒戈就这么表达
+        self.assertEqual(encounter.get(wolf).side, "party")
+        with self.assertRaises(RuleError):
+            api.set_combatant_side(encounter, wolf, "bystander")
+
+    def test_allies_of_filters_self_other_side_and_down(self):
+        hero = self.fighter()
+        w1 = self.monster(WOLF, 1)
+        w2 = self.monster(WOLF, 2)
+        encounter = api.new_encounter([hero, w1, w2], rng=ScriptedRng([10, 15, 16]))
+        self.assertEqual(encounter.allies_of(w1), [encounter.get(w2)])
+        w2.hp.damage(99)                            # 倒地的盟友不算（原文「未失能」）
+        self.assertEqual(encounter.allies_of(w1), [])
+
+    def test_allies_near_ignores_unplaced(self):
+        """没摆位的不算相邻 —— 默认全员挤 (0,0) 时人人相邻，那是白送优势。"""
+        hero = self.fighter()
+        w1 = self.monster(WOLF, 1)
+        w2 = self.monster(WOLF, 2)
+        encounter = api.new_encounter([hero, w1, w2], rng=ScriptedRng([10, 15, 16]))
+        api.place_combatant(encounter, hero, 3, 3)
+        self.assertEqual(encounter.allies_near(w1, hero), [])     # w2 还在 (0,0) 没摆
+        api.place_combatant(encounter, w2, 4, 3)
+        self.assertEqual(encounter.allies_near(w1, hero),
+                         [encounter.get(w2)])
+
+
+class PackTacticsTest(Base):
+    """第 7 条（G23 / P10b）结算侧：三态 + 报告。
+
+    判不了必须**说出来**（unknown → 平掷 + 注记），不许静默当 false ——
+    这条是本阶段最容易在实现时被抹平的语义，注入反向验证专盯它。
+    """
+
+    def pack(self, placed=True, hero_at=(3, 3), w1_at=(2, 3), w2_at=(4, 3)):
+        hero = self.fighter()
+        w1 = self.monster(WOLF, 1)
+        w2 = self.monster(WOLF, 2)
+        encounter = api.new_encounter([hero, w1, w2],
+                                      rng=ScriptedRng([10, 15, 16]))
+        if placed:
+            for who, at in ((hero, hero_at), (w1, w1_at), (w2, w2_at)):
+                api.place_combatant(encounter, who, *at)
+        guard = 0
+        while api.encounter_view(encounter)["current"] != w1.id:
+            api.advance_turn(encounter)
+            guard += 1
+            assert guard < 10, "没轮到狼 1"
+        return hero, w1, w2, encounter
+
+    def test_flanking_pack_gives_advantage(self):
+        """两只狼夹一个玩家：优势自动出现，来源写明，掷骰真掷两颗留高。"""
+        hero, w1, w2, encounter = self.pack()
+        result = api.monster_attack(
+            encounter, self.bundle, w1, "action:0", hero,
+            rng=ScriptedRng([8, 14, 3]), apply=False)
+        self.assertEqual(result["attack"]["mode"], "adv")
+        self.assertIn("群体战术", result["attack"]["mode_sources"])
+        self.assertEqual(result["attack"]["kept"], [14])       # 留高
+        self.assertEqual(result["attack"]["dropped"], [8])
+        self.assertTrue(any("群体战术" in note for note in result["notes"]))
+
+    def test_lone_wolf_unplaced_is_unknown_not_false(self):
+        """单狼、全员没摆位：判不了 → 平掷 + 说明。折叠成 false 就是吃掉优势。"""
+        hero = self.fighter()
+        wolf = self.monster()
+        encounter = api.new_encounter([hero, wolf], rng=ScriptedRng([20, 15]))
+        while api.encounter_view(encounter)["current"] != wolf.id:
+            api.advance_turn(encounter)
+        result = api.monster_attack(
+            encounter, self.bundle, wolf, "action:0", hero,
+            rng=ScriptedRng([10, 3]), apply=False)
+        self.assertEqual(result["attack"]["mode"], "flat")
+        self.assertTrue(any("判不了" in note for note in result["notes"]),
+                        result["notes"])
+
+    def test_lone_wolf_placed_is_definitively_false(self):
+        """摆了位又确无盟友：这是定论的 false，不许再拿「判不了」烦人。"""
+        hero = self.fighter()
+        wolf = self.monster()
+        encounter = api.new_encounter([hero, wolf], rng=ScriptedRng([20, 15]))
+        api.place_combatant(encounter, hero, 3, 3)
+        api.place_combatant(encounter, wolf, 2, 3)
+        while api.encounter_view(encounter)["current"] != wolf.id:
+            api.advance_turn(encounter)
+        result = api.monster_attack(
+            encounter, self.bundle, wolf, "action:0", hero,
+            rng=ScriptedRng([10, 3]), apply=False)
+        self.assertEqual(result["attack"]["mode"], "flat")
+        self.assertFalse(any("判不了" in note for note in result["notes"]),
+                         result["notes"])
+
+    def test_unplaced_ally_makes_it_unknown(self):
+        """狼 2 没摆位：它可能就站在旁边 —— unknown，不是 false。"""
+        hero = self.fighter()
+        w1 = self.monster(WOLF, 1)
+        w2 = self.monster(WOLF, 2)
+        encounter = api.new_encounter([hero, w1, w2],
+                                      rng=ScriptedRng([10, 15, 16]))
+        api.place_combatant(encounter, hero, 3, 3)
+        api.place_combatant(encounter, w1, 2, 3)
+        while api.encounter_view(encounter)["current"] != w1.id:
+            api.advance_turn(encounter)
+        result = api.monster_attack(
+            encounter, self.bundle, w1, "action:0", hero,
+            rng=ScriptedRng([10, 3]), apply=False)
+        self.assertEqual(result["attack"]["mode"], "flat")
+        self.assertTrue(any("判不了" in note for note in result["notes"]),
+                        result["notes"])
+
+    def test_pack_tactics_looks_at_the_target_not_the_attacker(self):
+        """原文是「目标的 5 尺内」：狼俩互相挨着、目标在远处 → 没有优势。
+
+        写成「自己身边」在双方贴身时会碰巧一样，分成两堆就全错（G23 原文坑）。
+        """
+        hero, w1, w2, encounter = self.pack(
+            hero_at=(8, 8), w1_at=(0, 0), w2_at=(1, 0))
+        result = api.monster_attack(
+            encounter, self.bundle, w1, "action:0", hero,
+            rng=ScriptedRng([10, 3]), apply=False)
+        self.assertEqual(result["attack"]["mode"], "flat")
+        self.assertFalse(any("判不了" in note for note in result["notes"]))
+        self.assertFalse(result["attack"]["mode_sources"])
+
+    def test_manual_mode_beats_the_trait_verdict(self):
+        """DM 说这一掷有优势就有优势 —— 手动指定优先于特性判定。"""
+        hero, w1, w2, encounter = self.pack()
+        result = api.monster_attack(
+            encounter, self.bundle, w1, "action:0", hero,
+            rng=ScriptedRng([5, 18, 3]), apply=False, mode="adv")
+        self.assertEqual(result["attack"]["mode"], "adv")
+        self.assertEqual(result["attack"]["mode_sources"], [])
+        self.assertTrue(any("手动" in note for note in result["notes"]))
+        with self.assertRaises(RuleError):
+            api.monster_attack(encounter, self.bundle, w1, "action:0", hero,
+                               rng=ScriptedRng([10, 3]), mode="lucky")
+
+    def test_preview_with_advantage_pays_nothing(self):
+        hero, w1, w2, encounter = self.pack()
+        before = hero.hp.current
+        api.monster_attack(
+            encounter, self.bundle, w1, "action:0", hero,
+            rng=ScriptedRng([8, 14, 3]), apply=False)
+        self.assertEqual(hero.hp.current, before)
+        self.assertEqual(encounter.get(w1).economy.action, 1)
 
 
 if __name__ == "__main__":
