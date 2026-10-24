@@ -81,9 +81,17 @@ class PowersPage(ttk.Frame):
         self.text = ScrollText(detail, height=8, width=52)
         self.text.pack(fill="both", expand=True)
 
-        # --- 右：使用 -----------------------------------------------------
+        # --- 右：选择（按需出现）+ 使用 ------------------------------------
+        # 兑换类能力要选环级、授予类要指认受益者 —— 选择行只在选中的能力
+        # 需要时出现（layout 铁律：没用的控件不占位）。
+        self.choice_frame = ttk.Frame(right)
+        self.choice_frame.pack(fill="x")
+        self.choice_var = tk.StringVar(value="")
+        self._choice_kind = ""            # "" / "slot_level" / "target_id"
+        self._choice_map: dict[str, str] = {}   # 显示名 → target_id
+
         use = ttk.Frame(right)
-        use.pack(fill="x")
+        use.pack(fill="x", pady=(4, 0))
         self.use_button = ttk.Button(use, text="使用这项能力", command=self.use_selected)
         self.use_button.pack(side="left")
         self.blocked_var = tk.StringVar(value="")
@@ -186,10 +194,66 @@ class PowersPage(ttk.Frame):
             self.use_button.configure(text="被动能力（无需使用）")
         else:
             self.use_button.configure(text="使用这项能力")
+        self._fill_choice(row)
 
     def _status(self, text: str, error: bool = False) -> None:
         self.status_var.set(text)
         self.status.configure(foreground="#a33" if error else "#666666")
+
+    # --- 选择行（P15）------------------------------------------------------
+    def _fill_choice(self, row: dict) -> None:
+        """按选中能力的 channels 重建选择行。不需要选择的权力不留控件。"""
+        for child in self.choice_frame.winfo_children():
+            child.destroy()
+        self._choice_kind = ""
+        self._choice_map = {}
+        self.choice_var.set("")
+        channels = set(row.get("channels") or [])
+        if not row.get("button"):
+            return
+        if "token" in channels:
+            self._choice_kind = "target_id"
+            ttk.Label(self.choice_frame, text="给谁：",
+                      foreground="#666666").pack(side="left")
+            encounter = self.app.encounter
+            if encounter is None:
+                ttk.Label(self.choice_frame, text="先去战斗页开战（要指认场上的人）",
+                          foreground="#a33").pack(side="left")
+                return
+            me = self.app.actor.id
+            values = []
+            for item in api.encounter_view(encounter, self.app.bundle)["order"]:
+                if item["id"] == me:
+                    continue            # 灵感只能给别人
+                values.append("%s（%s）" % (item["label"], item["id"]))
+                self._choice_map[values[-1]] = item["id"]
+            if not values:
+                ttk.Label(self.choice_frame, text="场上没有别人",
+                          foreground="#a33").pack(side="left")
+                return
+            box = ttk.Combobox(self.choice_frame, textvariable=self.choice_var,
+                               state="readonly", width=22, values=values)
+            box.pack(side="left")
+            box.set(values[0])
+        elif "exchange" in channels:
+            self._choice_kind = "slot_level"
+            ttk.Label(self.choice_frame, text="环级：",
+                      foreground="#666666").pack(side="left")
+            values = ["%d 环" % level for level in range(1, 10)]
+            box = ttk.Combobox(self.choice_frame, textvariable=self.choice_var,
+                               state="readonly", width=8, values=values)
+            box.pack(side="left")
+            box.set(values[0])
+
+    def _choice(self) -> dict:
+        """把选择行收成 api.use_power 的 choice 参数。"""
+        if not self._choice_kind:
+            return {}
+        if self._choice_kind == "target_id":
+            target = self._choice_map.get(self.choice_var.get())
+            return {"target_id": target} if target else {}
+        text = self.choice_var.get()
+        return {"slot_level": int(text.split()[0])} if text else {}
 
     # --- 使用 -------------------------------------------------------------
     def use_selected(self) -> bool:
@@ -201,7 +265,8 @@ class PowersPage(ttk.Frame):
             self._status("这是一项被动能力，不需要使用。", error=True)
             return False
         report = api.use_power(self.app.actor, self.app.bundle, row["id"],
-                               locale=self.app.locale)
+                               locale=self.app.locale, choice=self._choice(),
+                               encounter=self.app.encounter)
         if not report.get("ok"):
             self.report.set_text(str(report.get("message") or "使用失败"))
             self._status(str(report.get("message") or "使用失败"), error=True)

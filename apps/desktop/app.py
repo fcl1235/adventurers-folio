@@ -34,6 +34,9 @@ class DesktopApp(tk.Tk):
         self.locale = locale
         self.selftest = selftest
         self.sheet: dict = {}
+        # 遭遇战是 app 级状态（P15）：战斗页创建/销毁它，能力页（授予目标）
+        # 与法术页（召唤入場）都要读同一份 —— 挂在页私有属性上别的页够不着。
+        self.encounter = None
 
         self.title("D&D 2024 角色卡")
         self.minsize(*WINDOW_MIN)

@@ -33,6 +33,17 @@ def _scores(args) -> dict[str, int]:
     return scores
 
 
+def _multiclass(pairs):
+    """--multiclass class_id=level（可重复）→ [(class_id, level)]。"""
+    out = []
+    for item in pairs or ():
+        ident, _, level = str(item).partition("=")
+        if not ident or not level:
+            raise SystemExit("--multiclass 要写 class_id=level：%r" % item)
+        out.append((ident.strip(), int(level)))
+    return tuple(out)
+
+
 def _character(args):
     bundle = api.load_content(args.root)
     if bundle.errors:
@@ -44,6 +55,7 @@ def _character(args):
         subclass=getattr(args, "subclass", None),
         feats=tuple(getattr(args, "feat", None) or ()),
         choices=_choices(getattr(args, "pick", None)),
+        extra_classes=_multiclass(getattr(args, "multiclass", None)),
     )
 
 
@@ -418,6 +430,8 @@ def _add_character_args(parser) -> None:
     parser.add_argument("--pick", action="append", default=None,
                         help="专长选择项的值：<专长 id>.<选择项>=a,b（可重复）")
     parser.add_argument("--level", type=int, default=1)
+    parser.add_argument("--multiclass", action="append", default=None,
+                        help="兼职：class_id=level（可重复）")
     parser.add_argument("--zh", default="无名冒险者")
     parser.add_argument("--en", default="Unnamed Adventurer")
     parser.add_argument("--lang", default="zh", choices=["zh", "en"])

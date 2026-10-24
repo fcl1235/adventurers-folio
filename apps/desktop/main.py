@@ -35,11 +35,26 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--level", type=int, default=5, help="职业等级")
     parser.add_argument("--subclass", default=None, help="子职 id")
     parser.add_argument("--feat", action="append", default=[], help="专长 id（可多次）")
+    parser.add_argument("--multiclass", action="append", default=[],
+                        help="兼职：class_id=level（可多次，如 --multiclass dnd2024.class.wizard=3）")
     parser.add_argument("--name", dest="zh", default="无名冒险者", help="角色名")
     for key in DEFAULT_SCORES:
         parser.add_argument("--%s" % key, type=int, default=None, help="%s 值" % key.upper())
     parser.add_argument("--selftest", action="store_true", help="构建界面后立即退出（不显示窗口）")
     return parser
+
+
+
+
+def _multiclass(pairs):
+    """--multiclass class_id=level（可重复）→ [(class_id, level)]。"""
+    out = []
+    for item in pairs or ():
+        ident, _, level = str(item).partition("=")
+        if not ident or not level:
+            raise SystemExit("--multiclass 要写 class_id=level：%r" % item)
+        out.append((ident.strip(), int(level)))
+    return tuple(out)
 
 
 def main(argv=None) -> int:
@@ -50,7 +65,8 @@ def main(argv=None) -> int:
 
     actor = api.new_character(bundle, args.cls, args.level, _scores(args),
                               name_zh=args.zh, subclass=args.subclass,
-                              feats=tuple(args.feat))
+                              feats=tuple(args.feat),
+                              extra_classes=_multiclass(args.multiclass))
     from .app import DesktopApp
     app = DesktopApp(bundle, actor, selftest=args.selftest)
     if args.selftest:

@@ -245,12 +245,17 @@ def power_channels(power: Power) -> tuple[str, ...]:
     from .effects.grants import (      # 局部导入：effects 会 import 本包的 Modifier
         GrantAdvantage, GrantDefense, GrantModifier, GrantProficiency,
     )
+    from .effects.exchange import Exchange
     from .effects.onhit import ExtraDamage
     from .effects.state import MarkAdvantage
+    from .effects.token import GrantToken
 
     found: set[str] = set()
     for effect in power.effects:
-        if isinstance(effect, GrantModifier):
+        if isinstance(effect, (Exchange, GrantToken)):
+            # 兑换要选环级、授予要指认受益者 —— 界面据 channels 出选择行
+            found.add("exchange" if isinstance(effect, Exchange) else "token")
+        elif isinstance(effect, GrantModifier):
             targets = {str(item.target) for item in effect.modifiers}
             # `score.<属性>` 改的是属性值本身，与 d20 加值是两条路
             found.add("score" if any(item.startswith("score.") for item in targets)

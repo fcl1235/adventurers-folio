@@ -351,6 +351,75 @@ def _check_encounter(label: str, page: EncounterPage, stats: dict) -> list[str]:
     return problems
 
 
+def _check_live_wiring(bundle) -> list[str]:
+    """P15 活接线：能力页的选择行、法术页的施放、遭遇战的跨页存活。
+
+    与布局审计分开：这里不量尺寸，只验「界面上点的按钮真的动了引擎的状态」。
+    三个断言各盯一条链：
+      1. 诗人在遭遇战里用灵感 → 狼身上有骰（选择行 target_id 生效）；
+      2. 德鲁伊从法术页施放巨虫术 → 场上多一只（施放行 encounter 生效）；
+      3. 换页刷新之后 app.encounter 还在（状态上移没有被打断）。
+    """
+    problems: list[str] = []
+    from dnd5r.kernel.rng import ScriptedRng
+
+    bard = api.new_character(
+        bundle, "dnd2024.class.bard", 2,
+        {"str": 10, "dex": 12, "con": 14, "int": 10, "wis": 10, "cha": 14},
+        name_zh="诗人", name_en="Bard", actor_id="pc.bard")
+    app = DesktopApp(bundle, bard, selftest=True)
+    try:
+        wolf = api.spawn_monster(bundle, "dnd2024.monster.wolf")
+        app.encounter = api.new_encounter([bard, wolf], rng=ScriptedRng([10, 15]))
+        guard = 0
+        while app.encounter.current().actor is not bard and guard < 4:
+            api.advance_turn(app.encounter)
+            guard += 1
+        app.refresh()
+        page = app.powers_page
+        page.powers.select_id("dnd2024.class.bard.bardic_inspiration")
+        page._select_power()
+        if page._choice_kind != "target_id":
+            problems.append("活接线：灵感的选择行没有出现（channels 未进 sheet？）")
+        elif not page.use_selected():
+            problems.append("活接线：灵感使用失败（%s）" % page.status_var.get())
+        elif not api.tokens_of(wolf):
+            problems.append("活接线：用了灵感，狼身上却没有骰")
+        # 换页刷新：遭遇战必须还活着
+        app.refresh()
+        if app.encounter is None or len(app.encounter.combatants) != 2:
+            problems.append("活接线：刷新后遭遇战丢了（状态没有真的挂在 app 上）")
+    finally:
+        app.destroy()
+
+    druid = api.new_character(
+        bundle, "dnd2024.class.druid", 9,
+        {"str": 10, "dex": 12, "con": 14, "int": 10, "wis": 18, "cha": 8},
+        name_zh="德鲁伊", name_en="Druid")
+    app = DesktopApp(bundle, druid, selftest=True)
+    try:
+        api.plan_spells(druid, bundle, "dnd2024.class.druid",
+                        prepared=["dnd2024.spell.giant_insect"])
+        app.refresh()
+        wolf = api.spawn_monster(bundle, "dnd2024.monster.wolf")
+        app.encounter = api.new_encounter([druid, wolf], rng=ScriptedRng([10, 15]))
+        page = app.spells
+        page.show("prepared", "dnd2024.spell.giant_insect")
+        before = len(app.encounter.combatants)
+        if not page.cast(True):
+            problems.append("活接线：法术页施放失败（%s）" % page.status_var.get())
+        elif len(app.encounter.combatants) != before + 1:
+            problems.append("活接线：施放了召唤法术，场上却没有多出生物")
+        slot4 = next((row for row in app.sheet["spellcasting"][0]["slots"]
+                      if row["level"] == 4), None)
+        if slot4 and slot4["left"] != slot4["max"] - 1:
+            problems.append("活接线：结算施放没有扣法术位（4 环 %d/%d）"
+                            % (slot4["left"], slot4["max"]))
+    finally:
+        app.destroy()
+    return problems
+
+
 def main() -> int:
     bundle = api.load_content(ROOT / "plugins")
     if bundle.errors:
@@ -403,6 +472,10 @@ def main() -> int:
                 problems.append("%s：窗口被映射了（零弹窗铁律）" % label)
         finally:
             app.destroy()
+
+    problems.extend(_check_live_wiring(bundle))
+    print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 —— %s"
+          % ("OK" if not problems else "见上"))
 
     if problems:
         for item in problems:

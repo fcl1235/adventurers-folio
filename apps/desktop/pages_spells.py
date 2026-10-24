@@ -290,6 +290,8 @@ class SpellPage(ttk.Frame):
         self._blocks: list[dict] = []
         self._index = 0
         self._busy = False
+        self._spell_id = ""            # 当前选中（戏法或已准备的任一条）
+        self._spell_level = 0          # 它自己的环级（施放行缺省值）
         self._build()
 
     # --- 骨架 -------------------------------------------------------------
@@ -363,6 +365,23 @@ class SpellPage(ttk.Frame):
         self.cantrip_button = ttk.Button(buttons, text="设为戏法 / 取消",
                                          command=self.toggle_cantrip)
         self.cantrip_button.pack(side="left", padx=(6, 0))
+
+        # 施放（P15）：环级默认取法术自身；升环就选高一档。
+        # 结算花法术位；召唤类法术把生物真的放进遭遇战（app.encounter）。
+        cast = ttk.Frame(right)
+        cast.pack(fill="x", pady=(6, 0))
+        ttk.Label(cast, text="环级：", foreground="#666666").pack(side="left")
+        self.slot_var = tk.StringVar(value="")
+        self.slot_box = ttk.Combobox(cast, textvariable=self.slot_var,
+                                     state="readonly", width=6)
+        self.slot_box.pack(side="left")
+        self.cast_button = ttk.Button(cast, text="施放·预览",
+                                      command=lambda: self.cast(False))
+        self.cast_button.pack(side="left", padx=(6, 0))
+        ttk.Button(cast, text="施放·结算",
+                   command=lambda: self.cast(True)).pack(side="left")
+        self.cast_report = ScrollText(right, height=5, width=30)
+        self.cast_report.pack(fill="both", expand=True, pady=(6, 0))
 
     # --- 数据 -------------------------------------------------------------
     def refresh(self, sheet: dict) -> None:
@@ -458,6 +477,62 @@ class SpellPage(ttk.Frame):
         self.pick_button.configure(state=state)
         self.cantrip_button.configure(state=state)
 
+    # --- 施放（P15）---------------------------------------------------------
+    def _fill_slot_options(self) -> None:
+        """施放环级选项：从该角色当前有余量的位池读（sheet 的 spellcasting 块），
+        界面不自己算「能放几环」—— 那是规则。戏法不花位，选项留空。"""
+        levels = sorted({int(row["level"])
+                         for row in (self._block().get("slots") or [])
+                         if int(row.get("left") or 0) > 0})
+        if self._spell_level == 0:            # 戏法
+            self.slot_box.configure(values=[])
+            self.slot_var.set("")
+            return
+        # 有余量的环位里，不低于法术自身环级的才能放；一个都没有就只列自身环级
+        usable = [level for level in levels if level >= self._spell_level]
+        values = ["%d 环" % level for level in (usable or [self._spell_level])]
+        self.slot_box.configure(values=values)
+        self.slot_var.set(values[0])
+
+    def _selected_spell(self) -> tuple[str, int]:
+        return self._spell_id, self._spell_level
+
+    def cast(self, apply: bool) -> bool:
+        """施放选中法术。预览不花位、召唤不入場；结算两者都真做。"""
+        spell_id, level = self._selected_spell()
+        if not spell_id:
+            self._status("先在左边选一道法术。", error=True)
+            return False
+        slot = None
+        if level > 0:
+            text = self.slot_var.get()
+            slot = int(text.split()[0]) if text else None
+            if slot is None:
+                self._status("这道法术没有可选的法术位。", error=True)
+                return False
+        try:
+            result = api.roll_spell(
+                self.app.actor, self.app.bundle, spell_id, slot=slot,
+                targets=(), locale=self.app.locale, apply=apply,
+                encounter=self.app.encounter)
+        except api.DndError as error:
+            self._status(str(error), error=True)
+            return False
+        lines = ["[%s] %s" % ("结算" if apply else "预览", spell_id)]
+        for note in result.get("notes") or []:
+            lines.append("  · %s" % note)
+        summon = result.get("summon")
+        if summon:
+            lines.append("  召唤：%s（AC %d / HP %d / 先攻 %d）"
+                         % (summon["label"], summon["ac"], summon["hp"],
+                            summon["initiative"]))
+        self.cast_report.set_text(chr(10).join(lines))
+        self._status(("结算：" if apply else "预览：")
+                     + (result.get("notes")[-1] if result.get("notes") else "完成"))
+        if apply:
+            self.app.refresh()      # 法术位扣了、召唤物上了先攻条
+        return True
+
     def _status(self, text: str, error: bool = False) -> None:
         self.status_var.set(text)
         self.status.configure(foreground="#a33" if error else "#666666")
@@ -480,7 +555,13 @@ class SpellPage(ttk.Frame):
         row = self._row(kind, spell_id) if spell_id else {}
         if not row:
             self.detail.set_text("")
+            self._spell_id = ""
+            self._spell_level = 0
+            self._fill_slot_options()
             return
+        self._spell_id = spell_id
+        self._spell_level = int(row.get("level") or 0)
+        self._fill_slot_options()
         # 「当前等级对应哪一档」是规则，问 api；页面只负责把答案排成文本
         info = api.spell_info(self.app.bundle, spell_id,
                               character_level=int((self.app.sheet or {}).get("total_level") or 0))

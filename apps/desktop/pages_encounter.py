@@ -50,7 +50,7 @@ class EncounterPage(ttk.Frame):
     def __init__(self, master, app) -> None:
         super().__init__(master, padding=(6, 4))
         self.app = app
-        self.encounter = None            # api 的 Encounter；None = 还没开战
+        # 遭遇战本体挂在 app 上（别的页要指认目标 / 召唤入場）；这里只留代理
         self.roster: list[dict] = []     # 怪物清单（来自 api.monster_catalog）
         self._attendees: list = []       # 已经点过「加入」的怪物 Actor
         self._attacker_id = ""
@@ -61,6 +61,15 @@ class EncounterPage(ttk.Frame):
         self._mode = tk.StringVar(value="place")
         self._log: list[str] = []
         self._build()
+
+    # 遭遇战代理：读写都落到 app（唯一一份，战斗页只是它的驾驶舱）
+    @property
+    def encounter(self):
+        return self.app.encounter
+
+    @encounter.setter
+    def encounter(self, value) -> None:
+        self.app.encounter = value
 
     # --- 骨架 -------------------------------------------------------------
     def _build(self) -> None:
