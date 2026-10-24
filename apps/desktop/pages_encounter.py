@@ -112,6 +112,9 @@ class EncounterPage(ttk.Frame):
         self.start_button.pack(side="left")
         self.next_button = ttk.Button(row, text="下一回合", command=self.next_turn)
         self.next_button.pack(side="left", padx=(4, 0))
+        # 阵营是输入不是判断：程序不猜谁是狼的同伴，DM 说了算（G23）
+        self.side_button = ttk.Button(row, text="改阵营", command=self.toggle_side)
+        self.side_button.pack(side="left", padx=(4, 0))
         self.round_var = tk.StringVar(value="还没开战")
         ttk.Label(row, textvariable=self.round_var).pack(side="left", padx=(10, 0))
 
@@ -148,6 +151,17 @@ class EncounterPage(ttk.Frame):
         self.action_pane = ListPane(box, height=4, width=30)
         self.action_pane.pack(fill="x")
         self.action_pane.list.bind("<<ListboxSelect>>", lambda _e: self._select_action())
+
+        # 掷骰模式：默认「自动」—— 按特性事实判定（群体战术）；判不了时
+        # 报告会明说，这时 DM 在这里手动指定。只对怪物/形态攻击生效，
+        # 玩家武器攻击按角色自己的状态判定（选了也会提示没生效）。
+        mode_row = ttk.Frame(box)
+        mode_row.pack(fill="x", pady=(4, 0))
+        ttk.Label(mode_row, text="掷骰模式：", foreground="#666666").pack(side="left")
+        self.mode_var = tk.StringVar(value="自动")
+        ttk.Combobox(mode_row, textvariable=self.mode_var, state="readonly",
+                     values=("自动", "优势", "劣势", "平掷"),
+                     width=6).pack(side="left")
 
         row = ttk.Frame(box)
         row.pack(fill="x", pady=(6, 0))
@@ -187,8 +201,9 @@ class EncounterPage(ttk.Frame):
         rows = []
         for row in (view.get("order") or []):
             mark = "▶" if row.get("active") else "　"
-            rows.append((row["id"], "%s %s　先攻 %d　HP %d/%d　(%d,%d)%s"
-                         % (mark, row["label"], int(row["initiative"]),
+            side = {"party": "我", "foes": "敌"}.get(row.get("side"), "？")
+            rows.append((row["id"], "%s [%s] %s　先攻 %d　HP %d/%d　(%d,%d)%s"
+                         % (mark, side, row["label"], int(row["initiative"]),
                             int(row["hp"]["current"]), int(row["hp"]["maximum"]),
                             int(row["x"]), int(row["y"]),
                             "　已倒地" if row.get("down") else "")))
@@ -265,7 +280,7 @@ class EncounterPage(ttk.Frame):
         self.attacker_var.set("出手的人：%s" % label)
 
     def _note_form(self, actor, form: dict) -> None:
-        """换了个形态就说一句：这是它的卡，特性只有文字（G23 未修）。
+        """换了个形态就说一句：这是它的卡，哪些特性算得出来、哪些只有文字。
 
         放在状态行而不是新控件里 —— 右栏高度是预算内的，多一行 Label
         会把下面的按钮挤出窗口（布局铁律）。同一个人同一个形态只说一次。
@@ -274,11 +289,17 @@ class EncounterPage(ttk.Frame):
         if self._form_noted == key:
             return
         self._form_noted = key
-        traits = "、".join("%s（文字，未建模）" % row["name"]
-                           for row in (form.get("traits") or ()))
+        traits = list(form.get("traits") or ())
+        modeled = "、".join(row["name"] for row in traits if row.get("attack_mode"))
+        texts = "、".join(row["name"] for row in traits if not row.get("attack_mode"))
+        bits = []
+        if modeled:
+            bits.append("%s 按场上位置自动判定优势" % modeled)
+        if texts:
+            bits.append("%s 只有文字（未建模）" % texts)
         self._say("形态 %s：天然武器按卡上的数算%s"
                   % (form.get("name") or form.get("id"),
-                     "；特性 " + traits if traits else "；这个形态没有特性"))
+                     "；" + "；".join(bits) if bits else "；这个形态没有特性"))
 
     def _combatant(self, ident: str):
         if not self.encounter or not ident:
@@ -354,6 +375,33 @@ class EncounterPage(ttk.Frame):
         self.app.refresh()
         return True
 
+    def toggle_side(self) -> bool:
+        """把先攻条里选中的人换到另一边（我方 ↔ 敌方）。
+
+        群体战术只认阵营 —— 魅惑倒戈的狼、临时倒戈的盟友都靠这个按钮表达，
+        程序不猜，只记账。
+        """
+        if not self.encounter:
+            self._say("还没开战。", error=True)
+            return False
+        picked = self.order_pane.selected_id()
+        if not picked:
+            self._say("先在先攻条里点一个人。", error=True)
+            return False
+        row = next((item for item in (self._view().get("order") or [])
+                    if item["id"] == picked), None)
+        new_side = "foes" if row and row.get("side") == "party" else "party"
+        word = "我方" if new_side == "party" else "敌方"
+        try:
+            info = api.set_combatant_side(self.encounter, picked, new_side)
+        except api.DndError as exc:
+            self._say(str(exc), error=True)
+            return False
+        self._append("%s 改为%s。" % (info["label"], word))
+        self._say("%s 现在算%s。" % (info["label"], word))
+        self.app.refresh()
+        return True
+
     # --- 选择 -------------------------------------------------------------
     def _select_attacker(self) -> None:
         picked = self.order_pane.selected_id()
@@ -382,6 +430,7 @@ class EncounterPage(ttk.Frame):
                      and self._target_id and self._action_key)
         self.roll_button.configure(state="normal" if ready else "disabled")
         self.next_button.configure(state="normal" if self.encounter else "disabled")
+        self.side_button.configure(state="normal" if self.encounter else "disabled")
         self.start_button.configure(
             state="disabled" if (self.encounter and self.encounter.round) else "normal")
 
@@ -465,17 +514,23 @@ class EncounterPage(ttk.Frame):
         kind = api.actor_view(actor, self.app.locale).get("kind")
         morphed = bool(api.form_view(actor, self.app.bundle,
                                      self.app.locale).get("morphed"))
+        manual = {"优势": "adv", "劣势": "dis", "平掷": "flat"}.get(
+            self.mode_var.get(), "")
         try:
             if kind == "pc" and not morphed:
+                if manual:
+                    self._append("  · 玩家武器攻击暂不支持手动指定掷骰模式"
+                                 "（按角色自己的优势/劣势判定）")
                 result = api.attack_roll(
                     actor, self.app.bundle, target["actor"],
                     weapon=self._action_key, apply=apply, rng=rng,
                     encounter=self.encounter)
             else:
-                # 怪物与变形中的角色走同一条：命中加值取卡上的数、按槽位付额度
+                # 怪物与变形中的角色走同一条：命中加值取卡上的数、按槽位付额度；
+                # 掷骰模式默认按特性事实判定（群体战术），手动指定优先
                 result = api.monster_attack(
                     self.encounter, self.app.bundle, actor, self._action_key,
-                    target["actor"], rng=rng, apply=apply)
+                    target["actor"], rng=rng, apply=apply, mode=manual)
         except api.DndError as exc:
             self._say(str(exc), error=True)
             return False
@@ -534,6 +589,10 @@ def _describe(result: dict, attacker: str, target: str, apply: bool) -> str:
     attack = result.get("attack")
     if attack:
         mode = {"adv": "（优势）", "dis": "（劣势）"}.get(attack.get("mode"), "")
+        sources = attack.get("mode_sources") or []
+        if mode and sources:
+            mode = "%s · %s" % (mode.strip("（）"), "、".join(sources))
+            mode = "（%s）" % mode
         lines.append("  d20 %d %+d = %d%s" % (int(attack["die"]), int(attack["bonus"]),
                                               int(attack["total"]), mode))
     for row in result["damage"].get("breakdown") or []:

@@ -299,6 +299,8 @@ class MorphEffectTest(_Fixture):
 
 
 class SessionMorphTest(_Fixture):
+    """P11 起 Session 没有自己的投影：看角色读 api.character_sheet。"""
+
     def session(self, level):
         from dnd5r.session import Session
 
@@ -306,11 +308,17 @@ class SessionMorphTest(_Fixture):
         session.create_character(DRUID, level, SCORES)
         return session
 
+    def sheet(self, session) -> dict:
+        return api.character_sheet(session.character, session.bundle)
+
     def test_no_forms_before_wild_shape_unlocks(self):
-        self.assertEqual(self.session(1).forms(), [])
+        session = self.session(1)
+        self.assertEqual(api.eligible_forms_for(session.character, session.bundle), [])
 
     def test_forms_follow_cr_axis(self):
-        names = {form.id for form in self.session(4).forms()}
+        session = self.session(4)
+        names = {form.id
+                 for form in api.eligible_forms_for(session.character, session.bundle)}
         self.assertIn(CAT, names)
         self.assertNotIn(BROWN_BEAR, names)
 
@@ -318,27 +326,28 @@ class SessionMorphTest(_Fixture):
         from dnd5r.session import NewTurn, UsePower
 
         session = self.session(8)
-        before = session.view().header
-        view, report = session.dispatch(UsePower(WILD_SHAPE, {"form_id": BROWN_BEAR}))
+        before = self.sheet(session)
+        report = session.dispatch(UsePower(WILD_SHAPE, {"form_id": BROWN_BEAR}))
         self.assertTrue(report.ok, report.message)
-        header = view.header
-        self.assertEqual(header.name, "棕熊")
-        self.assertEqual(header.ac, 11)
-        self.assertEqual(header.temp_hp, 8)
-        self.assertEqual(header.hp_max, before.hp_max)     # 上限不变
-        self.assertEqual(header.speed, {"walk": 40, "climb": 30})
+        sheet = self.sheet(session)
+        self.assertEqual(sheet["name"], "棕熊")
+        self.assertEqual(sheet["ac"]["total"], 11)
+        self.assertEqual(sheet["hp"]["temp"], 8)
+        self.assertEqual(sheet["hp"]["maximum"], before["hp"]["maximum"])  # 上限不变
+        self.assertEqual(sheet["speed"], {"walk": 40, "climb": 30})
 
         session.dispatch(NewTurn())                        # 变形与恢复都要附赠动作
-        view, report = session.dispatch(UsePower(REVERT))
+        report = session.dispatch(UsePower(REVERT))
         self.assertTrue(report.ok, report.message)
-        self.assertFalse(session.is_morphed())
-        self.assertEqual(view.header.name, before.name)
-        self.assertEqual(view.header.temp_hp, 0)
+        after = self.sheet(session)
+        self.assertFalse(after["morphed"])
+        self.assertEqual(after["name"], before["name"])
+        self.assertEqual(after["hp"]["temp"], 0)
 
     def test_revert_requires_morph(self):
         from dnd5r.session import UsePower
 
-        view, report = self.session(8).dispatch(UsePower(REVERT))
+        report = self.session(8).dispatch(UsePower(REVERT))
         self.assertFalse(report.ok)
         self.assertIn("morphed", report.message)
 

@@ -157,8 +157,8 @@ class SubclassUnlockTest(unittest.TestCase):
     def test_session_cards_include_subclass(self):
         session = api.Session.open(str(PLUGINS), seed=1)
         session.create_character("dnd2024.class.fighter", 3, SCORES, subclass=CHAMPION)
-        titles = [card.title for card in session.view().cards]
-        self.assertIn("强化重击", titles)
+        sheet = api.character_sheet(session.character, session.bundle)
+        self.assertIn("强化重击", {row["name"] for row in sheet["powers"]})
 
 
 class ChampionCritTest(unittest.TestCase):
@@ -195,8 +195,9 @@ class ChampionCritTest(unittest.TestCase):
     def test_attack_card_shows_range(self):
         session = api.Session.open(str(PLUGINS), seed=1)
         session.create_character("dnd2024.class.fighter", 15, SCORES, subclass=CHAMPION)
-        details = [line for card in session.view().attacks for line in card.detail]
-        self.assertTrue(any("重击范围 18-20" in line for line in details), details)
+        # P11 起攻击卡不再逐行带 detail；重击范围在 sheet["crit"]（同一份投影）
+        crit = api.character_sheet(session.character, session.bundle)["crit"]
+        self.assertEqual(crit["text"], "18-20")
 
 
 class DraconicResilienceTest(unittest.TestCase):

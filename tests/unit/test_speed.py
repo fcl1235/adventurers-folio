@@ -122,14 +122,20 @@ class SpeedSheetTest(unittest.TestCase):
         self.assertTrue(result["ok"], result["message"])
         self.assertEqual(result["sheet"]["speed"]["walk"], 40)
 
-    def test_session_view_agrees_with_sheet(self):
-        """CLI 视图与 api 投影必须同一个数 —— 两处各算一遍是漏洞的温床。"""
+    def test_session_actor_matches_sheet(self):
+        """P11 起只有一份投影（session.view 已删）：同一只角色读 sheet 即可。
+
+        这条测试保留的原因：CLI `play` 走 Session 建角、桌面端走 api 建角，
+        两条入口建出来的必须是同一套数值。
+        """
         session = api.Session.open(str(PLUGINS))
         actor = session.create_character("dnd2024.class.barbarian", 5, SCORES,
                                         name_zh="野蛮人", name_en="Barbarian")
-        view = session.view()
-        self.assertEqual(view.header.speed["walk"], 40)
-        self.assertEqual(view.header.ac, api.character_sheet(actor, session.bundle)["ac"]["total"])
+        sheet = api.character_sheet(actor, session.bundle)
+        self.assertEqual(sheet["speed"]["walk"], 40)
+        # 无甲防御：10 + 敏捷 +2 + 体质 +2（快速移动是速度通道，不进 AC）
+        self.assertEqual(sheet["ac"]["total"], 14)
+        self.assertIn("无甲防御", sheet["ac"]["detail"])
 
 
 if __name__ == "__main__":

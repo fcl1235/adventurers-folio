@@ -337,24 +337,39 @@ def cmd_golden(args) -> int:
     return golden_main(argv)
 
 
-def _print_view(view) -> None:
-    header = view.header
-    print("%s  %s  等级 %d" % (header.name, "、".join(header.classes), header.level))
+def _print_sheet(sheet: dict) -> None:
+    """渲染 `api.character_sheet` 的 dict —— 没有第二份投影（G24）。
+
+    P11 之前这里渲染的是 Session 自己拼的 Card；两套投影各算一遍 AC / 攻击，
+    迟早各说各话。现在 CLI 与桌面端读的是同一份数据。
+    """
+    classes = "、".join("%s %d" % (row["name"], row["class_level"])
+                        for row in sheet.get("classes") or []) or "无职业"
+    print("%s  %s  等级 %d" % (sheet["name"], classes,
+                               int(sheet.get("total_level") or 1)))
+    hp = sheet["hp"]
     print("HP %d/%d%s  AC %d  熟练 +%d"
-          % (header.hp, header.hp_max,
-             "（临时 %d）" % header.temp_hp if header.temp_hp else "",
-             header.ac, header.proficiency_bonus))
-    if header.conditions:
-        print("状态：%s" % "、".join(header.conditions))
-    print("--- 卡片 ---")
-    for card in view.cards:
-        mark = "▶" if card.actions else "·"
-        value = (" [%s]" % card.value) if card.value else ""
-        print(" %s %-14s %-22s%s  %s" % (mark, card.title, card.subtitle, value, card.tone))
-        for line in card.detail:
-            print("      %s" % line)
-    for card in view.attacks:
-        print(" · %-14s %-22s [%s]" % (card.title, card.subtitle, card.value))
+          % (hp["current"], hp["maximum"],
+             "（临时 %d）" % hp["temp"] if hp["temp"] else "",
+             sheet["ac"]["total"], int(sheet.get("proficiency_bonus") or 0)))
+    if sheet.get("conditions"):
+        print("状态：%s" % "、".join(sheet["conditions"]))
+    print("--- 能力 ---")
+    for power in sheet.get("powers") or []:
+        mark = "▶" if power["button"] else "·"
+        print(" %s %-16s %-26s [%s]" % (mark, power["name"],
+                                        power["subtitle"], power["status"]))
+    print("--- 资源 ---")
+    refresh_zh = {"long_rest": "长休", "short_rest": "短休", "never": "不恢复"}
+    for pool in sheet.get("pools") or []:
+        print(" · %-16s %d/%d（%s恢复）"
+              % (pool["label"] or pool["id"], pool["left"], pool["max"],
+                 refresh_zh.get(pool["refresh"], pool["refresh"])))
+    for row in sheet.get("attacks") or []:
+        print(" · 攻击 %-14s %+d（%s%+d %s）× %d/动作"
+              % (row["name"], row["attack"], row["damage"],
+                 row["damage_bonus"], row["damage_type"],
+                 int(sheet.get("attacks_per_action") or 1)))
 
 
 def cmd_play(args) -> int:
@@ -363,34 +378,35 @@ def cmd_play(args) -> int:
     actor = session.create_character(args.cls, args.level, _scores(args),
                                      name_zh=args.zh, name_en=args.en,
                                      subclass=getattr(args, "subclass", None))
+    sheet = lambda: api.character_sheet(actor, session.bundle, args.lang)  # noqa: E731
     print("=== 初始 ===")
-    _print_view(session.view())
+    _print_sheet(sheet())
 
     hit = max(1, actor.hp.maximum // 2)
     print("\n=== 受伤 %d ===" % hit)
-    _, report = session.dispatch(api.TakeDamage(hit))
+    report = session.dispatch(api.TakeDamage(hit))
     print(report.message, "→ HP %d/%d" % (actor.hp.current, actor.hp.maximum))
 
     print("\n=== 使用 %s ===" % args.power)
     choice = {"form_id": args.form} if getattr(args, "form", None) else {}
-    view, report = session.dispatch(api.UsePower(args.power, choice))
+    report = session.dispatch(api.UsePower(args.power, choice))
     print(report.message or "（无输出）")
     print("→ HP %d/%d" % (actor.hp.current, actor.hp.maximum))
 
     print("\n=== 短休 ===")
-    _, report = session.dispatch(api.ShortRest(dice=0))
+    report = session.dispatch(api.ShortRest(dice=0))
     print(report.message)
 
     print("\n=== 新回合后再次使用 ===")
     session.dispatch(api.NewTurn())
-    _, report = session.dispatch(api.UsePower(args.power, choice))
+    report = session.dispatch(api.UsePower(args.power, choice))
     print(("成功：" if report.ok else "被拒绝：") + (report.message or "（无输出）"))
 
     print("\n=== 长休 ===")
-    _, report = session.dispatch(api.LongRest())
+    report = session.dispatch(api.LongRest())
     print(report.message)
     print("\n=== 结束 ===")
-    _print_view(session.view())
+    _print_sheet(sheet())
     return 0
 
 

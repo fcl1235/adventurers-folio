@@ -3,18 +3,41 @@
 > 项目名 `5rcard` = **5R** + card。这里的 5R 就是 D&D 2024 修订版，
 > 国外社区也叫 **5.5e**（2014 版才叫 5e）。本项目**只做 5R**，不是 5e 的兼容实现。
 
-纯 Python + tkinter 的桌面角色卡工具。规则数据全部内置为本地 JSON：
-不联网、不装第三方库、不需要数据库。
+本仓库里有**两个程序**，同一份 5R 规则口径，两代实现：
 
-- 12 个职业 × 1–20 级、48 个子职
-- 347 个法术（含 8 个 2024 Summon 系列的召唤物映射）
-- 140 件魔法物品、91 条野兽数据（88 只可变形 + 3 只游侠伙伴）、32 条召唤物 Stat Block
-- 67 条专长（43 通用 + 12 战斗风格 + 12 传奇恩惠）
-- 建卡向导 + 六标签页角色卡 + 升级/休息/掷骰
+| | 旧版（已完结） | **重制版（开发中，`re1` 分支）** |
+|---|---|---|
+| 入口 | `python dnd55e_character_builder.py`（或 `启动人物卡.bat`） | `python -m apps.desktop.main` |
+| 架构 | `dnd55e/` 四层单体，数据在根目录 JSON | `dnd5r/` 插件化引擎（内核零内容）+ `apps/` 前端 + `plugins/` 内容包 |
+| 自检 | `运行自检.bat`（10 步） | `重构自检.bat`（5 步：单测 / 分层 / 插件 / 黄金对账 / 布局） |
+| 文档 | `dnd55e_rules_reference.md` | **`架构设计v3-插件化.md`**（设计 + 逐阶段实施记录） |
+| 角色 | 两者数值逐项对账（黄金矩阵 32560 项），旧版是新引擎的 oracle | |
+
+重制版的核心理念：**内核不认识任何 D&D 专有名词**——职业、法术、怪物全部是
+可插拔的内容包；分层约束（C1–C8）与数值对账全部由脚本验收，不是靠自觉。
+下文先讲旧版（作为稳定可用的程序），重制版细节见架构文档。
+
+## 快速开始（两个程序）
+
+需要 Python 3.10+（含 tkinter，Windows 官方安装包自带）。
+
+```
+rem —— 旧版（稳定） ——
+启动人物卡.bat
+python dnd55e_character_builder.py --selftest
+
+rem —— 重制版 ——
+python -m apps.desktop.main
+python tools/selfcheck.py        # 或双击 重构自检.bat
+python -m apps.cli.main play --level 2   # 无头剧本：建卡→用能力→休息
+```
+
+角色档存在 `characters/` 下（`_last.json` 记住上次打开的档）。
+注意：两个程序的存档格式不同（重制版存档由 `dnd5r.api` 读写，只存事实）。
 
 ## 规则版本：只做 5R
 
-本项目的判定标准是 **D&D 2024 修订版**，凡是 5R 与 5e 有出入的地方一律按 5R：
+两个程序用的是同一份判定标准：**D&D 2024 修订版**，凡是 5R 与 5e 有出入的地方一律按 5R：
 
 | 领域 | 5e（2014） | **5R（本项目采用）** |
 |---|---|---|
@@ -30,17 +53,13 @@
 5R 与 2014 内容**向后兼容**，但本程序不带 2014 数据，也不提供版本切换开关。
 （代码里 `dnd55e`、`5.5e` 这类命名是历史遗留，指的都是同一个 5R。）
 
-## 快速开始
+旧版程序的功能面（重制版逐阶段对齐中，进度见架构文档 §9）：
 
-需要 Python 3.10+（含 tkinter，Windows 官方安装包自带）。
-
-```
-启动人物卡.bat                      # 双击也可
-python dnd55e_character_builder.py            # 直接启动
-python dnd55e_character_builder.py --selftest # 无人值守自检(不开窗口)
-```
-
-角色档存在 `characters/` 下（`_last.json` 记住上次打开的档）。
+- 12 个职业 × 1–20 级、48 个子职
+- 347 个法术（含 8 个 2024 Summon 系列的召唤物映射）
+- 140 件魔法物品、91 条野兽数据（88 只可变形 + 3 只游侠伙伴）、32 条召唤物 Stat Block
+- 67 条专长（43 通用 + 12 战斗风格 + 12 传奇恩惠）
+- 建卡向导 + 六标签页角色卡 + 升级/休息/掷骰
 
 ## 界面导览
 
@@ -115,7 +134,7 @@ dnd55e/
 | `dnd55e/data/metamagic.json` | 超魔法选项 |
 
 数据来自 SRD 5.2（dnd5eapi.co 的 2024 端点）与 PHB 2024 的公开条目。
-原始抓取快照**不入库**（`data/raw/` 已在 `.gitignore` 排除），需要时运行 `_fetch_srd.py` 自行生成。
+原始抓取快照**不入库**（`data/raw/` 已在 `.gitignore` 排除），需要时运行 `tools/legacy/_fetch_srd.py` 自行生成。
 
 ## 自检
 
@@ -129,16 +148,16 @@ dnd55e/
 
 > **首次 clone 后** `data/raw/` 是空的（该目录不入库，见 `NOTICE.md`）。此时第 0 步会提示缺数据、
 > 第 3 步打印 `SKIP` 跳过逐级对账，其余步骤照常运行。想跑全量对账就先执行
-> `python _fetch_class_detail.py` 与 `python _fetch_srd.py` 补齐上游快照。
+> `python tools/legacy/_fetch_class_detail.py` 与 `python tools/legacy/_fetch_srd.py` 补齐上游快照。
 > **主程序本身不依赖 `data/raw/`**，建卡与存档完全正常。
 
 改数据文件后还要单独跑对应校验器（它们不在批处理里）：
 
 ```
-python _featcheck.py      # feats_general.json
-python _itemcheck.py      # items.json
-python _moncheck.py       # monsters.json
-python _summoncheck.py    # summons.json
+python tools/legacy/_featcheck.py   # feats_general.json
+python tools/legacy/_itemcheck.py   # items.json
+python tools/legacy/_moncheck.py    # monsters.json
+python tools/legacy/_summoncheck.py # summons.json
 ```
 
 另有可选的深度验证脚本，在 `backup/` 下：
@@ -166,7 +185,7 @@ python _summoncheck.py    # summons.json
 完整署名、修改说明与免责声明见 **[`NOTICE.md`](NOTICE.md)**。
 
 本仓库**不包含** `data/raw/` 上游原始快照（已在 `.gitignore` 排除），需要时自行运行
-`_fetch_srd.py` 获取。
+`tools/legacy/_fetch_srd.py` 获取。
 
 > 本作品部分材料版权归 Wizards of the Coast LLC 所有。
 > Portions of the materials used are property of Wizards of the Coast LLC. ©Wizards of the Coast LLC.
@@ -175,6 +194,7 @@ python _summoncheck.py    # summons.json
 ## 文档
 
 - `dnd55e_rules_reference.md` — 规则基准与实现口径（2024 vs 2014 差异、逐条实现的判定）
-- `_dataspec.md` — 数据字段规范（给改数据的人看）
-- `重构方案.md` — P1–P5 模块化改造记录（已完成）
+- `tools/legacy/_dataspec.md` — 旧版数据字段规范（给改数据的人看）
+- `架构设计v3-插件化.md` — **重制版的设计与逐阶段实施记录（先读这份）**
+- `重构方案.md` — 旧程序 P1–P5 模块化改造记录（已完成）
 - `P6方案.md` — P6 五项功能补齐与执行结果（已完成）

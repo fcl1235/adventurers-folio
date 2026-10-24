@@ -278,9 +278,9 @@ class SessionTests(Base):
         session.create_character(DRUID, 10, SCORES,
                                  name_zh="德鲁伊", name_en="Druid", subclass=MOON)
         session.start_encounter([self.foe()], rng=ScriptedRng([15, 5]))
-        _, report = session.dispatch(api.NewTurn())     # 德鲁伊 → 对手
+        report = session.dispatch(api.NewTurn())     # 德鲁伊 → 对手
         self.assertIn("对手", report.message)
-        _, report = session.dispatch(api.NewTurn())     # 对手 → 德鲁伊（第 2 轮）
+        report = session.dispatch(api.NewTurn())     # 对手 → 德鲁伊（第 2 轮）
         self.assertIn("德鲁伊", report.message)
         self.assertIn("第 2 轮", report.message)
 

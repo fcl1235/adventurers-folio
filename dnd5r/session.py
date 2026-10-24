@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""会话：前后端之间唯一的操作入口。
+"""会话：CLI 剧本与单测的便捷壳。
 
-一条铁律：**前端不发方法名，发意图**。
-`dispatch(UsePower("..."))` 返回 `(view, report)`，前端只负责把二者画出来。
+2026-10（P11，§14.32）**降位**：正式的前后端契约是 `dnd5r.api` 的函数门面，
+桌面端从它直取；Session 只保留「命令 → 报告」的剧本用法（CLI `play`
+无头跑流程）。它**没有自己的投影** —— 要看角色就 `api.character_sheet`，
+同一个数不会有第二个算法（G24 的正解；原先那套 Card 投影已删）。
 
-Session 持有回合状态（动作经济、随机源、日志），角色本身的派生值仍然现算。
-这样 CLI 能无头跑完整个流程 —— 这本身就是后端独立的证明。
+一条铁律不变：**前端不发方法名，发意图**。`dispatch(UsePower("..."))`
+返回 Report；角色本身的派生值仍然现算，回合状态（动作经济、遭遇战指针）
+由这里持有 —— 所以 CLI 能无头跑完整个流程，这本身就是后端独立的证明。
 """
 
 from __future__ import annotations
@@ -17,29 +20,11 @@ from .content import ClassDef, ContentBundle, load_all
 from .kernel.errors import DndError, IllegalAction
 from .kernel.events import Report
 from .kernel.rng import Rng, SeededRng
-from .kernel.text import Text
 from .model.actor import Actor
-from .model.levels import ClassLevel, TotalLevel
 from .model.profile import ClassEntry
-from .model.statblock import ABILITY_NAMES
-from .rules.actioneconomy import ActionEconomy, ActionType
-from .rules.armor import ac_inputs, loadout_for
-from .rules.build import (
-    available_powers, build_actor, eligible_forms_for, morph_class_of,
-    owner_class_id,
-)
-from .rules.contributions import (
-    facts_for, modifiers_for, passive_modifiers, passive_proficiencies,
-)
-from .rules.effects import EffectContext
+from .rules.actioneconomy import ActionEconomy
 from .rules.encounter import Encounter
-from .rules.morph import FormSpec, is_morphed
-from .rules.powers import Power, can_use, phase_label, use_power
-from .rules.progression import proficiency_bonus
 from .rules.rest import RestResult, long_rest, short_rest
-from .rules.resolver import RefContext, Resolver, crit_text
-from .rules.weapons import damage_name, profiles_for
-from .view import Card, CardAction, CharacterView, HeaderView
 
 
 # --- 命令 -------------------------------------------------------------
@@ -110,11 +95,15 @@ class Session:
         name_en: str = "Unnamed Adventurer",
         actor_id: str = "pc.hero",
         subclass: str | None = None,
+        extra_classes: Sequence[tuple[str, int]] = (),
     ) -> Actor:
-        self.actor = build_actor(
+        from .api import new_character
+
+        self.actor = new_character(
             self.bundle, class_id=class_id, class_level=class_level,
-            scores=scores, name_zh=name_zh, name_en=name_en, actor_id=actor_id,
-            subclass=subclass,
+            scores=scores, name_zh=name_zh, name_en=name_en,
+            actor_id=actor_id, subclass=subclass,
+            extra_classes=tuple(extra_classes),
         )
         self.economy.reset(movement=self.actor.statblock.speed("walk"))
         self.encounter = None
@@ -131,11 +120,11 @@ class Session:
         主角的额度对象**就是** `self.economy` 那一份（同一个引用），不是另建一套。
         两份各记一套的结果是「角色卡上写着动作还在，遭遇战里说他用完了」。
         """
+        from .api import new_encounter
+
         actor = self.character
-        encounter = Encounter.of([actor, *others])
+        encounter = new_encounter([actor, *others], rng=rng or self.rng)
         encounter.get(actor).economy = self.economy
-        encounter.roll_initiative(rng or self.rng)
-        encounter.begin()
         self.encounter = encounter
         return encounter
 
@@ -157,71 +146,18 @@ class Session:
                 found[entry.class_id] = class_def.hit_die
         return found
 
-    def morph_class(self) -> tuple[ClassEntry, ClassDef] | None:
-        """当前职业里带「形态轴」的那个（德鲁伊）。按数据找，不判 class_id。"""
-        return morph_class_of(self.character, self.bundle)
-
-    def forms(self) -> list[FormSpec]:
-        """当前可选的全部形态：按 CR 轴 + 游速 4 级 / 飞行 8 级解禁过滤。
-
-        还要求「变形能力本身已解锁」——1 级德鲁伊有 CR 轴但还没有荒野变形，
-        这时候列出形态就是骗人。
-        """
-        return eligible_forms_for(self.character, self.bundle)
-
-    def is_morphed(self) -> bool:
-        return is_morphed(self.character)
-
-    def resolver(self) -> Resolver:
-        actor = self.character
-        profile = actor.profile
-        total = profile.total if profile else TotalLevel(1)
-        class_level = None
-        if profile and len(profile.classes) == 1:
-            class_level = ClassLevel(int(profile.classes[0].class_level))
-        top = actor.top()
-        return Resolver(RefContext(
-            prof_bonus=proficiency_bonus(total),
-            total_level=total,
-            class_level=class_level,
-            abilities=top.statblock.abilities,
-            speeds=dict(top.statblock.speeds),
-            facts=facts_for(actor, class_level, loadout_for(actor, self.bundle.armors)),
-        ))
-
-    def context_for(self, power: Power | None = None) -> EffectContext:
-        actor = self.character
-        profile = actor.profile
-        class_level = None
-        if profile is not None and power is not None:
-            owner = owner_class_id(self.bundle, power)
-            if owner is not None and profile.has_class(owner):
-                class_level = profile.class_level(owner)
-        if class_level is None and profile is not None and len(profile.classes) == 1:
-            class_level = profile.classes[0].class_level
-        total = profile.total if profile else TotalLevel(1)
-        return EffectContext(
-            actor=actor,
-            rng=self.rng,
-            locale=self.locale,
-            prof_bonus=proficiency_bonus(total),
-            total_level=total,
-            class_level=class_level,
-            source=power.id if power else "",
-            # 位置型原语要用它改坐标；没有遭遇战时是 None，效果会明说没结算
-            encounter=self.encounter,
-        )
-
     # --- 派发 ---------------------------------------------------------
-    def dispatch(self, command: Any) -> tuple[CharacterView, Report]:
+    def dispatch(self, command: Any) -> Report:
+        """执行一条命令。失败不抛出 —— Report.ok=False + 人话原因。"""
         try:
             report = self._handle(command)
         except DndError as exc:
             report = Report(ok=False, message=str(exc))
         if report.message:
             self.log.append(report.message)
+            self.log = self.log[-12:]       # 剧本日志只留最近 12 条
         self.last_report = report
-        return self.view(), report
+        return report
 
     def _handle(self, command: Any) -> Report:
         if isinstance(command, UsePower):
@@ -253,35 +189,18 @@ class Session:
         raise IllegalAction("不认识的命令：%r" % (command,))
 
     def _use_power(self, power_id: str, choice: Mapping[str, Any] | None = None) -> Report:
-        power = self._resolve_power(power_id)
-        context = self.context_for(power)
-        context.scratch.update(self._scratch(power, choice or {}))
-        report = use_power(power, context, self.economy)
-        for key, amount in list(context.scratch.items()):
-            if key.startswith("granted_"):
-                try:
-                    self.economy.grant(ActionType(key[len("granted_"):]), int(amount))
-                except DndError:
-                    continue
-        return report
+        """转发到 `api.use_power` —— 那是唯一的能力执行入口，桌面端走同一条。
 
-    def _resolve_power(self, power_id: str) -> Power:
-        """取「这个角色当前等级下」的能力对象。
-
-        不能直接查 PowerBook：叠层（18 级野兽施法解除施法禁令）是按等级
-        现算的，book 里那份是未叠层的原版。
+        延迟导入是因为 api 的门面反过来 re-export 本模块（Session 在 `api.__all__`
+        里），顶层互相 import 会在包初始化时成环。
         """
-        for power in available_powers(self.bundle, self.character):
-            if power.id == power_id:
-                return power
-        return self.bundle.book.get(power_id)   # 不存在时抛「没有这个能力」
+        from .api import use_power as api_use_power
 
-    def _scratch(self, power: Power, choice: Mapping[str, Any]) -> dict[str, Any]:
-        """把这次操作需要的数据塞进 scratch（变形要选形态就是这么进来的）。"""
-        scratch: dict[str, Any] = dict(choice)
-        if any(getattr(effect, "op", "") == "morph" for effect in power.effects):
-            scratch["forms"] = {form.id: form for form in self.forms()}
-        return scratch
+        result = api_use_power(
+            self.character, self.bundle, power_id,
+            economy=self.economy, rng=self.rng, locale=self.locale,
+            choice=dict(choice or {}), encounter=self.encounter)
+        return Report(ok=bool(result["ok"]), message=result["message"])
 
     def _rest(self, result: RestResult) -> Report:
         # 用 reset 而不是换新对象：遭遇战里的 Combatant 拿着同一个引用，
@@ -293,178 +212,6 @@ class Session:
         marks.end_turn()
         marks.end_round()
         return Report(ok=True, message=result.summary)
-
-    # --- 投影 ---------------------------------------------------------
-    def view(self) -> CharacterView:
-        actor = self.character
-        resolver = self.resolver()
-        top = actor.top()
-        profile = actor.profile
-        loadout = loadout_for(actor, self.bundle.armors)
-        base, gear_mods = ac_inputs(loadout, top.statblock, self.locale)
-        mods = passive_modifiers(self.bundle, actor, self.locale)
-        ac = resolver.armor_class(
-            top, list(modifiers_for(mods, "ac")) + list(gear_mods), base=base,
-        )
-        morphed = top.layer is not None
-
-        classes: list[str] = []
-        level = 1
-        if profile is not None:
-            for entry in profile.classes:
-                class_def = self.bundle.classes.get(entry.class_id)
-                label = class_def.name.get(self.locale) if class_def else entry.class_id
-                classes.append("%s %d" % (label, int(entry.class_level)))
-            level = int(profile.total)
-
-        header = HeaderView(
-            name=top.statblock.name.get(self.locale),
-            classes=tuple(classes),
-            level=level,
-            hp=actor.hp.current,
-            hp_max=actor.hp.maximum,
-            temp_hp=actor.hp.temp,
-            ac=ac.total,
-            ac_detail=ac.describe(),
-            speed={mode: resolver.speed(
-                top, mode, () if morphed else modifiers_for(mods, "speed.%s" % mode)).total
-                for mode in top.statblock.speeds},
-            proficiency_bonus=proficiency_bonus(profile.total if profile else TotalLevel(1)),
-            conditions=actor.conditions.ids(),
-        )
-
-        cards = self._power_cards() + self._pool_cards()
-        return CharacterView(
-            header=header,
-            cards=tuple(cards),
-            attacks=self._attack_cards(),
-            log=tuple(self.log[-12:]),
-        )
-
-    def _power_cards(self) -> list[Card]:
-        """卡片 = 已解锁的全部能力。
-
-        走 `available_powers` 而不是自己再遍历一遍职业/子职/专长：
-        第二个入口就是第二个 bug 点（P5e 加子职时就漏过这里）。
-        """
-        return [self._card_for(power) for power in available_powers(self.bundle, self.character)]
-
-    def _card_for(self, power: Power) -> Card:
-        title = power.name.get(self.locale)
-        detail = (power.text.get(self.locale),)
-        if not power.is_button:
-            subtitle = "被动" if power.kind.value == "passive" else {
-                "triggered": "触发：%s" % phase_label(power.phase),
-            }.get(power.kind.value, power.kind.value)
-            value, _ = self._cost_value(power)
-            return Card(id="power:%s" % power.id, title=title, subtitle=subtitle,
-                        value=value, tone="dim", detail=detail)
-
-        reasons = can_use(power, self.context_for(power), self.economy)
-        value, tone = self._cost_value(power)
-        badges = tuple(
-            ["kind.%s" % power.kind.value] + (["blocked"] if reasons else [])
-        )
-        return Card(
-            id="power:%s" % power.id,
-            title=title,
-            subtitle=power.subtitle(self.locale),
-            value=value,
-            tone="dim" if reasons else tone,
-            badges=badges,
-            actions=() if reasons else (
-                CardAction(command="use_power", label=title,
-                           payload={"power_id": power.id}),
-            ),
-            detail=detail + tuple(reasons),
-        )
-
-    def _cost_value(self, power: Power) -> tuple[str, str]:
-        cost = power.cost
-        if cost is None or not cost.resource:
-            return "", "normal"
-        root = self.character.root().resources
-        if not root.has(cost.resource):
-            return "—", "dim"
-        pool = root.get(cost.resource)
-        return "%d/%d" % (pool.available, pool.capacity), ("dim" if pool.available == 0 else "normal")
-
-    def _pool_cards(self) -> list[Card]:
-        """只给「没有按钮对应」的池出卡：按钮卡上已经显示余量，重复会看花眼。"""
-        taken = {power.cost.resource
-                 for power in self.bundle.book.all()
-                 if power.is_button and power.cost and power.cost.resource}
-        cards = []
-        for pool in self.character.root().resources.pools.values():
-            if pool.id in taken:
-                continue
-            title = pool.label.get(self.locale) if pool.label else pool.id.split(".")[-1]
-            if pool.id.startswith("hit_dice."):
-                title = "生命骰"
-            cards.append(Card(
-                id="pool:%s" % pool.id,
-                title=title,
-                subtitle={"charge": "次数", "point": "点数", "slot_level": "环级",
-                          "dice": "骰池"}.get(pool.kind.value, pool.kind.value),
-                value="%d/%d" % (pool.available, pool.capacity),
-                tone="dim" if pool.available == 0 else "normal",
-                badges=("refresh.%s" % pool.refresh.value,),
-            ))
-        return cards
-
-    def _attack_cards(self) -> tuple[Card, ...]:
-        """攻击卡直接来自装备：没拿武器就是徒手打击（1 + 力量）。"""
-        actor = self.character
-        resolver = self.resolver()
-        top = actor.top()
-        tokens = set(actor.profile.proficiencies) if actor.profile else set()
-        tokens |= passive_proficiencies(self.bundle, actor)
-        found = profiles_for(actor, self.bundle.weapons, top.statblock.abilities,
-                             resolver.ctx.prof_bonus, tokens)
-        mods = passive_modifiers(self.bundle, actor, self.locale)
-        crit = resolver.crit_range(top, modifiers_for(mods, "attack.crit_min"))
-        count = 1
-        profile = actor.profile
-        if profile is not None:
-            for entry in profile.classes:
-                class_def = self.bundle.classes.get(entry.class_id)
-                if class_def is not None:
-                    count = max(count, class_def.total_attacks(entry.class_level))
-        cards = []
-        for item in found:
-            detail = ["%s 武器" % ABILITY_NAMES[item.ability].get(self.locale)
-                      if item.ability in ABILITY_NAMES else item.ability]
-            if item.off_hand:
-                detail.append("副手（不加属性调整值）")
-            if not item.proficient:
-                detail.append("未熟练：没有熟练加值")
-            if item.mastery:
-                detail.append("专精：%s" % item.mastery)
-            if item.disadvantage:
-                detail.append("重型武器属性不足 13：攻击劣势")
-            if crit.total < 20:
-                detail.append("重击范围 %s" % crit_text(crit.total))
-            cards.append(Card(
-                id="attack:%s" % item.weapon_id,
-                title=item.name.get(self.locale),
-                subtitle="+%d 攻击 · %s %s" % (
-                    item.attack, item.damage_total_hint,
-                    damage_name(item.damage_type, self.locale)),
-                value="%d 次/动作" % count,
-                tone="dim" if not item.proficient else "normal",
-                detail=tuple(detail),
-            ))
-        return tuple(cards)
-
-    def report_dict(self) -> dict:
-        report = self.last_report
-        return {
-            "ok": report.ok,
-            "message": report.message,
-            "events": [type(event).__name__ for event in report.events],
-            "rolls": [{"label": roll.label, "total": roll.total, "detail": roll.detail}
-                      for roll in report.rolls],
-        }
 
 
 __all__ = [
