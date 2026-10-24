@@ -183,13 +183,16 @@ def spend_slot(actor: Actor, slot_level: int, class_id: str = ""):
     if not pools:
         return None
     index = int(slot_level)
-    for level, pool in pools:
-        if level == index:
-            if not pool.can_spend(1):
-                raise IllegalAction("没有可用的 %d 环法术位（已用光）" % index)
+    # 同一环级可能有多个池（职业位 + 创造的位）：按顺序找**有余额**的那个，
+    # 第一个池空了直接报错会让人花不出去创造的位（P13 抓到）。
+    same_level = [pool for level, pool in pools if level == index]
+    if not same_level:
+        raise IllegalAction("没有 %d 环法术位" % index)
+    for pool in same_level:
+        if pool.can_spend(1):
             pool.spend(1)
             return pool
-    raise IllegalAction("没有 %d 环法术位" % index)
+    raise IllegalAction("没有可用的 %d 环法术位（已用光）" % index)
 
 
 def highest_slot_table(class_def: ClassDef, class_level: ClassLevel) -> int:

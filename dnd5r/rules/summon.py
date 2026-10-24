@@ -383,3 +383,78 @@ def slot_curve(summon, base_slot: int, locale: str = "zh", caster_mod: int = 0,
             continue
         rows.append({"slot": slot, "ac": card["ac"], "hp": card["hp"]})
     return rows
+
+
+# --- 入场（P13）----------------------------------------------------------
+def build_summon_actor(summon, slot_level: int, caster_attack: int = 0,
+                       caster_dc: int = 8, size: str = "", index: int = 1,
+                       locale: str = "zh"):
+    """把一只召唤物变成遭遇战里的 Actor（与 build_monmonster 同一个思路）。
+
+    需要施法者的两个数：法术攻击加值（召唤物动作的 attack: spell 就是它）
+    与法术 DC（save_dc: spell）。AC 反推成 ac_base 与怪物同一口径 ——
+    Resolver 统一按「基础 + 敏捷」算，不反推就加两次敏捷。
+
+    返回 (actor, table)：table 的三槽动作是 `MonsterAttack`（与怪物/形态
+    同一形状），所以结算走同一条 `resolve_monster_attack`。
+    """
+    from dataclasses import dataclass as _dc
+
+    from ..model.actor import Actor, ActorKind, HpPool
+    from ..model.statblock import Abilities, Statblock
+    from .monsters import DamageRoll, MonsterAttack
+
+    card = resolve(summon, slot_level, caster_attack, size, locale)
+    if card["hp"] is None:
+        raise RuleError("%s 算不出生命值（按体型分叉的要传 size）" % summon.id)
+    abilities = Abilities.of(**{key: int(value)
+                                for key, value in card["abilities"].items()})
+
+    def convert(rows):
+        out = []
+        for row in rows:
+            kind = row.kind if row.kind in ("melee", "ranged", "save") else "other"
+            save_dc = 0
+            save = ""
+            if kind == "save":
+                save = row.save
+                save_dc = int(caster_dc)
+            out.append(MonsterAttack(
+                name=row.name, kind=kind,
+                attack_bonus=int(caster_attack) if kind in ("melee", "ranged") else None,
+                reach=int(row.reach), range=int(row.range),
+                save=save, save_dc=save_dc,
+                damage=tuple(DamageRoll(dice=part.at(slot_level, caster_attack),
+                                        type=part.damage_type)
+                             for part in row.damage),
+                text=row.text,
+            ))
+        return tuple(out)
+
+    @_dc(frozen=True)
+    class _Table:
+        actions: tuple
+        bonus_actions: tuple
+        reactions: tuple
+
+    table = _Table(actions=convert(summon.actions),
+                   bonus_actions=convert(summon.bonus_actions),
+                   reactions=convert(summon.reactions))
+    statblock = Statblock(
+        name=summon.name,
+        abilities=abilities,
+        ac_base=max(0, int(card["ac"]) - abilities.mod("dex")),
+        speeds=dict(card["speeds"]),
+        senses=dict(card["senses"]),
+        size=summon.size,
+    )
+    base_name = summon.name.get(locale)
+    ident = summon.id if int(index) <= 1 else "%s#%d" % (summon.id, int(index))
+    actor = Actor(
+        id=ident,
+        kind=ActorKind.SUMMON,
+        statblock=statblock,
+        hp=HpPool(maximum=int(card["hp"])),
+        display_name=base_name if int(index) <= 1 else "%s %d" % (base_name, int(index)),
+    )
+    return actor, table

@@ -134,6 +134,12 @@ def long_rest(actor: Actor) -> RestResult:
             pool.refill()
 
     recovered = root.resources.refill_all()
+    # 创造的法术位（Refresh.VANISH）长休整池蒸发 —— 原文 "vanishes when you
+    # finish a Long Rest"。恢复语义表达不了「消失」，所以是删除而不是清零。
+    vanished = [pool_id for pool_id, pool in root.resources.pools.items()
+                if pool.refresh.value == "vanish"]
+    for pool_id in vanished:
+        del root.resources.pools[pool_id]
     expired = _expire(actor, "long_rest")
 
     if healed:

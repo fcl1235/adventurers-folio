@@ -1,3 +1,4 @@
+# hand-edited: 兑换能力（法术位化点 / 创造法术位）是手写真实机制，生成器不覆盖本文件
 # 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
 # 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
 # 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
@@ -148,6 +149,46 @@ powers:
             数值结算见 P5 后续：本条先登记规则原文。
           en: |-
             Number resolution lands later in P5; the rule text is registered here.
+
+  - id: dnd2024.class.sorcerer.convert_slot_to_points
+    name: {zh: 法术位化术法点, en: Convert Spell Slot to Sorcery Points}
+    level: 2
+    kind: activated
+    target: self
+    text:
+      zh: |-
+        无动作消耗一个法术位，获得等于其环级的术法点。
+      en: |-
+        As no action, expend a spell slot to gain Sorcery Points equal to the slot's level.
+    effects:
+      - exchange:
+          direction: slots_to_points
+          pool: dnd2024.resource.sorcerer.sorcery
+
+  - id: dnd2024.class.sorcerer.create_spell_slot
+    name: {zh: 创造法术位, en: Creating Spell Slots}
+    level: 2
+    kind: activated
+    target: self
+    cost: {action: bonus}
+    text:
+      zh: |-
+        附赠动作，按表花术法点造一个法术位（最高 5 环），长休消失。
+        造 1 环 2 点（术士 2 级起）、2 环 3 点（3 级）、3 环 5 点（5 级）、
+        4 环 6 点（7 级）、5 环 7 点（9 级）。
+      en: |-
+        As a Bonus Action, transform unexpended Sorcery Points into one spell slot
+        (no higher than level 5). The slot vanishes when you finish a Long Rest.
+    effects:
+      - exchange:
+          direction: points_to_slots
+          pool: dnd2024.resource.sorcerer.sorcery
+          options:
+            - {slot_level: 1, cost: 2, min_level: 2}
+            - {slot_level: 2, cost: 3, min_level: 3}
+            - {slot_level: 3, cost: 5, min_level: 5}
+            - {slot_level: 4, cost: 6, min_level: 7}
+            - {slot_level: 5, cost: 7, min_level: 9}
 
   - id: dnd2024.class.sorcerer.metamagic
     name: {zh: 超魔法, en: Metamagic}

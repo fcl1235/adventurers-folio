@@ -226,11 +226,13 @@ powers:
       en: |-
         Whenever you make an ability check that uses one of your skill or tool proficiencies, you can treat a d20 roll of 9 or lower as a 10.
     effects:
-      - note:
-          zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
-          en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+      # 原文：凡用到技能或工具熟练的属性检定，d20 掷出 9 或更低按 10 计。
+      # 只对熟练的生效 —— when_proficient 由 roll_check 按「这次检定是否熟练」判。
+      - override_outcome:
+          set_die: 10
+          when_die_lte: 9
+          applies_to: check
+          when_proficient: true
 
   - id: dnd2024.class.rogue.improved_cunning_strike
     name: {zh: 强化灵巧打击, en: Improved Cunning Strike}

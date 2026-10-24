@@ -29,6 +29,9 @@ class Refresh(str, Enum):
     SHORT_REST = "short_rest"
     LONG_REST = "long_rest"
     ENCOUNTER = "encounter"
+    # 长休**蒸发**（不是恢复）：创造出来的法术位这类「临时获得」的池。
+    # 与 NONE 的区别：NONE 是「永远不回」，VANISH 是「长休连池一起消失」。
+    VANISH = "vanish"
 
 
 @dataclass

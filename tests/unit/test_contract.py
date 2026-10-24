@@ -98,6 +98,16 @@ class ContractTest(unittest.TestCase):
         if forms and any(getattr(effect, "op", "") == "morph" for effect in power.effects):
             context.scratch["forms"] = {form.id: form for form in forms}
             context.scratch["form_id"] = forms[0].id
+        # 兑换类能力要选环级（P13）：位→点烧 1 环（20 级角色必有）；
+        # 点→位取当前等级造得出的最低档
+        for effect in power.effects:
+            if getattr(effect, "op", "") != "exchange":
+                continue
+            if effect.direction == "slots_to_points":
+                context.scratch["slot_level"] = 1
+            else:
+                usable = [row for row in effect.options if row.min_level <= int(level)]
+                context.scratch["slot_level"] = min(row.slot_level for row in usable)
         return context
 
     def test_triggered_powers_are_not_buttons(self):

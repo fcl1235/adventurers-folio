@@ -26,7 +26,9 @@ from .grants import (
     GrantProficiency,
 )
 from .morph import Morph, Revert
+from .exchange import Exchange, ExchangeOption
 from .numeric import Damage, GrantTempHp, Heal, ReduceDamage
+from .outcome import OverrideOutcome
 from .onhit import ExtraDamage
 from .position import Teleport
 from .state import (
@@ -45,5 +47,6 @@ __all__ = [
     "Heal", "Damage", "GrantTempHp", "ReduceDamage", "Morph", "Revert",
     "GrantModifier", "GrantDefense", "GrantProficiency", "GrantAdvantage", "GrantAction",
     "ApplyCondition", "RemoveCondition", "SpendResource", "RecoverResource",
+    "Exchange", "ExchangeOption", "OverrideOutcome",
     "ModifyRoll", "MarkAdvantage", "NoteEffect", "Teleport", "ExtraDamage",
 ]
