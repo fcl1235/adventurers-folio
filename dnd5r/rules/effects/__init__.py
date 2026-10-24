@@ -31,6 +31,7 @@ from .numeric import Damage, GrantTempHp, Heal, ReduceDamage
 from .outcome import OverrideOutcome
 from .onhit import ExtraDamage
 from .position import Teleport
+from .token import GrantToken
 from .state import (
     ApplyCondition,
     MarkAdvantage,
@@ -47,6 +48,6 @@ __all__ = [
     "Heal", "Damage", "GrantTempHp", "ReduceDamage", "Morph", "Revert",
     "GrantModifier", "GrantDefense", "GrantProficiency", "GrantAdvantage", "GrantAction",
     "ApplyCondition", "RemoveCondition", "SpendResource", "RecoverResource",
-    "Exchange", "ExchangeOption", "OverrideOutcome",
+    "Exchange", "ExchangeOption", "OverrideOutcome", "GrantToken",
     "ModifyRoll", "MarkAdvantage", "NoteEffect", "Teleport", "ExtraDamage",
 ]

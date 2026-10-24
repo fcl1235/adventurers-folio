@@ -27,10 +27,10 @@ from typing import Callable, Iterable
 
 from ..kernel.errors import RuleError
 
-# 标记种类。目前只有「待消费的优势/劣势」与「待消费的额外伤害」两种形状，
-# 两者都是「掷骰/命中那一刻才决定要不要用」—— 这正是标记存在的理由。
-MARK_KINDS = ("advantage", "extra_damage")
-SCOPES = ("turn", "round", "never")
+# 标记种类。「待消费的优势/劣势」「待消费的额外伤害」，以及「别人交给你的一颗骰」
+# （诗人灵感）：三者都是「掷骰/命中那一刻才决定要不要用」—— 这正是标记存在的理由。
+MARK_KINDS = ("advantage", "extra_damage", "token")
+SCOPES = ("turn", "round", "never", "rest")
 
 
 @dataclass
@@ -53,6 +53,7 @@ class Mark:
     # 额外伤害用这两个字段；优势标记留空
     dice: str = ""
     damage_type: str = ""
+    # token（诗人灵感）用 dice 装「1d6/1d8/...」；mode/target 对它无意义
 
     def __post_init__(self) -> None:
         if not self.id:
@@ -60,7 +61,7 @@ class Mark:
         if self.kind not in MARK_KINDS:
             raise RuleError("未知标记种类：%r（可选 %s）"
                             % (self.kind, "/".join(MARK_KINDS)))
-        if self.mode not in ("adv", "dis"):
+        if self.kind != "token" and self.mode not in ("adv", "dis"):
             raise RuleError("标记的 mode 只能是 adv 或 dis：%r" % (self.mode,))
         if self.expires not in SCOPES:
             raise RuleError("未知过期作用域：%r（可选 %s）"
@@ -132,6 +133,11 @@ class MarkSet:
     def end_turn(self) -> list[Mark]:
         """自己回合结束：清 `turn` 标记与全部用量记账。返回被清掉的标记。"""
         return self._purge(("turn",), clear_spent=True)
+
+    def purge_rest(self) -> list[Mark]:
+        """任何一次休息结束：清 `rest` 作用域（诗人灵感这类「一小时内的好处」，
+        引擎没有时钟，用「撑不过一次休息」做最接近的近似 —— 宁可早清，不可永驻）。"""
+        return self._purge(("rest",), clear_spent=False)
 
     def end_round(self) -> list[Mark]:
         """一轮结束：清 `round` 标记（`never` 保留，`turn` 早在回合末清过了）。"""

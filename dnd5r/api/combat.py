@@ -31,6 +31,7 @@ def roll_check(
     rng: Rng | None = None,
     locale: str = "zh",
     ability: str = "",
+    use_inspiration: bool = False,
 ) -> dict:
     """掷一次 d20 检定 —— **优势/劣势在这里才真的变成「掷两次留一个」**。
 
@@ -44,6 +45,10 @@ def roll_check(
 
     工具的规则是「DM 决定用哪项属性」，所以工具检定允许显式传 `ability` 覆盖
     内容里的**建议属性**；不传就用建议值。
+
+    `use_inspiration=True` 消耗身上一颗灵感骰（别人给的，诗人灵感这类）：
+    掷出骰面加进合计。**要不要加是玩家的选择**（原文是「看到失败之后决定」，
+    DC 在桌上、不在引擎里）—— 预览一次不带参数看总数，再决定重掷还是加骰。
 
     返回值里 **`advantage: true`** 就是「该掷两次、取高」这件事本身；
     加值和明细来自与角色卡**同一个** `Resolver`，不会出现「卡上 +7、掷的时候 +5」。
@@ -128,12 +133,14 @@ def roll_check(
                                            mode=mode, mode_sources=mode_sources)
         label = "攻击（%s）" % ability.upper()
 
-    roll = roll_d20(rng or SeededRng(), resolution.mode)
+    roller = rng or SeededRng()
+    roll = roll_d20(roller, resolution.mode)
     die = roll.total
     override = _apply_override_outcome(
         content, actor, kind, locals().get("proficient", False), die)
     if override:
         die = override[0]
+    inspiration = _spend_inspiration(actor, roller, use_inspiration)
     kept = roll.parts[0].rolls
     dropped = roll.parts[0].dropped if roll.parts else ()
     return {
@@ -149,13 +156,53 @@ def roll_check(
         "kept": list(kept),
         "dropped": list(dropped),
         "modifier": resolution.total,
-        "total": die + resolution.total,
+        "total": die + resolution.total + (inspiration["roll"] if inspiration else 0),
         "detail": resolution.describe(),
         # 一次性标记**不在这里消费**：这是通用的掷骰工具（预览、补掷都用它），
         # 悄悄改状态会让人「随便掷一下就丢了优势」。真打要走 `attack_roll`。
         # 但优势确实按标记算进去了，所以必须提示它还在。
         "marks_pending": marks_of(actor) if kind == "attack" else [],
-        "notes": [override[1]] if override else [],
+        "inspiration": inspiration,
+        "tokens_pending": tokens_of(actor),
+        "notes": ([override[1]] if override else [])
+                 + ([inspiration["note"]] if inspiration else []),
+    }
+
+
+def tokens_of(actor: Actor) -> list[dict]:
+    """身上还挂着的授予骰（诗人灵感这类）。与 marks_of 同一个口径：只读。"""
+    rows = []
+    for mark in actor.root().marks.matching(lambda item: item.kind == "token"):
+        rows.append({
+            "id": mark.id, "label": mark.label or mark.source,
+            "dice": mark.dice, "uses": int(mark.uses),
+            "source": mark.source, "expires": mark.expires,
+            "text": "%s：下一次 d20 检定可加 %s（%s）"
+                    % (mark.label or "授予骰", mark.dice, mark.source),
+        })
+    return rows
+
+
+def _spend_inspiration(actor: Actor, roller, enabled: bool):
+    """掷并消耗一颗灵感骰。没有骰却要求用 = 报错（不是静默不加）。"""
+    if not enabled:
+        return None
+    from ..kernel.dice import parse as parse_dice
+    from ..kernel.errors import RuleError
+
+    held = actor.root().marks.matching(lambda item: item.kind == "token")
+    if not held:
+        raise RuleError("身上没有待用的灵感骰（诗人要先用附赠动作给你一颗）")
+    token = held[0]
+    result = parse_dice(token.dice).roll(roller)
+    actor.root().marks.consume(lambda item: item is token)
+    return {
+        "label": token.label or token.source,
+        "dice": token.dice,
+        "roll": result.total,
+        "detail": result.describe(),
+        "note": "%s %s 掷出 %d，加进本次合计" % (token.label or "灵感骰",
+                                               token.dice, result.total),
     }
 
 

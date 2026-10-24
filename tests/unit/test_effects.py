@@ -67,8 +67,8 @@ class ContractTest(unittest.TestCase):
             "morph", "revert", "teleport",
             # P9b：一次性标记（待消费的优势）与命中时结算的额外伤害
             "mark", "extra_damage",
-            # P13：结算后保底、双向兑换（召唤入場不是效果原语，在 api 层接）
-            "override_outcome", "exchange",
+            # P13：结算后保底、双向兑换；P13b：授予骰（召唤入場在 api 层接）
+            "override_outcome", "exchange", "grant_token",
         }
         self.assertEqual(set(known_ops()), expected)
 

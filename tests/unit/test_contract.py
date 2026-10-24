@@ -98,6 +98,9 @@ class ContractTest(unittest.TestCase):
         if forms and any(getattr(effect, "op", "") == "morph" for effect in power.effects):
             context.scratch["forms"] = {form.id: form for form in forms}
             context.scratch["form_id"] = forms[0].id
+        # 授予类能力要指认受益者（P13b）：没有遭遇战时效果会走「未结算」说明
+        if any(getattr(effect, "op", "") == "grant_token" for effect in power.effects):
+            context.scratch["target_id"] = "npc.someone"
         # 兑换类能力要选环级（P13）：位→点烧 1 环（20 级角色必有）；
         # 点→位取当前等级造得出的最低档
         for effect in power.effects:

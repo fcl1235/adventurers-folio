@@ -37,7 +37,7 @@ from .sheet import (
 )
 from .combat import (
     CHECK_KINDS, attack_options, attack_roll, marks_of, monster_attack,
-    opportunity_attack, roll_check, roll_spell,
+    opportunity_attack, roll_check, roll_spell, tokens_of,
 )
 from .encounter import (
     advance_turn, encounter_distance, encounter_view, join_encounter,
@@ -72,7 +72,7 @@ __all__ = [
     "spell_info", "summon_info", "monster_catalog", "monster_sheet",
     "monster_actions", "spawn_monster",
     "attack_roll", "opportunity_attack", "monster_attack", "attack_options",
-    "marks_of",
+    "marks_of", "tokens_of",
     "eligible_forms_for", "morph_class_of", "form_options", "form_view",
     # 遭遇战（P9a）：回合容器、先攻、距离。对象进出，不落档。
     "Encounter", "Combatant", "FOOT",

@@ -73,6 +73,7 @@ def short_rest(
     before = actor.hp.current
     lines: list[str] = []
     spent_total = 0
+    root.marks.purge_rest()   # 与长休同一条：rest 作用域不过夜
     healed_total = 0
     con_mod = actor.statblock.abilities.mod("con")
 
@@ -134,6 +135,7 @@ def long_rest(actor: Actor) -> RestResult:
             pool.refill()
 
     recovered = root.resources.refill_all()
+    root.marks.purge_rest()      # 灵感这类「一小时内」的好东西撑不过一次休息
     # 创造的法术位（Refresh.VANISH）长休整池蒸发 —— 原文 "vanishes when you
     # finish a Long Rest"。恢复语义表达不了「消失」，所以是删除而不是清零。
     vanished = [pool_id for pool_id, pool in root.resources.pools.items()

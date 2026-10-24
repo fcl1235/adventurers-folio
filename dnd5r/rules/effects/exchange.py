@@ -53,6 +53,9 @@ class Exchange(Effect):
     direction: str = "points_to_slots"
     pool: str = ""
     options: tuple[ExchangeOption, ...] = ()
+    # slots_to_points 每烧一个位得几点：缺省 = 等于环级（魔法源泉）；
+    # 写整数 = 固定量（灵感泉源「花任意一个位回一次灵感」是 1）
+    gain: int = 0
 
     def __post_init__(self) -> None:
         if self.direction not in DIRECTIONS:
@@ -81,9 +84,11 @@ class Exchange(Effect):
         before = points.available
         # 花掉玩家指定环级的一个位（有账本却没这一环 → spend_slot 自己会拒绝）
         spend_slot(root, slot_lv)
-        points.recover(slot_lv)
-        ctx.note("把一个 %d 环法术位化作 %d 点术法点（%d → %d）"
-                % (slot_lv, slot_lv, before, points.available))
+        gained = int(self.gain) if int(self.gain) > 0 else int(slot_lv)
+        points.recover(gained)
+        ctx.note("把一个 %d 环法术位化作 %d 点%s（%d → %d）"
+                 % (slot_lv, gained, points.label.zh or "点数",
+                    before, points.available))
 
     # --- 点 → 位 --------------------------------------------------------
     def _points_to_slot(self, ctx: EffectContext, root, slot_lv: int,
@@ -120,7 +125,8 @@ class Exchange(Effect):
 
     def to_dict(self) -> dict:
         return {"direction": self.direction, "pool": self.pool,
-                "options": [row.to_dict() for row in self.options]}
+                "options": [row.to_dict() for row in self.options],
+                "gain": self.gain}
 
     @classmethod
     def from_payload(cls, payload: Any, where: str = "") -> "Exchange":
@@ -137,6 +143,7 @@ class Exchange(Effect):
             direction=str(payload.get("direction", "points_to_slots")).lower(),
             pool=str(payload.get("pool", "")),
             options=tuple(options),
+            gain=int(payload.get("gain", 0) or 0),
         )
 
 

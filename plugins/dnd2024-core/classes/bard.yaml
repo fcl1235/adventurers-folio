@@ -1,3 +1,4 @@
+# hand-edited: 灵感（授予骰）与灵感泉源（花位回次数）是手写真实机制，生成器不覆盖本文件
 # 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
 # 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
 # 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
@@ -113,19 +114,23 @@ powers:
   - id: dnd2024.class.bard.bardic_inspiration
     name: {zh: 吟游诗人灵感, en: Bardic Inspiration}
     level: 1
-    kind: passive
-    target: self
+    kind: activated
+    cost: {action: bonus, resource: dnd2024.resource.bard.inspiration, label: 吟游诗人灵感}
+    target: one_creature
     text:
       zh: |-
         附赠动作给 60 尺内一名生物一颗灵感骰（d6；5/10/15 级升为 d8/d10/d12），1 小时内一次 d20 检定失败可加上骰值。次数 = 魅力调整值（至少 1），5 级起短休也全恢复。
       en: |-
         You can supernaturally inspire others through words, music, or dance. This inspiration is represented by your Bardic Inspiration die, which is a d6. Using Bardic Inspiration. As a Bonus Action, you can inspire another creature within 60 feet of yourself who can see or hear you. That creature gains one of your Bardic Inspiration dice. A creature can have only one Bardic Inspiration die at a time. Once within the next hour when the creature fails a D20 Test, the creature can roll the Bardic Inspiration die and add the number rolled to the d20, potentially turning the failure into a success. A Bardic Inspiration die is expended when it's rolled. Number of Uses. You can confer a Bardic Inspiration die a number of times equal to your Charisma modifier (minimum of once), and you regain all expended uses when you finish a Long Rest. At Higher Levels. Your Bardic Inspiration die changes when you reach certain Bard levels, as shown in the Bardic Die column of the Bard Features table. The die becomes a d8 at level 5, a d10 at level 10, and a d12 at level 15.
     effects:
-      - note:
-          zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
-          en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+      # 交给别人（choice.target_id 指认）；骰面按诗人等级查表；同时只能持有一颗
+      # （同源替换）；「一小时内」用 rest 作用域近似（撑不过一次休息）。
+      - grant_token:
+          label: 吟游诗人灵感
+          die: {table: {1: 6, 5: 8, 10: 10, 15: 12}, key: class_level}
+          expires: rest
+          forbid_self: true
+          range_feet: 60
 
   - id: dnd2024.class.bard.spellcasting
     name: {zh: 施法, en: Spellcasting}
@@ -215,7 +220,7 @@ powers:
   - id: dnd2024.class.bard.font_of_inspiration
     name: {zh: 灵感泉源, en: Font of Inspiration}
     level: 5
-    kind: passive
+    kind: activated
     target: self
     text:
       zh: |-
@@ -223,11 +228,18 @@ powers:
       en: |-
         You now regain all your expended uses of Bardic Inspiration when you finish a Short or Long Rest. In addition, you can expend a spell slot (no action required) to regain one expended use of Bardic Inspiration.
     effects:
+      # 花任意一个法术位，回一次灵感次数（原文 "no action required"）
+      - exchange:
+          direction: slots_to_points
+          pool: dnd2024.resource.bard.inspiration
+          gain: 1
       - note:
           zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
+            「短休也恢复全部次数」未建模：池的恢复方式建池时定死，改动它需要
+            refresh 补丁通道 —— 现在只有这一条用例，先手记。
           en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+            The short-rest recharge upgrade is not modeled: a pool's refresh is
+            fixed at build time; rerouting it needs a refresh-patch channel.
 
   - id: dnd2024.class.bard.countercharm
     name: {zh: 反迷惑, en: Countercharm}
