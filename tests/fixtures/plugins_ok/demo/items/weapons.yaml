@@ -1,0 +1,7 @@
+- id: demo.weapon.club
+  kind: weapon
+  name: {zh: 木棒, en: Club}
+  category: simple
+  damage: "1d4"
+  damage_type: bludgeoning
+  properties: [light]

@@ -1,0 +1,12 @@
+id: homebrew-demo
+kind: content
+api: 1
+name:
+  zh: 示例自制包
+  en: Demo Homebrew
+version: 0.2.0
+requires: [demo-core >= 0.1]
+# 声明要整条替换哪些 id（overlay 的两语义之一；字段级 patch 不做）
+replaces: [demo.weapon.club]
+provides:
+  weapons: [demo.weapon.stick]

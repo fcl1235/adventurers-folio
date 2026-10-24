@@ -26,6 +26,9 @@ class Manifest:
     name: Text
     version: str = "0.1.0"
     requires: tuple[str, ...] = ()
+    # 本插件要**整条替换**哪些内容 id（overlay 的显式声明，§13.4）。
+    # 没声明而在别的插件里撞了 id：报错，不搞「后加载的赢」。
+    replaces: tuple[str, ...] = ()
     provides: Mapping[str, Sequence[str]] = field(default_factory=dict)
     path: str = ""
 
@@ -86,6 +89,7 @@ def parse_manifest(data: Any, where: str = "plugin.yaml") -> Manifest:
         name=name,
         version=str(data.get("version", "0.1.0")),
         requires=tuple(str(item) for item in requires),
+        replaces=tuple(str(item) for item in (data.get("replaces") or ())),
         provides=MappingProxyType({str(k): tuple(str(x) for x in v) for k, v in provides.items()}),
         path=str(where),
     )
@@ -102,11 +106,38 @@ def load_manifest(path: str | Path) -> Manifest:
     return parse_manifest(raw, where=str(file_path))
 
 
+def _version_tuple(text: str) -> tuple[int, ...]:
+    """`1.2.3` → (1, 2, 3)。数字段之外的内容按 0 计（`1.0a` ≈ 1.0）。"""
+    parts = []
+    for chunk in str(text).split("."):
+        digits = ""
+        for ch in chunk.strip():
+            if ch.isdigit():
+                digits += ch
+            else:
+                break
+        parts.append(int(digits) if digits else 0)
+    return tuple(parts) if parts else (0,)
+
+
 def check_requires(manifest: Manifest, available: Mapping[str, str]) -> list[str]:
-    """检查依赖；返回缺失或版本不足的条目。版本比较只做字符串相等的前缀检查。"""
+    """检查依赖：名字要在、版本要够（`pkg >= 1.2` 按数字段逐段比）。
+
+    版本只有两位数字时补零比较（1.2 == 1.2.0），不做 semver 全集 ——
+    插件版本本来就只有我们自己发。
+    """
     problems = []
     for item in manifest.requires:
-        name = item.split(">=")[0].strip()
-        if name and name not in available:
-            problems.append("缺少依赖插件 %s" % name)
+        if ">=" in item:
+            name, _, wanted = item.partition(">=")
+            name, wanted = name.strip(), wanted.strip()
+            have = available.get(name)
+            if have is None:
+                problems.append("缺少依赖插件 %s" % name)
+            elif _version_tuple(have) < _version_tuple(wanted):
+                problems.append("依赖 %s 需要 >= %s，实际 %s" % (name, wanted, have))
+        else:
+            name = item.strip()
+            if name and name not in available:
+                problems.append("缺少依赖插件 %s" % name)
     return problems

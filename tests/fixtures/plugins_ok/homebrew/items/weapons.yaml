@@ -1,0 +1,16 @@
+# 第一条整条替换 demo.weapon.club（清单里声明过 replaces）；第二条是纯新增。
+# 替换要把整条写全 —— patch 不做字段级合并（§13.4 / P14）。
+- id: demo.weapon.club
+  kind: weapon
+  name: {zh: 木棒（自制）, en: Club (Homebrew)}
+  category: simple
+  damage: "1d4"
+  damage_type: bludgeoning
+  properties: [light, thrown]
+- id: demo.weapon.stick
+  kind: weapon
+  name: {zh: 木棍, en: Stick}
+  category: simple
+  damage: "1d4"
+  damage_type: bludgeoning
+  properties: [light]

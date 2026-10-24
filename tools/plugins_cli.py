@@ -31,6 +31,9 @@ class CheckResult:
     issues: list[str] = field(default_factory=list)
     texts: list[tuple[Text, str]] = field(default_factory=list)
     ids: dict[str, str] = field(default_factory=dict)
+    # 各插件声明要替换的 id（P14 overlay）：撞到它们不算重复，是显式替换。
+    declared_replaces: set[str] = field(default_factory=set)
+    replaced: list[str] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -62,6 +65,10 @@ def walk_entries(node: Any, where: str, result: CheckResult, rel: str,
         ident = str(node["id"])
         if not is_valid(ident):
             result.issues.append("%s: id 不合规范 %r" % (rel, ident))
+        elif ident in result.ids and ident in result.declared_replaces:
+            result.replaced.append("%s: 替换 %r（原由 %s 提供）"
+                                   % (rel, ident, result.ids[ident]))
+            result.ids[ident] = rel
         elif ident in result.ids:
             result.issues.append("%s: id 重复 %r（另见 %s）" % (rel, ident, result.ids[ident]))
         else:
@@ -91,6 +98,7 @@ def check_root(root: str | Path, with_terms: bool = False) -> CheckResult:
         try:
             manifest = load_manifest(manifest_path)
             result.manifests.append(manifest)
+            result.declared_replaces.update(manifest.replaces)
         except PluginError as exc:
             result.issues.append(str(exc))
             continue

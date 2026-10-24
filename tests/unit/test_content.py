@@ -176,7 +176,8 @@ hit_die: 0
                 encoding="utf-8")
         bundle = load_all(root)
         self.assertEqual(len(bundle.classes), 1)
-        self.assertTrue(any("同时由" in item for item in bundle.errors))
+        self.assertTrue(any("重复提供" in item for item in bundle.errors))
+        self.assertTrue(any("replaces" in item for item in bundle.errors))   # P14：报错要指路
 
     def test_missing_plugins_dir_is_empty(self):
         bundle = load_all(self.tmp / "nope")
