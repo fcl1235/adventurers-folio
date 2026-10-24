@@ -67,10 +67,20 @@ def multiclass_hit_points(
     per_level_bonus: int = 0,
     flat_bonus: int = 0,
 ) -> int:
-    """兼职：每个职业第一级都取满骰，其余级取固定值。"""
+    """兼职 HP：**只有起始职业的 1 级取满骰**（首段走 `hit_points_max`），
+    后续职业的每一级（含它们自己的 1 级）都取固定增量。
+
+    原文：新职业的每一级按「骰面一半 + 1 + 体质」计入 —— 把每个兼职职业
+    的 1 级也算满骰是常见的实现错误，那会给野蛮人兼战士白送 2 点起始 HP。
+    段的顺序就是档案里的职业顺序（第一个是起始职业）。
+    """
     if not segments:
         raise RuleError("至少要有一个职业段")
-    total = 0
-    for hit_die, level in segments:
-        total += hit_points_max(hit_die, con_mod, as_class_level(int(level)), per_level_bonus, 0)
+    hit_die, level = segments[0]
+    total = hit_points_max(hit_die, con_mod, as_class_level(int(level)))
+    steps = int(level)
+    for hit_die, level in segments[1:]:
+        steps += int(level)
+        total += int(level) * hp_per_level(hit_die, con_mod)
+    total += int(per_level_bonus) * steps
     return max(1, total + int(flat_bonus))

@@ -48,9 +48,17 @@ class HitPointsTest(unittest.TestCase):
             hit_points_max(10, 2, ClassLevel(0))
 
     def test_multiclass_sums_segments(self):
-        """5 级战士 + 3 级法师：两段都各自按「首级满骰」算，这才是 SRD 的做法。"""
+        """5 级战士 + 3 级法师：**只有起始职业的 1 级取满骰**（P12 修正）。
+
+        兼职职业的每一级（含它自己的 1 级）都取固定增量 —— 每段都算满骰
+        是常见实现错误，会白送起始 HP。
+        """
         total = multiclass_hit_points([(10, ClassLevel(5)), (6, ClassLevel(3))], 2)
-        self.assertEqual(total, hit_points_max(10, 2, ClassLevel(5)) + hit_points_max(6, 2, ClassLevel(3)))
+        # 战士：12 + 4×8 = 44；法师：3×6 = 18（不再有满骰的 8+2）
+        self.assertEqual(total, 44 + 18)
+        self.assertEqual(
+            total,
+            hit_points_max(10, 2, ClassLevel(5)) + 3 * (6 // 2 + 1 + 2))
 
     def test_hit_dice_pool(self):
         pool = hit_dice_pool("demo.class_a", 10, ClassLevel(5))

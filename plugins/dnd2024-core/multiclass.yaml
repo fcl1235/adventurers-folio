@@ -1,0 +1,47 @@
+# 2024 兼职表：每个职业的前置属性与多职业熟练（PHB「Multiclassing」）。
+#
+# 三条口径（§12.4）：
+#   * prereq 是**进入非起始职业**的门槛，按当前属性校验（升级历史不进档案，
+#     「每次升级都要重新满足」按最终属性近似 —— 简化写在这里，别装精确）。
+#     外层列表是「或」，内层映射是「且」：战士 [{str:13},{dex:13}] = 力量或敏捷 13。
+#   * grants 只给「多职业熟练表」那一份：不给起始豁免熟练、不给起始装备 ——
+#     豁免熟练永远只来自起始职业（§12.3）。
+#   * 技能选择数**不建模**：程序的职业技能本来就走「玩家自选熟练」通道，
+#     不在这里再造一份（原文的技能数按类手记，不编数据）。
+- class: dnd2024.class.barbarian
+  prereq: [{str: 13}]
+  grants: [armor.shield, weapon.simple, weapon.martial]
+- class: dnd2024.class.bard
+  prereq: [{cha: 13}]
+  grants: [armor.light, weapon.simple]
+- class: dnd2024.class.cleric
+  prereq: [{wis: 13}]
+  grants: [armor.light, armor.medium, armor.shield]
+- class: dnd2024.class.druid
+  prereq: [{wis: 13}]
+  grants: [armor.light, armor.medium, armor.shield]
+- class: dnd2024.class.fighter
+  prereq: [{str: 13}, {dex: 13}]
+  grants: [armor.light, armor.medium, armor.shield, weapon.simple, weapon.martial]
+- class: dnd2024.class.monk
+  prereq: [{dex: 13, wis: 13}]
+  grants: [weapon.simple, weapon.martial]
+- class: dnd2024.class.paladin
+  prereq: [{str: 13, cha: 13}]
+  grants: [armor.light, armor.medium, armor.shield, weapon.simple, weapon.martial]
+- class: dnd2024.class.ranger
+  prereq: [{dex: 13, wis: 13}]
+  grants: [armor.light, armor.medium, armor.shield, weapon.simple, weapon.martial]
+- class: dnd2024.class.rogue
+  prereq: [{dex: 13}]
+  grants: [armor.light, weapon.simple,
+           weapon.hand_crossbow, weapon.longsword, weapon.rapier, weapon.shortsword]
+- class: dnd2024.class.sorcerer
+  prereq: [{cha: 13}]
+  grants: []
+- class: dnd2024.class.warlock
+  prereq: [{cha: 13}]
+  grants: [armor.light, weapon.simple]
+- class: dnd2024.class.wizard
+  prereq: [{int: 13}]
+  grants: []

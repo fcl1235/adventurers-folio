@@ -71,6 +71,7 @@ def _modifier(data: Any, source: str, where: str) -> Modifier:
         direction=direction_value,
         when=when,
         cap=None if cap is None else int(cap),
+        exclusive=str(data.get("exclusive", "") or ""),
     )
 
 

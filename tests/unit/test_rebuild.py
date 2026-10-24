@@ -77,13 +77,15 @@ class RebuildTest(unittest.TestCase):
         self.assertIn("skill.arcana", fresh.profile.proficiencies)
         self.assertEqual(fresh.profile.proficiencies, actor.profile.proficiencies)
 
-    def test_multiclass_rebuild_is_refused(self):
-        """兼职重建要合并位表，现在做不到 —— 必须报错，不能悄悄按主职业建。"""
+    def test_multiclass_rebuild_works(self):
+        """P12 之后兼职真的能重建（此前是明确拒绝）。两段职业都要回来。"""
         actor = self._fighter()
-        actor.profile = actor.profile.add_class(WIZARD, 3).with_base_scores(STR_SCORES)
-        with self.assertRaises(RuleError) as ctx:
-            rebuild_actor(self.bundle, actor)
-        self.assertIn("兼职", str(ctx.exception))
+        scores = dict(STR_SCORES, int=14)   # 法师兼职前置：INT 13
+        actor.profile = actor.profile.add_class(WIZARD, 3).with_base_scores(scores)
+        fresh = rebuild_actor(self.bundle, actor)
+        self.assertEqual([item.class_id for item in fresh.profile.classes],
+                         [item.class_id for item in actor.profile.classes])
+        self.assertEqual(fresh.profile.total, actor.profile.total)
 
     def test_profile_without_base_scores_refuses(self):
         """旧档没有原始属性：明确报错。返回 0 会建出一个废角色。"""

@@ -64,6 +64,7 @@ powers:
           target: ac
           value: ability.con
           when: { unarmored: true }
+          exclusive: unarmored_defense
       - note:
           zh: |-
             未穿护甲时 AC = 10 + 敏捷调整值 + 体质调整值（可用盾牌）。

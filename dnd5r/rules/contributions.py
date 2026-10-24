@@ -17,13 +17,17 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from typing import Any
 
 from ..kernel.predicate import evaluate
+from ..kernel.errors import DndError, RuleError
 from ..model.actor import Actor
+from ..rules.progression import proficiency_bonus
 from ..model.levels import ClassLevel
 from .armor import Loadout
-from .build import available_powers
+from .build import available_powers, owner_class_id
 from .modifiers import Modifier
 from .powers import Power
 from .scores import (
@@ -77,10 +81,18 @@ def passive_modifiers(bundle, actor: Actor, locale: str = "zh") -> tuple[Modifie
     「14 = 12 基础 +2 无甲防御」），id 出现在玩家眼前只是噪音。
     """
     found: list[Modifier] = []
+    profile = actor.profile
+    prof = proficiency_bonus(profile.total) if profile else 2
     for power in _unlocked(bundle, actor):
         label = power.name.get(locale) or power.id
+        owner_lv = None
+        if profile is not None:
+            owner = owner_class_id(bundle, power)
+            if owner is not None and profile.has_class(owner):
+                owner_lv = profile.class_level(owner)
         for effect in power.effects:
             for mod in getattr(effect, "modifiers", ()):
+                mod = _bind_class_level(mod, actor, owner_lv, prof)
                 found.append(mod if mod.source else _with_source(mod, label))
     for node in (actor.root(), actor.top()):
         for effect in node.effects:
@@ -93,7 +105,35 @@ def _with_source(mod: Modifier, source: str) -> Modifier:
     return Modifier(
         target=mod.target, value=mod.value, stack=mod.stack, source=source,
         scope=mod.scope, direction=mod.direction, when=mod.when, cap=mod.cap,
+        exclusive=mod.exclusive,
     )
+
+
+def _bind_class_level(mod: Modifier, actor: Actor, owner_lv, prof: int) -> Modifier:
+    """把引用 class_level 的 Amount 按**所属职业**的等级先算成数。
+
+    修饰值管道不带「这条来自哪个职业」：多职业时 resolver 的 ctx 给不出
+    正确的 class_level（武僧的移动表要按武僧等级查，不是主职业等级）。
+    在收集点绑定一次 —— 明细里显示的也就是这个数，不另有一套。
+    算不了的（带骰子之类）保持原样，让 resolve 报它本来就有的错。
+    """
+    if owner_lv is None:
+        return mod
+    evaluate = getattr(mod.value, "evaluate", None)
+    if not callable(evaluate) or isinstance(mod.value, (int, bool)):
+        return mod
+    top = actor.top()
+    ctx = {
+        "prof_bonus": int(prof),
+        "total_level": int(actor.profile.total) if actor.profile else 1,
+        "class_level": int(owner_lv),
+        "abilities": top.statblock.abilities,
+        "speeds": dict(top.statblock.speeds),
+    }
+    try:
+        return replace(mod, value=int(evaluate(ctx)))
+    except (RuleError, DndError):
+        return mod
 
 
 def passive_proficiencies(bundle, actor: Actor) -> set[str]:

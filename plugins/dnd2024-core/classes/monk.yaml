@@ -63,6 +63,7 @@ powers:
           target: ac
           value: ability.wis
           when: { unarmored: true, shield: false }
+          exclusive: unarmored_defense
       - note:
           zh: |-
             未穿护甲且未持盾时 AC = 10 + 敏捷调整值 + 感知调整值。

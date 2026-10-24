@@ -30,7 +30,7 @@ powers:
           modifiers:
             - {target: hp.per_level, value: 1}
             # 无甲时基础 AC 已经含了 10 + 敏捷，这里再把魅力加上去
-            - {target: ac, value: ability.cha, when: {unarmored: true}}
+            - {target: ac, value: ability.cha, when: {unarmored: true}, exclusive: unarmored_defense}
           label: 龙族韧性
 
   - id: dnd2024.subclass.sorcerer.draconic_sorcery.draconic_spells

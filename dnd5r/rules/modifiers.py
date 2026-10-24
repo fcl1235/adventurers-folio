@@ -64,6 +64,10 @@ class Modifier:
     # 只对 `score.<属性>` 生效：属性加值能顶到的上限（原始冠军 / 身心合一写 25）。
     # resolve() 不读它 —— 属性值不走 d20 管道，见 rules/contributions.py。
     cap: int | None = None
+    # 互斥组（§12.3）：同组的多条**取数值最高的一条**，其余不计。
+    # 用在「同类公式不叠加」的地方 —— 野蛮人/武僧/龙裔的无甲防御：
+    # 兼职拿到两个公式时用较好的那个，而不是加在一起（那是白送 AC）。
+    exclusive: str = ""
 
     def __post_init__(self) -> None:
         if not self.target:
@@ -195,6 +199,7 @@ def resolve(
     `mode` 只对 d20 有意义（优势/劣势），数值通道一律留默认。
     """
     active = [mod for mod in modifiers if eval_when(mod.when, ctx or {})]
+    active = _apply_exclusive(active, ctx)
 
     set_terms = [mod for mod in active if mod.stack is Stack.SET]
     if set_terms:
@@ -267,6 +272,22 @@ def _need(ctx: Mapping[str, Any], key: str) -> int:
     if key not in ctx:
         raise RuleError("符号引用缺少上下文 %r" % key)
     return int(ctx[key])
+
+
+def _apply_exclusive(active: list[Modifier], ctx: Mapping[str, Any] | None) -> list[Modifier]:
+    """互斥组：每组只留数值最高的一条。数值要现算（值可能是 Ref/Amount），
+    所以这一步只能在有 ctx 的 resolve() 里做 —— 靠注释提醒是防不住的（§12.3）。"""
+    groups: dict[str, list[Modifier]] = {}
+    for mod in active:
+        if mod.exclusive:
+            groups.setdefault(mod.exclusive, []).append(mod)
+    if not groups:
+        return active
+    keep: set[int] = set()
+    for members in groups.values():
+        best = max(members, key=lambda item: _numeric(item, ctx))
+        keep.update(id(member) for member in members if member is best)
+    return [mod for mod in active if not mod.exclusive or id(mod) in keep]
 
 
 def group_by_target(modifiers: Iterable[Modifier]) -> dict[str, list[Modifier]]:
