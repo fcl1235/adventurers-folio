@@ -9,8 +9,19 @@ from ..kernel.errors import RuleError
 from ..model.actor import Actor
 from ..model.profile import Profile
 from ..rules.build import build_from_profile
+from ..rules.spellcasting import SLOT_PREFIX
 
 SAVE_VERSION = 1
+
+# 旧档的位池 id 前缀（F36 之前位池挂在插件命名空间下）。存档按池 id 记余量，
+# 前缀变了不迁移，读档时旧 id 匹配不上池，已用位会静默丢 —— 所以在这里改写。
+LEGACY_SLOT_PREFIX = "dnd2024.slot."
+
+
+def _migrate_pool_id(pool_id: str) -> str:
+    if pool_id.startswith(LEGACY_SLOT_PREFIX):
+        return SLOT_PREFIX + pool_id[len(LEGACY_SLOT_PREFIX):]
+    return pool_id
 
 
 def save_character(actor: Actor, locale: str = "zh") -> dict:
@@ -64,6 +75,7 @@ def load_character(
         actor.hp.current = max(0, min(int(hp["current"]), actor.hp.maximum))
     actor.hp.temp = max(0, int(hp.get("temp") or 0))
     for pool_id, used in (data.get("resources") or {}).items():
+        pool_id = _migrate_pool_id(str(pool_id))
         if not actor.resources.has(pool_id):
             continue                      # 内容升级后池没了：忽略，别让读档失败
         pool = actor.resources.pools[pool_id]

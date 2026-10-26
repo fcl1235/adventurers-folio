@@ -31,6 +31,23 @@ class RealPluginTest(unittest.TestCase):
         self.assertEqual(fighter.saves, ("str", "con"))
         self.assertEqual(int(fighter.subclass_level), 3)
 
+    def test_class_by_short_resolves_loaded_classes(self):
+        """专长的 spell_list 短名解析：认**任何**插件的职业，不写死前缀（F36）。"""
+        self.assertEqual(self.bundle.class_by_short("fighter"), FIGHTER)
+
+    def test_class_by_short_unknown_rejected(self):
+        with self.assertRaises(PluginError):
+            self.bundle.class_by_short("mystic")
+
+    def test_class_by_short_ambiguous_rejected(self):
+        """两个插件都提供同名职业时报歧义 —— 猜一个等于让另一个的专长选错法术表。"""
+        bundle = load_all(PLUGINS)
+        # 只测 id 解析逻辑，值借用真职业定义即可
+        bundle.classes["homebrew.class.fighter"] = bundle.classes[FIGHTER]
+        with self.assertRaises(PluginError) as ctx:
+            bundle.class_by_short("fighter")
+        self.assertIn("多个职业", str(ctx.exception))
+
     def test_all_texts_bilingual(self):
         for class_def in self.bundle.classes.values():
             self.assertTrue(class_def.name.zh and class_def.name.en)

@@ -64,7 +64,7 @@ class SpendSlotTest(Base):
         actor = self.wizard(5)
         before = self.slots(actor)
         pool = spend_slot(actor, 2)
-        self.assertEqual(pool.id, "dnd2024.slot.wizard.2")
+        self.assertEqual(pool.id, "engine.slot.wizard.2")
         self.assertEqual(self.slots(actor)[2], before[2] - 1)
         self.assertEqual(self.slots(actor)[1], before[1])   # 别的环位不动
 
@@ -87,7 +87,7 @@ class SpendSlotTest(Base):
         actor = self.wizard(5)
         actor.kind = ActorKind.MONSTER
         for pool in list(actor.resources.pools.values()):
-            if pool.id.startswith("dnd2024.slot."):
+            if pool.id.startswith("engine.slot."):
                 del actor.resources.pools[pool.id]
         self.assertIsNone(spend_slot(actor, 1))
 

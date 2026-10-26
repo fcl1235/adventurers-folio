@@ -235,7 +235,8 @@ class FeatSpellContentGuardTest(unittest.TestCase):
             spell_pool(self.bundle, choice)
 
     def test_unknown_class_rejected(self):
-        with self.assertRaises(RuleError):
+        # 短名按已加载内容解析（F36）：引用不存在的职业是内容错误 → PluginError
+        with self.assertRaises(PluginError):
             spell_pool(self.bundle, self._choice(spell_list="mystic"))
 
     def test_check_feat_choices_reports_problems(self):

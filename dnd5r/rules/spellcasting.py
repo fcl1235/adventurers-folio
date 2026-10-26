@@ -33,7 +33,9 @@ if TYPE_CHECKING:               # 只在注解里用到，见下方说明
 
 # 法术位池的 id 前缀。位是建角色时统一建的（`build_actor`），
 # 这里只读不建 —— 否则「算一次 DC」会顺手改角色状态。
-SLOT_PREFIX = "dnd2024.slot."
+# 前缀属于**引擎**命名空间：位池由引擎铸造（不管职业来自哪个插件），
+# 不能挂在某个插件的命名空间下 —— 否则第三方插件自铸的位引擎不认（F36）。
+SLOT_PREFIX = "engine.slot."
 
 
 def casting_ability(class_def: ClassDef) -> str:

@@ -24,6 +24,11 @@ FORBIDDEN = [
     "eldritch", "metamagic", "goblin", "dragon", "beholder",
 ]
 
+# 版本/插件命名空间（dnd2024、dnd2014、…）：内核不得把它写进字符串字面量 ——
+# 引擎铸造的 id 用引擎自己的命名空间（engine.slot.*）。查内容名词抓不到这类
+# 耦合（slot.spellcasting 不是内容词），所以单列一条（F36）。
+NAMESPACE_RE = re.compile(r"dnd\d{4}")
+
 CORE_DIRS = ("kernel", "rules", "model")
 PLUGIN_ALLOWED = ("dnd5r.plugin", "dnd5r.api")
 
@@ -54,6 +59,20 @@ def imported_modules(tree: ast.Module) -> list[str]:
     return found
 
 
+def string_constants(tree: ast.Module) -> list[ast.Constant]:
+    """代码里的字符串字面量（docstring 除外 —— 示例文案可以提插件名，代码不行）。"""
+    docstrings = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            first = node.body[0] if node.body else None
+            if (isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant)
+                    and isinstance(first.value.value, str)):
+                docstrings.add(id(first.value))
+    return [node for node in ast.walk(tree)
+            if isinstance(node, ast.Constant) and isinstance(node.value, str)
+            and id(node) not in docstrings]
+
+
 def check_c1(pkg: Path) -> list[str]:
     hits = []
     for folder in CORE_DIRS:
@@ -62,6 +81,13 @@ def check_c1(pkg: Path) -> list[str]:
             for word in FORBIDDEN:
                 if re.search(r"\b%s\b" % re.escape(word), text):
                     hits.append("%s 出现内容名词 %r（C1）" % (path.relative_to(pkg.parent), word))
+            tree = parse(path)
+            if tree is None:
+                continue
+            for node in string_constants(tree):
+                if NAMESPACE_RE.search(node.value):
+                    hits.append("%s:%d 把插件命名空间写进了字符串 %r（C1：引擎铸造的 id 用引擎命名空间）"
+                                % (path.relative_to(pkg.parent), node.lineno, node.value))
     return hits
 
 

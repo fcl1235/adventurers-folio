@@ -108,7 +108,7 @@ class ExchangeTest(Base):
         self.assertTrue(out["ok"], out["message"])
         pools = self.pools(actor)
         self.assertEqual(pools[SORCERY], (3, 5))            # 5 − 2
-        self.assertEqual(pools["dnd2024.slot.created.1"], (1, 1))
+        self.assertEqual(pools["engine.slot.created.1"], (1, 1))
 
     def test_created_slot_is_spendable(self):
         """造出来的位真的能花：职业位耗尽后，花的就是创造的位。"""
@@ -120,7 +120,7 @@ class ExchangeTest(Base):
                       choice={"slot_level": 1})
         self.assertEqual(lowest_slot(actor, 1), 1)   # 现在唯一的 1 环来自创造的位
         spend_slot(actor, 1)
-        self.assertEqual(self.pools(actor)["dnd2024.slot.created.1"], (0, 1))
+        self.assertEqual(self.pools(actor)["engine.slot.created.1"], (0, 1))
 
     def test_created_slots_vanish_on_long_rest(self):
         """原文 "vanishes when you finish a Long Rest"：整池蒸发，不是回满。"""
@@ -128,9 +128,9 @@ class ExchangeTest(Base):
         session = Session(self.bundle, seed=3)
         session.create_character(SORCERER, 5, SORC_SCORES)
         session.dispatch(api.UsePower(CREATE_SLOT, {"slot_level": 1}))
-        self.assertIn("dnd2024.slot.created.1", self.pools(session.character))
+        self.assertIn("engine.slot.created.1", self.pools(session.character))
         session.dispatch(LongRest())
-        self.assertNotIn("dnd2024.slot.created.1",
+        self.assertNotIn("engine.slot.created.1",
                          {row["id"] for row in
                           api.character_sheet(session.character, self.bundle)["pools"]})
         self.assertEqual(self.pools(session.character)[SORCERY], (5, 5))
@@ -162,7 +162,7 @@ class ExchangeTest(Base):
         self.assertTrue(out["ok"], out["message"])
         pools = self.pools(actor)
         self.assertEqual(pools[SORCERY], (5, 5))             # 3 + 2 = 5（正好顶满）
-        self.assertEqual(pools["dnd2024.slot.sorcerer.2"], (2, 3))   # 3 − 1
+        self.assertEqual(pools["engine.slot.sorcerer.2"], (2, 3))   # 3 − 1
 
     def test_slot_to_points_needs_that_level(self):
         actor = self.sorcerer(5)

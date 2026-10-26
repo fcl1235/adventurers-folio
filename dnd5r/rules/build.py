@@ -422,7 +422,7 @@ def _build_slot_pools(
         row = slots_from_table(effective, bundle.caster_progression)
         for slot_level, capacity in sorted(row.items()):
             actor.resources.add(Pool(
-                id="dnd2024.slot.spellcasting.%d" % slot_level,
+                id="engine.slot.spellcasting.%d" % slot_level,
                 kind=PoolKind.SLOT, capacity=capacity,
                 label=Text.of("%d 环法术位" % slot_level,
                               "Level %d Spell Slots" % slot_level),
@@ -436,7 +436,7 @@ def _add_class_slots(actor: Actor, def_: ClassDef, lv: ClassLevel) -> None:
         if capacity <= 0:
             continue
         actor.resources.add(Pool(
-            id="dnd2024.slot.%s.%d" % (def_.id.split(".")[-1], index_),
+            id="engine.slot.%s.%d" % (def_.id.split(".")[-1], index_),
             kind=PoolKind.SLOT, capacity=capacity,
             label=Text.of("%d 环法术位" % index_, "Level %d Spell Slots" % index_),
             owner_class=def_.id, refresh=def_.slot_refresh,

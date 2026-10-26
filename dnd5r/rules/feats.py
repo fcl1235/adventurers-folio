@@ -306,10 +306,10 @@ def spell_pool(bundle: ContentBundle, choice: FeatChoice) -> tuple[str, ...]:
                             % choice.id)
         allowed = set(bundle.spells)
     else:
-        class_id = "dnd2024.class.%s" % choice.spell_list
-        if class_id not in bundle.classes:
-            raise RuleError("选择项 %s 的 spell_list 指向不存在的职业：%s"
-                            % (choice.id, choice.spell_list))
+        # 短名按已加载内容解析，不写死任何插件的前缀 —— 职业来自哪个插件
+        # 就认哪个（F36）。加载期校验会先拦住坏引用，这里再查一次是给
+        # 绕过加载器的调用方兜底。
+        class_id = bundle.class_by_short(choice.spell_list)
         allowed = set(bundle.spell_list(class_id))
         if not allowed:
             raise RuleError("职业 %s 没有法术表，不能作为 spell_list" % choice.spell_list)

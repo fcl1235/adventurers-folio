@@ -65,7 +65,7 @@ class Base(unittest.TestCase):
     def slot_pools(self, actor):
         return sorted((row["id"], row["left"], row["max"])
                       for row in self.sheet(actor)["pools"]
-                      if row["id"].startswith("dnd2024.slot."))
+                      if row["id"].startswith("engine.slot."))
 
     def proficient_saves(self, actor):
         return sorted(key for key, row in self.sheet(actor)["saves"].items()
@@ -87,20 +87,20 @@ class TwelvePointSixTest(Base):
         self.assertEqual(self.proficient_saves(actor), ["con", "str"])
         # 法师是唯一的非契约施法职业 → 用它自己的位表（3 级：4×1 环 + 2×2 环）
         self.assertEqual(self.slot_pools(actor),
-                         [("dnd2024.slot.wizard.1", 4, 4), ("dnd2024.slot.wizard.2", 2, 2)])
+                         [("engine.slot.wizard.1", 4, 4), ("engine.slot.wizard.2", 2, 2)])
 
     def test_paladin6_warlock2(self):
         """圣武士位表照旧（它仍是非契约施法者里唯一的一个）；契约位独立。"""
         actor = self.make(PALADIN, 6, [(WARLOCK, 2)], PALADIN_SCORES)
         slots = dict((row[0], row[2]) for row in self.slot_pools(actor))
-        self.assertIn("dnd2024.slot.paladin.1", slots)        # 圣武士自己的位表
-        self.assertEqual(slots["dnd2024.slot.paladin.1"], 4)  # 6 级圣武士 4×1 环
-        self.assertEqual(slots["dnd2024.slot.paladin.2"], 2)
+        self.assertIn("engine.slot.paladin.1", slots)        # 圣武士自己的位表
+        self.assertEqual(slots["engine.slot.paladin.1"], 4)  # 6 级圣武士 4×1 环
+        self.assertEqual(slots["engine.slot.paladin.2"], 2)
         # 契约位独立：邪术师 2 级 = 2 个 1 环，短休恢复
-        pact = self.pool(actor, "dnd2024.slot.warlock.1")
+        pact = self.pool(actor, "engine.slot.warlock.1")
         self.assertEqual((pact["left"], pact["max"]), (2, 2))
         self.assertEqual(pact["refresh"], "short_rest")
-        self.assertFalse(any(row[0].startswith("dnd2024.slot.spellcasting")
+        self.assertFalse(any(row[0].startswith("engine.slot.spellcasting")
                              for row in self.slot_pools(actor)))   # 没进合并表
         self.assertEqual(self.proficient_saves(actor), ["cha", "wis"])
 
@@ -109,9 +109,9 @@ class TwelvePointSixTest(Base):
         actor = self.make(CLERIC, 1, [(WIZARD, 5)],
                           {"str": 10, "dex": 12, "con": 14, "int": 14, "wis": 14, "cha": 8})
         self.assertEqual(self.slot_pools(actor),
-                         [("dnd2024.slot.spellcasting.1", 4, 4),
-                          ("dnd2024.slot.spellcasting.2", 3, 3),
-                          ("dnd2024.slot.spellcasting.3", 3, 3)])
+                         [("engine.slot.spellcasting.1", 4, 4),
+                          ("engine.slot.spellcasting.2", 3, 3),
+                          ("engine.slot.spellcasting.3", 3, 3)])
         # 豁免熟练只来自牧师（感知/魅力），不带法师的智力/感知
         self.assertEqual(self.proficient_saves(actor), ["cha", "wis"])
         # HP：牧师 d8 体+2 = 10；法师 5×(3+1+2) = 30
@@ -142,9 +142,9 @@ class TwelvePointSixTest(Base):
         """合并表 6 级 = 4/3/3；术法点 = 术士等级（1），不是总等级。"""
         actor = self.make(WIZARD, 5, [(SORCERER, 1)], ARCANE)
         self.assertEqual(self.slot_pools(actor),
-                         [("dnd2024.slot.spellcasting.1", 4, 4),
-                          ("dnd2024.slot.spellcasting.2", 3, 3),
-                          ("dnd2024.slot.spellcasting.3", 3, 3)])
+                         [("engine.slot.spellcasting.1", 4, 4),
+                          ("engine.slot.spellcasting.2", 3, 3),
+                          ("engine.slot.spellcasting.3", 3, 3)])
         self.assertEqual(self.pool(actor, "dnd2024.resource.sorcerer.sorcery")["max"], 1)
         # HP：法师 d6 体+2 = 8 + 4×6；术士 d6 1×6 → 38
         self.assertEqual(self.sheet(actor)["hp"]["maximum"], 38)
@@ -236,16 +236,16 @@ class SlotsBehaviorTest(Base):
         actor = self.make(WIZARD, 5, [(SORCERER, 1)], ARCANE)
         self.assertEqual(lowest_slot(actor, 1), 1)
         spend_slot(actor, 1)
-        self.assertEqual(self.pool(actor, "dnd2024.slot.spellcasting.1")["left"], 3)
+        self.assertEqual(self.pool(actor, "engine.slot.spellcasting.1")["left"], 3)
 
     def test_single_class_slots_unchanged(self):
         """单职业的位池 id / owner / 数量与 P5a 起完全一致（golden 层 0 的口径）。"""
         actor = api.new_character(self.bundle, WIZARD, 5, ARCANE,
                                   name_zh="法师", name_en="Wizard")
         self.assertEqual(self.slot_pools(actor),
-                         [("dnd2024.slot.wizard.1", 4, 4),
-                          ("dnd2024.slot.wizard.2", 3, 3),
-                          ("dnd2024.slot.wizard.3", 2, 2)])
+                         [("engine.slot.wizard.1", 4, 4),
+                          ("engine.slot.wizard.2", 3, 3),
+                          ("engine.slot.wizard.3", 2, 2)])
 
     def test_progression_table_matches_the_full_caster_table(self):
         """DataFidelity：合并表 == 全职表（规则里它就是同一张表，抄错会静默错位）。"""

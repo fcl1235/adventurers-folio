@@ -198,7 +198,7 @@ class FontOfInspirationTest(Base):
                             rng=ScriptedRng([3]), choice={"slot_level": 2})
         self.assertTrue(out["ok"], out["message"])
         self.assertEqual(pool.available, 1)                 # 回 1，不是回 2
-        self.assertEqual(bard.root().resources.get("dnd2024.slot.bard.2").available,
+        self.assertEqual(bard.root().resources.get("engine.slot.bard.2").available,
                          2)                                 # 3 − 1
 
     def test_short_rest_recharge_not_modeled(self):

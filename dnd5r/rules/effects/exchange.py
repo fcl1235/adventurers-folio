@@ -11,7 +11,7 @@
   points_to_slots  创造法术位：按表花点（2/3/5/6/7），附赠动作，长休消失，
                    且有「最低术士等级」门槛 —— 表写在内容里，内核不背数字
 
-创造的位是 `Refresh.VANISH` 的独立池（dnd2024.slot.created.N）：长休整池蒸发，
+创造的位是 `Refresh.VANISH` 的独立池（engine.slot.created.N）：长休整池蒸发，
 不污染职业位表的容量 —— 池容量一旦被临时改动，长休回满就会把临时的位变永久。
 """
 
@@ -28,7 +28,7 @@ from ..spellcasting import spend_slot
 from .base import Effect, EffectContext, register
 
 DIRECTIONS = ("points_to_slots", "slots_to_points")
-CREATED_PREFIX = "dnd2024.slot.created."
+CREATED_PREFIX = "engine.slot.created."
 
 
 @dataclass(frozen=True, slots=True)

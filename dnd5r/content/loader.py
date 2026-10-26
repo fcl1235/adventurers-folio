@@ -87,6 +87,22 @@ class ContentBundle:
                               % (class_id, ", ".join(sorted(self.classes)) or "无"))
         return self.classes[class_id]
 
+    def class_by_short(self, short: str) -> str:
+        """短名（`wizard`）→ 完整职业 id（`dnd2024.class.wizard`）。
+
+        不写死前缀：专长的 `spell_list: wizard` 写的是短名，职业来自哪个插件
+        就从加载结果里查哪个（F36）。多个插件都提供 `.class.<短名>` 时报
+        歧义，不猜 —— 猜一个等于让另一个插件的专长选到错职业的法术表。
+        """
+        hits = sorted(item_id for item_id in self.classes
+                      if item_id.split(".")[-2:] == ["class", short])
+        if not hits:
+            raise PluginError("没有短名为 %s 的职业（已加载：%s）"
+                              % (short, ", ".join(sorted(self.classes)) or "无"))
+        if len(hits) > 1:
+            raise PluginError("短名 %s 匹配到多个职业：%s" % (short, "、".join(hits)))
+        return hits[0]
+
     def armor(self, armor_id: str) -> ArmorDef:
         if armor_id not in self.armors:
             raise PluginError("没有这件护甲：%s" % armor_id)
@@ -651,12 +667,13 @@ def _check_feat_spell_refs(bundle: ContentBundle) -> None:
                 continue
             if choice.spell_list == SPELL_LIST_ANY:
                 continue
-            class_id = "dnd2024.class.%s" % choice.spell_list
-            if class_id not in bundle.classes:
-                bundle.errors.append(
-                    "专长 %s 的选择项 %s 指向未知职业 %s"
-                    % (feat.id, choice.id, choice.spell_list))
-            elif not bundle.spell_list(class_id):
+            try:
+                class_id = bundle.class_by_short(choice.spell_list)
+            except PluginError as exc:
+                bundle.errors.append("专长 %s 的选择项 %s：%s"
+                                     % (feat.id, choice.id, exc))
+                continue
+            if not bundle.spell_list(class_id):
                 bundle.errors.append(
                     "专长 %s 的选择项 %s 指向的职业 %s 没有法术表"
                     % (feat.id, choice.id, choice.spell_list))

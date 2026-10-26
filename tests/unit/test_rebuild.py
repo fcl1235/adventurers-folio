@@ -212,6 +212,17 @@ class SaveLoadTest(unittest.TestCase):
         back = api.load_character(self.bundle, data)
         self.assertEqual(back.hp.current, back.hp.maximum)
 
+    def test_legacy_slot_ids_migrated(self):
+        """F36 之前的旧档：位池 id 挂在插件命名空间下，读档必须改写成引擎前缀。
+
+        不迁移的话旧 id 匹配不上池，已用的法术位会静默回满 —— 那是白送位的 bug。
+        """
+        actor = api.new_character(self.bundle, WIZARD, 5, STR_SCORES)
+        data = api.save_character(actor)
+        data["resources"] = {"dnd2024.slot.wizard.1": 2}
+        back = api.load_character(self.bundle, data)
+        self.assertEqual(back.resources.pools["engine.slot.wizard.1"].used, 2)
+
     def test_future_version_rejected(self):
         data = api.save_character(self._actor())
         data["version"] = api.SAVE_VERSION + 1
