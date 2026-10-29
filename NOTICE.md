@@ -12,6 +12,9 @@ This is unofficial, non-commercial Fan Content. Not approved or endorsed by Wiza
 `dnd55e/`、`dnd5r/`、`apps/`、`tools/`、`tests/` 及各校验脚本（`*.py`、`*.bat`）的著作权归本项目作者，
 以 **MIT License** 授权，全文见 `LICENSE`。
 
+**MIT 许可仅覆盖源代码**，不覆盖 `plugins/` 下的规则内容与 Markdown 文档；那些内容适用第 2、3 节的条件。
+（`LICENSE` 保持标准 MIT 原文不加补充条款，是为了让 GitHub 能正确识别许可类型；适用范围写在这里。）
+
 ## 2. SRD 5.2 内容（CC-BY-4.0）
 
 本项目部分规则内容来自《System Reference Document 5.2》（SRD 5.2，对应 D&D 2024 版核心规则），
