@@ -7,8 +7,10 @@ import sys
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+from _path import PROJECT_ROOT                   # 项目根（本脚本在 tools/legacy/）
+
 API = "https://www.dnd5eapi.co/api/2024/spells/"
-OUT = r"E:\workbuddycache\test1\dnd55e_spells.json"
+OUT = os.path.join(PROJECT_ROOT, "dnd55e_spells.json")
 
 SCHOOL = {"abjuration": "防护", "conjuration": "咒法", "divination": "预言",
           "enchantment": "附魔", "evocation": "塑能", "illusion": "幻术",

@@ -10,7 +10,9 @@ import json
 import os
 import sys
 
-PATH = os.path.join("dnd55e", "data", "feats_general.json")
+from _path import PROJECT_ROOT                   # 项目根（本脚本在 tools/legacy/）
+
+PATH = os.path.join(PROJECT_ROOT, "dnd55e", "data", "feats_general.json")
 
 # ---- 规范白名单（_dataspec.md A 节） ----
 EFFECT_KEYS = {

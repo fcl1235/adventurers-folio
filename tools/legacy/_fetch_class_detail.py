@@ -12,7 +12,8 @@ import time
 import urllib.request
 
 BASE = "https://www.dnd5eapi.co"
-RAW = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "raw")
+from _path import PROJECT_ROOT                   # 项目根（本脚本在 tools/legacy/）
+RAW = os.path.join(PROJECT_ROOT, "data", "raw")
 UA = {"User-Agent": "Mozilla/5.0 (dnd55e-character-builder data sync)"}
 
 

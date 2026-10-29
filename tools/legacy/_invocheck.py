@@ -12,6 +12,7 @@ import json
 import os
 import sys
 
+from _path import PROJECT_ROOT                   # noqa: F401  把项目根放进 sys.path
 from dnd55e.paths import BASE_DIR
 from dnd55e.rules import Rules
 

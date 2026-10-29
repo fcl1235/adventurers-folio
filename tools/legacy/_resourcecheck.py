@@ -16,8 +16,7 @@ import json
 import os
 import sys
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, DIR)
+from _path import PROJECT_ROOT as DIR            # 项目根（本脚本在 tools/legacy/；_path 已插入 sys.path）
 
 from dnd55e.character import Character            # noqa: E402
 from dnd55e.rules import Rules                    # noqa: E402

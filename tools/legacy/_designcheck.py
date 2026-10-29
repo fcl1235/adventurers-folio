@@ -17,7 +17,7 @@ import os
 import re
 import sys
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+from _path import PROJECT_ROOT as ROOT           # 项目根（本脚本在 tools/legacy/）
 DOC = os.path.join(ROOT, "架构设计v3-插件化.md")
 DATA = os.path.join(ROOT, "dnd55e_classes_detail.json")
 

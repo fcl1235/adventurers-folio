@@ -17,7 +17,7 @@ import json
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+from _path import PROJECT_ROOT as ROOT           # 项目根（本脚本在 tools/legacy/）
 OUT = os.path.join(ROOT, "dnd55e", "data", "summons.json")
 
 SIZE = {"T": "微型", "S": "小型", "M": "中型", "L": "大型", "H": "巨型"}

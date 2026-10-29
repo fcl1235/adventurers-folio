@@ -7,9 +7,11 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+from _path import PROJECT_ROOT                   # 项目根（本脚本在 tools/legacy/）
+
 BASE = "https://www.dnd5eapi.co/api/2024/"
 FORCE = "--force" in sys.argv      # 默认命中本地缓存就不联网
-OUT = r"E:\workbuddycache\test1\data\raw"
+OUT = os.path.join(PROJECT_ROOT, "data", "raw")
 
 # 分类 -> 是否需要逐条抓详情
 CATS = {

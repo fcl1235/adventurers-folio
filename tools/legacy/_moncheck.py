@@ -9,7 +9,7 @@ import os
 import re
 import sys
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+from _path import PROJECT_ROOT as ROOT           # 项目根（本脚本在 tools/legacy/）
 PATH = os.path.join(ROOT, "dnd55e", "data", "monsters.json")
 
 CR_TIERS = ["0", "1/8", "1/4", "1/2", "1", "2", "3", "4", "5", "6"]

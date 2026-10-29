@@ -9,7 +9,7 @@ import os
 import re
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+from _path import PROJECT_ROOT as HERE           # 项目根（本脚本在 tools/legacy/）
 PATH = os.path.join(HERE, "dnd55e", "data", "items.json")
 RAW = os.path.join(HERE, "data", "raw", "magic-items.json")
 

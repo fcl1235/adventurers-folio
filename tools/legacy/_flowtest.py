@@ -16,9 +16,9 @@ import os
 import sys
 import traceback
 
-from dnd55e.util import ability_mod as _am, roll_dice
+from _path import PROJECT_ROOT as DIR            # 项目根（本脚本在 tools/legacy/）
 
-DIR = os.path.dirname(os.path.abspath(__file__))
+from dnd55e.util import ability_mod as _am, roll_dice
 spec = importlib.util.spec_from_file_location(
     "cb", os.path.join(DIR, "dnd55e_character_builder.py"))
 cb = importlib.util.module_from_spec(spec)

@@ -11,8 +11,7 @@ import json
 import os
 import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+from _path import PROJECT_ROOT as HERE           # 项目根（本脚本在 tools/legacy/）
 
 from detail_features_cn import FEATURE_CN, RESOURCES, DICE_NOTES   # noqa: E402
 from detail_subclasses_cn import SUBCLASS_INFO                     # noqa: E402

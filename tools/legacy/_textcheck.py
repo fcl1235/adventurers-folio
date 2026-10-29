@@ -9,7 +9,7 @@ import importlib.util
 import os
 import re
 
-DIR = os.path.dirname(os.path.abspath(__file__))
+from _path import PROJECT_ROOT as DIR            # 项目根（本脚本在 tools/legacy/）
 spec = importlib.util.spec_from_file_location(
     "cb", os.path.join(DIR, "dnd55e_character_builder.py"))
 cb = importlib.util.module_from_spec(spec)

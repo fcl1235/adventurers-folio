@@ -16,7 +16,7 @@ import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+from _path import PROJECT_ROOT as ROOT           # 项目根（本脚本在 tools/legacy/）
 RAW = os.path.join(ROOT, "data", "raw")
 OUT = os.path.join(ROOT, "dnd55e", "data", "monsters.json")
 UA = {"User-Agent": "Mozilla/5.0 (dnd55e data builder)"}

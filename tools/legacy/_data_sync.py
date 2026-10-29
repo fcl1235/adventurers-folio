@@ -16,7 +16,8 @@ import os
 import subprocess
 import sys
 
-DIR = os.path.dirname(os.path.abspath(__file__))
+from _path import PROJECT_ROOT as DIR            # 项目根（本脚本在 tools/legacy/）
+HERE = os.path.dirname(os.path.abspath(__file__))  # 同级脚本目录（_build_spells.py 等）
 RAW = os.path.join(DIR, "data", "raw")
 PY = sys.executable
 
@@ -84,13 +85,13 @@ def main():
         return 1
 
     print("开始补齐 (只抓缺失项) ...")
-    args = [PY, os.path.join(DIR, "_build_spells.py")]
+    args = [PY, os.path.join(HERE, "_build_spells.py")]
     if force:
         args.append("--force")
     if "dnd55e_spells.json" in missing or force:
         subprocess.run(args, cwd=DIR)
     if any(m.startswith("data/raw/") for m in missing) or force:
-        a2 = [PY, os.path.join(DIR, "_fetch_srd.py")]
+        a2 = [PY, os.path.join(HERE, "_fetch_srd.py")]
         if force:
             a2.append("--force")
         subprocess.run(a2, cwd=DIR)
@@ -99,13 +100,13 @@ def main():
     need_detail_raw = any(f"data/raw/{c}.json" in missing for c in detail_raw)
     need_detail = "dnd55e_classes_detail.json" in missing
     if need_detail_raw or force:
-        a3 = [PY, os.path.join(DIR, "_fetch_class_detail.py")]
+        a3 = [PY, os.path.join(HERE, "_fetch_class_detail.py")]
         if force:
             a3.append("--force")
         subprocess.run(a3, cwd=DIR)
         need_detail = True
     if need_detail or force:
-        subprocess.run([PY, os.path.join(DIR, "_build_class_detail.py")], cwd=DIR)
+        subprocess.run([PY, os.path.join(HERE, "_build_class_detail.py")], cwd=DIR)
 
     still = [m for m in missing
              if not os.path.exists(os.path.join(DIR, m if m.startswith("data/")

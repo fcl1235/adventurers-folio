@@ -8,6 +8,8 @@ import symtable
 import sys
 import os
 
+from _path import PROJECT_ROOT                   # 项目根（本脚本在 tools/legacy/）
+
 BUILTINS = set(dir(builtins)) | {"__file__", "__name__", "__doc__", "__package__",
                                  "__path__", "__spec__", "__loader__"}
 
@@ -34,7 +36,7 @@ def check(path):
     return missing, star
 
 def sources():
-    for root, dirs, files in os.walk("dnd55e"):
+    for root, dirs, files in os.walk(os.path.join(PROJECT_ROOT, "dnd55e")):
         dirs[:] = [d for d in dirs if d != "__pycache__"]
         for f in sorted(files):
             if f.endswith(".py"):
