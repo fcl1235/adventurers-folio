@@ -12,5 +12,5 @@ if %CODE%==0 (
 ) else (
   echo 自检失败，退出码 %CODE%。
 )
-pause
+if not defined DND_NO_PAUSE pause
 exit /b %CODE%
