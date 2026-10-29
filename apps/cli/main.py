@@ -441,7 +441,7 @@ def _add_character_args(parser) -> None:
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(prog="dnd5r", description="D&D 5R 规则引擎命令行")
+    parser = argparse.ArgumentParser(prog="dnd5r", description="冒险者手帖 · 5R 规则引擎命令行")
     sub = parser.add_subparsers(dest="command")
 
     version = sub.add_parser("version", help="版本号")

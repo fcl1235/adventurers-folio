@@ -228,7 +228,7 @@ class PanelsMixin():
         bar = ttk.Frame(self)
         bar.pack(fill="x", side="bottom")
         self.status = ttk.Label(
-            bar, text="欢迎来到 D&D 5.5e 人物卡 —— 点击工具栏「✦ 新建角色」开始冒险",
+            bar, text="欢迎来到 冒险者手帖 —— 点击工具栏「✦ 新建角色」开始冒险",
             style="Dim.TLabel", anchor="w", padding=(12, 5))
         self.status.pack(side="left", fill="x", expand=True)
         # 荒野变形的当前状态: 变身中在状态栏右侧常驻提示, 随时可恢复本体

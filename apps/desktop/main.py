@@ -29,7 +29,7 @@ def _scores(args) -> dict[str, int]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="apps.desktop", description="D&D 2024 角色卡（桌面）")
+    parser = argparse.ArgumentParser(prog="apps.desktop", description="冒险者手帖 · 5R 角色卡（桌面）")
     parser.add_argument("--root", default="plugins", help="插件目录")
     parser.add_argument("--class", dest="cls", default="dnd2024.class.fighter", help="职业 id")
     parser.add_argument("--level", type=int, default=5, help="职业等级")

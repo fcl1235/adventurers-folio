@@ -45,7 +45,7 @@ This is unofficial, non-commercial Fan Content. Not approved or endorsed by Wiza
 ## 4. 商标
 
 "Dungeons & Dragons"、"D&D"、Dragon Ampersand 及相关标识是 Wizards of the Coast LLC 的注册商标。
-本项目名称 `5rcard` 不使用上述商标；正文中对规则版本的指代仅用于说明兼容性（"compatible with
+本项目名称 `adventurers-folio`（中文名「冒险者手帖」）不使用上述商标；正文中对规则版本的指代仅用于说明兼容性（"compatible with
 fifth edition" / "5E compatible"），不构成商标使用授权。
 
 ## 5. 不收录的内容

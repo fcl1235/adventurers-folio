@@ -75,7 +75,7 @@ class AppIO:
         path = filedialog.asksaveasfilename(
             parent=self, defaultextension=".json", initialdir=paths.CHAR_DIR,
             initialfile=f"{self._safe_name(self.char.name)}.json",
-            filetypes=[("D&D 5.5e 角色档", "*.json"), ("所有文件", "*.*")])
+            filetypes=[("冒险者手帖 角色档", "*.json"), ("所有文件", "*.*")])
         if not path:
             return
         try:
@@ -101,7 +101,7 @@ class AppIO:
         os.makedirs(paths.CHAR_DIR, exist_ok=True)
         path = filedialog.askopenfilename(
             parent=self, initialdir=paths.CHAR_DIR,
-            filetypes=[("D&D 5.5e 角色档", "*.json"), ("所有文件", "*.*")])
+            filetypes=[("冒险者手帖 角色档", "*.json"), ("所有文件", "*.*")])
         if not path:
             return
         try:

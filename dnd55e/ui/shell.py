@@ -21,7 +21,7 @@ class ShellMixin():
     def __init__(self, selftest=False):
         super().__init__()
         self._selftest = selftest
-        self.title("D&D 5.5e 人物卡 · Character Builder")
+        self.title("冒险者手帖 · Character Builder")
         self.geometry("1340x860")
         self.minsize(1200, 760)
         self.configure(bg=BG)
@@ -89,7 +89,7 @@ class ShellMixin():
     def _build_toolbar(self):
         bar = ttk.Frame(self, style="Panel.TFrame", padding=(10, 7))
         bar.pack(fill="x")
-        ttk.Label(bar, text="🎲 D&D 5.5e 人物卡", style="GoldPanel.TLabel",
+        ttk.Label(bar, text="🎲 冒险者手帖", style="GoldPanel.TLabel",
                   font=(UI_FONT, 13, "bold")).pack(side="left", padx=(2, 16))
 
         def b(txt, cmd, style="TButton"):
@@ -129,7 +129,7 @@ class ShellMixin():
         inner.place(relx=0.5, rely=0.42, anchor="center")
         ttk.Label(inner, text="⚔  🎲  ⚔", font=(UI_FONT, 36),
                   foreground=GOLD2, background=BG).pack(pady=(0, 8))
-        ttk.Label(inner, text="D&D 5.5e 人物卡", style="Title.TLabel").pack()
+        ttk.Label(inner, text="冒险者手帖", style="Title.TLabel").pack()
         ttk.Label(inner, text="2024 版规则 · 建卡向导 / 升级 / 战斗追踪 一站式",
                   style="Dim.TLabel", font=(UI_FONT, 11)).pack(pady=(4, 28))
         ttk.Button(inner, text="✦  创建新角色 (六步向导)", style="Hero.TButton",

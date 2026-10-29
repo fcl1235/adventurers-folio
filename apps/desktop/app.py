@@ -38,7 +38,7 @@ class DesktopApp(tk.Tk):
         # 与法术页（召唤入場）都要读同一份 —— 挂在页私有属性上别的页够不着。
         self.encounter = None
 
-        self.title("D&D 2024 角色卡")
+        self.title("冒险者手帖 · 5R 角色卡")
         self.minsize(*WINDOW_MIN)
         if not selftest:
             self.geometry("%dx%d" % WINDOW_MIN)

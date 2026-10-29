@@ -22,7 +22,7 @@ class WizardCore():
             self.withdraw()
         self.r = rules
         self.on_finish = on_finish
-        self.title("新建角色 · D&D 5.5e 建卡向导")
+        self.title("新建角色 · 冒险者手帖")
         self.geometry("740x720")
         self.minsize(700, 560)
         self.transient(master)

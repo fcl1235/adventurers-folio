@@ -24,6 +24,6 @@ from .ui_shell import AppShell
 
 
 class App(AppShell, AppSheet, AppActions, AppIO, tk.Tk):
-    """D&D 5.5e 人物卡主窗口"""
+    """冒险者手帖主窗口"""
 
 
