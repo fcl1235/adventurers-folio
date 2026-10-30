@@ -67,10 +67,16 @@ def parse_slot(slot) -> EquipSlot:
     return found
 
 
+# 目录里的排序：轻→中→重→盾。**不要按 AC 倒序** —— 那样盾牌会排在最前
+# （盾的 ac_base 是 0），变成「第一行是盾、第二行是最重的甲」。
+CATEGORY_ORDER = {"light": 0, "medium": 1, "heavy": 2, "shield": 3}
+
+
 def armor_catalog(bundle: ContentBundle, locale: str = "zh") -> dict:
     """护甲与盾的清单（13 件）。界面据 `slot` 分组，不用自己判断哪件是盾。"""
     rows = sorted(bundle.armors.values(),
-                  key=lambda item: (item.category != "shield", -item.ac_base, item.id))
+                  key=lambda item: (CATEGORY_ORDER.get(item.category, 9),
+                                    -item.ac_base, item.id))
     return {
         "count": len(rows),
         "armors": [

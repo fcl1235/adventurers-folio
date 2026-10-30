@@ -25,11 +25,15 @@ CONDITIONS: tuple[tuple[str, str], ...] = (
     ("unconscious", "昏迷"),
 )
 
+EXHAUSTION_ID = "exhaustion"
+
 _ZH = dict(CONDITIONS)
+# 力竭也在这张表里：它没有勾选框（自己有关卡），但状态免疫里会出现「力竭」，
+# 名单对不上就会漏掉一条免疫。
+_ZH[EXHAUSTION_ID] = "力竭"
 
 # 内容包自己造的临时状态（狂暴、隐匿……）没有中文名。**不要硬翻**：
 # 宁可把 id 原样显示，也好过把 "raging" 翻成「愤怒」让玩家对不上原文。
-EXHAUSTION_ID = "exhaustion"
 
 
 def name_of(condition_id: str) -> str:

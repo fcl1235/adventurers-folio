@@ -685,6 +685,95 @@ class MorphUiTest(unittest.TestCase):
         self.assertEqual(page.unmorph_button.winfo_manager(), "")
 
 
+class GearPageTest(unittest.TestCase):
+    """装备页：换装立刻反映到 sheet（AC / 攻击表 / 槽位），装不上要说原因。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self):
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_lists_filled_from_catalog(self):
+        app = self._app()
+        page = app.gear
+        self.assertEqual(len(page._armors), 13)
+        self.assertEqual(len(page._weapons), 38)
+        self.assertEqual(page.armor_list.text_at(0).startswith("　"), True)
+        # 目录顺序：轻甲在前、盾牌在最后（按 AC 倒序会把盾排到第一行）
+        self.assertIn("轻甲", page.armor_list.text_at(0))
+        self.assertIn("盾牌", page.armor_list.text_at(len(page._armors) - 1))
+
+    def test_equip_armor_updates_ac_and_slot(self):
+        app = self._app()
+        page = app.gear
+        before = app.sheet["ac"]["total"]
+        page.select_armor("dnd2024.item.armor.chain_mail")
+        self.assertIn("锁甲", page.armor_detail_var.get())
+        self.assertTrue(page.equip_armor())
+        self.assertGreater(app.sheet["ac"]["total"], before)
+        self.assertEqual(page.slots.value_at(0), "锁甲")
+        # 清单里那一行要带上「已装」圆点
+        marked = [page.armor_list.text_at(i) for i in range(len(page._armors))
+                  if page.armor_list.text_at(i).startswith("●")]
+        self.assertEqual(len(marked), 1)
+        self.assertIn("锁甲", marked[0])
+
+    def test_equip_weapon_updates_attack_table(self):
+        app = self._app()
+        page = app.gear
+        page.select_weapon("dnd2024.item.weapon.longsword")
+        self.assertIn("挥砍", page.weapon_detail_var.get())
+        self.assertTrue(page.equip_weapon("main_hand"))
+        self.assertEqual(app.sheet["attacks"][0]["name"], "长剑")
+        self.assertTrue(page.unequip_weapon())
+        self.assertNotEqual(app.sheet["attacks"][0]["name"], "长剑")
+
+    def test_refusal_keeps_state_and_explains(self):
+        """双手剑配盾：状态要留着，状态行要写清为什么。"""
+        app = self._app()
+        page = app.gear
+        page.select_armor("dnd2024.item.armor.shield")
+        self.assertTrue(page.equip_armor())
+        page.select_weapon("dnd2024.item.weapon.greatsword")
+        self.assertFalse(page.equip_weapon("main_hand"))
+        self.assertIn("双手武器", page.status_var.get())
+        self.assertEqual(app.sheet["equipped"].get("shield"),
+                         "dnd2024.item.armor.shield")
+        self.assertNotIn("main_hand", app.sheet["equipped"])
+
+    def test_selection_survives_refresh(self):
+        """装完一件之后不能跳回第一行 —— 玩家会找不到自己刚点的是哪件。"""
+        app = self._app()
+        page = app.gear
+        page.select_armor("dnd2024.item.armor.chain_mail")
+        page.equip_armor()
+        self.assertEqual(page.armor_list.selected_id(), "dnd2024.item.armor.chain_mail")
+
+    def test_unequip_when_empty_says_so(self):
+        app = self._app()
+        page = app.gear
+        page.select_armor("dnd2024.item.armor.chain_mail")
+        self.assertFalse(page.unequip_armor())
+        self.assertIn("空着", page.status_var.get())
+
+    def test_survives_save_load(self):
+        """换装要能存下来：v1 存档漏了 inventory，读回来 AC 会悄悄变回 10。"""
+        app = self._app()
+        app.gear.select_armor("dnd2024.item.armor.chain_mail")
+        app.gear.equip_armor()
+        payload = api.save_character(app.actor)
+        fresh = api.load_character(self.bundle, payload)
+        self.assertEqual(api.equipped_map(fresh).get("armor"),
+                         "dnd2024.item.armor.chain_mail")
+        self.assertEqual(app.sheet["ac"]["total"],
+                         api.character_sheet(fresh, self.bundle)["ac"]["total"])
+
+
 class StatePanelTest(unittest.TestCase):
     """状态面板：勾选写事实、力竭写数值、濒死记账、专注给 DC。
 

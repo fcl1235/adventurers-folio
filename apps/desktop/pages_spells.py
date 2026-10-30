@@ -18,6 +18,7 @@ from tkinter import ttk
 import dnd5r.api as api
 
 from . import theme, widgets
+from .conditions import CONDITIONS, EXHAUSTION_ID, name_of
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, KeyValue, ListPane, ScrollText, section
 
 MARK_CHOSEN = "✓ "
@@ -68,19 +69,12 @@ SIZE_ZH = {"tiny": "微型", "small": "小型", "medium": "中型",
 SPEED_ZH = {"walk": "步行", "climb": "攀爬", "swim": "游泳",
             "fly": "飞行", "burrow": "掘道"}
 SENSE_ZH = widgets.SENSE_ZH     # 与能力页共用一份，见 widgets.py
-DAMAGE_ZH = {
-    "acid": "强酸", "bludgeoning": "钝击", "cold": "冷冻", "fire": "火焰",
-    "force": "力场", "lightning": "闪电", "necrotic": "黯蚀", "piercing": "穿刺",
-    "poison": "毒素", "psychic": "心灵", "radiant": "光耀", "slashing": "挥砍",
-    "thunder": "雷鸣",
-}
-CONDITION_ZH = {
-    "blinded": "目盲", "charmed": "魅惑", "deafened": "耳聋", "exhaustion": "力竭",
-    "frightened": "恐惧", "grappled": "受擒", "incapacitated": "失能",
-    "invisible": "隐形", "paralyzed": "麻痹", "petrified": "石化",
-    "poisoned": "中毒", "prone": "倒地", "restrained": "束缚",
-    "stunned": "震慑", "unconscious": "昏迷",
-}
+# 与装备页共用一份（widgets.DAMAGE_ZH）：两份表的下场是改一处漏一处
+DAMAGE_ZH = widgets.DAMAGE_ZH
+# 状态名与状态面板共用一份（conditions.py）：两处都维护的话，
+# 同一个 id 在法术页写「受擒」、在状态栏写「擒抱」，玩家会以为是两回事。
+CONDITION_ZH = {ident: zh for ident, zh in CONDITIONS}
+CONDITION_ZH[EXHAUSTION_ID] = name_of(EXHAUSTION_ID)
 AREA_ZH = {"cone": "锥形", "line": "线形", "sphere": "球形",
            "cube": "立方", "cylinder": "柱形"}
 

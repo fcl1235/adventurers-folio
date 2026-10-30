@@ -28,6 +28,7 @@ from .dice import format_roll
 from .pages import OverviewPage
 from .pages_encounter import EncounterPage
 from .pages_feats import FeatPage
+from .pages_gear import GearPage
 from .pages_powers import PowersPage
 from .pages_spells import SpellPage
 from .widgets import COL_MID, hit_dice_text, hint_bar
@@ -107,6 +108,8 @@ class DesktopApp(tk.Tk):
         self.overview = OverviewPage(self.book, on_roll=self.roll_check,
                                      on_action=self.on_state_action)
         self.book.add(self.overview, text="概览")
+        self.gear = GearPage(self.book, self)
+        self.book.add(self.gear, text="装备")
         self.spells = SpellPage(self.book, self)
         self.book.add(self.spells, text="法术")
         self.feats = FeatPage(self.book, self)
@@ -115,8 +118,8 @@ class DesktopApp(tk.Tk):
         self.book.add(self.powers_page, text="能力")
         self.encounter_page = EncounterPage(self.book, self)
         self.book.add(self.encounter_page, text="战斗")
-        self.pages = [self.overview, self.spells, self.feats, self.powers_page,
-                      self.encounter_page]
+        self.pages = [self.overview, self.gear, self.spells, self.feats,
+                      self.powers_page, self.encounter_page]
 
     def _build_hero(self) -> ttk.Frame:
         """身份 + 生命值 + 5 个数值胶囊。

@@ -36,6 +36,15 @@ SENSE_ZH = {"darkvision": "黑暗视觉", "blindsight": "盲视",
 ABILITY_ZH = {"str": "力量", "dex": "敏捷", "con": "体质",
               "int": "智力", "wis": "感知", "cha": "魅力"}
 
+# 伤害类型的中文名。法术页与装备页都要用 —— 以前只有法术页有一份，
+# 装备页再抄一份又是「改一处漏一处」。
+DAMAGE_ZH = {
+    "acid": "强酸", "bludgeoning": "钝击", "cold": "冷冻", "fire": "火焰",
+    "force": "力场", "lightning": "闪电", "necrotic": "黯蚀", "piercing": "穿刺",
+    "poison": "毒素", "psychic": "心灵", "radiant": "光耀", "slashing": "挥砍",
+    "thunder": "雷鸣",
+}
+
 
 def sense_text(senses: dict) -> str:
     """`{darkvision: 60}` → 「黑暗视觉 60 尺」。带单位，别让人猜。"""

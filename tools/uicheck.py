@@ -28,6 +28,7 @@ from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
 from apps.desktop.pages_encounter import EncounterPage  # noqa: E402
 from apps.desktop.pages_feats import FeatPage  # noqa: E402
+from apps.desktop.pages_gear import GearPage  # noqa: E402
 from apps.desktop.pages_powers import PowersPage  # noqa: E402
 from apps.desktop.pages_spells import SpellPage, _chosen_ids  # noqa: E402
 from apps.desktop.widgets import COL_MID, COL_RIGHT  # noqa: E402
@@ -298,6 +299,44 @@ def _check_edit_row(label: str, app, page: OverviewPage, avail_h: int) -> list[s
                                 % (label, key, shown.get(key), value))
     finally:
         page.toggle_edit(False)
+    return problems
+
+
+def _check_gear(label: str, app, page: GearPage) -> list[str]:
+    """装备页：装上之后 sheet 必须跟着变，而且**装完要还原**（后面还要比对别的页）。"""
+    problems: list[str] = []
+    if len(page._armors) != api.armor_catalog(app.bundle)["count"]:
+        problems.append("%s：护甲清单 %d 条，目录是 %d 条"
+                        % (label, len(page._armors),
+                           api.armor_catalog(app.bundle)["count"]))
+    if len(page._weapons) != api.weapon_catalog(app.bundle)["count"]:
+        problems.append("%s：武器清单 %d 条，目录是 %d 条"
+                        % (label, len(page._weapons),
+                           api.weapon_catalog(app.bundle)["count"]))
+
+    armor = next((row for row in page._armors if row["category"] == "heavy"), None)
+    if armor is None:
+        return problems
+    before = app.sheet["ac"]["total"]
+    page.select_armor(armor["id"])
+    if armor["name"] not in page.armor_detail_var.get():
+        problems.append("%s：详情写着 %r，选中的是 %s"
+                        % (label, page.armor_detail_var.get(), armor["name"]))
+    if not page.equip_armor():
+        problems.append("%s：装不上 %s（%s）" % (label, armor["name"], page.status_var.get()))
+        return problems
+    if app.sheet["equipped"].get("armor") != armor["id"]:
+        problems.append("%s：装上 %s 后 sheet 里没有它" % (label, armor["name"]))
+    if page.slots.value_at(0) != armor["name"]:
+        problems.append("%s：槽位显示 %r，实际装的是 %s"
+                        % (label, page.slots.value_at(0), armor["name"]))
+    if app.sheet["ac"]["total"] == before:
+        problems.append("%s：装上 %s 后 AC 没变（%d）"
+                        % (label, armor["name"], before))
+    if not page.unequip_armor():
+        problems.append("%s：卸不下来 %s" % (label, armor["name"]))
+    elif app.sheet["equipped"].get("armor"):
+        problems.append("%s：卸完以后 sheet 里还留着护甲" % label)
     return problems
 
 
@@ -606,6 +645,8 @@ def main() -> int:
                     problems.extend(_check_appearance(label, app, page, app.sheet))
                     problems.extend(_check_dice(label, app, page, app.sheet))
                     problems.extend(_check_edit_row(label, app, page, avail_h))
+                elif isinstance(page, GearPage):
+                    problems.extend(_check_gear(label, app, page))
                 elif isinstance(page, SpellPage):
                     problems.extend(_check_spells(label, page, stats))
                 elif isinstance(page, FeatPage):
