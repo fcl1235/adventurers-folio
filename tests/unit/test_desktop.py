@@ -13,11 +13,14 @@ from pathlib import Path
 import dnd5r.api as api
 from apps.desktop import theme
 from apps.desktop.app import WINDOW_MIN, DesktopApp
+from dnd5r.kernel.rng import ScriptedRng
 
 ROOT = Path(__file__).resolve().parents[2]
 PLUGINS = ROOT / "plugins"
 FIGHTER = "dnd2024.class.fighter"
+ROGUE = "dnd2024.class.rogue"
 SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
+DEX_SCORES = {"str": 10, "dex": 17, "con": 14, "int": 12, "wis": 12, "cha": 10}
 
 
 class DesktopAppTest(unittest.TestCase):
@@ -450,6 +453,58 @@ def _walk(widget):
     yield widget
     for child in widget.winfo_children():
         yield from _walk(child)
+
+
+class DiceTest(unittest.TestCase):
+    """掷骰：结果必须来自引擎，记录要落地，失败不许炸到 Tk 回调里。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self):
+        actor = api.new_character(self.bundle, ROGUE, 5, DEX_SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_roll_matches_sheet_modifier(self):
+        app = self._app()
+        skill = next(row for row in app.sheet["skills"] if row["key"] == "stealth")
+        result = app.roll_check("skill", "stealth", rng=ScriptedRng([13]))
+        self.assertIsNotNone(result)
+        self.assertEqual(result["total"], 13 + skill["total"])
+        self.assertEqual(app.overview.dice_log.row_count, 1)
+        self.assertIn("隐匿", app.overview.dice_log.lines()[0])
+
+    def test_labels_are_chinese(self):
+        """`label` 对豁免是内部 token（save.dex），直接显示会中英混杂。"""
+        app = self._app()
+        app.roll_check("save", "dex", rng=ScriptedRng([10]))
+        app.roll_check("ability", "str", rng=ScriptedRng([10]))
+        lines = app.overview.dice_log.lines()
+        self.assertNotIn("save.", lines[0])
+        self.assertIn("敏捷豁免", lines[1])
+        self.assertIn("力量检定", lines[0])
+
+    def test_log_newest_first_and_capped(self):
+        app = self._app()
+        for _ in range(70):
+            app.roll_check("ability", "con", rng=ScriptedRng([5]))
+        self.assertEqual(app.overview.dice_log.row_count, 60)
+
+    def test_failure_reports_without_raising(self):
+        app = self._app()
+        self.assertIsNone(app.roll_check("nope", "x"))
+        self.assertIn("掷骰失败", str(app.status.cget("text")))
+        self.assertEqual(app.overview.dice_log.row_count, 0)
+
+    def test_ability_card_buttons_are_wired(self):
+        app = self._app()
+        card = app.overview.ability_cards["str"]
+        self.assertEqual(str(card.check_button.cget("state")), "normal")
+        card.check_button.invoke()
+        self.assertEqual(app.overview.dice_log.row_count, 1)
 
 
 if __name__ == "__main__":

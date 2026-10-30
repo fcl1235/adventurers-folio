@@ -21,6 +21,7 @@ import dnd5r.api as api
 
 from . import theme
 from .cards import Chip
+from .dice import format_roll
 from .pages import OverviewPage
 from .pages_encounter import EncounterPage
 from .pages_feats import FeatPage
@@ -84,7 +85,7 @@ class DesktopApp(tk.Tk):
         self.book = ttk.Notebook(self)
         self.book.pack(side="top", fill="both", expand=True, padx=8, pady=(0, 4))
 
-        self.overview = OverviewPage(self.book)
+        self.overview = OverviewPage(self.book, on_roll=self.roll_check)
         self.book.add(self.overview, text="概览")
         self.spells = SpellPage(self.book, self)
         self.book.add(self.spells, text="法术")
@@ -156,6 +157,25 @@ class DesktopApp(tk.Tk):
         """换掉角色并重画。改档案（专长选择项）后必须整只换 —— 派生值全变了。"""
         self.actor = actor
         self.refresh()
+
+    # --- 掷骰 -------------------------------------------------------------
+    def roll_check(self, kind: str, key: str = "", rng=None) -> dict | None:
+        """掷一次并写进记录。**加值与优势全由 `api.roll_check` 决定**。
+
+        `rng` 只为测试注入：界面上掷的是真骰子，探针里可以塞一条固定序列。
+        失败只改状态行、返回 None —— 让异常冒到 Tk 回调里会打一堆调用栈，
+        界面上却一点反馈都没有。
+        """
+        try:
+            result = api.roll_check(self.actor, self.bundle, kind, key, rng=rng)
+        except api.DndError as exc:
+            self.status.configure(text="掷骰失败：%s" % exc,
+                                  foreground=theme.WARN)
+            return None
+        line = format_roll(result)
+        self.overview.dice_log.add(line)
+        self.status.configure(text="掷骰　" + line, foreground=theme.TEXT)
+        return result
 
     def _refresh_header(self) -> None:
         sheet = self.sheet

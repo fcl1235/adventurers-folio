@@ -11,16 +11,16 @@ import tkinter as tk
 from tkinter import ttk
 
 from .cards import AbilityCard
-from .widgets import (CARD_LEFT, COL_MID, COL_RIGHT, GridTable, KeyValue,
-                      ScrollFrame, hit_dice_text, section, sense_text)
+from .dice import DiceLog
+from .widgets import (ABILITY_ZH, CARD_LEFT, COL_MID, COL_RIGHT, GridTable,
+                      KeyValue, RollGrid, ScrollFrame, hit_dice_text, section,
+                      sense_text)
 
 ABILITY_ORDER = ("str", "dex", "con", "int", "wis", "cha")
 # 列宽是**字符数**（ttk.Label 的单位）。像素预算由布局审计现量 reqwidth 得出，
 # 不在这里手算 —— 字体一变手算的值就废了。
 SKILL_COLUMNS = [("技能", 10), ("属性", 5), ("加值", 5), ("熟练", 5), ("明细", 24)]
 ATTACK_COLUMNS = [("武器", 12), ("命中", 5), ("伤害", 11)]
-ABILITY_ZH = {"str": "力量", "dex": "敏捷", "con": "体质",
-              "int": "智力", "wis": "感知", "cha": "魅力"}
 
 
 def _signed(value: int) -> str:
@@ -44,8 +44,9 @@ class OverviewPage(ttk.Frame):
     分数与豁免是配角。旧程序就是这样，一眼能读出「我力量 +4」。
     """
 
-    def __init__(self, master) -> None:
+    def __init__(self, master, on_roll=None) -> None:
         super().__init__(master, padding=(6, 4))
+        self._on_roll = on_roll
         self._build()
 
     def _build(self) -> None:
@@ -74,6 +75,14 @@ class OverviewPage(ttk.Frame):
             self.ability_cards[key] = card
         for column in (0, 1):
             grid.columnconfigure(column, minsize=148, weight=1)
+        # 「检 / 豁」按钮接上掷骰。`on_roll(kind, key)` 由外壳注入 ——
+        # 页面自己不碰 api，掷完的记录也归外壳管。
+        if self._on_roll is not None:
+            for key, card in self.ability_cards.items():
+                card.set_roll_callbacks(
+                    lambda attribute=key: self._roll("ability", attribute),
+                    lambda attribute=key: self._roll("save", attribute),
+                )
 
         # --- 中：技能 + 熟练工具 ---------------------------------------------
         # 工具**只列熟练的**，且用一行折行文本而不是小表：全 37 件铺在卡上会把
@@ -89,10 +98,19 @@ class OverviewPage(ttk.Frame):
 
         skills = section(mid, "技能", "熟练加熟练加值，专精再加一份；明细在右侧说明栏")
         skills.pack(fill="both", expand=True)
-        self.skills = GridTable(skills, SKILL_COLUMNS, rows=18)
+        self.skills = RollGrid(skills, SKILL_COLUMNS, rows=18,
+                               on_roll=lambda key: self._roll("skill", key))
         self.skills.pack(fill="both", expand=True)
 
-        # --- 右：战斗数值 + 攻击（整体可滚动）--------------------------------
+        # --- 右：战斗数值 + 攻击（可滚动）+ 掷骰记录（钉在底部）----------------
+        # 打包顺序是铁律：**先 side="bottom" 钉住记录**，再让滚动的战斗区吃掉剩余空间。
+        # 反过来做，内容一长记录就被挤到看不见的地方 —— 而且玩家每掷一次都要滚动才能
+        # 看到结果，那这个面板就白做了。
+        dice = section(right, "掷骰记录")
+        dice.pack(side="bottom", fill="x", pady=(4, 0))
+        self.dice_log = DiceLog(dice, height=5, width=30)
+        self.dice_log.pack(fill="both", expand=True)
+
         # 定高滚动容器：内容长了就滚，**不会把页面 reqheight 顶出去**。
         # 以前这里是两条会长的竖排，攻击表一多就把整页顶破预算。
         scroll = ScrollFrame(right, height=400, width=COL_RIGHT)
@@ -110,6 +128,10 @@ class OverviewPage(ttk.Frame):
         attacks.pack(fill="x", pady=(6, 0))
         self.attacks = GridTable(attacks, ATTACK_COLUMNS, rows=8)
         self.attacks.pack(fill="x")
+
+    def _roll(self, kind: str, key: str) -> None:
+        if self._on_roll is not None:
+            self._on_roll(kind, key)
 
     # --- 数据 -------------------------------------------------------------
     def refresh(self, sheet: dict) -> None:
@@ -136,7 +158,8 @@ class OverviewPage(ttk.Frame):
             mark = "专精" if row.get("expertise") else ("熟练" if row.get("proficient") else "")
             tag = "expert" if row.get("expertise") else ("prof" if row.get("proficient") else "")
             rows.append(((row["name"], row["ability"].upper(),
-                          _signed(row["total"]), mark, row["detail"]), tag))
+                          _signed(row["total"]), mark, row["detail"]), tag,
+                         row["key"]))
         self.skills.fill(rows)
 
     def refresh_tools(self, sheet: dict) -> None:

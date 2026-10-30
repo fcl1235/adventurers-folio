@@ -237,6 +237,32 @@ def _walk(widget):
         yield from _walk(child)
 
 
+def _check_dice(label: str, app, page: OverviewPage, sheet: dict) -> list[str]:
+    """掷骰必须真的接到引擎：结果 = d20 + 卡上那个加值，记录也要落地。
+
+    用 `ScriptedRng` 固定骰面，所以这条检查是确定的 —— 不依赖运气。
+    """
+    problems: list[str] = []
+    skill = next((row for row in sheet.get("skills") or () if row.get("key") == "stealth"),
+                 (sheet.get("skills") or [None])[0])
+    if skill is None:
+        return problems
+    before = page.dice_log.row_count
+    result = app.roll_check("skill", skill["key"], rng=ScriptedRng([10]))
+    if result is None:
+        problems.append("%s：掷骰失败（状态行：%s）" % (label, app.status.cget("text")))
+        return problems
+    want = 10 + int(skill["total"])
+    if int(result.get("total", 0)) != want:
+        problems.append("%s：%s 掷出 %s，应为 d20 10 + 卡面 %d = %d"
+                        % (label, skill["name"], result.get("total"),
+                           skill["total"], want))
+    if page.dice_log.row_count != min(before + 1, 60):
+        problems.append("%s：掷骰记录没有新增（%d → %d）"
+                        % (label, before, page.dice_log.row_count))
+    return problems
+
+
 def _check_pools(label: str, page: PowersPage) -> list[str]:
     """资源池的显示值必须等于 sheet 的「剩余 / 上限」。
 
@@ -540,6 +566,7 @@ def main() -> int:
                     problems.extend(_check_skills(label, page, app.sheet))
                     problems.extend(_check_overview_defense(label, page, app.sheet))
                     problems.extend(_check_appearance(label, app, page, app.sheet))
+                    problems.extend(_check_dice(label, app, page, app.sheet))
                 elif isinstance(page, SpellPage):
                     problems.extend(_check_spells(label, page, stats))
                 elif isinstance(page, FeatPage):

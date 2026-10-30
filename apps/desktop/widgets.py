@@ -32,6 +32,10 @@ CARD_LEFT = 320
 SENSE_ZH = {"darkvision": "黑暗视觉", "blindsight": "盲视",
             "tremorsense": "震颤感知", "truesight": "真实视觉"}
 
+# 六属性的中文名。技能表、属性卡、掷骰记录都用它。
+ABILITY_ZH = {"str": "力量", "dex": "敏捷", "con": "体质",
+              "int": "智力", "wis": "感知", "cha": "魅力"}
+
 
 def sense_text(senses: dict) -> str:
     """`{darkvision: 60}` → 「黑暗视觉 60 尺」。带单位，别让人猜。"""
@@ -154,6 +158,71 @@ class GridTable(ttk.Frame):
 
     def text(self, row: int, column: int) -> str:
         return self._cells[row][column].cget("text")
+
+
+class RollGrid(ttk.Frame):
+    """带掷骰按钮的网格表（技能表用）。
+
+    **列索引与 `GridTable` 完全一致**：`text(row, col)` 的 `col` 只数数据列，
+    按钮不算列 —— 测试与审计都按 `text(i, 0)` 读名称，加一个按钮不该把列号挪位。
+    """
+
+    def __init__(self, master, columns: list[tuple[str, int]], rows: int,
+                 on_roll=None) -> None:
+        super().__init__(master)
+        self.columns = columns
+        self.row_count = rows
+        self._on_roll = on_roll
+        self._keys: list[str] = []
+        self._buttons: list[ttk.Button] = []
+        self._cells: list[list[ttk.Label]] = []
+        for index, (title, width) in enumerate(columns):
+            ttk.Label(self, text=title, width=width, anchor="w",
+                      font=(theme.UI_FONT, 9, "bold")).grid(
+                row=0, column=index + 1, sticky="w", padx=(0, 6))
+        for row in range(rows):
+            button = ttk.Button(self, text="🎲", style="Mini.TButton", width=2,
+                                command=lambda index=row: self._roll(index),
+                                state="normal" if on_roll else "disabled")
+            button.grid(row=row + 1, column=0, padx=(0, 4), pady=1)
+            self._buttons.append(button)
+            line = []
+            for index, (_, width) in enumerate(columns):
+                cell = ttk.Label(self, text="", width=width, anchor="w")
+                cell.grid(row=row + 1, column=index + 1, sticky="w",
+                          padx=(0, 6), pady=1)
+                line.append(cell)
+            self._cells.append(line)
+
+    def fill(self, rows: list[tuple[tuple[str, ...], str, str]]) -> None:
+        """`rows` 是 (单元格文本, 颜色标记, 掷骰用的 key)；多余的旧行清空。"""
+        self._keys = []
+        for index, line in enumerate(self._cells):
+            if index < len(rows):
+                cells, tag, key = rows[index]
+                color = theme.TAG_COLORS.get(tag, theme.TEXT)
+                self._keys.append(key)
+                self._buttons[index].configure(
+                    state="normal" if self._on_roll and key else "disabled")
+                for cell, text in zip(line, cells):
+                    cell.configure(text=str(text), foreground=color)
+            else:
+                for cell in line:
+                    cell.configure(text="", foreground=theme.TEXT)
+                self._buttons[index].configure(state="disabled")
+
+    def key_at(self, row: int) -> str:
+        return self._keys[row] if row < len(self._keys) else ""
+
+    def text(self, row: int, column: int) -> str:
+        return self._cells[row][column].cget("text")
+
+    def _roll(self, index: int) -> None:
+        if self._on_roll is None:
+            return
+        key = self.key_at(index)
+        if key:
+            self._on_roll(key)
 
 
 class ListPane(ttk.Frame):

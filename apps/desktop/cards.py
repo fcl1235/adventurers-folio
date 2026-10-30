@@ -69,8 +69,38 @@ class AbilityCard(ttk.Frame):
         self._score = ttk.Label(self, text="", style="DimCard.TLabel",
                                 anchor="center")
         self._score.pack(fill="x")
+        # 「检 / 豁」小按钮。旧程序就在这个位置，roll 有就用、没接就置灰 ——
+        # 让按钮看起来能点却没反应是最差的体验。
+        buttons = ttk.Frame(self, style="Card.TFrame")
+        buttons.pack(fill="x", pady=(3, 0))
+        self.check_button = ttk.Button(buttons, text="检",
+                                       style="Mini.TButton", width=3,
+                                       command=self._on_check, state="disabled")
+        self.check_button.pack(side="left", expand=True, fill="x")
+        self.save_button = ttk.Button(buttons, text="豁",
+                                      style="Mini.TButton", width=3,
+                                      command=self._on_save, state="disabled")
+        self.save_button.pack(side="left", expand=True, fill="x", padx=(3, 0))
+        self._check = None
+        self._save_hook = None
 
     # --- 接口 ---------------------------------------------------------
+    def set_roll_callbacks(self, on_check, on_save) -> None:
+        """接上掷骰。没接之前两个按钮是灰的。"""
+        self._check, self._save_hook = on_check, on_save
+        state = "normal" if on_check else "disabled"
+        self.check_button.configure(command=self._on_check, state=state)
+        self.save_button.configure(command=self._on_save,
+                                   state="normal" if on_save else "disabled")
+
+    def _on_check(self) -> None:
+        if self._check is not None:
+            self._check(self.key)
+
+    def _on_save(self) -> None:
+        if self._save_hook is not None:
+            self._save_hook(self.key)
+
     def set_values(self, *, mod: int, score: int, save: int,
                    proficient: bool = False) -> None:
         self._mod.configure(text="%+d" % mod, foreground=theme.GOLD2)
