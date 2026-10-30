@@ -31,6 +31,7 @@ from .pages_feats import FeatPage
 from .pages_gear import GearPage
 from .pages_powers import PowersPage
 from .pages_spells import SpellPage
+from .wizard import WizardView
 from .widgets import COL_MID, hit_dice_text, hint_bar
 
 # 设计尺寸：与旧程序一致，左 320 属性卡 + 中 610 标签页 + 右 300 状态正好放下。
@@ -40,14 +41,12 @@ WINDOW_MIN = (1180, 820)
 # 真正的硬下限（小屏才用得上）。低于 WINDOW_MIN 时页面会被裁，这是已知限制。
 WINDOW_FLOOR = (1024, 600)
 
-# 「新建」用的默认档案。P7 的建卡向导接上之后，这里只会剩「空档案」的含义。
-DEFAULT_NEW = dict(
-    class_id="dnd2024.class.fighter",
-    class_level=5,
-    scores={"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8},
-    name_zh="无名冒险者",
-)
 SAVE_DIR = Path("saves")
+# 界面的两种形态：`sheet` 是角色卡（默认），`wizard` 是建卡向导。
+# 用**同一个窗口**换内容，不开 Toplevel —— 弹窗要么写死 geometry
+# （内容一变按钮就消失），要么得复制一套 _fit 逻辑。
+MODE_SHEET = "sheet"
+MODE_WIZARD = "wizard"
 
 
 class DesktopApp(tk.Tk):
@@ -64,6 +63,9 @@ class DesktopApp(tk.Tk):
         # 遭遇战是 app 级状态（P15）：战斗页创建/销毁它，能力页（授予目标）
         # 与法术页（召唤入場）都要读同一份 —— 挂在页私有属性上别的页够不着。
         self.encounter = None
+        # 当前形态与建卡向导实例（`MODE_WIZARD` 时才有）
+        self.mode = MODE_SHEET
+        self.wizard = None
 
         self.title("冒险者手帖 · 5R 角色卡")
         # 主题必须在建控件**之前**套上：ttk 样式是「建的时候就查」的，
@@ -175,7 +177,8 @@ class DesktopApp(tk.Tk):
         self.file_buttons: dict[str, ttk.Button] = {}
         for key, text, action in (("new", "新建", self.new_character),
                                   ("open", "打开", self.open_dialog),
-                                  ("save", "保存", self.save_dialog)):
+                                  ("save", "保存", self.save_dialog),
+                                  ("level", "升级", self.level_up)):
             button = ttk.Button(files, text=text, style="Mini.TButton",
                                 command=action, width=5)
             button.pack(side="left", padx=(0, 4))
@@ -323,16 +326,107 @@ class DesktopApp(tk.Tk):
         return True
 
     def new_character(self) -> None:
-        """新建。**建卡向导（P7）接上之前**先按默认档案建一个。"""
-        actor = api.new_character(self.bundle, **DEFAULT_NEW)
+        """新建 → 打开建卡向导。默认档案只在向导被取消时兜底。"""
+        self.open_wizard()
+
+    # --- 建卡向导 ---------------------------------------------------------
+    def open_wizard(self, draft: dict | None = None, editing: bool = False,
+                    step: int = 0) -> None:
+        """在主窗口内切到建卡向导。
+
+        `editing=True` 是「改现有角色」（升级后发现还差选择）：完成时走
+        `apply_draft`（重建并保住背包/HP/资源），不走造新角色那条路。
+        """
+        if self.mode == MODE_WIZARD:
+            return
+        self.mode = MODE_WIZARD
+        # hero 与标签页**同时**让位：向导走完全程，中途看见旧角色的血条
+        # 会让人以为「已经在改这个角色了」。
+        self.hero.pack_forget()
+        self.book.pack_forget()
+        self.wizard = WizardView(self, self, draft=draft, editing=editing, step=step)
+        self.wizard.pack(side="top", fill="both", expand=True, padx=8, pady=(6, 0))
+        self.status.configure(
+            text="%s · 第 %d 步：%s" % ("改卡中" if editing else "建卡中",
+                                      self.wizard.index + 1,
+                                      self.wizard.current["title"]),
+            foreground=theme.DIM)
+
+    def close_wizard(self) -> None:
+        """回到角色卡。**顺序要紧**：hero 先 pack，标签页后 pack ——
+        反过来的话标签页会占满整条，hero 被挤到最后一行。"""
+        if self.mode != MODE_WIZARD:
+            return
+        self.mode = MODE_SHEET
+        if self.wizard is not None:
+            self.wizard.destroy()
+            self.wizard = None
+        self.hero.pack(side="top", fill="x", padx=8, pady=(6, 2))
+        self.book.pack(side="top", fill="both", expand=True, padx=8, pady=(0, 4))
+
+    def finish_wizard(self, actor, editing: bool = False) -> None:
+        """向导点了「建卡 / 完成」：换角色、回角色卡、清记录。
+
+        **先退出向导再 apply_actor**：`apply_actor` 会调 `_fit_window`，
+        而它在向导模式下量的是一个还没还原的布局（chrome 里算的是向导高度），
+        算出来的窗口尺寸会偏小。顺序反了窗口会莫名缩一下。
+
+        `editing=True` 时**不清**当前文件与掷骰记录 —— 改的还是同一个角色，
+        记录留着才对得上。
+        """
+        self.close_wizard()
         self.apply_actor(actor)
+        if editing:
+            self.status.configure(text="已改卡：%s" % (self.sheet.get("name") or ""),
+                                  foreground=theme.TEXT)
+            return
         self.current_path = None
         self.overview.dice_log.clear()
-        self.status.configure(text="已新建角色（建卡向导尚未接入，暂用默认档案）",
+        self.status.configure(text="已建卡：%s（还没保存，Ctrl+S 或点「保存」）"
+                                    % (self.sheet.get("name") or "无名冒险者"),
                               foreground=theme.TEXT)
+
+    # --- 升级 -------------------------------------------------------------
+    def level_up(self) -> None:
+        """升一级主职业。保留背包/装备/HP；还差选择就把向导开到那一步。
+
+        **不弹确认框**：零弹窗铁律。升级是可逆的（降级就是改回去），
+        而且 `rebuild_actor` 保住了运行时状态，不存在「升错了角色废了」。
+        """
+        try:
+            view = api.level_up_view(self.bundle, self.actor, self.locale)
+            actor = api.level_up(self.bundle, self.actor, self.locale)
+        except api.DndError as exc:
+            self.status.configure(text="升不了级：%s" % exc, foreground=theme.WARN)
+            return
+        self.apply_actor(actor)
+        parts = ["升到 %d 级 %s（生命上限 %d → %d）"
+                 % (view["to_level"], view["class_name"],
+                    view["hp_before"], view["hp_after"])]
+        if view["prof_before"] != view["prof_after"]:
+            parts.append("熟练加值 +%d" % (view["prof_after"] - view["prof_before"]))
+        if view["unlocks"]:
+            parts.append("新解锁：" + "、".join(row["name"] for row in view["unlocks"]))
+        if view["needs"]:
+            parts.append("还差：" + "；".join(row["text"] for row in view["needs"]))
+            # 把向导直接开到第一个「要补选择」的那一步，玩家不用自己找。
+            # **状态行要在 open_wizard 之后再写**：它会先把自己的「第 N 步」写进去。
+            message = " · ".join(parts)
+            self.open_wizard(draft=api.draft_from_actor(self.bundle, self.actor),
+                             editing=True,
+                             step=api.STEP_INDEX.get(view["needs"][0]["step"], 0))
+            self.status.configure(text=message, foreground=theme.WARN)
+            return
+        self.status.configure(text=" · ".join(parts), foreground=theme.TEXT)
 
     def save_dialog(self):
         """另存为/保存。selftest 下**必须直接返回** —— 弹文件对话框会挂住探针。"""
+        if self.mode == MODE_WIZARD:
+            # 建卡中「保存」会存下**上一个**角色的卡，然后界面说「已保存」。
+            # 那是最坏的一种谎话：玩家以为存了新角色。
+            self.status.configure(text="建卡过程中不能保存，先把卡建完（或点「取消」）",
+                                  foreground=theme.WARN)
+            return None
         if self.selftest:
             return None
         from tkinter import filedialog
@@ -344,6 +438,11 @@ class DesktopApp(tk.Tk):
         return self.save_to(path) if path else None
 
     def open_dialog(self):
+        if self.mode == MODE_WIZARD:
+            # 同理：读进来会换掉角色，而界面上还停在第 N 步的草案里
+            self.status.configure(text="建卡过程中不能打开别的角色，先建完或点「取消」",
+                                  foreground=theme.WARN)
+            return False
         if self.selftest:
             return False
         from tkinter import filedialog
@@ -424,6 +523,9 @@ class DesktopApp(tk.Tk):
         「报 LAYOUT OK 但实际已经超预算」这种最难查的错。实测 old header 时是 99。
         """
         self.update_idletasks()
+        if self.mode == MODE_WIZARD and self.wizard is not None:
+            # 向导模式下 hero 与标签页都让位了，窗口里只剩向导 + 状态栏
+            return self.winfo_reqheight() - self.wizard.winfo_reqheight()
         tallest = max(self.page_size(page)[1] for page in self.pages)
         return self.winfo_reqheight() - tallest
 

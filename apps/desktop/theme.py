@@ -140,6 +140,12 @@ def apply_theme(root: tk.Misc) -> None:
     style.map("Mini.TButton",
               background=[("active", "#403b4e")],
               foreground=[("disabled", "#5c5967")])
+    # 建卡向导的「当前步骤」按钮：金底深字。**不要用 state="disabled" 表示当前步**
+    # —— 灰掉的按钮看起来像「这一步不能点」，而它恰恰是可以点的。
+    style.configure("Active.Mini.TButton", padding=(3, 0), font=(font, 8, "bold"),
+                    background="#8a6d1a", foreground="#ffe9a8")
+    style.map("Active.Mini.TButton", background=[("active", "#a8871f"),
+                                                 ("pressed", GOLD)])
     # 选项卡
     style.configure("TNotebook", background=BG, bordercolor=BORDER)
     style.configure("TNotebook.Tab", background=PANEL, foreground=DIM,

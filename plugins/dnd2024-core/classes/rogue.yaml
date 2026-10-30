@@ -13,6 +13,10 @@ proficiencies:
   armor: [light]
 caster: none
 subclass_level: 3
+# 武器精通件数（2024）：等级 → 可精通的武器种类数。只写变化点，其余沿用上一级。
+# 依据 data/raw/class-levels-2024.json 的 class_specific.weapon_mastery；
+# 圣武士/游侠/盗贼的原文只写「两种武器」且未提升级增量，故只登记 1 级。
+mastery_counts: { 1: 2 }
 skill_choices: 4
 skill_list:
   - acrobatics

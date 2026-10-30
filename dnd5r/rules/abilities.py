@@ -23,7 +23,11 @@ POINT_BUY_MIN = 8
 POINT_BUY_MAX = 15
 # 标准数组（从高到低）
 STANDARD_ARRAY = (15, 14, 13, 12, 10, 8)
-BACKGROUND_BONUS_CAP = SCORE_MAX        # 20 是属性上限，这里跟着 statblock 走
+# **角色**属性上限是 20，和 `statblock.SCORE_MAX`（30）不是同一个数。
+# 30 是怪物/异界生物的上限：拿它当角色上限，背景加值就会允许「19 + 2 = 21」
+# 这种规则里不存在的结果。（P6 曾把两者当成一个，向导校验时露出来了。）
+CHARACTER_SCORE_MAX = 20
+BACKGROUND_BONUS_CAP = CHARACTER_SCORE_MAX
 BACKGROUND_PLUS_TWO = 2
 BACKGROUND_PLUS_ONE = 1
 

@@ -599,6 +599,89 @@ def _check_live_wiring(bundle) -> list[str]:
     return problems
 
 
+def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
+    """建卡向导（P7）：8 步的尺寸 + 骨架顺序 + 真实建出一张卡。
+
+    向导是**独立形态**（`app.mode`），不进 `pages`，所以主循环量不到它；
+    单独跑一遍，否则以后往某一步里加个控件就没人拦了。
+
+    三条断言各盯一类坑：
+      1. 每一步 reqsize 都在预算内 —— 第 5/6 步（技能/精通）是 46 个勾选框，最胖；
+      2. 底部导航栏是 `pack` 的 **bottom** 边 —— 顺序反了「下一步」会被挤出窗口
+         （旧程序吃过两次亏，一次表现成「变形按钮点不到」）；
+      3. 走完全程真的建出角色、回到角色卡，且出身（物种/背景/精通）落进了卡里。
+    """
+    problems: list[str] = []
+    S = {"str": 15, "dex": 14, "con": 13, "int": 12, "wis": 10, "cha": 8}
+    seed = api.new_character(bundle, "dnd2024.class.fighter", 1, S,
+                             name_zh="占位", name_en="Placeholder")
+    app = DesktopApp(bundle, seed, selftest=True)
+    try:
+        app.open_wizard()
+        wizard = app.wizard
+        if wizard is None or app.mode != "wizard":
+            return ["向导：open_wizard() 之后 mode=%r" % (app.mode,)]
+        if app.book.winfo_manager():
+            problems.append("向导：标签页没有让位（`book` 还在 pack 里）")
+        # 每一步都要有界面构造器。加一步忘了写界面在这里就红，不会白屏到运行时
+        missing = [step["key"] for step in api.WIZARD_STEPS
+                   if not hasattr(wizard, "_step_%s" % step["key"])]
+        if missing:
+            problems.append("向导：这些步骤没有界面构造器：%s" % "、".join(missing))
+        if list(api.STEP_INDEX) != [step["key"] for step in api.WIZARD_STEPS]:
+            problems.append("向导：STEP_INDEX 与 WIZARD_STEPS 顺序不一致")
+
+        if wizard.footer.pack_info().get("side") != "bottom":
+            problems.append("向导：底部导航栏不是先 pack 的 bottom —— "
+                            "内容一长「下一步」就会被挤出去")
+
+        for index in range(len(api.WIZARD_STEPS)):
+            wizard.go(index)
+            app.update_idletasks()
+            width, height = wizard.winfo_reqwidth(), wizard.winfo_reqheight()
+            print("%-14s 向导 %d/%d %4dx%-4d 可用 %4dx%-4d"
+                  % ("建卡向导", index + 1, len(api.WIZARD_STEPS),
+                     width, height, avail_w, avail_h))
+            if width > avail_w:
+                problems.append("向导第 %d 步：宽 %d > 可用 %d" % (index + 1, width, avail_w))
+            if height > avail_h:
+                problems.append("向导第 %d 步（%s）：高 %d > 可用 %d"
+                                % (index + 1, wizard.current["title"], height, avail_h))
+
+        # 走一遍真流程：战士 5 级 + 士兵 + 矮人 + 4 件精通
+        wizard.go(0)
+        wizard.draft["class_id"] = "dnd2024.class.fighter"
+        wizard.draft["class_level"] = 5
+        wizard.draft["subclass"] = "dnd2024.subclass.fighter.champion"
+        wizard.draft["background"] = "dnd2024.background.soldier"
+        wizard.draft["species"] = "dnd2024.species.dwarf"
+        wizard.draft["background_bonus"] = {"str": 2, "con": 1}
+        wizard.draft["skills"] = ["athletics", "perception"]
+        weapons = [row["id"] for row in
+                   api.mastery_choices(bundle, "dnd2024.class.fighter", 5)["options"]][:4]
+        wizard.draft["masteries"] = weapons
+        wizard.draft["name_zh"] = "铁砧"
+        wizard.go(len(api.WIZARD_STEPS) - 1)
+        app.update_idletasks()
+        wizard.finish()
+        app.update_idletasks()
+        if app.mode != "sheet":
+            problems.append("向导：建卡后没有回到角色卡（mode=%r）" % (app.mode,))
+        sheet = app.sheet
+        if sheet.get("name") != "铁砧":
+            problems.append("向导：建卡后的角色名是 %r" % (sheet.get("name"),))
+        origin = sheet.get("origin") or {}
+        if (origin.get("species") or {}).get("name") != "矮人":
+            problems.append("向导：物种没有落进卡里（%r）"
+                            % ((origin.get("species") or {}).get("name"),))
+        if len(origin.get("masteries") or ()) != len(weapons):
+            problems.append("向导：精通只记下了 %d 件，应 %d 件"
+                            % (len(origin.get("masteries") or ()), len(weapons)))
+    finally:
+        app.destroy()
+    return problems
+
+
 def main() -> int:
     bundle = api.load_content(ROOT / "plugins")
     if bundle.errors:
@@ -609,6 +692,10 @@ def main() -> int:
     problems: list[str] = []
     page_count = 0
     stats: dict = {}
+    # 预置一份（下面的循环里会用真实窗口现量覆盖）：这样 `CASES` 为空时
+    # 后面的向导审计也不会炸在 NameError 上
+    avail_w = WINDOW_MIN[0] - 16
+    avail_h = WINDOW_MIN[1]
     for label, class_id, level, subclass, scores, feats in CASES:
         actor = api.new_character(bundle, class_id, level, scores,
                                   subclass=subclass, feats=feats)
@@ -660,6 +747,7 @@ def main() -> int:
         finally:
             app.destroy()
 
+    problems.extend(_check_wizard(bundle, avail_w, avail_h))
     problems.extend(_check_live_wiring(bundle))
     print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 —— %s"
           % ("OK" if not problems else "见上"))

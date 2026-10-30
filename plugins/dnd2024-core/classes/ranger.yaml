@@ -1,3 +1,4 @@
+# hand-edited: 已手写 mastery_counts（武器精通件数），生成器不覆盖本文件
 # 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。
 # 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。
 # 特性目前一律是 passive + note：规则原文已登记，数值结算随 P5 后续逐条落地。
@@ -13,6 +14,10 @@ proficiencies:
 caster: half
 casting_ability: wis
 subclass_level: 3
+# 武器精通件数（2024）：等级 → 可精通的武器种类数。只写变化点，其余沿用上一级。
+# 依据 data/raw/class-levels-2024.json 的 class_specific.weapon_mastery；
+# 圣武士/游侠/盗贼的原文只写「两种武器」且未提升级增量，故只登记 1 级。
+mastery_counts: { 1: 2 }
 skill_choices: 3
 skill_list:
   - animal-handling

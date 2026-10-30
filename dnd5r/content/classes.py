@@ -61,6 +61,10 @@ class ClassDef:
     slots: Mapping[int, tuple[int, ...]] = field(default_factory=dict)
     cantrips: Mapping[int, int] = field(default_factory=dict)
     prepared: Mapping[int, int] = field(default_factory=dict)
+    # 武器精通件数：等级 → 可精通的武器种类数。没有这个键 = 该职业没有武器精通
+    # （2024 只有野蛮人/战士/圣武士/游侠/盗贼有）。0 与「没有」是两件事：
+    # 空表 = 完全不给这项特性；写了表但某级缺 = 沿用最近的下界。
+    mastery_counts: Mapping[int, int] = field(default_factory=dict)
     slot_refresh: Refresh = Refresh.LONG_REST   # 邪术师契约位是短休恢复
     source: str = ""
 
@@ -118,6 +122,16 @@ class ClassDef:
                     if mod.target == "attack.count" and isinstance(mod.value, int):
                         pairs.append((power.id, mod.value))
         return attacks_per_action(pairs)
+
+    def mastery_count_at(self, class_level: ClassLevel) -> int:
+        """这一级可以精通几件武器。空表返回 0 —— 「没有武器精通」与「写了个 0」
+        在界面上要做的事一样（不显示这一步），所以不必区分。"""
+        if not self.mastery_counts:
+            return 0
+        usable = [int(key) for key in self.mastery_counts if int(key) <= int(class_level)]
+        if not usable:
+            return 0
+        return max(0, int(self.mastery_counts[max(usable)]))
 
     def to_dict(self) -> dict:
         return {
@@ -246,6 +260,19 @@ def _parse_level_table(data: Any, where: str) -> dict[int, int]:
         raise PluginError("%s 必须是 等级→数值 的映射" % where)
 
 
+def _parse_mastery_counts(data: Any, ident: str) -> dict[int, int]:
+    """武器精通件数表。**写错了必须报错** —— 静默吞掉一个非法等级，
+    界面上就变成「战士 5 级选不了精通」，查起来要翻三层。"""
+    table = _parse_level_table(data, "%s mastery_counts" % ident)
+    for level, count in table.items():
+        if not 1 <= level <= 20:
+            raise PluginError("%s 的 mastery_counts 等级越界：%r" % (ident, level))
+        if not 0 <= count <= 10:
+            raise PluginError("%s 的 mastery_counts 件数不合理：%d 级 %r"
+                              % (ident, level, count))
+    return table
+
+
 def parse_slots(data: Any) -> dict[int, tuple[int, ...]]:
     """法术位表：`{5: [4,3,2,0,0,0,0,0,0]}`。多写或写错环数都要当场报错。"""
     if not data:
@@ -335,6 +362,7 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
         slots=parse_slots(data.get("slots")),
         cantrips=_parse_level_table(data.get("cantrips"), "%s cantrips" % ident),
         prepared=_parse_level_table(data.get("prepared"), "%s prepared" % ident),
+        mastery_counts=_parse_mastery_counts(data.get("mastery_counts"), ident),
         slot_refresh=_parse_refresh(data.get("slot_refresh"), ident),
         source=source,
     )

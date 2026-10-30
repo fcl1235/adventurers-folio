@@ -58,6 +58,14 @@ from .origin import (
     origin_view, random_scores, score_cost, score_presets, set_masteries,
     set_origin, species_catalog,
 )
+# 建卡向导（P7）：8 步的目录与最终组装。界面只拿数据，不自己查内容
+from .wizard import (
+    STEP_INDEX, WIZARD_STEPS, bonus_plans, build_from_draft, class_catalog,
+    draft_problems, empty_draft, mastery_choices, skill_catalog, spell_choices,
+    step_options, subclass_choices, tool_catalog,
+)
+# 升级（P7）：改等级 → 重建（保住背包/HP/资源），并把「还差选什么」列出来
+from .progress import apply_draft, draft_from_actor, level_up, level_up_view
 # 前端要构造 / 捕获的类型与异常是 api 契约的一部分（P6 的教训：
 # 不让 apps 去 import kernel.errors，C3 才守得住）
 from ..kernel.errors import DndError, PluginError, RuleError
@@ -96,6 +104,11 @@ __all__ = [
     "species_catalog", "background_catalog", "origin_view", "set_origin",
     "set_masteries", "bonus_shapes", "score_presets", "check_scores",
     "score_cost", "random_scores", "SCORE_MODES", "SCORE_MODE_ZH",
+    # 建卡向导（P7）
+    "WIZARD_STEPS", "STEP_INDEX", "empty_draft", "class_catalog", "skill_catalog",
+    "tool_catalog", "subclass_choices", "mastery_choices", "spell_choices",
+    "step_options", "draft_problems", "build_from_draft", "bonus_plans",
+    "level_up", "level_up_view", "draft_from_actor", "apply_draft",
     "attack_roll", "opportunity_attack", "monster_attack", "attack_options",
     "marks_of", "tokens_of",
     "eligible_forms_for", "morph_class_of", "form_options", "form_view",

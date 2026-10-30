@@ -122,6 +122,22 @@ class Profile:
     def add_class(self, class_id: str, class_level: int) -> "Profile":
         return replace(self, classes=self.classes + (ClassEntry.make(class_id, class_level),))
 
+    def with_class_level(self, class_id: str, class_level: int) -> "Profile":
+        """改某个职业的等级（升级 / 降级只用这一处）。
+
+        **不在这一层拦总等级上限**：`MAX_TOTAL_LEVEL` 是 build 时的事，
+        在这里再判一次只会出现两套口径。但「没有这个职业」要当场报错 ——
+        悄悄追加一个新职业条目是最难查的那种静默。
+        """
+        if not self.has_class(class_id):
+            raise RuleError("档案里没有这个职业：%s" % class_id)
+        updated = tuple(
+            ClassEntry.make(entry.class_id, int(class_level))
+            if entry.class_id == class_id else entry
+            for entry in self.classes
+        )
+        return replace(self, classes=updated)
+
     # --- 等级 ---------------------------------------------------------
     @property
     def total(self) -> TotalLevel:

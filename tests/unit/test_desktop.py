@@ -550,13 +550,27 @@ class SaveLoadTest(unittest.TestCase):
             self.assertTrue(remember.is_file())
             self.assertIn("a.json", remember.read_text(encoding="utf-8"))
 
-    def test_new_character_resets_to_default(self):
+    def test_new_character_goes_through_wizard(self):
+        """「新建」不再是「照默认档案建一个」—— 它打开建卡向导（P7）。
+
+        这里盯的是**副作用**：进向导时旧角色必须原封不动（取消就还是他），
+        只有真正点了「建卡」才丢掉旧档案与掷骰记录。
+        """
         with tempfile.TemporaryDirectory() as tmp:
             app = self._app(tmp)
-            app.save_to(Path(tmp) / "a.json")
+            # `save_to` 返回路径字符串，`current_path` 存的是 `Path` —— 别直接比
+            path = Path(str(app.save_to(Path(tmp) / "a.json")))
+            app.roll_check("ability", "str", rng=ScriptedRng([10]))
+            old_name = app.sheet["name"]
             app.new_character()
-            self.assertIsNone(app.current_path, "新建之后不该还认着旧文件")
-            self.assertEqual(app.overview.dice_log.row_count, 0)
+            self.assertEqual(app.mode, "wizard")
+            self.assertEqual(app.current_path, path, "进向导不该忘掉当前文件")
+            # 取消 → 旧角色还在，记录也还在
+            app.wizard.cancel()
+            self.assertEqual(app.mode, "sheet")
+            self.assertEqual(app.sheet["name"], old_name)
+            self.assertEqual(app.current_path, path)
+            self.assertEqual(app.overview.dice_log.row_count, 1)
 
     def test_load_clears_dice_log(self):
         """换人之后上一个人的掷骰记录留着只会误导。"""
@@ -856,6 +870,264 @@ class StatePanelTest(unittest.TestCase):
         expected = "成功" if 15 + con >= dc else "失败"
         self.assertIn(expected, app.overview.state_panel.dc_var.get())
         self.assertIn("专注", app.overview.dice_log.lines()[0])
+
+
+class WizardTest(unittest.TestCase):
+    """建卡向导（P7）：主窗口内换形态，8 步走完真的建出角色。
+
+    这里盯的是**接线**，不是规则 —— 「这只角色合不合法」由 `test_wizard.py`
+    在 api 层验。界面层的三个坑各一条：
+      1. 换形态时 hero / 标签页要真的让位并回得来（pack 顺序错了会错位）；
+      2. 校验不过要跳回出错那一步，**不许**在最后一步丢一句「有错误」；
+      3. 建卡途中保存会存下**上一个**角色 —— 必须拦住。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self):
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def _valid_draft(self):
+        draft = api.empty_draft()
+        draft.update(
+            class_id=FIGHTER, class_level=5,
+            subclass="dnd2024.subclass.fighter.champion",
+            species="dnd2024.species.dwarf",
+            background="dnd2024.background.soldier",
+            background_bonus={"str": 2, "con": 1},
+            scores={"str": 15, "dex": 14, "con": 13, "int": 12, "wis": 10, "cha": 8},
+            skills=["athletics", "perception"],
+            masteries=["dnd2024.item.weapon.longsword",
+                       "dnd2024.item.weapon.greataxe",
+                       "dnd2024.item.weapon.longbow",
+                       "dnd2024.item.weapon.warhammer"],
+            name_zh="铁砧",
+        )
+        return draft
+
+    def test_open_wizard_swaps_mode_and_hides_sheet(self):
+        app = self._app()
+        self.assertEqual(app.mode, "sheet")
+        app.open_wizard()
+        self.assertEqual(app.mode, "wizard")
+        self.assertIsNotNone(app.wizard)
+        # hero 与标签页都让位：向导过程中不该看见旧角色的血条
+        self.assertEqual(app.hero.winfo_manager(), "")
+        self.assertEqual(app.book.winfo_manager(), "")
+        app.open_wizard()                     # 重复调用不该建第二个向导
+        self.assertEqual(len([w for w in app.winfo_children()
+                              if w is app.wizard]), 1)
+
+    def test_cancel_restores_sheet(self):
+        app = self._app()
+        app.open_wizard()
+        app.wizard.cancel()
+        app.update_idletasks()
+        self.assertEqual(app.mode, "sheet")
+        self.assertIsNone(app.wizard)
+        self.assertEqual(app.hero.winfo_manager(), "pack")
+        self.assertEqual(app.book.winfo_manager(), "pack")
+        # pack 顺序：hero 必须先于 book，否则标签页会占满整条把 hero 挤到最后
+        children = app.pack_slaves()
+        self.assertLess(children.index(app.hero), children.index(app.book))
+        self.assertEqual(app.sheet["name"], app.sheet["name"])   # 角色没被换掉
+
+    def test_wizard_has_every_step_and_bottom_footer(self):
+        app = self._app()
+        app.open_wizard()
+        wizard = app.wizard
+        self.assertEqual(len(wizard.step_buttons), len(api.WIZARD_STEPS))
+        self.assertEqual(wizard.footer.pack_info().get("side"), "bottom")
+        for step in api.WIZARD_STEPS:
+            self.assertTrue(hasattr(wizard, "_step_%s" % step["key"]),
+                            "缺少界面构造器：%s" % step["key"])
+
+    def test_every_step_renders_without_error(self):
+        app = self._app()
+        app.open_wizard()
+        wizard = app.wizard
+        for index, step in enumerate(api.WIZARD_STEPS):
+            wizard.go(index)
+            app.update_idletasks()
+            self.assertEqual(wizard.current["key"], step["key"])
+            # 代码说得好听不如量一次：reqsize 必须是**真的算过**的（不是 1×1）
+            self.assertGreater(wizard.winfo_reqheight(), 100,
+                               "第 %d 步量出来是 1×1，说明没 update_idletasks" % (index + 1))
+
+    def test_finish_builds_character_with_origin(self):
+        app = self._app()
+        app.open_wizard()
+        app.wizard.draft.update(self._valid_draft())
+        app.wizard.go(len(api.WIZARD_STEPS) - 1)
+        app.update_idletasks()
+        app.wizard.finish()
+        app.update_idletasks()
+        self.assertEqual(app.mode, "sheet")
+        sheet = app.sheet
+        self.assertEqual(sheet["name"], "铁砧")
+        self.assertEqual(sheet["origin"]["species"]["name"], "矮人")
+        self.assertEqual(sheet["origin"]["background"]["name"], "士兵")
+        self.assertEqual(len(sheet["origin"]["masteries"]), 4)
+        # 矮人 +2 体质要真的算进 HP（背景加值赶在算 HP 之前那条约束的终点）
+        self.assertIn("已建卡", app.status.cget("text"))
+
+    def test_finish_jumps_to_first_broken_step(self):
+        app = self._app()
+        app.open_wizard()
+        draft = self._valid_draft()
+        draft["skills"] = []                  # 战士要选 2 项技能
+        app.wizard.draft.update(draft)
+        app.wizard.go(len(api.WIZARD_STEPS) - 1)
+        app.wizard.finish()
+        app.update_idletasks()
+        self.assertEqual(app.mode, "wizard", "校验没过却把卡建出来了")
+        self.assertEqual(app.wizard.current["key"], "skills")
+        self.assertTrue(app.wizard.status_var.get())
+        self.assertEqual(str(app.wizard.status.cget("foreground")), str(theme.WARN))
+
+    def test_save_blocked_while_building(self):
+        app = self._app()
+        app.open_wizard()
+        before = app.current_path
+        self.assertIsNone(app.save_dialog())
+        self.assertEqual(app.current_path, before)
+        self.assertIn("不能保存", app.status.cget("text"))
+        self.assertFalse(app.open_dialog())
+        self.assertIn("不能打开", app.status.cget("text"))
+
+    def test_changing_class_clears_class_bound_choices(self):
+        app = self._app()
+        app.open_wizard()
+        wizard = app.wizard
+        wizard.draft.update(self._valid_draft())
+        wizard.go(0)
+        wizard.class_pane.select_id("dnd2024.class.wizard")
+        wizard._on_class()
+        # 技能/精通/法术都是「本职业的表里选」，换职业后必须全部作废
+        self.assertEqual(wizard.draft["skills"], [])
+        self.assertEqual(wizard.draft["masteries"], [])
+        self.assertEqual(wizard.draft["cantrips"], {})
+        self.assertEqual(wizard.draft["subclass"], "")
+
+    def test_subclass_list_matches_class(self):
+        app = self._app()
+        app.open_wizard()
+        wizard = app.wizard
+        wizard.go(0)
+        wizard.class_pane.select_id("dnd2024.class.wizard")
+        wizard._on_class()
+        app.update_idletasks()
+        labels = list(wizard.subclass_box.cget("values"))
+        self.assertEqual(labels[0], "（暂无）")
+        self.assertGreater(len(labels), 1)
+        expected = [row["name"] for row in
+                    api.subclass_choices(self.bundle, "dnd2024.class.wizard", 1)["options"]]
+        self.assertEqual(labels[1:], expected)
+        # 选中项 → draft 里必须是内容 id，不是名字
+        wizard.subclass_box.current(1)
+        wizard._on_subclass()
+        self.assertTrue(wizard.draft["subclass"].startswith("dnd2024.subclass.wizard."))
+
+    def test_scores_step_offers_bonus_plans(self):
+        app = self._app()
+        app.open_wizard()
+        wizard = app.wizard
+        wizard.go(1)
+        wizard.background_pane.select_id("dnd2024.background.soldier")
+        wizard._on_background()
+        wizard.go(3)
+        app.update_idletasks()
+        plans = api.bonus_plans("dnd2024.background.soldier", self.bundle)
+        self.assertEqual(len(wizard._bonus_labels), len(plans))
+        wizard.bonus_index = 0
+        wizard._on_bonus()
+        self.assertEqual(wizard.draft["background_bonus"], plans[0])
+        # 加值必须真的出现在「加值后」那一行，否则玩家看不出选了有什么用
+        self.assertIn("加值后", wizard.cost_var.get())
+
+
+class LevelUpUiTest(unittest.TestCase):
+    """升级按钮（P7）：升一级、报清楚、还差选择就把向导开到那一步。
+
+    最容易出的错是**升级顺手把装备脱了 / 血回满**——那两件都真发生过
+    （见 `rules/build.py::rebuild_actor` 的注释）。所以这里量 AC 与当前 HP。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self, level=2, **kwargs):
+        params = dict(name_zh="铁砧", name_en="Anvil",
+                      species="dnd2024.species.dwarf",
+                      background="dnd2024.background.soldier",
+                      background_bonus={"str": 2, "con": 1},
+                      masteries=["dnd2024.item.weapon.longsword",
+                                 "dnd2024.item.weapon.greataxe"],
+                      extra_proficiencies=["skill.perception", "skill.insight"])
+        params.update(kwargs)
+        actor = api.new_character(self.bundle, FIGHTER, level, SCORES, **params)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_level_up_keeps_equipment_and_hp(self):
+        app = self._app()
+        app.gear.select_armor("dnd2024.item.armor.chain_mail")
+        self.assertTrue(app.gear.equip_armor())
+        app.actor.hp.current = 7
+        app.refresh()
+        before_ac = app.sheet["ac"]["total"]
+        before_max = app.sheet["hp"]["maximum"]
+        app.level_up()
+        app.update_idletasks()
+        self.assertEqual(app.sheet["ac"]["total"], before_ac, "升级把护甲脱了")
+        self.assertEqual(app.sheet["hp"]["current"], 7, "升级把血回满了")
+        self.assertGreater(app.sheet["hp"]["maximum"], before_max,
+                           "升级要涨生命上限（多一个生命骰）")
+        self.assertIn("升到 3 级", app.status.cget("text"))
+
+    def test_level_up_opens_wizard_at_missing_step(self):
+        app = self._app()
+        app.level_up()
+        app.update_idletasks()
+        self.assertEqual(app.mode, "wizard")
+        # 3 级战士：子职与第 3 件精通都还没选，向导该停在「职业」那一步
+        self.assertEqual(app.wizard.current["key"], "class")
+        self.assertTrue(app.wizard.editing, "改现有角色要走 apply_draft，不能造新角色")
+        self.assertIn("还差", app.status.cget("text"))
+        # 状态行说的是升级结果，不是向导自己的「第 N 步」
+        self.assertIn("生命上限", app.status.cget("text"))
+
+    def test_level_up_at_cap_warns_without_raising(self):
+        app = self._app(level=20)
+        app.level_up()
+        app.update_idletasks()
+        self.assertEqual(app.mode, "sheet")
+        self.assertIn("升不了级", app.status.cget("text"))
+        self.assertEqual(str(app.status.cget("foreground")), str(theme.WARN))
+
+    def test_edited_draft_returns_to_sheet_with_choices_applied(self):
+        app = self._app()
+        app.level_up()
+        wizard = app.wizard
+        wizard.draft["subclass"] = "dnd2024.subclass.fighter.champion"
+        wizard.draft["masteries"] = list(wizard.draft["masteries"]) + [
+            "dnd2024.item.weapon.longbow"]
+        wizard.go(len(api.WIZARD_STEPS) - 1)
+        app.update_idletasks()
+        wizard.finish()
+        app.update_idletasks()
+        self.assertEqual(app.mode, "sheet")
+        self.assertEqual([row["name"] for row in app.sheet["subclasses"]], ["冠军勇士"])
+        self.assertEqual(len(app.sheet["origin"]["masteries"]), 3)
+        # 改卡不清当前文件与掷骰记录 —— 改的还是同一个角色
+        self.assertIn("已改卡", app.status.cget("text"))
 
 
 if __name__ == "__main__":

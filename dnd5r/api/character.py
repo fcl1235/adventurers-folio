@@ -186,6 +186,8 @@ def new_character(
     background: str = "",
     background_bonus: Mapping[str, int] | None = None,
     masteries: Sequence[str] = (),
+    extra_proficiencies: Sequence[str] = (),
+    extra_expertise: Sequence[str] = (),
 ) -> Actor:
     """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。
 
@@ -218,6 +220,8 @@ def new_character(
         background=background,
         background_bonus=dict(background_bonus or {}),
         masteries=tuple(masteries),
+        extra_proficiencies=tuple(extra_proficiencies),
+        extra_expertise=tuple(extra_expertise),
     )
 
 
