@@ -17,6 +17,7 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from . import theme, widgets
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, KeyValue, ListPane, ScrollText, section
 
 MARK_CHOSEN = "✓ "
@@ -66,8 +67,7 @@ SIZE_ZH = {"tiny": "微型", "small": "小型", "medium": "中型",
            "large": "大型", "huge": "巨型", "gargantuan": "超巨型"}
 SPEED_ZH = {"walk": "步行", "climb": "攀爬", "swim": "游泳",
             "fly": "飞行", "burrow": "掘道"}
-SENSE_ZH = {"blindsight": "盲视", "darkvision": "黑暗视觉",
-            "tremorsense": "震颤感知", "truesight": "真实视觉"}
+SENSE_ZH = widgets.SENSE_ZH     # 与能力页共用一份，见 widgets.py
 DAMAGE_ZH = {
     "acid": "强酸", "bludgeoning": "钝击", "cold": "冷冻", "fire": "火焰",
     "force": "力场", "lightning": "闪电", "necrotic": "黯蚀", "piercing": "穿刺",
@@ -317,7 +317,7 @@ class SpellPage(ttk.Frame):
         self.class_row = ttk.Frame(head)
         self.class_row.pack(fill="x")
         ttk.Label(self.class_row, textvariable=self.class_var,
-                  font=("Microsoft YaHei UI", 10, "bold")).pack(side="left")
+                  font=(theme.UI_FONT, 10, "bold")).pack(side="left")
         # 兼职会有多块施法（各算各的 DC 与法位），给一对切换按钮；
         # 只有一个施法职业时不显示 —— 没得切还摆个按钮只是噪声。
         self.switch_row = ttk.Frame(head)
@@ -370,7 +370,7 @@ class SpellPage(ttk.Frame):
         # 结算花法术位；召唤类法术把生物真的放进遭遇战（app.encounter）。
         cast = ttk.Frame(right)
         cast.pack(fill="x", pady=(6, 0))
-        ttk.Label(cast, text="环级：", foreground="#666666").pack(side="left")
+        ttk.Label(cast, text="环级：", foreground=theme.DIM).pack(side="left")
         self.slot_var = tk.StringVar(value="")
         self.slot_box = ttk.Combobox(cast, textvariable=self.slot_var,
                                      state="readonly", width=6)
@@ -535,7 +535,7 @@ class SpellPage(ttk.Frame):
 
     def _status(self, text: str, error: bool = False) -> None:
         self.status_var.set(text)
-        self.status.configure(foreground="#a33" if error else "#666666")
+        self.status.configure(foreground=theme.WARN if error else theme.DIM)
 
     # --- 显示详情 ---------------------------------------------------------
     def _spell_options(self, kind: str) -> list[dict]:

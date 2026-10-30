@@ -23,6 +23,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import dnd5r.api as api                      # noqa: E402
+from apps.desktop import theme                    # noqa: E402
 from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
 from apps.desktop.pages_encounter import EncounterPage  # noqa: E402
@@ -159,6 +160,81 @@ def _check_overview_defense(label: str, page: OverviewPage, sheet: dict) -> list
     if rows.get("暴击") != "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)):
         problems.append("%s：概览暴击 %r 与 sheet 不一致" % (label, rows.get("暴击")))
     return problems
+
+
+def _check_appearance(label: str, app, page: OverviewPage, sheet: dict) -> list[str]:
+    """外观不是靠肉眼看的：颜色、属性卡、胶囊都要能被断言卡住。
+
+    这几条盯的是「人物卡回归」这件事本身 —— 主题没套上、属性卡没建、
+    或者哪个原生控件还留着浅底色，都会在这里红。
+    """
+    problems: list[str] = []
+    if str(app.cget("bg")) != theme.BG:
+        problems.append("%s：根窗口底色 %r，不是主题的 %r"
+                        % (label, app.cget("bg"), theme.BG))
+
+    # 六张属性卡：数量、调整值、分数、豁免都要与 sheet 一致
+    abilities = sheet.get("abilities") or {}
+    saves = sheet.get("saves") or {}
+    if len(page.ability_cards) != 6:
+        problems.append("%s：属性卡 %d 张，应为 6 张"
+                        % (label, len(page.ability_cards)))
+    for key, card in page.ability_cards.items():
+        row = abilities.get(key) or {}
+        want_mod = "%+d" % int(row.get("mod", 0))
+        if card.mod_text() != want_mod:
+            problems.append("%s：%s 调整值显示 %r，应为 %r"
+                            % (label, key, card.mod_text(), want_mod))
+        want_score = "数值 %d" % int(row.get("score", 0))
+        if card.score_text() != want_score:
+            problems.append("%s：%s 分数显示 %r，应为 %r"
+                            % (label, key, card.score_text(), want_score))
+        save = saves.get(key) or {}
+        if card.save_text() != "豁免 %+d" % int(save.get("total", 0)):
+            problems.append("%s：%s 豁免显示 %r 与 sheet 不一致"
+                            % (label, key, card.save_text()))
+        if card.save_proficient() != bool(save.get("proficient")):
+            problems.append("%s：%s 豁免熟练标记与 sheet 不一致" % (label, key))
+
+    # 5 个胶囊
+    perception = next((row["total"] for row in sheet.get("skills", ())
+                       if row.get("key") == "perception"), None)
+    expect = {
+        "ac": str((sheet.get("ac") or {}).get("total", "—")),
+        "initiative": "%+d" % (sheet.get("initiative") or {}).get("total", 0),
+        "speed": "%d" % (sheet.get("speed") or {}).get("walk", 0),
+        "prof": "%+d" % sheet.get("proficiency_bonus", 0),
+        "perception": "%+d" % perception if perception is not None else "—",
+    }
+    for key, want in expect.items():
+        chip = app.chips.get(key)
+        if chip is None:
+            problems.append("%s：缺少 %s 胶囊" % (label, key))
+        elif chip.value() != want:
+            problems.append("%s：%s 胶囊显示 %r，应为 %r"
+                            % (label, key, chip.value(), want))
+
+    # 残留浅底色检查：tk 原生控件不受 ttk 样式管，必须自己配
+    dark = {theme.BG, theme.PANEL, theme.CARD, theme.CARD2, theme.TXT_BG,
+            theme.MAP_BG}
+    for widget in _walk(app):
+        if widget.winfo_class() not in ("Canvas", "Text", "Listbox"):
+            continue
+        try:
+            background = str(widget.cget("background")).lower()
+        except Exception:
+            continue
+        if background not in {value.lower() for value in dark}:
+            problems.append("%s：%s 用的是浅底色 %s（暗色主题下会很刺眼）"
+                            % (label, widget.winfo_class(), background))
+    return problems
+
+
+def _walk(widget):
+    """递归遍历控件树（含 ttk 的容器）。"""
+    yield widget
+    for child in widget.winfo_children():
+        yield from _walk(child)
 
 
 def _check_pools(label: str, page: PowersPage) -> list[str]:
@@ -463,6 +539,7 @@ def main() -> int:
                         problems.append("攻击表需要 %d px，超过右栏预算 %d" % (need, COL_RIGHT))
                     problems.extend(_check_skills(label, page, app.sheet))
                     problems.extend(_check_overview_defense(label, page, app.sheet))
+                    problems.extend(_check_appearance(label, app, page, app.sheet))
                 elif isinstance(page, SpellPage):
                     problems.extend(_check_spells(label, page, stats))
                 elif isinstance(page, FeatPage):

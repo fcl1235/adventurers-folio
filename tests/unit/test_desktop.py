@@ -11,6 +11,7 @@ import unittest
 from pathlib import Path
 
 import dnd5r.api as api
+from apps.desktop import theme
 from apps.desktop.app import WINDOW_MIN, DesktopApp
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -368,6 +369,87 @@ class PowersPageTest(unittest.TestCase):
         self.assertEqual(str(page.use_button.cget("state")), "disabled")
         self.assertFalse(page.use_selected(), "被动能力不该能「使用」")
         self.assertIn("被动", page.status_var.get())
+
+
+class AppearanceTest(unittest.TestCase):
+    """「明确标识各项数值」这件事，也要能被断言卡住，不能靠肉眼验收。
+
+    这一组盯三件东西：暗色主题真的套上了、六张属性卡在且数字对、
+    原生控件没有遗留浅底色。任何一条破了，界面就会退回「一张表单」。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self, class_id=FIGHTER, level=5, **kwargs):
+        actor = api.new_character(self.bundle, class_id, level, SCORES, **kwargs)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_root_is_dark(self):
+        app = self._app()
+        self.assertEqual(str(app.cget("bg")), theme.BG)
+
+    def test_ability_cards_match_sheet(self):
+        """六张属性卡：调整值、分数、豁免都要与 sheet 一致。"""
+        app = self._app()
+        cards = app.overview.ability_cards
+        self.assertEqual(len(cards), 6)
+        for key, card in cards.items():
+            row = app.sheet["abilities"][key]
+            save = app.sheet["saves"][key]
+            self.assertEqual(card.mod_text(), "%+d" % row["mod"], key)
+            self.assertEqual(card.score_text(), "数值 %d" % row["score"], key)
+            self.assertEqual(card.save_text(), "豁免 %+d" % save["total"], key)
+            self.assertEqual(card.save_proficient(), bool(save["proficient"]), key)
+
+    def test_chips_match_sheet(self):
+        app = self._app()
+        perception = next(row["total"] for row in app.sheet["skills"]
+                          if row["key"] == "perception")
+        self.assertEqual(app.chips["ac"].value(), str(app.sheet["ac"]["total"]))
+        self.assertEqual(app.chips["initiative"].value(),
+                         "%+d" % app.sheet["initiative"]["total"])
+        self.assertEqual(app.chips["speed"].value(),
+                         "%d" % app.sheet["speed"]["walk"])
+        self.assertEqual(app.chips["prof"].value(),
+                         "%+d" % app.sheet["proficiency_bonus"])
+        self.assertEqual(app.chips["perception"].value(), "%+d" % perception)
+
+    def test_hp_color_follows_ratio(self):
+        app = self._app()
+        self.assertEqual(str(app.hp_value.cget("foreground")), theme.OK)
+        app.actor.hp.current = 1
+        app.refresh()
+        self.assertEqual(str(app.hp_value.cget("foreground")), theme.WARN)
+
+    def test_no_light_backgrounds_left(self):
+        """ttk 样式管不到 tk 原生控件：它们必须自己配底色。"""
+        app = self._app()
+        dark = {value.lower() for value in
+                (theme.BG, theme.PANEL, theme.CARD, theme.CARD2, theme.TXT_BG,
+                 theme.MAP_BG)}
+        for widget in _walk(app):
+            if widget.winfo_class() not in ("Canvas", "Text", "Listbox"):
+                continue
+            background = str(widget.cget("background")).lower()
+            self.assertIn(background, dark,
+                          "%s 还是浅底色 %s" % (widget.winfo_class(), background))
+
+    def test_hit_dice_is_readable(self):
+        """生命骰是一组池，直接把列表塞进 Label 会打出 `[{'id': ...}]`。"""
+        app = self._app()
+        text = app.overview.fight.value_at(8)
+        self.assertNotIn("{", text)
+        self.assertIn("战士", text)
+
+
+def _walk(widget):
+    yield widget
+    for child in widget.winfo_children():
+        yield from _walk(child)
 
 
 if __name__ == "__main__":

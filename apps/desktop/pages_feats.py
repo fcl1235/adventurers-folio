@@ -16,6 +16,7 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from . import theme
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, ListPane, ScrollText, section
 
 ABILITY_ZH = {"str": "力量", "dex": "敏捷", "con": "体质",
@@ -82,7 +83,7 @@ class FeatPage(ttk.Frame):
         listed = section(left, "专长")
         listed.pack(fill="both", expand=True)
         ttk.Label(listed, text="✓ 已计入　◆ 改掷骰　▶ 用时算　△ 待手动　□ 仅文字",
-                  foreground="#666666").pack(anchor="w")
+                  foreground=theme.DIM).pack(anchor="w")
         self.feats = ListPane(listed, height=20, width=28)
         self.feats.pack(fill="both", expand=True, pady=(2, 0))
         self.feats.list.bind("<<ListboxSelect>>", lambda _e: self._select_feat())
@@ -261,7 +262,7 @@ class FeatPage(ttk.Frame):
 
     def _status(self, text: str, error: bool = False) -> None:
         self.status_var.set(text)
-        self.status.configure(foreground="#a33" if error else "#666666")
+        self.status.configure(foreground=theme.WARN if error else theme.DIM)
 
     # --- 写数据 -----------------------------------------------------------
     def add_pick(self) -> bool:

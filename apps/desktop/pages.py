@@ -10,7 +10,9 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
-from .widgets import COL_LEFT, COL_MID, COL_RIGHT, GridTable, KeyValue, section
+from .cards import AbilityCard
+from .widgets import (CARD_LEFT, COL_MID, COL_RIGHT, GridTable, KeyValue,
+                      ScrollFrame, hit_dice_text, section, sense_text)
 
 ABILITY_ORDER = ("str", "dex", "con", "int", "wis", "cha")
 # 列宽是**字符数**（ttk.Label 的单位）。像素预算由布局审计现量 reqwidth 得出，
@@ -36,14 +38,18 @@ def _mode_mark(row: dict) -> str:
 
 
 class OverviewPage(ttk.Frame):
-    """概览：六属性 / 豁免 / 18 技能 / 战斗数值。"""
+    """概览：六属性卡 / 18 技能 / 战斗数值与攻击。
+
+    左栏是**六张属性卡**（2 列 × 3 行），不是一张文本表：调整值 18pt 金色是卡面主角，
+    分数与豁免是配角。旧程序就是这样，一眼能读出「我力量 +4」。
+    """
 
     def __init__(self, master) -> None:
         super().__init__(master, padding=(6, 4))
         self._build()
 
     def _build(self) -> None:
-        left = ttk.Frame(self, width=COL_LEFT)
+        left = ttk.Frame(self, width=CARD_LEFT)
         mid = ttk.Frame(self, width=COL_MID)
         right = ttk.Frame(self, width=COL_RIGHT)
         left.grid(row=0, column=0, sticky="nsw")
@@ -52,13 +58,22 @@ class OverviewPage(ttk.Frame):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
-        # --- 左：属性 + 豁免 -------------------------------------------------
-        self.abilities = KeyValue(left, rows=6)
-        self.abilities.pack(fill="x", pady=(0, 8))
-        saves = section(left, "豁免")
-        saves.pack(fill="x")
-        self.saves = KeyValue(saves, rows=6)
-        self.saves.pack(fill="x")
+        # --- 左：六张属性卡 ------------------------------------------------
+        # 宽度靠 `grid columnconfigure(minsize=148, weight=1)` 撑 —— `ttk.Frame(width=)`
+        # **不约束 reqsize**（实测概览常量合计 1176，页面 req 只有 793），
+        # 写 width= 是撑不出 320 的。
+        box = section(left, "属性")
+        box.pack(fill="x")
+        grid = ttk.Frame(box)
+        grid.pack(fill="x")
+        self.ability_cards: dict[str, AbilityCard] = {}
+        for index, key in enumerate(ABILITY_ORDER):
+            card = AbilityCard(grid, key, ABILITY_ZH[key])
+            card.grid(row=index // 2, column=index % 2,
+                      sticky="nsew", padx=4, pady=3)
+            self.ability_cards[key] = card
+        for column in (0, 1):
+            grid.columnconfigure(column, minsize=148, weight=1)
 
         # --- 中：技能 + 熟练工具 ---------------------------------------------
         # 工具**只列熟练的**，且用一行折行文本而不是小表：全 37 件铺在卡上会把
@@ -77,33 +92,38 @@ class OverviewPage(ttk.Frame):
         self.skills = GridTable(skills, SKILL_COLUMNS, rows=18)
         self.skills.pack(fill="both", expand=True)
 
-        # --- 右：战斗数值 ---------------------------------------------------
-        fight = section(right, "战斗")
+        # --- 右：战斗数值 + 攻击（整体可滚动）--------------------------------
+        # 定高滚动容器：内容长了就滚，**不会把页面 reqheight 顶出去**。
+        # 以前这里是两条会长的竖排，攻击表一多就把整页顶破预算。
+        scroll = ScrollFrame(right, height=400, width=COL_RIGHT)
+        scroll.pack(fill="both", expand=True)
+        self.right_scroll = scroll
+        body = scroll.body
+
+        fight = section(body, "战斗")
         fight.pack(fill="x")
         # 抗性/感官以前全仓库零显示点（§P6 方案里点名过的缺口），一并补在这里
-        self.fight = KeyValue(fight, rows=8)
+        self.fight = KeyValue(fight, rows=10)
         self.fight.pack(fill="x", pady=(0, 6))
 
-        attacks = section(right, "攻击")
-        attacks.pack(fill="both", expand=True, pady=(6, 0))
+        attacks = section(body, "攻击")
+        attacks.pack(fill="x", pady=(6, 0))
         self.attacks = GridTable(attacks, ATTACK_COLUMNS, rows=8)
-        self.attacks.pack(fill="both", expand=True)
+        self.attacks.pack(fill="x")
 
     # --- 数据 -------------------------------------------------------------
     def refresh(self, sheet: dict) -> None:
         abilities = sheet.get("abilities") or {}
-        for index, key in enumerate(ABILITY_ORDER):
-            row = abilities.get(key) or {}
-            self.abilities.set_row(
-                index, ABILITY_ZH[key],
-                "%d (%s)" % (row.get("score", 0), _signed(row.get("mod", 0))))
-
         saves = sheet.get("saves") or {}
-        for index, key in enumerate(ABILITY_ORDER):
-            row = saves.get(key) or {}
-            mark = "*" if row.get("proficient") else ""
-            self.saves.set_row(index, "%s%s" % (ABILITY_ZH[key], mark),
-                               _signed(row.get("total", 0)))
+        for key in ABILITY_ORDER:
+            row = abilities.get(key) or {}
+            save = saves.get(key) or {}
+            self.ability_cards[key].set_values(
+                mod=int(row.get("mod", 0)),
+                score=int(row.get("score", 0)),
+                save=int(save.get("total", 0)),
+                proficient=bool(save.get("proficient")),
+            )
 
         self.refresh_skills(sheet)
         self.refresh_tools(sheet)
@@ -130,6 +150,7 @@ class OverviewPage(ttk.Frame):
                                      for row in known))
 
     def refresh_fight(self, sheet: dict) -> None:
+        """0–7 行的**语义冻结**（测试按索引读，别挪）：AC/先攻/HP/速度/熟练/抗性/感官/暴击。"""
         hp = sheet.get("hp") or {}
         speed = (sheet.get("speed") or {}).get("walk", 0)
         init = sheet.get("initiative") or {}
@@ -141,11 +162,12 @@ class OverviewPage(ttk.Frame):
         self.fight.set_row(4, "熟练", _signed(sheet.get("proficiency_bonus", 0)))
         resist = sheet.get("resistances") or []
         self.fight.set_row(5, "抗性", "、".join(resist) if resist else "—")
-        senses = sheet.get("senses") or {}
-        self.fight.set_row(6, "感官", "、".join("%s %d" % (key, value)
-                                               for key, value in sorted(senses.items()))
-                           or "—")
+        self.fight.set_row(6, "感官", sense_text(sheet.get("senses") or {}) or "—")
         self.fight.set_row(7, "暴击", "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)))
+        # 8–9 是新增的两行：hero 上没地方放，但也不能不显示。
+        self.fight.set_row(8, "生命骰",
+                           hit_dice_text(hp.get("hit_dice"), sheet.get("classes")) or "—")
+        self.fight.set_row(9, "攻击次数", str(sheet.get("attacks_per_action", "—")))
 
     def refresh_attacks(self, sheet: dict) -> None:
         rows = []

@@ -28,6 +28,7 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from . import theme
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, ListPane, ScrollText, section
 
 # 一格 5 尺。10 × 8 格 = 50 × 40 尺，够放一场小型遭遇战，也不会把页面顶出预算。
@@ -105,7 +106,7 @@ class EncounterPage(ttk.Frame):
 
         self.hint_var = tk.StringVar(
             value="清单按 CR 排序。同一只加两次会是「狼」与「狼 2」，各有各的血条。")
-        ttk.Label(left, textvariable=self.hint_var, foreground="#666666",
+        ttk.Label(left, textvariable=self.hint_var, foreground=theme.DIM,
                   wraplength=COL_LEFT - 20, justify="left").pack(anchor="w", pady=(6, 0))
 
     def _build_order(self, mid) -> None:
@@ -139,8 +140,8 @@ class EncounterPage(ttk.Frame):
                 side="left", padx=(0, 8))
 
         self.canvas = tk.Canvas(box, width=COLS * CELL, height=ROWS * CELL,
-                                background="#f7f7f4", highlightthickness=1,
-                                highlightbackground="#d8d6ce")
+                                background=theme.MAP_BG, highlightthickness=1,
+                                highlightbackground=theme.MAP_BORDER)
         self.canvas.pack(anchor="w", pady=(4, 0))
         self.canvas.bind("<Button-1>", self._on_canvas_click)
 
@@ -149,14 +150,14 @@ class EncounterPage(ttk.Frame):
         box.pack(fill="x")
         self.attacker_var = tk.StringVar(value="出手的人：（先攻条里选）")
         ttk.Label(box, textvariable=self.attacker_var, wraplength=COL_RIGHT - 20,
-                  foreground="#333333").pack(anchor="w")
+                  foreground=theme.DIM).pack(anchor="w")
 
-        ttk.Label(box, text="目标：", foreground="#666666").pack(anchor="w", pady=(4, 0))
+        ttk.Label(box, text="目标：", foreground=theme.DIM).pack(anchor="w", pady=(4, 0))
         self.target_pane = ListPane(box, height=4, width=30)
         self.target_pane.pack(fill="x")
         self.target_pane.list.bind("<<ListboxSelect>>", lambda _e: self._select_target())
 
-        ttk.Label(box, text="动作用哪一条：", foreground="#666666").pack(anchor="w", pady=(4, 0))
+        ttk.Label(box, text="动作用哪一条：", foreground=theme.DIM).pack(anchor="w", pady=(4, 0))
         self.action_pane = ListPane(box, height=4, width=30)
         self.action_pane.pack(fill="x")
         self.action_pane.list.bind("<<ListboxSelect>>", lambda _e: self._select_action())
@@ -166,7 +167,7 @@ class EncounterPage(ttk.Frame):
         # 玩家武器攻击按角色自己的状态判定（选了也会提示没生效）。
         mode_row = ttk.Frame(box)
         mode_row.pack(fill="x", pady=(4, 0))
-        ttk.Label(mode_row, text="掷骰模式：", foreground="#666666").pack(side="left")
+        ttk.Label(mode_row, text="掷骰模式：", foreground=theme.DIM).pack(side="left")
         self.mode_var = tk.StringVar(value="自动")
         ttk.Combobox(mode_row, textvariable=self.mode_var, state="readonly",
                      values=("自动", "优势", "劣势", "平掷"),
@@ -483,10 +484,10 @@ class EncounterPage(ttk.Frame):
         self.canvas.delete("all")
         for col in range(COLS + 1):
             self.canvas.create_line(col * CELL, 0, col * CELL, ROWS * CELL,
-                                    fill="#e3e1d9")
+                                    fill=theme.MAP_GRID)
         for row in range(ROWS + 1):
             self.canvas.create_line(0, row * CELL, COLS * CELL, row * CELL,
-                                    fill="#e3e1d9")
+                                    fill=theme.MAP_GRID)
         view = self._view()
         for index, row in enumerate(view.get("order") or []):
             cx = int(row["x"]) * CELL + CELL // 2
@@ -494,18 +495,18 @@ class EncounterPage(ttk.Frame):
             if not (0 <= cx < COLS * CELL and 0 <= cy < ROWS * CELL):
                 continue
             if row["id"] == self._attacker_id:
-                fill, outline = "#cfe3fb", "#1d5fa8"
+                fill, outline = theme.MAP_PC_FILL, theme.MAP_PC_EDGE
             elif row.get("active"):
-                fill, outline = "#f6d6d3", "#a33"
+                fill, outline = theme.MAP_FOE_FILL, theme.MAP_FOE_EDGE
             else:
-                fill, outline = "#eceae1", "#8a8880"
+                fill, outline = theme.MAP_NEUTRAL_FILL, theme.MAP_NEUTRAL_EDGE
             if row.get("down"):
-                fill, outline = "#dddddd", "#999999"
+                fill, outline = theme.MAP_EMPTY_FILL, theme.MAP_EMPTY_EDGE
             self.canvas.create_oval(cx - 15, cy - 15, cx + 15, cy + 15,
                                     fill=fill, outline=outline, width=2)
             # 同格的人叠在一起时错开 2px，至少看得出「不止一个人」
             self.canvas.create_text(cx, cy + index % 3, text=row["label"][:2],
-                                    fill="#2c2c2a", font=("Microsoft YaHei UI", 8))
+                                    fill=theme.MAP_TEXT, font=(theme.UI_FONT, 8))
 
     # --- 出手 -------------------------------------------------------------
     def roll(self, apply: bool, rng=None) -> bool:
@@ -558,7 +559,7 @@ class EncounterPage(ttk.Frame):
 
     def _say(self, text: str, error: bool = False) -> None:
         self.status_var.set(text)
-        self.status.configure(foreground="#a33" if error else "#666666")
+        self.status.configure(foreground=theme.WARN if error else theme.DIM)
 
 
 def _attack_rows(actions: list[dict]) -> list[dict]:

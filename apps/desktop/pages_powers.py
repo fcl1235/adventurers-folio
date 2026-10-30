@@ -19,12 +19,12 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from . import theme, widgets
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, KeyValue, ListPane, ScrollText, section
 
 REFRESH_ZH = {"long_rest": "长休恢复", "short_rest": "短休恢复",
               "initiative": "遭遇开始", "never": "不自动恢复", "turn": "每回合"}
-SENSE_ZH = {"darkvision": "黑暗视觉", "blindsight": "盲视",
-            "tremorsense": "震颤感知", "truesight": "真实视觉"}
+SENSE_ZH = widgets.SENSE_ZH     # 与法术页共用一份，见 widgets.py
 STATUS_MARK = {"counted": "✓", "dice": "◆", "active": "▶",
                "onhit": "◈", "manual": "△", "text": "□"}
 STATUS_ZH = {"counted": "已计入数值", "dice": "改掷骰", "active": "使用时结算",
@@ -71,7 +71,7 @@ class PowersPage(ttk.Frame):
         listed = section(mid, "能力")
         listed.pack(fill="both", expand=True)
         ttk.Label(listed, text="✓ 已计入　◆ 改掷骰　▶ 用时算　△ 待手动　□ 仅文字",
-                  foreground="#666666").pack(anchor="w")
+                  foreground=theme.DIM).pack(anchor="w")
         self.powers = ListPane(listed, height=10, width=52)
         self.powers.pack(fill="both", expand=True, pady=(2, 0))
         self.powers.list.bind("<<ListboxSelect>>", lambda _e: self._select_power())
@@ -198,7 +198,7 @@ class PowersPage(ttk.Frame):
 
     def _status(self, text: str, error: bool = False) -> None:
         self.status_var.set(text)
-        self.status.configure(foreground="#a33" if error else "#666666")
+        self.status.configure(foreground=theme.WARN if error else theme.DIM)
 
     # --- 选择行（P15）------------------------------------------------------
     def _fill_choice(self, row: dict) -> None:
@@ -214,7 +214,7 @@ class PowersPage(ttk.Frame):
         if "token" in channels:
             self._choice_kind = "target_id"
             ttk.Label(self.choice_frame, text="给谁：",
-                      foreground="#666666").pack(side="left")
+                      foreground=theme.DIM).pack(side="left")
             encounter = self.app.encounter
             if encounter is None:
                 ttk.Label(self.choice_frame, text="先去战斗页开战（要指认场上的人）",
@@ -238,7 +238,7 @@ class PowersPage(ttk.Frame):
         elif "exchange" in channels:
             self._choice_kind = "slot_level"
             ttk.Label(self.choice_frame, text="环级：",
-                      foreground="#666666").pack(side="left")
+                      foreground=theme.DIM).pack(side="left")
             values = ["%d 环" % level for level in range(1, 10)]
             box = ttk.Combobox(self.choice_frame, textvariable=self.choice_var,
                                state="readonly", width=8, values=values)

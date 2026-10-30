@@ -3,12 +3,17 @@
 
 所有数字都来自 `dnd5r.api.character_sheet()` 的返回值 —— 界面这一层
 **不查表、不算加值**（约束 C3/C5）。要加一个新数字，先让它出现在 sheet 里。
+
+配色一律取 `theme` 里的语义常量，**这个文件里不许出现十六进制色值**：
+以前 44 处硬编码颜色散在五个页面里，改一次主题要满仓库找。
 """
 
 from __future__ import annotations
 
 import tkinter as tk
 from tkinter import ttk
+
+from . import theme
 
 # 布局铁律（吃过两次亏，见 README）：
 #   1. 底部栏必须先 pack(side="bottom")，再 pack 伸展的内容 —— 否则窄屏时整条消失
@@ -18,6 +23,38 @@ COL_LEFT = 250
 COL_MID = 610
 COL_RIGHT = 300
 ROW_HEIGHT = 22
+# 概览页左栏专用：六张属性卡要 2 列 × 148px，250 放不下。
+# 共享的 COL_LEFT 不动 —— pages_encounter.py 用 COL_LEFT-20 算换行宽度。
+CARD_LEFT = 320
+
+# 「感官」键的中文名。三个页面都要用，以前抄了两份（pages_powers / pages_spells），
+# 抄两份的下场是改一处漏一处。
+SENSE_ZH = {"darkvision": "黑暗视觉", "blindsight": "盲视",
+            "tremorsense": "震颤感知", "truesight": "真实视觉"}
+
+
+def sense_text(senses: dict) -> str:
+    """`{darkvision: 60}` → 「黑暗视觉 60 尺」。带单位，别让人猜。"""
+    return "、".join("%s %d 尺" % (SENSE_ZH.get(key, key), value)
+                    for key, value in (senses or {}).items())
+
+
+def hit_dice_text(pools, classes) -> str:
+    """生命骰池 → 「战士 5/5」。
+
+    `sheet["hp"]["hit_dice"]` 是 `[{"id": "hit_dice.<职业 id>", "left": 5, "max": 5}]`，
+    直接把列表塞进 Label 会打出 `[{'id': ...}]` 这种东西（第一版就是这样）。
+    职业名从 `sheet["classes"]` 里对，对不上就退回 id 末段。
+    """
+    names = {row.get("id"): row.get("name") for row in (classes or ())}
+    parts = []
+    for pool in pools or ():
+        ident = str(pool.get("id", ""))
+        class_id = ident[len("hit_dice."):] if ident.startswith("hit_dice.") else ident
+        label = names.get(class_id) or class_id.rsplit(".", 1)[-1]
+        parts.append("%s %s/%s" % (label, pool.get("left"), pool.get("max")))
+    return "、".join(parts)
+
 
 
 class ScrollText(ttk.Frame):
@@ -26,7 +63,7 @@ class ScrollText(ttk.Frame):
     def __init__(self, master, height: int = 6, width: int = 30) -> None:
         super().__init__(master)
         self.text = tk.Text(self, height=height, width=width, wrap="word",
-                            relief="flat", borderwidth=0, padx=6, pady=4)
+                            padx=6, pady=4, **theme.TEXT_STYLE)
         bar = ttk.Scrollbar(self, orient="vertical", command=self.text.yview)
         self.text.configure(yscrollcommand=bar.set)
         self.text.pack(side="left", fill="both", expand=True)
@@ -41,16 +78,21 @@ class ScrollText(ttk.Frame):
 
 
 class KeyValue(ttk.Frame):
-    """左标签右数值的竖排小表（AC / 先攻 / HP 这类）。"""
+    """左标签右数值的竖排小表（AC / 先攻 / HP 这类）。
+
+    值用 12pt 粗体：这张表出现在概览右栏，是「扫一眼读数字」的场景，
+    与标签同字号同粗细时数字会被文字淹没。
+    """
 
     def __init__(self, master, rows: int = 4) -> None:
         super().__init__(master)
         self._values: list[tk.StringVar] = []
         self._labels: list[ttk.Label] = []
         for index in range(rows):
-            caption = ttk.Label(self, width=8)
+            caption = ttk.Label(self, width=8, style="Dim.TLabel")
             value = tk.StringVar(value="")
-            shown = ttk.Label(self, textvariable=value, anchor="e")
+            shown = ttk.Label(self, textvariable=value, anchor="e",
+                              font=(theme.UI_FONT, 11, "bold"))
             caption.grid(row=index, column=0, sticky="w", pady=1)
             shown.grid(row=index, column=1, sticky="e", pady=1)
             self.columnconfigure(1, weight=1)
@@ -88,7 +130,7 @@ class GridTable(ttk.Frame):
         self._cells: list[list[ttk.Label]] = []
         for index, (title, width) in enumerate(columns):
             ttk.Label(self, text=title, width=width, anchor="w",
-                      font=("Microsoft YaHei UI", 9, "bold")).grid(
+                      font=(theme.UI_FONT, 9, "bold")).grid(
                 row=0, column=index, sticky="w", padx=(0, 6))
         for row in range(rows):
             line = []
@@ -103,17 +145,12 @@ class GridTable(ttk.Frame):
         for index, line in enumerate(self._cells):
             if index < len(rows):
                 cells, tag = rows[index]
+                color = theme.TAG_COLORS.get(tag, theme.TEXT)
                 for cell, text in zip(line, cells):
-                    cell.configure(text=str(text))
-                    if tag == "prof":
-                        cell.configure(foreground="#1d5fa8")
-                    elif tag == "expert":
-                        cell.configure(foreground="#0f5132")
-                    else:
-                        cell.configure(foreground="#222222")
+                    cell.configure(text=str(text), foreground=color)
             else:
                 for cell in line:
-                    cell.configure(text="", foreground="#222222")
+                    cell.configure(text="", foreground=theme.TEXT)
 
     def text(self, row: int, column: int) -> str:
         return self._cells[row][column].cget("text")
@@ -129,9 +166,9 @@ class ListPane(ttk.Frame):
 
     def __init__(self, master, height: int = 10, width: int = 40) -> None:
         super().__init__(master)
-        self.list = tk.Listbox(self, height=height, width=width, exportselection=False,
-                               activestyle="none", relief="flat",
-                               highlightthickness=0, borderwidth=0)
+        self.list = tk.Listbox(self, height=height, width=width,
+                               exportselection=False, borderwidth=0,
+                               **theme.LISTBOX_STYLE)
         bar = ttk.Scrollbar(self, orient="vertical", command=self.list.yview)
         self.list.configure(yscrollcommand=bar.set)
         self.list.pack(side="left", fill="both", expand=True)
@@ -172,14 +209,77 @@ class ListPane(ttk.Frame):
         return int(self.list.size())
 
 
+class ScrollFrame(ttk.Frame):
+    """定高竖向滚动容器：内容放进 `self.body`。
+
+    高度**由构造参数定死**，不跟着内容长 —— 这样它才能塞进高度预算里。
+
+    `scrollregion` 用 `after_idle` 合并：旧程序是每建一个子控件就 bind 一次
+    `<Configure>` 重设 scrollregion，20 个控件就是 20 次全量重排，
+    表现是「拖动时一块一块慢慢刷出来」。合并之后一次重画只设一次。
+    """
+
+    def __init__(self, master, height: int = 320, width: int | None = None) -> None:
+        super().__init__(master)
+        # 画布**必须给 width**：不给的话它会用自己的默认宽（约 395px），
+        # 把整个右栏顶宽 95px，页面横向预算就白算了。
+        self.canvas = tk.Canvas(self, height=height, width=width or 300, bd=0,
+                                highlightthickness=1,
+                                highlightbackground=theme.BORDER,
+                                background=theme.BG)
+        self.bar = ttk.Scrollbar(self, orient="vertical",
+                                 command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.bar.set)
+        self.bar.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.body = ttk.Frame(self.canvas, style="TFrame")
+        self._win = self.canvas.create_window((0, 0), window=self.body, anchor="nw")
+        self.body.bind("<Configure>", self._schedule_sync)
+        self.canvas.bind("<Configure>", self._sync_width)
+        self.canvas.bind("<Enter>", self._wheel_on)
+        self.canvas.bind("<Leave>", self._wheel_off)
+        self.body.bind("<Enter>", self._wheel_on)
+        self.body.bind("<Leave>", self._wheel_off)
+        self._pending: str | None = None
+
+    def _schedule_sync(self, _event=None) -> None:
+        if self._pending is not None:
+            return
+        self._pending = self.after_idle(self._sync_scroll)
+
+    def _sync_scroll(self) -> None:
+        self._pending = None
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def _sync_width(self, event) -> None:
+        self.canvas.itemconfigure(self._win, width=event.width)
+
+    def _wheel_on(self, _event=None) -> None:
+        self.canvas.bind_all("<MouseWheel>", self._on_wheel)
+
+    def _wheel_off(self, _event=None) -> None:
+        self.canvas.unbind_all("<MouseWheel>")
+
+    def _on_wheel(self, event) -> None:
+        first, last = self.canvas.yview()
+        if first <= 0.0 and last >= 1.0:      # 没得滚就别吞事件
+            return
+        step = -1 * (event.delta // 120) if event.delta else 0
+        if step:
+            self.canvas.yview_scroll(step, "units")
+
+    def to_top(self) -> None:
+        self.canvas.yview_moveto(0)
+
+
 def section(master, title: str, note: str = "") -> ttk.LabelFrame:
     """带标题的分区框；note 是给玩家的一句说明（不是给我们自己看的注释）。"""
     frame = ttk.LabelFrame(master, text=title, padding=(8, 4))
     if note:
-        ttk.Label(frame, text=note, foreground="#666666").pack(anchor="w")
+        ttk.Label(frame, text=note, style="Dim.TLabel").pack(anchor="w")
     return frame
 
 
 def hint_bar(master) -> ttk.Label:
     """底部提示行。**必须 side="bottom" pack**，否则内容一挤就被裁掉。"""
-    return ttk.Label(master, anchor="w", foreground="#666666")
+    return ttk.Label(master, anchor="w", style="Dim.TLabel")
