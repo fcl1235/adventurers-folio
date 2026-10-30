@@ -1,0 +1,16 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 不含这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.scribe
+name: {zh: 抄写员, en: Scribe}
+summary:
+  zh: |-
+    抄、校、归档：你眼里的错字比别人的多一倍。
+  en: |-
+    Copy, collate, file: you spot twice as many errors as anyone else.
+abilities: [dex, int, wis]
+origin_feat: dnd2024.feat.skilled
+skills: [investigation, perception]
+tool: calligraphers_supplies
+tool_label: {zh: 书法工具, en: Calligrapher's Supplies}

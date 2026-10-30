@@ -30,7 +30,9 @@ from .morph import CrAxis, eligible_forms
 from .powers import Power
 from .progression import proficiency_bonus
 from .spellcasting import check_spell_picks
-from .scores import apply_score_bonuses, merge_bonuses, score_bonuses
+from .scores import ScoreBonus, apply_score_bonuses, merge_bonuses, score_bonuses
+# 背景加值的合法形态（+2/+1 或 +1/+1/+1）在 abilities 里判，这里只负责落成通道
+from .abilities import background_bonus as resolve_background_bonus
 
 
 def _ref_map(
@@ -187,6 +189,10 @@ def build_actor(
     prepared: Mapping[str, tuple[str, ...]] | None = None,
     extra_classes: "Sequence[tuple[str, int]]" = (),
     extra_subclasses: "Sequence[str]" = (),
+    species: str = "",
+    background: str = "",
+    background_bonus: Mapping[str, int] | None = None,
+    masteries: "Sequence[str]" = (),
 ) -> Actor:
     """建角色（支持兼职）。事实的拼装：职业等级、属性、熟练、资源池、HP 上限。
 
@@ -204,6 +210,14 @@ def build_actor(
 
     专长与子职一样是**玩家选择**：`feats` 是内容 id，`choices` 是「选了还要选什么」。
     选不完不报错，留在 `feat_picks().pending` 给界面当待办；选错当场抛 RuleError。
+
+    物种与背景（2024 的「出身」）：
+      * 物种特性与专长走**同一套 Power 原语**，所以只有「并进 all_powers」这一步，
+        黑暗视觉 / 抗性 / 每级 HP / 速度之后全走既有管道（不另造装配路径）。
+      * **属性加值跟着背景走**，不再跟着物种。加值形态由玩家选（+2 与 +1，或三项各 +1），
+        合法性在 `rules/abilities.background_bonus` 判。它必须赶在算 HP **之前**落地 ——
+        否则加在体质上的那两点不会进 HP 上限，20 级能差 10 点。
+      * 背景的起始专长并入 `feats`（去重：与玩家自选同一个专长时算一个）。
     """
     class_def: ClassDef = bundle.class_def(class_id)
     level = as_class_level(class_level)
@@ -256,6 +270,19 @@ def build_actor(
     # 专长前提看**总等级**（兼职也算）：19 级恩惠不会因为某个职业只有 3 级就拒绝
     total = TotalLevel(sum(int(lv) for _def, lv in all_defs))
     class_ids = tuple(def_.id for def_, _lv in all_defs)
+
+    # --- 出身：物种与背景 ---------------------------------------------
+    species_def = bundle.species_def(species) if species else None
+    origin_def = bundle.background(background) if background else None
+    if species_def is not None:
+        # 物种特性按**总等级**解锁（3 级天界启示、5 级龙族飞行在 1 级时就属于这个物种）。
+        # 这里不能借 `powers_at_level`：它吃的是 ClassLevel（C8），物种没有职业等级。
+        all_powers += tuple(power for power in species_def.powers
+                            if int(power.level) <= int(total) and power not in all_powers)
+    if origin_def is not None and origin_def.origin_feat:
+        # 起始专长与玩家自选走同一张清单。去重不是洁癖：`repeats` 按登记次数算，
+        # 同一个专长记两次会被当成「可重复选取」而多给一轮选择。
+        chosen_feats = tuple(dict.fromkeys((origin_def.origin_feat,) + chosen_feats))
     feat_defs_ = _check_feats(bundle, chosen_feats, total, class_ids, scores)
     feat_powers = tuple(p for feat in feat_defs_ for p in feat.powers)
     all_powers = all_powers + tuple(p for p in feat_powers if p not in all_powers)
@@ -268,7 +295,14 @@ def build_actor(
     problems = check_feat_choices(bundle, feat_defs_, picked_choices, repeats)
     if problems:
         raise RuleError("专长选择有问题：" + "；".join(problems))
-    bonuses = merge_bonuses(score_bonuses(all_powers), picks.score)
+    # 背景加值：与专长加值**平行的第二条通道**（它不属于任何专长，也不是内容驱动），
+    # 一起 merge 再重排，才能保证「先窄后宽」两条来源都照顾到。
+    origin_bonus: tuple[ScoreBonus, ...] = ()
+    if origin_def is not None:
+        filled = resolve_background_bonus(origin_def.abilities, background_bonus or {})
+        origin_bonus = tuple(ScoreBonus(ability=key, amount=amount, source="背景加值")
+                             for key, amount in sorted(filled.items()))
+    bonuses = merge_bonuses(score_bonuses(all_powers), picks.score, origin_bonus)
     abilities = apply_score_bonuses(Abilities.of(**dict(scores)), bonuses)
 
     # 兼职前置：按加值后的当前属性判（§12.4 的口径写在 multiclass.yaml 头部）
@@ -283,7 +317,15 @@ def build_actor(
 
     con_mod = abilities.mod("con")
     name = Text.of(name_zh, name_en)
-    statblock = Statblock(name=name, abilities=abilities)
+    # 物种给速度与体型（巨人 35 尺、侏儒/半身人是 Small）。**多选项默认取第一项**：
+    # 阿斯莫/人类/提夫林可以选 Medium 或 Small，档案里没有单独的「体型选择」字段，
+    # 取 Medium 是唯一不会算错数的默认（体型目前只影响显示与负重，两者都没结算）。
+    statblock = Statblock(
+        name=name,
+        abilities=abilities,
+        speeds={"walk": int(species_def.speed)} if species_def else {"walk": 30},
+        size=species_def.size[0] if species_def and species_def.size else "medium",
+    )
     ref = _ref_map(abilities, level, total, proficiency_bonus(total),
                    statblock.speeds)
     # HP：兼职分段（起始职业 1 级满骰，其余全按固定值），单职业走原公式
@@ -301,12 +343,21 @@ def build_actor(
         bundle, {def_.id: lv for def_, lv in all_defs}, spell_cantrips, spell_prepared)
     if spell_problems:
         raise RuleError("法术选择有问题：" + "；".join(spell_problems))
+    # 背景给的两项技能熟练与（可能的）一件工具熟练。工具只有落在真实工具表里才登记
+    # token —— 「工匠工具（自选一种）」这类没有固定 key，登记一个假 token 比不登记更糟。
+    origin_tokens: list[str] = []
+    if origin_def is not None:
+        origin_tokens.extend("skill.%s" % key for key in origin_def.skills)
+        if origin_def.tool and any(item.key == origin_def.tool
+                                   for item in bundle.tools.values()):
+            origin_tokens.append("tool.%s" % origin_def.tool)
     profile = Profile(
         classes=tuple(ClassEntry.make(def_.id, lv) for def_, lv in all_defs),
         subclasses=tuple(subclass_map.values()),
         proficiencies=(frozenset(saves)
                        | frozenset(class_def.proficiencies)
                        | frozenset(grant_tokens)
+                       | frozenset(origin_tokens)
                        | frozenset(extra_proficiencies)
                        | picks.proficiencies),
         expertise=picks.expertise | frozenset(extra_expertise),
@@ -317,6 +368,10 @@ def build_actor(
         prepared=spell_prepared,
         # 原始属性（加值之前）必须留在档案里：存档、重建、界面改专长都要靠它。
         base_scores={key: int(scores[key]) for key in ABILITY_KEYS},
+        species=species_def.id if species_def is not None else "",
+        background=origin_def.id if origin_def is not None else "",
+        background_bonus={key: int(value) for key, value in (background_bonus or {}).items()},
+        masteries=frozenset(str(item) for item in masteries),
     )
 
     actor = Actor(
@@ -493,6 +548,10 @@ def build_from_profile(
             subclass=primary_subclass, feats=profile.feats, choices=profile.choices,
             cantrips=profile.cantrips, prepared=profile.prepared,
             extra_classes=extras, extra_subclasses=extra_subclasses,
+            # 出身三项原样传回去：物种/背景决定特性与加值，精通只是记录。
+            species=profile.species, background=profile.background,
+            background_bonus=profile.background_bonus,
+            masteries=tuple(profile.masteries),
         )
         assert actor.profile is not None
         got = actor.profile
@@ -584,6 +643,15 @@ def available_powers(bundle: ContentBundle, actor: Actor):
     # 专长没有等级门槛（等级是**选取前提**，已在建角色时判过），全部生效
     for feat in feat_defs(bundle, actor.profile):
         found.extend(feat.powers)
+    # 物种特性与专长同一层，但**有角色等级门槛**（3 级天界启示、5 级龙族飞行）。
+    # 必须挂在这里而不是只在建角色时并进 all_powers：黑暗视觉、伤害抗性这些
+    # 是每次取卡现读的（`passive_modifiers` / `passive_defenses` 都走本函数），
+    # 只并进建角色那次的话，HP 对了、抗性却永远是空的。
+    species_def = bundle.species.get(actor.profile.species)
+    if species_def is not None:
+        total_level = int(actor.profile.total)
+        found.extend(power for power in species_def.powers
+                     if int(power.level) <= total_level)
     return tuple(sorted(found, key=lambda item: (item.owner, int(item.level), item.id)))
 
 

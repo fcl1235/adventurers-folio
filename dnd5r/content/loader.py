@@ -24,8 +24,10 @@ from .classes import (
     parse_multiclass_entry, parse_subclass,
 )
 from .feats import FeatDef, SPELL_LIST_ANY, parse_feat
+from .backgrounds import BackgroundDef, parse_background
 from .items import ArmorDef, WeaponDef, parse_armor, parse_weapon
 from .skills import SkillDef, ToolDef, parse_skill, parse_tool
+from .species import SpeciesDef, parse_species
 from .spells import SpellDef, parse_spell, parse_spell_list
 from .bestiary import MonsterDef  # noqa: F401  （类型注解用，见下方 PluginContent）
 
@@ -48,6 +50,8 @@ class PluginContent:
     monsters: dict[str, "MonsterDef"] = field(default_factory=dict)
     multiclass: dict[str, MulticlassDef] = field(default_factory=dict)
     caster_progression: dict[int, dict[int, int]] = field(default_factory=dict)
+    species: dict[str, "SpeciesDef"] = field(default_factory=dict)
+    backgrounds: dict[str, "BackgroundDef"] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -72,6 +76,8 @@ class ContentBundle:
     monsters: dict[str, "MonsterDef"] = field(default_factory=dict)
     multiclass: dict[str, MulticlassDef] = field(default_factory=dict)
     caster_progression: dict[int, dict[int, int]] = field(default_factory=dict)
+    species: dict[str, "SpeciesDef"] = field(default_factory=dict)
+    backgrounds: dict[str, "BackgroundDef"] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     # overlay 账本：谁替换了谁（P14）。存的是人话行，供自检与排查打印。
@@ -112,6 +118,26 @@ class ContentBundle:
         if weapon_id not in self.weapons:
             raise PluginError("没有这件武器：%s" % weapon_id)
         return self.weapons[weapon_id]
+
+    # --- 物种与背景（2024 的「出身」两块）------------------------------
+    def species_def(self, species_id: str) -> "SpeciesDef":
+        if species_id not in self.species:
+            raise PluginError("没有这个物种：%s（已加载：%s）"
+                              % (species_id, ", ".join(sorted(self.species)) or "无"))
+        return self.species[species_id]
+
+    def background(self, background_id: str) -> "BackgroundDef":
+        if background_id not in self.backgrounds:
+            raise PluginError("没有这个背景：%s（已加载：%s）"
+                              % (background_id,
+                                 ", ".join(sorted(self.backgrounds)) or "无"))
+        return self.backgrounds[background_id]
+
+    def species_by_short(self, short: str) -> "SpeciesDef":
+        return self.species_def(_by_short(self.species, "species", short))
+
+    def background_by_short(self, short: str) -> "BackgroundDef":
+        return self.background(_by_short(self.backgrounds, "background", short))
 
     def spell(self, spell_id: str) -> SpellDef:
         if spell_id not in self.spells:
@@ -274,6 +300,8 @@ def load_plugin(folder: str | Path) -> PluginContent:
     _load_caster_progression(base, result)
     _load_spells(base, result)
     _load_feats(base, result)
+    _load_species(base, result)
+    _load_backgrounds(base, result)
     _load_skills(base, result)
     _load_tools(base, result)
     _load_summons(base, result)
@@ -394,6 +422,58 @@ def _load_feats(base: Path, result: PluginContent) -> None:
                 result.book.add(power)
             except PluginError as exc:
                 result.errors.append(str(exc))
+
+
+def _load_species(base: Path, result: PluginContent) -> None:
+    """物种：一物种一文件（`species/dwarf.yaml`），与专长同构。
+
+    物种特性**走职业特性同一套原语**（`Power`），所以这里也把 powers 塞进
+    PowerBook —— 黑暗视觉、伤害抗性、每级 HP +1 之后全走既有管道，
+    `build_actor` 不需要为物种单开一条装配路径。
+    """
+    folder = base / "species"
+    if not folder.exists():
+        return
+    for path in sorted(folder.glob("*.yaml")):
+        rel = "%s/species/%s" % (base.name, path.name)
+        try:
+            item = parse_species(_read_yaml(path), source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if item.id in result.species:
+            result.errors.append("%s 的物种 id 重复：%s" % (rel, item.id))
+            continue
+        result.species[item.id] = item
+        for power in item.powers:
+            try:
+                result.book.add(power)
+            except PluginError as exc:
+                result.errors.append(str(exc))
+
+
+def _load_backgrounds(base: Path, result: PluginContent) -> None:
+    """背景：一背景一文件（`backgrounds/soldier.yaml`）。
+
+    背景**不带 powers** —— 它给的是三样东西：属性加值（玩家的分配决定，
+    存在 `Profile.choices` 之外的独立通道里）、一项起始专长（内容 id）、
+    两项技能与一件工具（熟练字符串）。这三样都由 `build_actor` 消费，
+    没有一条需要走 effect 管道，所以这里不做 PowerBook 注册。
+    """
+    folder = base / "backgrounds"
+    if not folder.exists():
+        return
+    for path in sorted(folder.glob("*.yaml")):
+        rel = "%s/backgrounds/%s" % (base.name, path.name)
+        try:
+            item = parse_background(_read_yaml(path), source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if item.id in result.backgrounds:
+            result.errors.append("%s 的背景 id 重复：%s" % (rel, item.id))
+            continue
+        result.backgrounds[item.id] = item
 
 
 def _load_skills(base: Path, result: PluginContent) -> None:
@@ -570,6 +650,22 @@ def manifest_id_hint(content: PluginContent) -> str:
     return content.manifest.id if content.manifest is not None else "?"
 
 
+def _by_short(table: Mapping[str, Any], kind: str, short: str) -> str:
+    """短名（`dwarf`）→ 完整内容 id（`dnd2024.species.dwarf`）。
+
+    与 `class_by_short` 同样的口径：前缀来自哪个插件就从加载结果里查哪个，
+    多插件提供同一短名时报歧义 —— 猜一个等于让另一个插件的条目被静默忽略。
+    """
+    hits = sorted(item_id for item_id in table
+                  if item_id.split(".")[-2:] == [kind, short])
+    if not hits:
+        raise PluginError("没有短名为 %s 的%s（已加载：%s）"
+                          % (short, kind, ", ".join(sorted(table)) or "无"))
+    if len(hits) > 1:
+        raise PluginError("短名 %s 匹配到多个%s：%s" % (short, kind, "、".join(hits)))
+    return hits[0]
+
+
 def load_all(root: str | Path = "plugins") -> ContentBundle:
     """加载目录下所有插件。冲突报错但不清空已加载内容。"""
     bundle = ContentBundle()
@@ -596,6 +692,8 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
         _absorb(bundle, content, "兼职条目", bundle.multiclass, content.multiclass)
         _absorb(bundle, content, "子职", bundle.subclasses, content.subclasses)
         _absorb(bundle, content, "专长", bundle.feats, content.feats)
+        _absorb(bundle, content, "物种", bundle.species, content.species)
+        _absorb(bundle, content, "背景", bundle.backgrounds, content.backgrounds)
         _absorb(bundle, content, "法术", bundle.spells, content.spells)
         _absorb(bundle, content, "法术表", bundle.spell_lists, content.spell_lists)
         # 能力注册表自带来源追溯，替换走它自己的 replace_existing

@@ -1,0 +1,16 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 不含这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.farmer
+name: {zh: 农夫, en: Farmer}
+summary:
+  zh: |-
+    土地教会你耐心、力气，以及怎么跟牲口打交道。
+  en: |-
+    The land taught you patience, strength, and how to handle animals.
+abilities: [str, con, wis]
+origin_feat: dnd2024.feat.tough
+skills: [animal_handling, nature]
+tool: carpenters_tools
+tool_label: {zh: 木工工具, en: Carpenter's Tools}

@@ -1,0 +1,91 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 不含这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.aasimar
+name: {zh: 阿斯莫, en: Aasimar}
+summary:
+  zh: |-
+    血脉里带着天界光辉的凡人：能治愈、能发光，也能在瞬间展开翅膀或让敌人看见自己身上的恐怖。
+  en: |-
+    Mortals touched by the Upper Planes, able to heal, to shine, and to reveal a sliver of celestial power.
+size: [medium, small]
+speed: 30
+
+powers:
+  - id: dnd2024.species.aasimar.celestial_resistance
+    name: {zh: 天界抗性, en: Celestial Resistance}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你具有黯蚀伤害与光耀伤害的抗性。
+      en: |-
+        Celestial Resistance — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_defense: {resistance: [necrotic, radiant]}
+
+  - id: dnd2024.species.aasimar.darkvision
+    name: {zh: 黑暗视觉, en: Darkvision}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在 60 尺内的微光光照中视为明亮光照，在黑暗中视为微光光照，只能分辨灰阶，无法分辨颜色。
+      en: |-
+        Darkvision — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_modifier: {target: sense.darkvision, value: 60, stack: max}
+
+  - id: dnd2024.species.aasimar.healing_hands
+    name: {zh: 治愈之手, en: Healing Hands}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以一个动作触碰一个生物，掷等于你熟练加值数量的 d4，目标恢复等量生命值。使用后需完成长休才能再次使用。
+      en: |-
+        Healing Hands — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            治疗池按熟练加值取骰，需要「掷骰 + 目标」管道，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.aasimar.light_bearer
+    name: {zh: 承光者, en: Light Bearer}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你习得戏法 光亮术（Light），施法属性为魅力。
+      en: |-
+        Light Bearer — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            戏法来自物种而非职业，记法术配额时需要一个「物种法术」来源，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.aasimar.celestial_revelation
+    name: {zh: 天界启示, en: Celestial Revelation}
+    level: 3
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        3 级起，你可以用一个附赠动作变身 1 分钟：天界之翼（飞行 30 尺）、死灵帷幕（黯蚀抗性 + 每回合对周围造成黯蚀伤害）或内在光耀（发光 + 每回合灼烧周围）。完成长休后才能再次使用。
+      en: |-
+        Celestial Revelation — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            三种形态都是限时效果，需要效果时长与回合流程，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

@@ -1,0 +1,61 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.orc
+name: {zh: 兽人, en: Orc}
+summary:
+  zh: |-
+    为冲撞而生：黑暗视觉 120 尺、附赠动作冲刺带临时生命、倒下了还能硬撑一次。
+  en: |-
+    Built to charge: superior darkvision, a bonus-action rush with Temporary Hit Points, and one refusal to fall.
+size: [medium]
+speed: 30
+
+powers:
+  - id: dnd2024.species.orc.adrenaline_rush
+    name: {zh: 肾上腺素冲刺, en: Adrenaline Rush}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以一个附赠动作，你可以冲刺，并获得等于熟练加值的临时生命值。次数等于熟练加值，短休或长休恢复。
+      en: |-
+        Adrenaline Rush — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            临时生命值按熟练加值取数，需要一个「按加值给临时 HP」的入口，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.orc.darkvision
+    name: {zh: 黑暗视觉, en: Darkvision}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在 120 尺内的微光光照中视为明亮光照，在黑暗中视为微光光照，只能分辨灰阶，无法分辨颜色。
+      en: |-
+        Darkvision — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_modifier: {target: sense.darkvision, value: 120, stack: max}
+
+  - id: dnd2024.species.orc.relentless_endurance
+    name: {zh: 坚韧不屈, en: Relentless Endurance}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        当你的生命值将降为 0 而不是直接死亡时，你可以改为降到 1 点。完成长休后才能再次使用。
+      en: |-
+        Relentless Endurance — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            「将降为 0 时改为 1」要在伤害结算处插一个钩子，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

@@ -1,0 +1,16 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 不含这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.guide
+name: {zh: 向导, en: Guide}
+summary:
+  zh: |-
+    你把荒野当自家后院，认得路、认得天、认得脚印。
+  en: |-
+    The wild is your backyard: you read trails, weather and tracks.
+abilities: [dex, con, wis]
+origin_feat: dnd2024.feat.magic_initiate_druid
+skills: [stealth, survival]
+tool: cartographer_tools
+tool_label: {zh: 制图工具, en: Cartographer's Tools}

@@ -33,6 +33,7 @@ from ._support import (
     ABILITY_KEYS, _class_defs, _context, _dice_mode, _proficiency_sets,
     resolver_for,
 )
+from .origin import origin_view
 
 def _ability_rows(actor: Actor, content: ContentBundle, morphed: bool = False) -> dict:
     """属性行：值 / 调整值 / 「白给了多少」。
@@ -387,6 +388,10 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
             for sub in subclass_defs(content, profile)
         ]
         sheet["total_level"] = int(profile.total)
+        # 出身：物种特性在**这里**也要出现 —— 它们是「人物的各项数值」的一部分，
+        # 只放在 powers 里的话界面得自己去 PowerBook 里捞，捞漏了就是卡上一个坑。
+        # `settled` 说明那条特性有没有真的进数值管道（只有 note 的就是没进）。
+        sheet["origin"] = origin_view(actor, content, locale)
         sheet["proficiency_bonus"] = proficiency_bonus(profile.total)
         sheet["multiclass"] = profile.is_multiclass
         sheet["max_total_level"] = MAX_TOTAL_LEVEL

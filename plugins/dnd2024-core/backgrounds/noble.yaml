@@ -1,0 +1,17 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 不含这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.noble
+name: {zh: 贵族, en: Noble}
+summary:
+  zh: |-
+    出身给了你名号、义务，和一群等着看你笑话的人。
+  en: |-
+    Birth gave you a title, a duty, and a crowd waiting for you to fail.
+abilities: [str, int, cha]
+origin_feat: dnd2024.feat.skilled
+skills: [history, persuasion]
+tool: 
+tool_label: {zh: 赌具（自选一种）, en: Gambling Set}
+# 这一类工具不固定具体物件（原文写的是「自选一种」），故 tool 留空：不登记熟练 token，只在卡上显示类别。

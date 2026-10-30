@@ -13,9 +13,11 @@ from ..model.profile import Profile
 from ..rules.build import build_from_profile
 from ..rules.spellcasting import SLOT_PREFIX
 
-# 2：加了 conditions / exhaustion / death_saves 三段。**读 v1 不迁移**——
-# 缺的段一律取默认（没有状态、不力竭、没开始掷死亡豁免），旧档照旧能打开。
-SAVE_VERSION = 2
+# 2：加了 conditions / exhaustion / death_saves 三段。
+# 3：加了 species / background / background_bonus / masteries 四项（P6 出身）。
+# **读旧档不迁移**——缺的段一律取默认（没有状态、不力竭、没开始掷死亡豁免、
+# 没选物种、没有背景加值、没记武器精通），v1/v2 的档照旧能打开。
+SAVE_VERSION = 3
 
 # 旧档的位池 id 前缀（F36 之前位池挂在插件命名空间下）。存档按池 id 记余量，
 # 前缀变了不迁移，读档时旧 id 匹配不上池，已用位会静默丢 —— 所以在这里改写。

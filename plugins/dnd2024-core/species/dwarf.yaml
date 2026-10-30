@@ -1,0 +1,75 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.dwarf
+name: {zh: 矮人, en: Dwarf}
+summary:
+  zh: |-
+    石头里长出来的人：黑暗视觉 120 尺、每级多 1 点生命、抗毒，还会在石面上感知四周。
+  en: |-
+    A stout folk of stone: superior darkvision, extra Hit Points every level, poison resistance, and tremorsense on stone.
+size: [medium]
+speed: 30
+
+powers:
+  - id: dnd2024.species.dwarf.darkvision
+    name: {zh: 黑暗视觉, en: Darkvision}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在 120 尺内的微光光照中视为明亮光照，在黑暗中视为微光光照，只能分辨灰阶，无法分辨颜色。
+      en: |-
+        Darkvision — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_modifier: {target: sense.darkvision, value: 120, stack: max}
+
+  - id: dnd2024.species.dwarf.dwarven_toughness
+    name: {zh: 矮人韧性, en: Dwarven Toughness}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你的生命值上限每级 +1。
+      en: |-
+        Dwarven Toughness — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_modifier: {target: hp.per_level, value: 1}
+
+  - id: dnd2024.species.dwarf.dwarven_resilience
+    name: {zh: 矮人体魄, en: Dwarven Resilience}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你具有毒素伤害的抗性。此外，你对抗中毒状态的豁免检定有优势。
+      en: |-
+        Dwarven Resilience — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_defense: {resistance: [poison]}
+      - note:
+          zh: |-
+            「对抗中毒状态的豁免有优势」要按状态来源判定，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.dwarf.stonecunning
+    name: {zh: 石中机警, en: Stonecunning}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以一个附赠动作，你获得 60 尺颤动感知，持续 10 分钟 —— 前提是你站在石质表面上。次数等于熟练加值，长休恢复。
+      en: |-
+        Stonecunning — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            颤动感知是限时感官，需要效果时长与地形判定，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

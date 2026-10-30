@@ -53,6 +53,11 @@ from .loadout import (
     equipped_map, leave_form_now, morph_forms, parse_slot, set_base_scores,
     weapon_catalog,
 )
+from .origin import (
+    SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, check_scores,
+    origin_view, random_scores, score_cost, score_presets, set_masteries,
+    set_origin, species_catalog,
+)
 # 前端要构造 / 捕获的类型与异常是 api 契约的一部分（P6 的教训：
 # 不让 apps 去 import kernel.errors，C3 才守得住）
 from ..kernel.errors import DndError, PluginError, RuleError
@@ -87,6 +92,10 @@ __all__ = [
     "armor_catalog", "weapon_catalog", "equip_item", "equipped_map",
     "SLOT_ZH", "SUPPORTED_SLOTS", "parse_slot", "set_base_scores",
     "morph_forms", "current_form", "leave_form_now",
+    # 出身：物种 / 背景 / 武器精通 / 属性生成（P6）
+    "species_catalog", "background_catalog", "origin_view", "set_origin",
+    "set_masteries", "bonus_shapes", "score_presets", "check_scores",
+    "score_cost", "random_scores", "SCORE_MODES", "SCORE_MODE_ZH",
     "attack_roll", "opportunity_attack", "monster_attack", "attack_options",
     "marks_of", "tokens_of",
     "eligible_forms_for", "morph_class_of", "form_options", "form_view",

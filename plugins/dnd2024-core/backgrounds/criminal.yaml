@@ -1,0 +1,16 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.criminal
+name: {zh: 罪犯, en: Criminal}
+summary:
+  zh: |-
+    在黑的那一面有熟人，知道哪扇门不上锁。
+  en: |-
+    You know the other side of the city, and which doors are never locked.
+abilities: [dex, con, int]
+origin_feat: dnd2024.feat.alert
+skills: [stealth, sleight_of_hand]
+tool: thieves_tools
+tool_label: {zh: 盗贼工具, en: Thieves' Tools}

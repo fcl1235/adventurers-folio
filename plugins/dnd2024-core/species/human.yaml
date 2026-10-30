@@ -1,0 +1,65 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.human
+name: {zh: 人类, en: Human}
+summary:
+  zh: |-
+    什么都会一点：长休后拿到英雄激励、多一项技能熟练、多一个起源专长。
+  en: |-
+    Adaptable generalists: Heroic Inspiration after every long rest, an extra skill proficiency, and an extra Origin feat.
+size: [medium, small]
+speed: 30
+
+powers:
+  - id: dnd2024.species.human.resourceful
+    name: {zh: 足智多谋, en: Resourceful}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你每次完成长休后获得英雄激励。
+      en: |-
+        Resourceful — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            英雄激励是休整流程的产物，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.human.skillful
+    name: {zh: 多才多艺, en: Skillful}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你获得一项自选技能的熟练。
+      en: |-
+        Skillful — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            这一项是玩家选择，可在建卡时作为额外熟练登记；物种特性本身不自动给。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.human.versatile
+    name: {zh: 全能, en: Versatile}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你获得一个自选的起源专长。
+      en: |-
+        Versatile — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            专长选择走专长通道，建卡时在专长页挑一个即可；物种特性本身不重复给。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

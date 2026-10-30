@@ -59,6 +59,18 @@ class Profile:
     # 显示值里混着专长/子职给的加值，倒推回去是减不掉的（有上限通道）。
     # 存档、读档、以及界面里改一个专长都要靠它重建。
     base_scores: Mapping[str, int] = field(default_factory=dict)
+    # 物种与背景都是**内容 id**（"dnd2024.species.dwarf"）。空串 = 没选
+    # （怪物、旧档、只关心战斗的临时角色都能是空的）。
+    species: str = ""
+    background: str = ""
+    # 背景加值的**分配结果**（属性 → +2/+1）。形态合法性（+2 与 +1，或三项各 +1）
+    # 由 `rules/abilities.background_bonus()` 判 —— 模型层只存事实，不判规则细节。
+    # 单独存而不是塞进 `choices`：它没有「选择项 id」，塞进去必然要拆字符串。
+    background_bonus: Mapping[str, int] = field(default_factory=dict)
+    # **武器精通**（2024 规则）：存武器的**内容 id**（"dnd2024.item.weapon.longsword"），
+    # 与专长、子职同一个口径。精通效果本身**不结算** —— 它依赖命中后的战术选择，
+    # 没有目标模型就算不出来。这里只记录玩家选了哪几件，界面标注「已记录，未结算」。
+    masteries: frozenset[str] = frozenset()
 
     def __post_init__(self) -> None:
         if not self.classes:
@@ -77,6 +89,17 @@ class Profile:
         unknown = set(self.expertise) - set(self.proficiencies)
         if unknown:
             raise RuleError("专精项不在熟练集合里：%s" % ", ".join(sorted(unknown)))
+        # 物种 / 背景：要么没选，要么是合规内容 id
+        for label, value in (("物种", self.species), ("背景", self.background)):
+            if value and not is_valid(value):
+                raise RuleError("%s id 不合规范：%r" % (label, value))
+        bad = [key for key in self.background_bonus if key not in ABILITY_KEYS]
+        if bad:
+            raise RuleError("背景加值只能加在 %s 上：%r"
+                            % ("/".join(ABILITY_KEYS), bad))
+        if not isinstance(self.masteries, frozenset):
+            object.__setattr__(self, "masteries", frozenset(str(item)
+                                                             for item in self.masteries))
         # 原始属性：要么整块不给（旧档、怪物），要么六项齐全。给一半视为数据错误 ——
         # 「少写了 con」会被当成 0 去算 HP，错得悄无声息。
         if self.base_scores:
@@ -169,6 +192,21 @@ class Profile:
             raise RuleError("档案没有记录原始属性，无法重建角色（旧档需重新建角色）")
         return int(self.base_scores[key])
 
+    # --- 物种 / 背景 / 精通 -------------------------------------------
+    def with_origin(self, species: str = "", background: str = "",
+                    bonus: Mapping[str, int] | None = None) -> "Profile":
+        """设定物种、背景与背景加值的分配（各自传空表示清掉）。建卡第一屏之后就该定下来。"""
+        return replace(
+            self,
+            species=str(species),
+            background=str(background),
+            background_bonus={str(key): int(value) for key, value in (bonus or {}).items()},
+        )
+
+    def with_masteries(self, weapons: Iterable[str]) -> "Profile":
+        """记录武器精通（武器的内容 id）。集合语义，重复给同一件只算一次。"""
+        return replace(self, masteries=frozenset(str(item) for item in weapons))
+
     # --- 法术选择 -----------------------------------------------------
     def with_cantrips(self, class_id: str, spells: Iterable[str]) -> "Profile":
         """设定某个职业的已知戏法。空列表 = 清掉这一职业的记录。"""
@@ -199,6 +237,11 @@ class Profile:
             # 原始属性必须进档：没有它，读回来的角色只剩一堆派生值，改不了也重建不了
             "base_scores": {key: self.base_scores[key] for key in ABILITY_KEYS
                             if key in self.base_scores},
+            "species": self.species,
+            "background": self.background,
+            "background_bonus": {key: int(value)
+                                 for key, value in self.background_bonus.items()},
+            "masteries": sorted(self.masteries),
         }
 
     @classmethod
@@ -224,6 +267,12 @@ class Profile:
             prepared={key: tuple(value) for key, value in (data.get("prepared") or {}).items()},
             base_scores={str(key): int(value)
                          for key, value in (data.get("base_scores") or {}).items()},
+            # v1/v2 旧档没有这四项 —— 取默认，不报错（出身是 2024 的可选项）
+            species=str(data.get("species") or ""),
+            background=str(data.get("background") or ""),
+            background_bonus={str(key): int(value)
+                              for key, value in (data.get("background_bonus") or {}).items()},
+            masteries=frozenset(str(item) for item in (data.get("masteries") or ())),
         )
 
 

@@ -1,0 +1,16 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 不含这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.sailor
+name: {zh: 水手, en: Sailor}
+summary:
+  zh: |-
+    在甲板上站过风暴，绳子与风向比地面更让你安心。
+  en: |-
+    You have stood a deck through a storm; rope and wind feel safer than ground.
+abilities: [str, dex, wis]
+origin_feat: dnd2024.feat.tavern_brawler
+skills: [acrobatics, perception]
+tool: navigators_tools
+tool_label: {zh: 航海工具, en: Navigator's Tools}

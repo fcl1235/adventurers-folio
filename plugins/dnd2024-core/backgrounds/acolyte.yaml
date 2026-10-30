@@ -1,0 +1,16 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.acolyte
+name: {zh: 侍僧, en: Acolyte}
+summary:
+  zh: |-
+    在神庙里长大，替神明跑腿、抄经、安抚信徒。
+  en: |-
+    Raised in a temple, running errands for a god and copying its texts.
+abilities: [int, wis, cha]
+origin_feat: dnd2024.feat.magic_initiate_cleric
+skills: [insight, religion]
+tool: calligraphers_supplies
+tool_label: {zh: 书法工具, en: Calligrapher's Supplies}

@@ -1,0 +1,16 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 不含这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.charlatan
+name: {zh: 骗子, en: Charlatan}
+summary:
+  zh: |-
+    把假身份穿在身上，靠一张嘴和一双快手活到今天。
+  en: |-
+    You wear a false name well, and live on a quick tongue and quicker hands.
+abilities: [dex, con, cha]
+origin_feat: dnd2024.feat.skilled
+skills: [deception, sleight_of_hand]
+tool: forgery_kit
+tool_label: {zh: 伪造工具, en: Forgery Kit}

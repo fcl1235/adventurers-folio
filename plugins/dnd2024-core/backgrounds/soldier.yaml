@@ -1,0 +1,17 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 backgrounds 条目（属性/专长/技能/工具均已核对）
+
+id: dnd2024.background.soldier
+name: {zh: 士兵, en: Soldier}
+summary:
+  zh: |-
+    军队教会你三件事：队形、服从，以及怎么活下来。
+  en: |-
+    The army taught you three things: formation, obedience, and how to survive.
+abilities: [str, dex, con]
+origin_feat: dnd2024.feat.savage_attacker
+skills: [athletics, intimidation]
+tool: 
+tool_label: {zh: 博弈用具（自选一种）, en: Gaming Set}
+# 这一类工具不固定具体物件（原文写的是「自选一种」），故 tool 留空：不登记熟练 token，只在卡上显示类别。

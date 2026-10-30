@@ -1,0 +1,82 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.halfling
+name: {zh: 半身人, en: Halfling}
+summary:
+  zh: |-
+    幸运的小个子：掷出 1 可以重掷，不怕吓，还能钻过大个子让出的空隙。
+  en: |-
+    Small and improbably lucky: reroll a 1, shrug off fear, and slip through the space of larger creatures.
+size: [small]
+speed: 30
+
+powers:
+  - id: dnd2024.species.halfling.brave
+    name: {zh: 勇敢, en: Brave}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你对抗恐慌状态的豁免检定有优势。
+      en: |-
+        Brave — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            「对抗恐慌状态的豁免」要按状态来源判定，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.halfling.halfling_nimbleness
+    name: {zh: 半身人灵巧, en: Halfling Nimbleness}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你可以穿过体型比你大的生物所占据的空间。
+      en: |-
+        Halfling Nimbleness — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            属于移动规则，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.halfling.luck
+    name: {zh: 幸运, en: Luck}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        当你在一次 d20 检定（攻击、属性检定或豁免）中掷出 1 时，可以重掷一次，并且必须使用新结果。
+      en: |-
+        Luck — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            「掷出 1 时重掷」要在每次 d20 结算后挂一个重掷提示，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.halfling.naturally_stealthy
+    name: {zh: 天生隐匿, en: Naturally Stealthy}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        当有至少一个体型比你大的生物遮蔽你时，你可以尝试躲藏。
+      en: |-
+        Naturally Stealthy — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            属于躲藏条件判定，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

@@ -1,0 +1,61 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.tiefling
+name: {zh: 提夫林, en: Tiefling}
+summary:
+  zh: |-
+    下界血脉的凡人：黑暗视觉、奇术戏法，炼狱血脉再给一份抗性与两个法术。
+  en: |-
+    Mortals touched by the Lower Planes: darkvision, the Thaumaturgy cantrip, and a fiendish legacy of resistance and spells.
+size: [medium, small]
+speed: 30
+
+powers:
+  - id: dnd2024.species.tiefling.darkvision
+    name: {zh: 黑暗视觉, en: Darkvision}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在 60 尺内的微光光照中视为明亮光照，在黑暗中视为微光光照，只能分辨灰阶，无法分辨颜色。
+      en: |-
+        Darkvision — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_modifier: {target: sense.darkvision, value: 60, stack: max}
+
+  - id: dnd2024.species.tiefling.otherworldly_presence
+    name: {zh: 异界威仪, en: Otherworldly Presence}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你习得戏法 奇术（Thaumaturgy），施法属性为魅力。
+      en: |-
+        Otherworldly Presence — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            物种法术来源尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.tiefling.fiendish_legacy
+    name: {zh: 炼狱血脉, en: Fiendish Legacy}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选择深渊（毒素抗性；戏法 毒液喷溅，3 级 致病射线，5 级 人类定身）、幽冥（黯蚀抗性；戏法 冻寒之触，3 级 虚假生命，5 级 衰弱射线）或炼狱（火焰抗性；戏法 火焰箭，3 级 炼狱叱喝，5 级 黑暗术）。
+      en: |-
+        Fiendish Legacy — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            抗性跟随选择、法术按等级解锁，需要血统选择与物种法术通道，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

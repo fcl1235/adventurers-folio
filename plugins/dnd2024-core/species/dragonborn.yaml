@@ -1,0 +1,95 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.dragonborn
+name: {zh: 龙裔, en: Dragonborn}
+summary:
+  zh: |-
+    龙血后裔：一口吐息、一身与血统同源的抗性，5 级后还能短暂展翼。
+  en: |-
+    Heirs of dragon blood, with a breath weapon, a matching resistance, and wings that unfurl at 5th level.
+size: [medium]
+speed: 30
+
+powers:
+  - id: dnd2024.species.dragonborn.draconic_ancestry
+    name: {zh: 龙族血脉, en: Draconic Ancestry}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选择一种龙类血统（如红龙→火焰、白龙→寒冷）。它决定你的吐息形状与伤害类型。
+      en: |-
+        Draconic Ancestry — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            血统是建卡时的选择项，需要一个「血统」选择管道，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.dragonborn.breath_weapon
+    name: {zh: 吐息武器, en: Breath Weapon}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        以攻击动作的一部分替换一次攻击，呼出 15 尺锥形或 30 尺直线吐息：范围内生物做敏捷豁免，失败受 1d10 伤害（5 级 2d10、11 级 3d10、17 级 4d10），成功减半。次数等于熟练加值，长休恢复。
+      en: |-
+        Breath Weapon — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            吐息是范围攻击，需要一个「范围 + 群体豁免」结算入口，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.dragonborn.damage_resistance
+    name: {zh: 伤害抗性, en: Damage Resistance}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你具有与龙族血统相同类型的伤害抗性。
+      en: |-
+        Damage Resistance — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            抗性类型跟随血统选择，选择管道接入后自动生效。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.dragonborn.darkvision
+    name: {zh: 黑暗视觉, en: Darkvision}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在 60 尺内的微光光照中视为明亮光照，在黑暗中视为微光光照，只能分辨灰阶，无法分辨颜色。
+      en: |-
+        Darkvision — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_modifier: {target: sense.darkvision, value: 60, stack: max}
+
+  - id: dnd2024.species.dragonborn.dragon_wings
+    name: {zh: 龙族飞行, en: Dragon Wings}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        5 级起，你可以用一个附赠动作展开龙翼，获得等于当前速度的飞行速度，持续 10 分钟。完成长休后才能再次使用。
+      en: |-
+        Dragon Wings — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            限时飞行速度需要效果时长管道，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

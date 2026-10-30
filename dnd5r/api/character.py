@@ -182,6 +182,10 @@ def new_character(
     prepared: Mapping[str, Sequence[str]] | None = None,
     extra_classes: Sequence[tuple[str, int]] = (),
     extra_subclasses: Sequence[str] = (),
+    species: str = "",
+    background: str = "",
+    background_bonus: Mapping[str, int] | None = None,
+    masteries: Sequence[str] = (),
 ) -> Actor:
     """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。
 
@@ -210,6 +214,10 @@ def new_character(
         prepared={key: tuple(value) for key, value in (prepared or {}).items()},
         extra_classes=tuple((str(k), int(v)) for k, v in extra_classes),
         extra_subclasses=tuple(str(item) for item in extra_subclasses),
+        species=species,
+        background=background,
+        background_bonus=dict(background_bonus or {}),
+        masteries=tuple(masteries),
     )
 
 

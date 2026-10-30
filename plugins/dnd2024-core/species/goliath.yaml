@@ -1,0 +1,65 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.goliath
+name: {zh: 巨人, en: Goliath}
+summary:
+  zh: |-
+    山岭巨人的后裔：跑得更快、力气更大，血统与巨躯形态各给一段爆发。
+  en: |-
+    Descendants of giants: faster on their feet, powerful of build, with a giant ancestry boon and a large-form burst.
+size: [medium]
+speed: 35
+
+powers:
+  - id: dnd2024.species.goliath.giant_ancestry
+    name: {zh: 巨人血统, en: Giant Ancestry}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选择一种巨人血统（云/火/霜/山岭/石/风暴），获得对应的短时增益，次数等于熟练加值，长休恢复。
+      en: |-
+        Giant Ancestry — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            六种增益各是限时效果，需要效果时长管道，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.goliath.powerful_build
+    name: {zh: 强力体格, en: Powerful Build}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在结束擒抱的豁免检定上有优势。计算负重与推、拖、举的重量时，视为大体型生物。
+      en: |-
+        Powerful Build — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            负重上限未在卡上计算，擒抱豁免的优势要按检定名判定，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.goliath.large_form
+    name: {zh: 巨躯形态, en: Large Form}
+    level: 5
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        5 级起，你可以用一个附赠动作变为大体型，持续 10 分钟：力量检定有优势、速度 +10 尺。完成长休后才能再次使用。
+      en: |-
+        Large Form — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            体型变化与限时速度需要变形/效果时长管道，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.

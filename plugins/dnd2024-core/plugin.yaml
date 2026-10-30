@@ -69,7 +69,34 @@ provides:
     - dnd2024.subclass.wizard.diviner
     - dnd2024.subclass.wizard.evoker
     - dnd2024.subclass.wizard.illusionist
-  species: []
+  species:
+    - dnd2024.species.aasimar
+    - dnd2024.species.dragonborn
+    - dnd2024.species.dwarf
+    - dnd2024.species.elf
+    - dnd2024.species.gnome
+    - dnd2024.species.goliath
+    - dnd2024.species.halfling
+    - dnd2024.species.human
+    - dnd2024.species.orc
+    - dnd2024.species.tiefling
+  backgrounds:
+    - dnd2024.background.acolyte
+    - dnd2024.background.artisan
+    - dnd2024.background.charlatan
+    - dnd2024.background.criminal
+    - dnd2024.background.entertainer
+    - dnd2024.background.farmer
+    - dnd2024.background.guard
+    - dnd2024.background.guide
+    - dnd2024.background.hermit
+    - dnd2024.background.merchant
+    - dnd2024.background.noble
+    - dnd2024.background.sage
+    - dnd2024.background.sailor
+    - dnd2024.background.scribe
+    - dnd2024.background.soldier
+    - dnd2024.background.wayfarer
   feats:
     - dnd2024.feat.ability_score_improvement
     - dnd2024.feat.actor

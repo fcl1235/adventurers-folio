@@ -1,0 +1,95 @@
+# 由 tools/gen_origins.py 从 dnd55e_core_data.json + 2024 规则重写生成。
+# 重跑生成器会覆盖本文件；要长期改动请改数据源，或在文件里写一个 hand-edited 注释让它别碰。
+# SRD 5.2 覆盖这一条：dnd55e_core_data.json 的 species 清单只用来确认条目，正文按 2024 原文重写
+
+id: dnd2024.species.elf
+name: {zh: 精灵, en: Elf}
+summary:
+  zh: |-
+    长寿的魔法民族：黑暗视觉、对抗魅惑的优势、4 小时出神代替睡眠，血脉再送三个法术。
+  en: |-
+    A long-lived magical people: darkvision, advantage against being charmed, trance instead of sleep, and spells from an elven lineage.
+size: [medium]
+speed: 30
+
+powers:
+  - id: dnd2024.species.elf.darkvision
+    name: {zh: 黑暗视觉, en: Darkvision}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你在 60 尺内的微光光照中视为明亮光照，在黑暗中视为微光光照，只能分辨灰阶，无法分辨颜色。
+      en: |-
+        Darkvision — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - grant_modifier: {target: sense.darkvision, value: 60, stack: max}
+
+  - id: dnd2024.species.elf.fey_ancestry
+    name: {zh: 妖精血统, en: Fey Ancestry}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你对抗魅惑状态的豁免检定有优势。
+      en: |-
+        Fey Ancestry — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            「对抗魅惑状态的豁免」要按状态来源判定，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.elf.keen_senses
+    name: {zh: 敏锐感官, en: Keen Senses}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你从 洞悉、察觉、生存 中选择一项，获得其技能熟练。
+      en: |-
+        Keen Senses — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            这一项是玩家选择，可在建卡时作为额外熟练登记；物种特性本身不自动给。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.elf.trance
+    name: {zh: 出神, en: Trance}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        你不需睡眠。以 4 小时冥想完成长休，且冥想期间保持清醒。
+      en: |-
+        Trance — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            长休时长属于休整流程，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
+
+  - id: dnd2024.species.elf.elven_lineage
+    name: {zh: 精灵血脉, en: Elven Lineage}
+    level: 1
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        选择卓尔、高等或木精灵：获得对应戏法，3 级与 5 级各获得一个对应法术，每个法术可用次数为 1 次，长休恢复。
+      en: |-
+        Elven Lineage — this plugin does not carry the SRD 5.2 English wording of this rule; the normalized Chinese text above is the authoritative copy.
+    effects:
+      - note:
+          zh: |-
+            物种法术来源与「免费施放次数」池都需要「物种法术」通道，尚未接入。
+          en: |-
+            The mechanical part of this trait is not wired yet; the rule text above is the source.
