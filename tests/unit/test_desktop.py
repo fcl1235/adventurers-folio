@@ -20,8 +20,10 @@ ROOT = Path(__file__).resolve().parents[2]
 PLUGINS = ROOT / "plugins"
 FIGHTER = "dnd2024.class.fighter"
 ROGUE = "dnd2024.class.rogue"
+DRUID = "dnd2024.class.druid"
 SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
 DEX_SCORES = {"str": 10, "dex": 17, "con": 14, "int": 12, "wis": 12, "cha": 10}
+WIS_SCORES = {"str": 10, "dex": 14, "con": 14, "int": 12, "wis": 17, "cha": 10}
 
 
 class DesktopAppTest(unittest.TestCase):
@@ -583,6 +585,104 @@ class SaveLoadTest(unittest.TestCase):
             self.assertFalse(app.open_dialog())
             self.assertEqual(list(Path(tmp).glob("*.json")), [],
                              "短路还不许顺手写出文件")
+
+
+class EditRowTest(unittest.TestCase):
+    """属性就地编辑：改的是原始属性，改完 HP 上限要跟着变、输入行要收起。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self):
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_starts_collapsed_and_opens_with_base_scores(self):
+        app = self._app()
+        page = app.overview
+        self.assertEqual(page.edit_row.winfo_manager(), "", "默认要收起")
+        page.toggle_edit()
+        self.assertEqual(page.edit_row.winfo_manager(), "pack")
+        shown = {key: var.get() for key, var in page.score_vars.items()}
+        self.assertEqual(shown, page.base_scores,
+                         "输入框初值必须是原始属性，不是卡面分数")
+        page.toggle_edit(False)
+        self.assertEqual(page.edit_row.winfo_manager(), "")
+
+    def test_apply_rebuilds_and_collapses(self):
+        app = self._app()
+        page = app.overview
+        before = app.sheet["hp"]["maximum"]
+        page.toggle_edit()
+        page.score_vars["con"].set(16)
+        page._apply_scores()
+        self.assertEqual(app.sheet["hp"]["maximum"], before + 5)
+        self.assertEqual(page.edit_row.winfo_manager(), "", "成功之后要收起")
+        self.assertEqual(app.sheet["base_scores"]["con"], 16)
+
+    def test_refused_value_shows_reason_and_keeps_row(self):
+        app = self._app()
+        page = app.overview
+        page.toggle_edit()
+        page.score_vars["str"].set(99)
+        page._apply_scores()
+        self.assertIn("99", str(page._build_error.cget("text")))
+        self.assertEqual(page.edit_row.winfo_manager(), "pack", "被拒时不能收起")
+        self.assertNotEqual(app.sheet["base_scores"]["str"], 99)
+
+    def test_reopen_shows_new_values(self):
+        app = self._app()
+        page = app.overview
+        page.toggle_edit()
+        page.score_vars["str"].set(18)
+        page._apply_scores()
+        page.toggle_edit()
+        self.assertEqual(page.score_vars["str"].get(), 18,
+                         "重新展开时要显示新值，不能停在旧值上")
+
+
+class MorphUiTest(unittest.TestCase):
+    """变形：形态选择行要出现，用完能「结束变形」。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self):
+        actor = api.new_character(self.bundle, DRUID, 8, WIS_SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_form_row_appears_for_wild_shape(self):
+        app = self._app()
+        page = app.powers_page
+        row = next(item for item in page._powers if item["id"].endswith("wild_shape"))
+        page.powers.select_id(row["id"])
+        page._power_id = row["id"]
+        page._fill_detail()
+        self.assertEqual(page._choice_kind, "form_id")
+        self.assertTrue(page._choice_map, "形态下拉里必须有可选形态")
+
+    def test_use_morphs_and_unmorph_button_shows(self):
+        app = self._app()
+        page = app.powers_page
+        self.assertEqual(page.unmorph_button.winfo_manager(), "",
+                         "没变形时不该有「结束变形」")
+        row = next(item for item in page._powers if item["id"].endswith("wild_shape"))
+        page.powers.select_id(row["id"])
+        page._power_id = row["id"]
+        page._fill_detail()
+        self.assertTrue(page.use_selected())
+        self.assertTrue(app.sheet["morphed"])
+        self.assertEqual(page.unmorph_button.winfo_manager(), "pack")
+
+        self.assertTrue(page.end_morph())
+        self.assertFalse(app.sheet["morphed"])
+        self.assertEqual(page.unmorph_button.winfo_manager(), "")
 
 
 class StatePanelTest(unittest.TestCase):

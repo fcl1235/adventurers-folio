@@ -249,6 +249,13 @@ class DesktopApp(tk.Tk):
             elif name == "death_reset":
                 api.reset_death_saves(self.actor)
                 self.status.configure(text="死亡豁免已重置", foreground=theme.TEXT)
+            elif name == "scores":
+                actor = api.set_base_scores(self.actor, self.bundle, dict(value))
+                # 换的是整只 actor：属性牵动 HP 上限/熟练/攻击/豁免一整套派生值
+                self.apply_actor(actor)
+                self.status.configure(text="属性已更新（HP 上限、熟练与攻击已重算）",
+                                      foreground=theme.TEXT)
+                return actor
             elif name == "concentration":
                 dc = api.concentration_dc(int(value))
                 roll = self.roll_check(
@@ -269,6 +276,8 @@ class DesktopApp(tk.Tk):
         except api.DndError as exc:
             self.status.configure(text="状态操作失败：%s" % exc,
                                   foreground=theme.WARN)
+            if name == "scores":
+                self.overview.set_edit_error(str(exc))
             return None
         self.refresh()
         return None

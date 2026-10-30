@@ -246,6 +246,7 @@ def power_channels(power: Power) -> tuple[str, ...]:
         GrantAdvantage, GrantDefense, GrantModifier, GrantProficiency,
     )
     from .effects.exchange import Exchange
+    from .effects.morph import Morph
     from .effects.onhit import ExtraDamage
     from .effects.state import MarkAdvantage
     from .effects.token import GrantToken
@@ -255,6 +256,10 @@ def power_channels(power: Power) -> tuple[str, ...]:
         if isinstance(effect, (Exchange, GrantToken)):
             # 兑换要选环级、授予要指认受益者 —— 界面据 channels 出选择行
             found.add("exchange" if isinstance(effect, Exchange) else "token")
+        elif isinstance(effect, Morph):
+            # 变形要先选形态。没有这条，界面上的「使用」按钮一定失败
+            # （effects/morph.py 会抛「变形需要先选一个形态」）
+            found.add("form")
         elif isinstance(effect, GrantModifier):
             targets = {str(item.target) for item in effect.modifiers}
             # `score.<属性>` 改的是属性值本身，与 d20 加值是两条路

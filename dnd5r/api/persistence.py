@@ -8,6 +8,7 @@ from ..content import ContentBundle
 from ..kernel.errors import RuleError
 from ..model.actor import MAX_EXHAUSTION, Actor
 from ..model.death import DeathSaves
+from ..model.inventory import Inventory
 from ..model.profile import Profile
 from ..rules.build import build_from_profile
 from ..rules.spellcasting import SLOT_PREFIX
@@ -54,6 +55,9 @@ def save_character(actor: Actor, locale: str = "zh") -> dict:
         "conditions": list(actor.conditions.ids()),
         "exhaustion": int(root.exhaustion),
         "death_saves": root.death_saves.to_dict(),
+        # 背包与装备槽。**v1 漏了这个** —— 穿上锁甲存盘、读回来变回 10 AC，
+        # 而且没有任何报错：派生值是现算的，所以「装备没了」只表现为数字变小。
+        "inventory": root.inventory.to_dict(),
     }
 
 
@@ -102,4 +106,8 @@ def load_character(
         level = 0
     actor.exhaustion = max(0, min(level, MAX_EXHAUSTION))
     actor.death_saves = DeathSaves.from_dict(data.get("death_saves"))
+    # v1 存档没有 inventory：读成空背包（那时候也存不下装备，没有可丢的东西）
+    raw_gear = data.get("inventory")
+    if isinstance(raw_gear, dict):
+        actor.inventory = Inventory.from_dict(raw_gear)
     return actor

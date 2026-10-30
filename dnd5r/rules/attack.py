@@ -86,6 +86,8 @@ def attack_profile(
         attacker, bundle.weapons, top.statblock.abilities,
         resolver.ctx.prof_bonus, _tokens(bundle, attacker),
         ranged_bonus=ranged, melee_bonus=melee,
+        # 持盾就腾不出第二只手：两用武器按单手档算（与角色卡同一条件）
+        shielded=loadout_for(attacker, bundle.armors).shielded,
     )
     return _pick(found, weapon_id, off_hand, attacker, bundle)
 

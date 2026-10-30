@@ -253,7 +253,8 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         modifiers_for(mods, "attack.ranged")).total
     attack_profiles = profiles_for(actor, content.weapons, top.statblock.abilities,
                                    resolver.ctx.prof_bonus, tokens,
-                                   ranged_bonus=ranged_bonus)
+                                   ranged_bonus=ranged_bonus,
+                                   shielded=loadout.shielded)
     attacks = [item.to_dict(locale) for item in attack_profiles]
     crit = resolver.crit_range(top, modifiers_for(mods, "attack.crit_min"))
     senses = {}
@@ -304,7 +305,14 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "resistances": resistances,
         "immunities": sorted(feat_immune),
         "abilities": _ability_rows(actor, content, morphed),
+        # 原始属性（加值之前）。界面「改属性」必须用它当初值 ——
+        # `abilities.score` 是加过专长/子职的结果，从它倒推减不干净。
+        "base_scores": (dict(profile.base_scores) if profile and profile.base_scores
+                        else {}),
         "gear": loadout.to_dict(locale),
+        # 槽位 → 物品 id。界面标「现在装着哪个」用；`gear` 只给了能算 AC 的那两件。
+        "equipped": {slot.value: ident
+                     for slot, ident in root.inventory.equipped.items()},
         "saves": {key: {"total": value.total, "detail": value.describe(),
                         "mode": value.mode, "mode_sources": list(value.mode_sources),
                         "proficient": key in saves_prof}

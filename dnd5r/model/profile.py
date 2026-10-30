@@ -86,10 +86,10 @@ class Profile:
             for key in ABILITY_KEYS:
                 value = self.base_scores[key]
                 if not isinstance(value, int) or isinstance(value, bool):
-                    raise RuleError("原始属性 %s 必须是整数：%r" % (key, value))
+                    raise RuleError("原始属性 %s 必须是整数：%r" % (key.upper(), value))
                 if not (SCORE_MIN <= value <= SCORE_MAX):
                     raise RuleError("原始属性 %s 超出 %d..%d：%r"
-                                    % (key, SCORE_MIN, SCORE_MAX, value))
+                                    % (key.upper(), SCORE_MIN, SCORE_MAX, value))
 
     # --- 构造 ---------------------------------------------------------
     @classmethod

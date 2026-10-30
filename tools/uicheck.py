@@ -263,6 +263,44 @@ def _check_dice(label: str, app, page: OverviewPage, sheet: dict) -> list[str]:
     return problems
 
 
+def _check_edit_row(label: str, app, page: OverviewPage, avail_h: int) -> list[str]:
+    """属性编辑行**展开时**也不能把页面顶破预算。
+
+    收起状态下量 reqheight 是量不到的 —— 那正是最容易漏的地方：
+    平时绿着，玩家一点「编辑属性」按钮就溢出。
+    """
+    problems: list[str] = []
+    if not page.base_scores:
+        problems.append("%s：sheet 没有 base_scores，属性编辑会拿卡面分数当初值"
+                        % label)
+    page.toggle_edit()
+    try:
+        # **必须 update_idletasks**：没跑过几何计算的页面 reqheight 是 1，
+        # 拿它比预算永远通过 —— 那种检查等于没检查（`page_size` 也不自己调）。
+        app.update_idletasks()
+        if not page.edit_row.winfo_manager():
+            problems.append("%s：属性编辑行没有出现在布局里" % label)
+        if page.edit_row.winfo_reqheight() < 40:
+            problems.append("%s：属性编辑行只有 %dpx 高，控件多半没建出来"
+                            % (label, page.edit_row.winfo_reqheight()))
+        height = app.page_size(page)[1]
+        if height > avail_h:
+            problems.append("%s：展开属性编辑后页面高 %d > 可用 %d"
+                            % (label, height, avail_h))
+        # 整页高度取三栏里最高的那栏，左栏单独量才不会「加了却没反应」
+        if page.left.winfo_reqheight() > avail_h:
+            problems.append("%s：展开属性编辑后左栏高 %d > 可用 %d"
+                            % (label, page.left.winfo_reqheight(), avail_h))
+        shown = {key: var.get() for key, var in page.score_vars.items()}
+        for key, value in page.base_scores.items():
+            if shown.get(key) != value:
+                problems.append("%s：属性编辑初值 %s=%r，原始属性是 %r"
+                                % (label, key, shown.get(key), value))
+    finally:
+        page.toggle_edit(False)
+    return problems
+
+
 def _check_pools(label: str, page: PowersPage) -> list[str]:
     """资源池的显示值必须等于 sheet 的「剩余 / 上限」。
 
@@ -567,6 +605,7 @@ def main() -> int:
                     problems.extend(_check_overview_defense(label, page, app.sheet))
                     problems.extend(_check_appearance(label, app, page, app.sheet))
                     problems.extend(_check_dice(label, app, page, app.sheet))
+                    problems.extend(_check_edit_row(label, app, page, avail_h))
                 elif isinstance(page, SpellPage):
                     problems.extend(_check_spells(label, page, stats))
                 elif isinstance(page, FeatPage):

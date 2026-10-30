@@ -87,13 +87,17 @@ class PowersPage(ttk.Frame):
         self.choice_frame = ttk.Frame(right)
         self.choice_frame.pack(fill="x")
         self.choice_var = tk.StringVar(value="")
-        self._choice_kind = ""            # "" / "slot_level" / "target_id"
-        self._choice_map: dict[str, str] = {}   # 显示名 → target_id
+        self._choice_kind = ""            # "" / "slot_level" / "target_id" / "form_id"
+        self._choice_map: dict[str, str] = {}   # 显示名 → target_id / form_id
 
         use = ttk.Frame(right)
         use.pack(fill="x", pady=(4, 0))
         self.use_button = ttk.Button(use, text="使用这项能力", command=self.use_selected)
         self.use_button.pack(side="left")
+        # 结束变形：只在变形中出现。**不能只在英雄条上提示** —— 玩家要结束变形时
+        # 会本能地来这里找「荒野变形」那个按钮。
+        self.unmorph_button = ttk.Button(use, text="结束变形", style="Mini.TButton",
+                                         command=self.end_morph)
         self.blocked_var = tk.StringVar(value="")
         ttk.Label(use, textvariable=self.blocked_var, foreground="#a33",
                   wraplength=290, justify="left").pack(anchor="w", pady=(4, 0))
@@ -119,8 +123,29 @@ class PowersPage(ttk.Frame):
             self._fill_defense(sheet)
             self._fill_powers()
             self._fill_detail()
+            self._sync_unmorph(bool(sheet.get("morphed")))
         finally:
             self._busy = False
+
+    def _sync_unmorph(self, morphed: bool) -> None:
+        """变形中才亮出「结束变形」。`pack_forget` 而不是 `state=disabled`：
+        一直摆着一个常年灰着的按钮，玩家会以为它坏了。"""
+        if morphed:
+            if not self.unmorph_button.winfo_manager():
+                self.unmorph_button.pack(side="left", padx=(6, 0))
+        elif self.unmorph_button.winfo_manager():
+            self.unmorph_button.pack_forget()
+
+    def end_morph(self) -> bool:
+        """结束变形，回到本体（形态给的临时 HP 会被收回，见 Actor.unmorph）。"""
+        try:
+            actor = api.leave_form_now(self.app.actor)
+        except api.DndError as exc:
+            self._status(str(exc), error=True)
+            return False
+        self.app.apply_actor(actor)
+        self._status("已结束变形。")
+        return True
 
     def _fill_pools(self) -> None:
         self.pools.clear()
@@ -244,6 +269,32 @@ class PowersPage(ttk.Frame):
                                state="readonly", width=8, values=values)
             box.pack(side="left")
             box.set(values[0])
+        elif "form" in channels:
+            self._fill_form_choice()
+
+    def _fill_form_choice(self) -> None:
+        """变形形态选择行（荒野变形）。不可用的形态也列出来并写明原因 ——
+        「为什么 8 级还不能变熊」比「列表里没有熊」有用得多。"""
+        self._choice_kind = "form_id"
+        ttk.Label(self.choice_frame, text="形态：",
+                  foreground=theme.DIM).pack(side="left")
+        options = api.morph_forms(self.app.actor, self.app.bundle, self.app.locale)
+        usable = options.get("usable") or []
+        if not usable:
+            ttk.Label(self.choice_frame, text="当前等级还不能变形",
+                      foreground=theme.WARN).pack(side="left")
+            self._choice_kind = ""
+            return
+        values = []
+        for form in usable:
+            label = "%s（CR %s · AC %d · HP %d）" % (form["name"], _cr(form["cr"]),
+                                                    int(form["ac"]), int(form["hp"]))
+            values.append(label)
+            self._choice_map[label] = form["id"]
+        box = ttk.Combobox(self.choice_frame, textvariable=self.choice_var,
+                           state="readonly", width=26, values=values)
+        box.pack(side="left")
+        box.set(values[0])
 
     def _choice(self) -> dict:
         """把选择行收成 api.use_power 的 choice 参数。"""
@@ -252,6 +303,9 @@ class PowersPage(ttk.Frame):
         if self._choice_kind == "target_id":
             target = self._choice_map.get(self.choice_var.get())
             return {"target_id": target} if target else {}
+        if self._choice_kind == "form_id":
+            form = self._choice_map.get(self.choice_var.get())
+            return {"form_id": form} if form else {}
         text = self.choice_var.get()
         return {"slot_level": int(text.split()[0])} if text else {}
 
@@ -281,6 +335,21 @@ class PowersPage(ttk.Frame):
 
 def _join(values) -> str:
     return "、".join(str(item) for item in values) if values else "—"
+
+
+def _cr(value) -> str:
+    """CR 是 0.125 / 0.25 这类小数：直接 str 会写成 0.125，桌上读作「1/8」。
+    内容里的 cr 也可能是 "1/8" 字符串，两种都兼容。"""
+    if isinstance(value, str):
+        return value
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    for frac, text in ((0.125, "1/8"), (0.25, "1/4"), (0.5, "1/2")):
+        if abs(number - frac) < 1e-9:
+            return text
+    return ("%d" % number) if number == int(number) else ("%g" % number)
 
 
 def _report_text(report: dict) -> str:

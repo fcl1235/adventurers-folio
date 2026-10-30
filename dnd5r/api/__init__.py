@@ -48,6 +48,11 @@ from .state import (
     clear_conditions, concentration_dc, death_save_view, reset_death_saves,
     roll_death_save, set_condition, set_exhaustion,
 )
+from .loadout import (
+    SLOT_ZH, SUPPORTED_SLOTS, armor_catalog, current_form, equip_item,
+    equipped_map, leave_form_now, morph_forms, parse_slot, set_base_scores,
+    weapon_catalog,
+)
 # 前端要构造 / 捕获的类型与异常是 api 契约的一部分（P6 的教训：
 # 不让 apps 去 import kernel.errors，C3 才守得住）
 from ..kernel.errors import DndError, PluginError, RuleError
@@ -78,6 +83,10 @@ __all__ = [
     # 运行时状态：状态勾选 / 力竭 / 濒死 / 专注 DC（P4）
     "set_condition", "clear_conditions", "set_exhaustion",
     "roll_death_save", "reset_death_saves", "death_save_view", "concentration_dc",
+    # 换装与属性编辑（P5）
+    "armor_catalog", "weapon_catalog", "equip_item", "equipped_map",
+    "SLOT_ZH", "SUPPORTED_SLOTS", "parse_slot", "set_base_scores",
+    "morph_forms", "current_form", "leave_form_now",
     "attack_roll", "opportunity_attack", "monster_attack", "attack_options",
     "marks_of", "tokens_of",
     "eligible_forms_for", "morph_class_of", "form_options", "form_view",

@@ -10,6 +10,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
+from . import theme
 from .cards import AbilityCard
 from .dice import DiceLog
 from .state_panel import StatePanel
@@ -60,6 +61,9 @@ class OverviewPage(ttk.Frame):
         right.grid(row=0, column=2, sticky="nsew")
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
+        # 三栏留个引用：布局审计要单独量某一栏（整页 reqheight 是取最高的那一栏，
+        # 左栏加了属性编辑行也不会让页面变高，光看整页会以为「加了没影响」）。
+        self.left, self.mid, self.right = left, mid, right
 
         # --- 左：六张属性卡 ------------------------------------------------
         # 宽度靠 `grid columnconfigure(minsize=148, weight=1)` 撑 —— `ttk.Frame(width=)`
@@ -85,6 +89,34 @@ class OverviewPage(ttk.Frame):
                     lambda attribute=key: self._roll("ability", attribute),
                     lambda attribute=key: self._roll("save", attribute),
                 )
+
+        # --- 左：属性就地编辑 ---------------------------------------------
+        # 收起时只占一行按钮。**改的是原始属性**（`Profile.base_scores`）：
+        # 卡面上显示的分数里混着专长与子职加值，从来回倒推减不掉那些加值，
+        # 所以界面必须把「建卡时填的那个数」原样拿来做输入框的初值。
+        self.edit_toggle = ttk.Button(box, text="编辑属性", style="Mini.TButton",
+                                      width=8, command=self.toggle_edit)
+        self.edit_toggle.pack(anchor="e", pady=(2, 0))
+        self.edit_row = ttk.Frame(box)
+        self.score_vars: dict[str, tk.IntVar] = {}
+        for index, key in enumerate(ABILITY_ORDER):
+            cell = ttk.Frame(self.edit_row)
+            cell.grid(row=index // 3, column=index % 3, sticky="w", padx=(0, 6), pady=1)
+            ttk.Label(cell, text=ABILITY_ZH[key], style="Dim.TLabel").pack(side="left")
+            var = tk.IntVar(value=10)
+            ttk.Spinbox(cell, from_=1, to=30, width=3, textvariable=var,
+                        justify="center").pack(side="left", padx=(3, 0))
+            self.score_vars[key] = var
+        buttons = ttk.Frame(self.edit_row)
+        buttons.grid(row=2, column=0, columnspan=3, sticky="e", pady=(2, 0))
+        self.apply_scores_button = ttk.Button(buttons, text="应用", style="Mini.TButton",
+                                              width=5, command=self._apply_scores)
+        self.apply_scores_button.pack(side="left")
+        ttk.Button(buttons, text="取消", style="Mini.TButton", width=5,
+                   command=lambda: self.toggle_edit(False)).pack(side="left", padx=(4, 0))
+        self.base_scores: dict[str, int] = {}
+        self._build_error = ttk.Label(box, text="", style="Dim.TLabel",
+                                      wraplength=290, justify="left")
 
         # --- 中：技能 + 熟练工具 ---------------------------------------------
         # 工具**只列熟练的**，且用一行折行文本而不是小表：全 37 件铺在卡上会把
@@ -145,10 +177,67 @@ class OverviewPage(ttk.Frame):
         if self._on_roll is not None:
             self._on_roll(kind, key)
 
+    # --- 属性编辑 ---------------------------------------------------------
+    def toggle_edit(self, open_: bool | None = None) -> None:
+        """展开/收起属性输入行。默认按当前状态切换。"""
+        expanded = bool(self.edit_row.winfo_manager())
+        want = (not expanded) if open_ is None else bool(open_)
+        if want:
+            self._load_scores()
+            if not expanded:
+                self.edit_row.pack(fill="x", pady=(4, 0))
+            self.edit_toggle.configure(text="收起")
+        else:
+            if expanded:
+                self.edit_row.pack_forget()
+            self.edit_toggle.configure(text="编辑属性")
+            self._set_edit_error("")
+
+    def _load_scores(self) -> None:
+        """初值必须是**原始属性**。没有记录时退回卡面分数并说明：那已经含了加值，
+        照着改会把专长加值吃掉一层。"""
+        for key, var in self.score_vars.items():
+            value = self.base_scores.get(key)
+            if value is None:
+                value = int((self._shown_scores or {}).get(key, 10))
+            var.set(int(value))
+
+    def _apply_scores(self) -> None:
+        scores = {}
+        for key, var in self.score_vars.items():
+            try:
+                scores[key] = int(var.get())
+            except (tk.TclError, ValueError):
+                self._set_edit_error("「%s」不是整数" % ABILITY_ZH[key])
+                return
+        if self._on_action is None:
+            return
+        if self._on_action("scores", scores):
+            self.toggle_edit(False)
+
+    def _set_edit_error(self, text: str) -> None:
+        self._build_error.configure(text=text, foreground=theme.WARN if text else theme.DIM)
+        if text:
+            self._build_error.pack(anchor="w", pady=(2, 0))
+        elif self._build_error.winfo_manager():
+            self._build_error.pack_forget()
+
+    def set_edit_error(self, text: str) -> None:
+        """给外壳用：改属性被规则拒绝时把原因写在这行输入底下，
+        而不是只在窗口底部的状态栏闪一句（那里离输入框太远，容易被忽略）。"""
+        self._set_edit_error(text)
+
     # --- 数据 -------------------------------------------------------------
     def refresh(self, sheet: dict) -> None:
         abilities = sheet.get("abilities") or {}
         saves = sheet.get("saves") or {}
+        # 属性编辑要的是**原始值**（加值之前）。卡面分数已经含了专长/子职加值，
+        # 拿它当初值再「+2」会把加值吃掉一层。
+        self.base_scores = dict(sheet.get("base_scores") or {})
+        self._shown_scores = {key: int((abilities.get(key) or {}).get("score", 10))
+                              for key in ABILITY_ORDER}
+        if self.edit_row.winfo_manager():
+            self._load_scores()        # 展开着的时候跟着数据走，别停在旧值上
         for key in ABILITY_ORDER:
             row = abilities.get(key) or {}
             save = saves.get(key) or {}

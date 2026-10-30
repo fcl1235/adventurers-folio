@@ -229,11 +229,14 @@ def profiles_for(
     tokens: Iterable[str] = (),
     ranged_bonus: int = 0,
     melee_bonus: int = 0,
+    shielded: bool = False,
 ) -> tuple[AttackProfile, ...]:
     """当前这一身能打出的攻击。没拿武器就是徒手打击。
 
     两用武器默认按双手握持算伤害（副手空着的时候），拿了两把就退回单手档 ——
-    「一只手拿剑一只手拿盾」的玩家期望看到 1d8，不是 1d10。
+    「一只手拿剑一只手拿盾」的玩家期望看到 1d8，不是 1d10。所以**持盾也算腾不出手**：
+    `shielded=True` 时永远按单手档算（盾在 SHIELD 槽，不在 OFF_HAND 槽，
+    光看 off 是不是 None 会把持盾的人当成双手握持）。
     """
     main, off = equipped_weapons(actor, weapons)
     tokens = tuple(tokens)
@@ -247,7 +250,8 @@ def profiles_for(
     if main is None and off is None:
         return (profile(None, abilities, prof_bonus, tokens, misc=bonus_for(None)),)
     found: list[AttackProfile] = []
-    two_handed = main is not None and has_property(main, "versatile") and off is None
+    two_handed = (main is not None and has_property(main, "versatile")
+                  and off is None and not shielded)
     if main is not None:
         found.append(profile(main, abilities, prof_bonus, tokens, two_handed=two_handed,
                              misc=bonus_for(main)))
