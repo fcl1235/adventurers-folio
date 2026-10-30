@@ -14,7 +14,9 @@
 
 from __future__ import annotations
 
+import json
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
 import dnd5r.api as api
@@ -36,15 +38,27 @@ WINDOW_MIN = (1180, 820)
 # 真正的硬下限（小屏才用得上）。低于 WINDOW_MIN 时页面会被裁，这是已知限制。
 WINDOW_FLOOR = (1024, 600)
 
+# 「新建」用的默认档案。P7 的建卡向导接上之后，这里只会剩「空档案」的含义。
+DEFAULT_NEW = dict(
+    class_id="dnd2024.class.fighter",
+    class_level=5,
+    scores={"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8},
+    name_zh="无名冒险者",
+)
+SAVE_DIR = Path("saves")
+
 
 class DesktopApp(tk.Tk):
-    def __init__(self, bundle, actor, *, locale: str = "zh", selftest: bool = False) -> None:
+    def __init__(self, bundle, actor, *, locale: str = "zh", selftest: bool = False,
+                 save_dir=None) -> None:
         super().__init__()
         self.bundle = bundle
         self.actor = actor
         self.locale = locale
         self.selftest = selftest
         self.sheet: dict = {}
+        self.save_dir = Path(save_dir) if save_dir else SAVE_DIR
+        self.current_path: Path | None = None
         # 遭遇战是 app 级状态（P15）：战斗页创建/销毁它，能力页（授予目标）
         # 与法术页（召唤入場）都要读同一份 —— 挂在页私有属性上别的页够不着。
         self.encounter = None
@@ -61,6 +75,10 @@ class DesktopApp(tk.Tk):
 
         self._build()
         self.refresh()
+        # 快捷键走 bind_all：窗口内的任何控件拿到焦点都能用
+        self.bind_all("<Control-s>", lambda _event: self.save_dialog())
+        self.bind_all("<Control-o>", lambda _event: self.open_dialog())
+        self.bind_all("<Control-n>", lambda _event: self.new_character())
 
     # --- 窗口尺寸 ---------------------------------------------------------
     def _fit(self) -> None:
@@ -143,6 +161,20 @@ class DesktopApp(tk.Tk):
             chip = Chip(chips, title)
             chip.pack(side="left", padx=(6, 0))
             self.chips[key] = chip
+
+        # 文件按钮。放在 hero 里而不是加一条菜单栏：Tk 的菜单栏是窗口框的一部分，
+        # **不计入 `winfo_reqheight`**，一加就等于凭空少掉 ~20px 可用高度，
+        # 而 chrome_height() 量不到它 —— 那种超出最难发现。hero 里加按钮只占宽度。
+        files = ttk.Frame(hero, style="Panel.TFrame")
+        files.pack(side="right", anchor="n", padx=(0, 10))
+        self.file_buttons: dict[str, ttk.Button] = {}
+        for key, text, action in (("new", "新建", self.new_character),
+                                  ("open", "打开", self.open_dialog),
+                                  ("save", "保存", self.save_dialog)):
+            button = ttk.Button(files, text=text, style="Mini.TButton",
+                                command=action, width=5)
+            button.pack(side="left", padx=(0, 4))
+            self.file_buttons[key] = button
         return hero
 
     # --- 刷新 -------------------------------------------------------------
@@ -176,6 +208,84 @@ class DesktopApp(tk.Tk):
         self.overview.dice_log.add(line)
         self.status.configure(text="掷骰　" + line, foreground=theme.TEXT)
         return result
+
+    # --- 存读档 -----------------------------------------------------------
+    def default_save_path(self) -> Path:
+        name = (self.sheet.get("name") or "character").strip() or "character"
+        return self.save_dir / ("%s.json" % name)
+
+    def save_to(self, path) -> str | None:
+        """写盘。返回实际路径，失败返回 None（原因进状态行，不抛）。"""
+        target = Path(path)
+        try:
+            payload = api.save_character(self.actor)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(json.dumps(payload, ensure_ascii=False, indent=1),
+                              encoding="utf-8")
+        except (OSError, api.DndError) as exc:
+            self.status.configure(text="存档失败：%s" % exc, foreground=theme.WARN)
+            return None
+        self._remember(target)
+        self.current_path = target
+        self.status.configure(text="已保存：%s" % target.name, foreground=theme.TEXT)
+        return str(target)
+
+    def load_from(self, path) -> bool:
+        target = Path(path)
+        try:
+            payload = json.loads(target.read_text(encoding="utf-8"))
+            actor = api.load_character(self.bundle, payload)
+        except (OSError, ValueError, api.DndError) as exc:
+            self.status.configure(text="读档失败：%s" % exc, foreground=theme.WARN)
+            return False
+        self.apply_actor(actor)
+        self._remember(target)
+        self.current_path = target
+        # 换了角色，上一个人的掷骰记录留着只会误导
+        self.overview.dice_log.clear()
+        self.status.configure(text="已读取：%s" % target.name, foreground=theme.TEXT)
+        return True
+
+    def new_character(self) -> None:
+        """新建。**建卡向导（P7）接上之前**先按默认档案建一个。"""
+        actor = api.new_character(self.bundle, **DEFAULT_NEW)
+        self.apply_actor(actor)
+        self.current_path = None
+        self.overview.dice_log.clear()
+        self.status.configure(text="已新建角色（建卡向导尚未接入，暂用默认档案）",
+                              foreground=theme.TEXT)
+
+    def save_dialog(self):
+        """另存为/保存。selftest 下**必须直接返回** —— 弹文件对话框会挂住探针。"""
+        if self.selftest:
+            return None
+        from tkinter import filedialog
+        initial = self.current_path or self.default_save_path()
+        path = filedialog.asksaveasfilename(
+            parent=self, title="保存角色", initialdir=str(self.save_dir),
+            initialfile=initial.name, defaultextension=".json",
+            filetypes=[("冒险者手帖 角色档", "*.json"), ("所有文件", "*.*")])
+        return self.save_to(path) if path else None
+
+    def open_dialog(self):
+        if self.selftest:
+            return False
+        from tkinter import filedialog
+        self.save_dir.mkdir(parents=True, exist_ok=True)
+        path = filedialog.askopenfilename(
+            parent=self, title="打开角色", initialdir=str(self.save_dir),
+            filetypes=[("冒险者手帖 角色档", "*.json"), ("所有文件", "*.*")])
+        return self.load_from(path) if path else False
+
+    def _remember(self, target: Path) -> None:
+        """记下「上次用的文件」。记不住不影响存盘本身，所以失败就忽略。"""
+        try:
+            self.save_dir.mkdir(parents=True, exist_ok=True)
+            (self.save_dir / "_last.json").write_text(
+                json.dumps({"path": str(target)}, ensure_ascii=False),
+                encoding="utf-8")
+        except OSError:
+            pass
 
     def _refresh_header(self) -> None:
         sheet = self.sheet

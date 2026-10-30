@@ -7,6 +7,7 @@
   3. `selftest=True` 时窗口始终 withdrawn —— 探针不许把窗口弹到前台
 """
 
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -505,6 +506,83 @@ class DiceTest(unittest.TestCase):
         self.assertEqual(str(card.check_button.cget("state")), "normal")
         card.check_button.invoke()
         self.assertEqual(app.overview.dice_log.row_count, 1)
+
+
+class SaveLoadTest(unittest.TestCase):
+    """存读档：写到临时目录，不碰用户文件；selftest 下对话框必须短路。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self, tmpdir):
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True, save_dir=tmpdir)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_save_writes_and_load_restores(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            app = self._app(tmp)
+            app.actor.hp.current = 21          # 事实挂在 HpPool 上，不是 actor.hp_current
+            app.refresh()
+            self.assertEqual(app.sheet["hp"]["current"], 21, "refresh 后界面与事实要一致")
+            path = app.save_to(Path(tmp) / "sub" / "hero.json")
+            self.assertIsNotNone(path)
+            self.assertTrue(Path(path).is_file(), "存档目录不存在时也要自动建")
+            self.assertEqual(app.current_path, Path(path))
+
+            # 换一个角色再读回来，确认是覆盖而不是「碰巧一样」
+            fresh = self._app(tmp)
+            self.assertNotEqual(fresh.sheet["name"], "")
+            self.assertTrue(fresh.load_from(path))
+            self.assertEqual(fresh.sheet["hp"]["current"], 21)
+            self.assertEqual(fresh.current_path, Path(path))
+
+    def test_remember_last_path(self):
+        """`_last.json` 记不住不影响存盘，但记得住才有「继续上次」的余地。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            app = self._app(tmp)
+            app.save_to(Path(tmp) / "a.json")
+            remember = Path(tmp) / "_last.json"
+            self.assertTrue(remember.is_file())
+            self.assertIn("a.json", remember.read_text(encoding="utf-8"))
+
+    def test_new_character_resets_to_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            app = self._app(tmp)
+            app.save_to(Path(tmp) / "a.json")
+            app.new_character()
+            self.assertIsNone(app.current_path, "新建之后不该还认着旧文件")
+            self.assertEqual(app.overview.dice_log.row_count, 0)
+
+    def test_load_clears_dice_log(self):
+        """换人之后上一个人的掷骰记录留着只会误导。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            app = self._app(tmp)
+            path = app.save_to(Path(tmp) / "a.json")
+            app.roll_check("ability", "str", rng=ScriptedRng([10]))
+            self.assertEqual(app.overview.dice_log.row_count, 1)
+            app.load_from(path)
+            self.assertEqual(app.overview.dice_log.row_count, 0)
+
+    def test_bad_file_reports_without_raising(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            app = self._app(tmp)
+            broken = Path(tmp) / "broken.json"
+            broken.write_text("{ not json", encoding="utf-8")
+            self.assertFalse(app.load_from(broken))
+            self.assertIn("读档失败", str(app.status.cget("text")))
+            self.assertFalse(app.load_from(Path(tmp) / "不存在.json"))
+
+    def test_dialogs_short_circuit_in_selftest(self):
+        """文件对话框会挂住探针：selftest 下必须直接返回。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            app = self._app(tmp)
+            self.assertIsNone(app.save_dialog())
+            self.assertFalse(app.open_dialog())
+            self.assertEqual(list(Path(tmp).glob("*.json")), [],
+                             "短路还不许顺手写出文件")
 
 
 if __name__ == "__main__":
