@@ -44,6 +44,10 @@ from .encounter import (
     move_combatant, nearby, new_encounter, place_combatant,
     set_combatant_side, teleport_combatant,
 )
+from .state import (
+    clear_conditions, concentration_dc, death_save_view, reset_death_saves,
+    roll_death_save, set_condition, set_exhaustion,
+)
 # 前端要构造 / 捕获的类型与异常是 api 契约的一部分（P6 的教训：
 # 不让 apps 去 import kernel.errors，C3 才守得住）
 from ..kernel.errors import DndError, PluginError, RuleError
@@ -71,6 +75,9 @@ __all__ = [
     "find_power", "use_power", "plugin_summary",
     "spell_info", "summon_info", "monster_catalog", "monster_sheet",
     "monster_actions", "spawn_monster",
+    # 运行时状态：状态勾选 / 力竭 / 濒死 / 专注 DC（P4）
+    "set_condition", "clear_conditions", "set_exhaustion",
+    "roll_death_save", "reset_death_saves", "death_save_view", "concentration_dc",
     "attack_roll", "opportunity_attack", "monster_attack", "attack_options",
     "marks_of", "tokens_of",
     "eligible_forms_for", "morph_class_of", "form_options", "form_view",

@@ -47,4 +47,6 @@ def resolver_for(
         abilities=top.statblock.abilities,
         speeds=dict(top.statblock.speeds),
         facts=facts_for(actor, class_level, loadout),
+        # 力竭跟着**身体**走：变形后（熊、狼）照样 −2/级，所以取 root 而不是 top
+        exhaustion=int(actor.root().exhaustion),
     ))

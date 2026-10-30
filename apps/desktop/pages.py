@@ -12,6 +12,7 @@ from tkinter import ttk
 
 from .cards import AbilityCard
 from .dice import DiceLog
+from .state_panel import StatePanel
 from .widgets import (ABILITY_ZH, CARD_LEFT, COL_MID, COL_RIGHT, GridTable,
                       KeyValue, RollGrid, ScrollFrame, hit_dice_text, section,
                       sense_text)
@@ -44,9 +45,10 @@ class OverviewPage(ttk.Frame):
     分数与豁免是配角。旧程序就是这样，一眼能读出「我力量 +4」。
     """
 
-    def __init__(self, master, on_roll=None) -> None:
+    def __init__(self, master, on_roll=None, on_action=None) -> None:
         super().__init__(master, padding=(6, 4))
         self._on_roll = on_roll
+        self._on_action = on_action
         self._build()
 
     def _build(self) -> None:
@@ -113,6 +115,10 @@ class OverviewPage(ttk.Frame):
 
         # 定高滚动容器：内容长了就滚，**不会把页面 reqheight 顶出去**。
         # 以前这里是两条会长的竖排，攻击表一多就把整页顶破预算。
+        # 定高滚动容器：内容长了就滚，**不会把页面 reqheight 顶出去**。
+        # 以前这里是两条会长的竖排，攻击表一多就把整页顶破预算。
+        # 400 是实测过的：加到 460 就把概览顶到 635（预算 646），余量只剩 11px，
+        # 换 60px 可视高度不值那个风险。
         scroll = ScrollFrame(right, height=400, width=COL_RIGHT)
         scroll.pack(fill="both", expand=True)
         self.right_scroll = scroll
@@ -121,13 +127,19 @@ class OverviewPage(ttk.Frame):
         fight = section(body, "战斗")
         fight.pack(fill="x")
         # 抗性/感官以前全仓库零显示点（§P6 方案里点名过的缺口），一并补在这里
-        self.fight = KeyValue(fight, rows=10)
+        self.fight = KeyValue(fight, rows=11)
         self.fight.pack(fill="x", pady=(0, 6))
 
         attacks = section(body, "攻击")
         attacks.pack(fill="x", pady=(6, 0))
         self.attacks = GridTable(attacks, ATTACK_COLUMNS, rows=8)
         self.attacks.pack(fill="x")
+
+        # 状态（条件 / 力竭 / 死亡豁免 / 专注）。放在右栏滚动区里：
+        # 这四块加起来 400px 上下，钉死在页面上会把概览顶破预算；
+        # 放进定高滚动容器则**不影响页面 reqheight**，往下滚就能看到。
+        self.state_panel = StatePanel(body, on_action=self._on_action)
+        self.state_panel.pack(fill="x", pady=(6, 0))
 
     def _roll(self, kind: str, key: str) -> None:
         if self._on_roll is not None:
@@ -151,6 +163,7 @@ class OverviewPage(ttk.Frame):
         self.refresh_tools(sheet)
         self.refresh_fight(sheet)
         self.refresh_attacks(sheet)
+        self.state_panel.refresh(sheet)
 
     def refresh_skills(self, sheet: dict) -> None:
         rows = []
@@ -191,6 +204,15 @@ class OverviewPage(ttk.Frame):
         self.fight.set_row(8, "生命骰",
                            hit_dice_text(hp.get("hit_dice"), sheet.get("classes")) or "—")
         self.fight.set_row(9, "攻击次数", str(sheet.get("attacks_per_action", "—")))
+        # 10 = 力竭。**这里必须写清它是真扣了的**，与状态那一栏「只记录」相反。
+        exh = sheet.get("exhaustion") or {}
+        level = int(exh.get("level", 0))
+        if level:
+            self.fight.set_row(10, "力竭", "%d 级（d20 %+d · 速度 %+d 尺）"
+                               % (level, int(exh.get("penalty", 0)),
+                                  int(exh.get("speed", 0))))
+        else:
+            self.fight.set_row(10, "力竭", "无")
 
     def refresh_attacks(self, sheet: dict) -> None:
         rows = []

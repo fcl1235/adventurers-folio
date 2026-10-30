@@ -23,6 +23,7 @@ import dnd5r.api as api
 
 from . import theme
 from .cards import Chip
+from .conditions import name_of
 from .dice import format_roll
 from .pages import OverviewPage
 from .pages_encounter import EncounterPage
@@ -103,7 +104,8 @@ class DesktopApp(tk.Tk):
         self.book = ttk.Notebook(self)
         self.book.pack(side="top", fill="both", expand=True, padx=8, pady=(0, 4))
 
-        self.overview = OverviewPage(self.book, on_roll=self.roll_check)
+        self.overview = OverviewPage(self.book, on_roll=self.roll_check,
+                                     on_action=self.on_state_action)
         self.book.add(self.overview, text="概览")
         self.spells = SpellPage(self.book, self)
         self.book.add(self.spells, text="法术")
@@ -191,10 +193,12 @@ class DesktopApp(tk.Tk):
         self.refresh()
 
     # --- 掷骰 -------------------------------------------------------------
-    def roll_check(self, kind: str, key: str = "", rng=None) -> dict | None:
+    def roll_check(self, kind: str, key: str = "", rng=None, note: str = "") -> dict | None:
         """掷一次并写进记录。**加值与优势全由 `api.roll_check` 决定**。
 
         `rng` 只为测试注入：界面上掷的是真骰子，探针里可以塞一条固定序列。
+        `note` 是掷完才知道的那句话（「DC 12 保持专注」）—— 记录里必须有，
+        否则过一会儿回看，看见的只是一次没头没尾的体质豁免。
         失败只改状态行、返回 None —— 让异常冒到 Tk 回调里会打一堆调用栈，
         界面上却一点反馈都没有。
         """
@@ -205,9 +209,69 @@ class DesktopApp(tk.Tk):
                                   foreground=theme.WARN)
             return None
         line = format_roll(result)
+        if note:
+            line = "%s → %s" % (line, note)
         self.overview.dice_log.add(line)
         self.status.configure(text="掷骰　" + line, foreground=theme.TEXT)
         return result
+
+    # --- 状态：条件 / 力竭 / 濒死 / 专注 -----------------------------------
+    def on_state_action(self, name: str, value=None, rng=None) -> dict | None:
+        """把状态面板的四种操作落成事实，然后整页重画。
+
+        `rng` 只为测试注入。失败照旧只改状态行 —— 让 RuleError 冒到 Tk 回调里，
+        玩家看到的是「点了没反应 + 控制台一堆栈」。
+        """
+        try:
+            if name == "condition":
+                ident, on = value
+                changed = api.set_condition(self.actor, ident, on)
+                note = "已记上" if on else "已取下"
+                if not changed:
+                    note = "本来就是" + ("记上的" if on else "取下的")
+                self.status.configure(text="状态　%s %s（已记录，未计入数值）"
+                                            % (name_of(ident), note),
+                                      foreground=theme.TEXT)
+            elif name == "exhaustion":
+                level = api.set_exhaustion(self.actor, int(value))
+                self.status.configure(text="力竭 %d 级（已计入：全部 d20 %+d）"
+                                            % (level, -2 * level),
+                                      foreground=theme.TEXT)
+            elif name == "death_save":
+                result = api.roll_death_save(self.actor, rng)
+                line = "死亡豁免：%d → %s（成功 %d/%d · 失败 %d/%d）" % (
+                    result["roll"], result["label"], result["succeeded"],
+                    result["succeeded_of"], result["failed"], result["failed_of"])
+                self.overview.dice_log.add(line)
+                self.status.configure(text=line, foreground=theme.TEXT)
+                self.refresh()
+                return result
+            elif name == "death_reset":
+                api.reset_death_saves(self.actor)
+                self.status.configure(text="死亡豁免已重置", foreground=theme.TEXT)
+            elif name == "concentration":
+                dc = api.concentration_dc(int(value))
+                roll = self.roll_check(
+                    "save", "con", rng=rng,
+                    note="DC %d 专注" % dc)
+                if roll is None:
+                    return None
+                ok = roll["total"] >= dc
+                self.overview.state_panel.set_concentration_dc(
+                    dc, "成功" if ok else "失败")
+                self.status.configure(
+                    text="专注检定　DC %d → %d，%s" % (dc, roll["total"],
+                                                    "保持专注" if ok else "专注中断"),
+                    foreground=theme.TEXT if ok else theme.WARN)
+                return roll
+            else:
+                raise api.RuleError("不认识的状态操作：%r" % (name,))
+        except api.DndError as exc:
+            self.status.configure(text="状态操作失败：%s" % exc,
+                                  foreground=theme.WARN)
+            return None
+        self.refresh()
+        return None
 
     # --- 存读档 -----------------------------------------------------------
     def default_save_path(self) -> Path:

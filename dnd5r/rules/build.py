@@ -16,6 +16,7 @@ from ..content import (
 from ..kernel.errors import RuleError
 from ..kernel.text import Text
 from ..model.actor import Actor, ActorKind, HpPool
+from ..model.death import DeathSaves
 from ..model.inventory import Inventory
 from ..model.levels import ClassLevel, TotalLevel, as_class_level
 from ..model.profile import ClassEntry, Profile
@@ -545,6 +546,10 @@ def rebuild_actor(
     fresh.conditions = actor.conditions
     fresh.effects = list(actor.effects)
     fresh.display_name = actor.display_name
+    # 力竭与濒死记分同样是运行时事实：改个专长不该把「力竭 2 级」抹掉，
+    # 也不该让一个只剩两次死亡豁免失败的角色复活。
+    fresh.exhaustion = int(actor.root().exhaustion)
+    fresh.death_saves = DeathSaves.from_dict(actor.root().death_saves.to_dict())
     return fresh
 
 

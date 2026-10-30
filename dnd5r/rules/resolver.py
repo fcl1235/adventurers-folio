@@ -18,6 +18,24 @@ from .modifiers import Modifier, Resolution, Stack, resolve
 # d20 上唯一能自然掷出的重击面。门槛只会被能力往小改，永远不会超过它
 CRIT_ON_20 = 20
 
+# 2024 力竭：每级 −2 **全部 d20**（攻击/豁免/属性检定/先攻），−5 尺速度。
+# 数值放在这里而不是散在 UI：角色卡与掷骰必须用同一份，否则「卡上 −4、掷的时候没扣」。
+EXHAUSTION_PER_LEVEL = -2
+EXHAUSTION_SPEED = -5
+
+
+def exhaustion_penalty(exhaustion_level: int) -> int:
+    """力竭给全部 d20 的加值（负数）。0 级返回 0。
+
+    参数名不叫 `level`：C8 会把名字里带 level 的参数默认当成角色等级，
+    要求标注 TotalLevel/ClassLevel —— 力竭等级是 0–6 的小整数，不是职业等级。
+    """
+    return EXHAUSTION_PER_LEVEL * max(0, int(exhaustion_level))
+
+
+def exhaustion_speed_penalty(exhaustion_level: int) -> int:
+    return EXHAUSTION_SPEED * max(0, int(exhaustion_level))
+
 
 @dataclass(frozen=True, slots=True)
 class RefContext:
@@ -27,6 +45,8 @@ class RefContext:
     abilities: Abilities
     speeds: Mapping[str, int]
     facts: Mapping[str, Any] = field(default_factory=dict)
+    # 力竭等级：**属于身体不属于形态**，所以由 derived.resolver_for 从 root() 取
+    exhaustion: int = 0
 
     def as_mapping(self) -> dict:
         base = {
@@ -35,6 +55,7 @@ class RefContext:
             "class_level": None if self.class_level is None else int(self.class_level),
             "abilities": self.abilities,
             "speeds": dict(self.speeds),
+            "exhaustion": int(self.exhaustion),
         }
         base.update(dict(self.facts))
         return base
@@ -91,8 +112,16 @@ class Resolver:
         elif proficient:
             terms.append(Modifier(target="proficiency",
                                   value=self.ctx.prof_bonus, source="熟练"))
+        if self.ctx.exhaustion:
+            terms.append(self._exhaustion_term())
         return resolve(terms, base=stat.abilities.mod(ability), ctx=self._ctx_map,
                        base_label=ability.upper(), mode=mode, mode_sources=mode_sources)
+
+    def _exhaustion_term(self) -> Modifier:
+        """力竭那条明细。**挂在 d20 通道上**，所以豁免/技能/攻击/先攻一次都不会漏 ——
+        逐处去减是数不清的（`initiative`、`attack_bonus`、`ability_check` 各一条路径）。"""
+        return Modifier(target="d20", value=exhaustion_penalty(self.ctx.exhaustion),
+                        source="力竭 %d 级" % self.ctx.exhaustion)
 
     def saving_throw(
         self,
@@ -150,8 +179,18 @@ class Resolver:
 
     # --- 机动与感知 ---------------------------------------------------
     def speed(self, actor: Actor, mode: str = "walk", modifiers: Iterable[Modifier] = ()) -> Resolution:
+        """速度：力竭每级 −5 尺，夹在 0 以上 —— 负速度在桌上没有意义。"""
         base = actor.top().statblock.speed(mode)
-        return resolve(modifiers, base=base, ctx=self._ctx_map)
+        terms = list(modifiers)
+        if self.ctx.exhaustion:
+            terms.append(Modifier(target="speed",
+                                  value=exhaustion_speed_penalty(self.ctx.exhaustion),
+                                  source="力竭 %d 级" % self.ctx.exhaustion))
+        result = resolve(terms, base=base, ctx=self._ctx_map)
+        if result.total >= 0:
+            return result
+        return Resolution(total=0, terms=result.terms, base_label=result.base_label,
+                          mode=result.mode, mode_sources=result.mode_sources)
 
     def sense(self, actor: Actor, mode: str, modifiers: Iterable[Modifier] = ()) -> Resolution:
         base = int(actor.top().statblock.senses.get(mode, 0))

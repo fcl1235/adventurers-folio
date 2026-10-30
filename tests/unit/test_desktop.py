@@ -585,5 +585,89 @@ class SaveLoadTest(unittest.TestCase):
                              "短路还不许顺手写出文件")
 
 
+class StatePanelTest(unittest.TestCase):
+    """状态面板：勾选写事实、力竭写数值、濒死记账、专注给 DC。
+
+    这一组盯的是「面板有没有把话说清」：力竭是真扣了的，状态是只记的 ——
+    弄反了就是撒谎型 UI，比不显示更糟。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self):
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def _labels(self, widget) -> str:
+        texts = []
+        for node in _walk(widget):
+            try:
+                texts.append(str(node.cget("text")))
+            except Exception:
+                continue
+        return " ".join(texts)
+
+    def test_honesty_texts_are_on_screen(self):
+        """状态=只记录，力竭=已计入。两句话必须在界面上，不能只写在注释里。"""
+        app = self._app()
+        panel = app.overview.state_panel
+        text = self._labels(panel)
+        self.assertIn("未计入数值", text)
+        self.assertIn("已计入", text)
+
+    def test_condition_checkbox_writes_fact(self):
+        app = self._app()
+        panel = app.overview.state_panel
+        panel.condition_vars["prone"].set(True)
+        panel._apply_condition("prone")
+        self.assertIn("prone", app.sheet["conditions"])
+        self.assertTrue(panel.condition_vars["prone"].get(), "刷新后勾选状态要跟着事实")
+        panel.condition_vars["prone"].set(False)
+        panel._apply_condition("prone")
+        self.assertNotIn("prone", app.sheet["conditions"])
+
+    def test_exhaustion_changes_numbers_and_row(self):
+        app = self._app()
+        app.on_state_action("exhaustion", 2)
+        self.assertEqual(app.sheet["exhaustion"]["level"], 2)
+        self.assertEqual(app.overview.state_panel.exhaustion_var.get(), 2)
+        self.assertIn("-4", app.overview.fight.value_at(10))
+        self.assertIn("力竭", app.overview.fight.label_at(10))
+
+    def test_death_save_disabled_while_alive(self):
+        app = self._app()
+        self.assertEqual(str(app.overview.state_panel.death_button.cget("state")),
+                         "disabled")
+        app.actor.hp.current = 0
+        app.refresh()
+        self.assertEqual(str(app.overview.state_panel.death_button.cget("state")),
+                         "normal")
+
+    def test_death_save_roll_is_logged(self):
+        app = self._app()
+        app.actor.hp.current = 0
+        app.refresh()
+        result = app.on_state_action("death_save", rng=ScriptedRng([1]))
+        self.assertEqual(result["outcome"], "ongoing")
+        self.assertEqual(result["failed"], 2)
+        self.assertIn("死亡豁免", app.overview.dice_log.lines()[0])
+        self.assertEqual(app.overview.state_panel.success_var.get(), "○○○")
+        self.assertEqual(app.overview.state_panel.failed_var.get(), "●●○")
+
+    def test_concentration_rolls_con_save(self):
+        app = self._app()
+        con = app.sheet["saves"]["con"]["total"]
+        app.on_state_action("concentration", 24, rng=ScriptedRng([15]))
+        dc = 12                                  # max(10, 24 // 2)
+        self.assertIn("DC %d" % dc, app.overview.state_panel.dc_var.get())
+        expected = "成功" if 15 + con >= dc else "失败"
+        self.assertIn(expected, app.overview.state_panel.dc_var.get())
+        self.assertIn("专注", app.overview.dice_log.lines()[0])
+
+
 if __name__ == "__main__":
     unittest.main()

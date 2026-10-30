@@ -6,6 +6,7 @@ from .statblock import Abilities, Statblock
 from .profile import ClassEntry, Profile
 from .resources import Pool, PoolKind, Refresh, ResourcePool
 from .conditions import ConditionSet
+from .death import DeathSaves
 from .inventory import Inventory, ItemRef, EquipSlot
 from .actor import Actor, ActorKind, HpPool
 
@@ -14,7 +15,7 @@ __all__ = [
     "Abilities", "Statblock",
     "ClassEntry", "Profile",
     "Pool", "PoolKind", "Refresh", "ResourcePool",
-    "ConditionSet",
+    "ConditionSet", "DeathSaves",
     "Inventory", "ItemRef", "EquipSlot",
     "Actor", "ActorKind", "HpPool",
 ]

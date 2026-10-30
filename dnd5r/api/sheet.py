@@ -9,7 +9,8 @@ from typing import Any
 
 from ..content import ContentBundle
 from ..kernel.rng import SeededRng
-from ..model.actor import Actor
+from ..model.actor import MAX_EXHAUSTION, Actor
+from ..model.death import DEAD_AT, STABLE_AT
 from ..model.levels import ClassLevel
 from ..rules.armor import ac_inputs, loadout_for
 from ..rules.build import (
@@ -24,7 +25,7 @@ from ..rules.feats import choice_prompt, proficiency_pool, spell_pool
 from ..rules.morph import form_id, reasons_for
 from ..rules.powers import can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus
-from ..rules.resolver import crit_text
+from ..rules.resolver import crit_text, exhaustion_penalty, exhaustion_speed_penalty
 from ..rules.scores import bonus_totals, merge_bonuses, score_bonuses
 from ..rules.spellcasting import casting_summary
 from ..rules.weapons import profiles_for
@@ -317,6 +318,20 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "attacks": attacks,
         "attacks_per_action": attacks_per_action,
         "conditions": list(actor.conditions.ids()),
+        # 力竭与濒死记分。**界面不再自己乘 2** —— 减值与速度惩罚都从这里给，
+        # 免得再出「卡上写 −4、掷骰时没扣」那种对不上的老毛病。
+        "exhaustion": {
+            "level": int(root.exhaustion),
+            "max": MAX_EXHAUSTION,
+            "penalty": exhaustion_penalty(root.exhaustion),
+            "speed": exhaustion_speed_penalty(root.exhaustion),
+        },
+        "death_saves": {
+            "succeeded": root.death_saves.succeeded,
+            "failed": root.death_saves.failed,
+            "succeeded_of": STABLE_AT, "failed_of": DEAD_AT,
+            "dead": root.death_saves.dead, "stable": root.death_saves.stable,
+        },
         "morphed": actor.top().layer is not None,
         # 形态的整张卡（含它自己的攻击）：变形后界面要照着它出手，
         # 不然熊只会用徒手 1 + 力量调整值 —— 内容里的 1d8+3 等于没写。

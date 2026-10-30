@@ -12,6 +12,7 @@ from enum import Enum
 
 from ..kernel.errors import RuleError
 from .conditions import ConditionSet
+from .death import DeathSaves
 from .inventory import Inventory
 from .marks import MarkSet
 from .profile import Profile
@@ -25,6 +26,10 @@ class ActorKind(str, Enum):
     MONSTER = "monster"
     FORM = "form"
     SUMMON = "summon"
+
+
+# 2024：力竭 6 级即死亡。每级 −2 全部 d20、−5 尺速度（数值在 rules/resolver.py）
+MAX_EXHAUSTION = 6
 
 
 @dataclass
@@ -95,6 +100,11 @@ class Actor:
     # 一次性标记（本回合的下一次攻击优势、待用的额外伤害）与「每回合一次」的记账。
     # **不进存档**：关掉程序就不该记得上一轮那个优势还没用（见 model/marks.py）。
     marks: MarkSet = field(default_factory=MarkSet)
+    # 力竭等级 0–6。**这是事实不是派生值**：每级 −2 全部 d20、−5 尺速度由
+    # `rules/resolver.py` 现算，这里只记「几级」。6 级是死亡，夹在上限内。
+    exhaustion: int = 0
+    # 濒死记分（0 HP 之后掷死亡豁免）。稳定/死亡之后由 `reset()` 清零。
+    death_saves: DeathSaves = field(default_factory=DeathSaves)
 
     def __post_init__(self) -> None:
         if not self.id:
@@ -105,6 +115,10 @@ class Actor:
             raise RuleError("statblock 必须是 Statblock")
         if not isinstance(self.hp, HpPool):
             raise RuleError("hp 必须是 HpPool")
+        if isinstance(self.exhaustion, bool) or not isinstance(self.exhaustion, int):
+            raise RuleError("exhaustion 必须是整数：%r" % (self.exhaustion,))
+        if not 0 <= self.exhaustion <= MAX_EXHAUSTION:
+            raise RuleError("力竭等级必须在 0–%d：%r" % (MAX_EXHAUSTION, self.exhaustion))
 
     # --- 层 -----------------------------------------------------------
     @property

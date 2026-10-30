@@ -6,12 +6,15 @@ from typing import Any, Mapping
 
 from ..content import ContentBundle
 from ..kernel.errors import RuleError
-from ..model.actor import Actor
+from ..model.actor import MAX_EXHAUSTION, Actor
+from ..model.death import DeathSaves
 from ..model.profile import Profile
 from ..rules.build import build_from_profile
 from ..rules.spellcasting import SLOT_PREFIX
 
-SAVE_VERSION = 1
+# 2：加了 conditions / exhaustion / death_saves 三段。**读 v1 不迁移**——
+# 缺的段一律取默认（没有状态、不力竭、没开始掷死亡豁免），旧档照旧能打开。
+SAVE_VERSION = 2
 
 # 旧档的位池 id 前缀（F36 之前位池挂在插件命名空间下）。存档按池 id 记余量，
 # 前缀变了不迁移，读档时旧 id 匹配不上池，已用位会静默丢 —— 所以在这里改写。
@@ -46,6 +49,11 @@ def save_character(actor: Actor, locale: str = "zh") -> dict:
         # 已用数按池 id 记：内容改了池容量也不会读到负数（读档时夹一次）
         "resources": {pool_id: int(pool.used)
                       for pool_id, pool in root.resources.pools.items()},
+        # 以下三段是 v2 新增。条件与力竭是**玩家点出来的事实**，不是派生值，
+        # 所以必须进档：不存的话「关掉程序回来，状态全没了」比不显示更糟。
+        "conditions": list(actor.conditions.ids()),
+        "exhaustion": int(root.exhaustion),
+        "death_saves": root.death_saves.to_dict(),
     }
 
 
@@ -82,4 +90,16 @@ def load_character(
         amount = min(int(used), pool.capacity)
         if amount > 0:
             pool.spend(amount)
+    # v2 段：缺了就是默认值（v1 旧档没有这三段，不该因此读不开）
+    for ident in (data.get("conditions") or ()):
+        ident = str(ident).strip()
+        if ident:
+            actor.conditions.add(ident)
+    level = data.get("exhaustion") or 0
+    try:
+        level = int(level)
+    except (TypeError, ValueError):
+        level = 0
+    actor.exhaustion = max(0, min(level, MAX_EXHAUSTION))
+    actor.death_saves = DeathSaves.from_dict(data.get("death_saves"))
     return actor
