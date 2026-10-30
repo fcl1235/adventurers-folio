@@ -512,10 +512,14 @@ def rebuild_actor(
     actor: Actor,
     profile: Profile | None = None,
 ) -> Actor:
-    """重建并**保住运行时状态**：当前 HP、临时 HP、资源的已用数。
+    """重建并**保住运行时状态**：当前 HP、临时 HP、资源的已用数、背包与装备。
 
     界面改一个专长就得重建（属性加值变了），但玩家不该因此回满血、
     或者把用掉的狂暴次数吐回来 —— 那是两件不同的事。
+
+    **装备也必须搬**：AC 是每次取卡时从 `inventory.equipped` 现读的
+    （`rules/armor.loadout_for`），不搬就等于「改一次力量，护甲自己脱了」。
+    实测过：穿锁甲 + 盾 AC 18，改完 str 回到 12。
 
     `profile` 是「还没写进 actor 的档案」：先在一份新档案上重建，成功了再换掉旧的。
     这样校验失败时 actor 一个字段都没动过。
@@ -535,6 +539,9 @@ def rebuild_actor(
         used = pool.capacity - pool.available
         if used > 0:
             fresh.resources.pools[pool_id].spend(used)
+    # 深拷贝而不是共享：调用方可能还留着旧 actor，别名会让「改一份、两份都变」。
+    # 走 to_dict/from_dict 而不是 copy.deepcopy，顺便验证背包序列化是完整的。
+    fresh.inventory = Inventory.from_dict(actor.root().inventory.to_dict())
     fresh.conditions = actor.conditions
     fresh.effects = list(actor.effects)
     fresh.display_name = actor.display_name

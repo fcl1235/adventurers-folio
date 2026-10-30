@@ -438,7 +438,10 @@ def main() -> int:
             page_count = len(app.pages)
             report = app.layout_report()
             avail_w = WINDOW_MIN[0] - 16                   # 左右各 8 的 padding
-            avail_h = WINDOW_MIN[1] - app.status.winfo_reqheight() - 40  # 40 = 头部 + 标签条
+            # 高度：status 是已 pack 的底部条，其余（顶栏 / 标签条 / 外边距）现量。
+            # 以前这里写死 `- 40`，实测 chrome 是 99 —— 预算多算了 59px，
+            # 加了 hero 之后还会更假。改量的，就不会再出现「绿着但超了」。
+            avail_h = WINDOW_MIN[1] - app.chrome_height()
             for row in report["pages"]:
                 width, height = row["req"]
                 print("%-14s 页面 %4dx%-4d 可用 %4dx%-4d"

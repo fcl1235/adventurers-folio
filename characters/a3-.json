@@ -7,7 +7,8 @@
   "subclass": "Circle of the Moon",
   "order": "magician",
   "land": "temperate",
-  "wild_shape_id": "lion",
+  "wild_shape_id": null,
+  "ws_refund": 1,
   "companion_id": null,
   "metamagic": [],
   "innate_active": false,
@@ -75,6 +76,7 @@
     ]
   },
   "spellbook": [],
+  "invocations": [],
   "book_pending": 0,
   "weapon": "木棍 Quarterstaff",
   "weapon_magic": 0,
@@ -86,7 +88,7 @@
   "lineage": "wood",
   "race_free_used": [],
   "res_used": {
-    "wildshape": 0
+    "wildshape": 1
   },
   "font_slots": {},
   "hit_dice_used": 0,

@@ -121,6 +121,20 @@ class DesktopApp(tk.Tk):
         """页面自身需要的尺寸（不依赖窗口是否可见）。"""
         return page.winfo_reqwidth(), page.winfo_reqheight()
 
+    def chrome_height(self) -> int:
+        """窗口中**不归页面用**的那部分高度：状态栏 + 顶栏 + 标签条 + 外边距。
+
+        **现量，不许写死。** 这里原来在测试里被写死成 40（"header + 标签条"），
+        一旦顶栏长高（比如加一条 hero），那个 40 就假了 —— 会出现
+        「报 LAYOUT OK 但实际已经超预算」这种最难查的错。
+
+        算法：根窗口的 reqheight 由已 pack 的子控件累加得出，
+        减掉最高那一页的 reqheight，剩下的就是 chrome。
+        """
+        self.update_idletasks()
+        tallest = max(self.page_size(page)[1] for page in self.pages)
+        return self.winfo_reqheight() - tallest
+
     def layout_report(self) -> dict:
         """布局审计用的纯数据：每页 reqsize + 中栏预算。
 

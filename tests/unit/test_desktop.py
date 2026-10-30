@@ -70,10 +70,15 @@ class DesktopAppTest(unittest.TestCase):
         self.assertIn("5", text)
 
     def test_layout_fits_min_window(self):
+        """每页的 reqsize 都要塞得进「窗口高 − 现量的 chrome」。
+
+        chrome 以前写死 40，实测是 99：那条断言实际上多给了 59px 余量，
+        属于「绿着但可能已经超了」。现在两边（这里与 uicheck）都走 chrome_height()。
+        """
         app = self._app()
         report = app.layout_report()
         avail_w = WINDOW_MIN[0] - 16
-        avail_h = WINDOW_MIN[1] - app.status.winfo_reqheight() - 40
+        avail_h = WINDOW_MIN[1] - app.chrome_height()
         for row in report["pages"]:
             width, height = row["req"]
             self.assertLessEqual(width, avail_w, "页面横向溢出")

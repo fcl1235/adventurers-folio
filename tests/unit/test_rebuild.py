@@ -17,6 +17,7 @@ from pathlib import Path
 
 import dnd5r.api as api
 from dnd5r.kernel.errors import RuleError
+from dnd5r.model.inventory import EquipSlot
 from dnd5r.model.profile import Profile
 from dnd5r.rules.build import build_from_profile, rebuild_actor
 
@@ -28,6 +29,8 @@ WIZARD = "dnd2024.class.wizard"
 ROGUE = "dnd2024.class.rogue"
 ASI = "dnd2024.feat.ability_score_improvement"
 SKILL_EXPERT = "dnd2024.feat.skill_expert"
+CHAIN_MAIL = "dnd2024.item.armor.chain_mail"
+SHIELD = "dnd2024.item.armor.shield"
 
 STR_SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
 INT_SCORES = {"str": 8, "dex": 14, "con": 14, "int": 17, "wis": 12, "cha": 10}
@@ -68,6 +71,26 @@ class RebuildTest(unittest.TestCase):
         self.assertEqual(fresh.hp.current, 12)
         self.assertEqual(fresh.hp.temp, 4)
         self.assertEqual(fresh.resources.pools[pool_id].used, 1)
+
+    def test_rebuild_keeps_equipment(self):
+        """重建要保住装备。
+
+        AC 是取卡时从 `inventory.equipped` 现读的（`rules/armor.loadout_for`），
+        所以不搬背包就等于「界面里改一次力量，护甲自己脱了」——
+        实测过：穿锁甲 + 盾 AC 18，改完 str 掉回 12。
+        """
+        actor = self._fighter(level=5)
+        actor.inventory.equip(EquipSlot.ARMOR, CHAIN_MAIL)
+        actor.inventory.equip(EquipSlot.SHIELD, SHIELD)
+        before = api.character_sheet(actor, self.bundle)["ac"]["total"]
+
+        scores = dict(STR_SCORES, str=18)
+        fresh = rebuild_actor(self.bundle, actor,
+                              actor.profile.with_base_scores(scores))
+        after = api.character_sheet(fresh, self.bundle)["ac"]["total"]
+        self.assertEqual(after, before, "重建后 AC 变了 —— 装备没搬过去")
+        self.assertEqual(fresh.inventory.equipped, actor.inventory.equipped)
+        self.assertIsNot(fresh.inventory, actor.inventory, "背包被共享了，改一份会两份都变")
 
     def test_rebuild_keeps_hand_added_choices(self):
         """玩家单独挑的熟练（不由内容决定）不能在重建时丢掉。"""
