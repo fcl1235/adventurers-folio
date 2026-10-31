@@ -10,7 +10,8 @@
 P11（§14.32）起按条目类型分文件，本文件只做转发 —— 想改哪类内容去对应模块：
 
   resources  池定义          classes   职业与子职
-  items      护甲与武器      skills    技能与工具
+  items      护甲、武器与冒险装备  packages  起始装备包
+  skills     技能与工具
   feats      专长            bestiary  怪物 / 召唤物 / 形态
   spells     法术与法术表    loader    插件加载与交叉校验
 
@@ -20,9 +21,11 @@ P11（§14.32）起按条目类型分文件，本文件只做转发 —— 想�
 
 from .resources import REFRESH_KINDS, RESOURCE_KINDS, ResourceDef, parse_resource
 from .items import (
-    ARMOR_CATEGORIES, WEAPON_CATEGORIES, WEAPON_DAMAGE_TYPES, WEAPON_PROPERTIES,
-    ArmorDef, WeaponDef, parse_armor, parse_weapon,
+    ARMOR_CATEGORIES, GEAR_CATEGORIES, WEAPON_CATEGORIES, WEAPON_DAMAGE_TYPES,
+    WEAPON_PROPERTIES, ArmorDef, GearDef, WeaponDef, parse_armor, parse_gear,
+    parse_weapon,
 )
+from .packages import StartingPack, parse_starting_pack
 from .classes import (
     ClassDef, MulticlassDef, SubclassDef, parse_class,
     parse_multiclass_entry, parse_slots, parse_subclass, powers_at_level,
@@ -84,7 +87,8 @@ from ..rules.summon import (  # noqa: F401
 )
 
 __all__ = [
-    "ResourceDef", "ClassDef", "SubclassDef", "ArmorDef", "WeaponDef",
+    "ResourceDef", "ClassDef", "SubclassDef", "ArmorDef", "WeaponDef", "GearDef",
+    "StartingPack", "GEAR_CATEGORIES", "parse_gear", "parse_starting_pack",
     "MonsterDef", "SummonDef",
     "PluginContent", "ContentBundle",
     "parse_resource", "parse_class", "parse_subclass", "parse_cr_axis", "parse_form",

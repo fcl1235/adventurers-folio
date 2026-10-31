@@ -1,0 +1,204 @@
+# 2024 SRD 5.2 起始装备（由 tools/gen_starting_gear.py 从 data/raw/classes.json 生成）。
+#
+# 每个职业两到三组互斥选项：一组是「装备包 + 金币」，另一组是纯金币。
+# 建卡与建卡向导都从这里取 —— 界面上的单选就是这里的 `label`。
+#
+# 字段：
+#   gold   选项**附带**的金币（纯金币选项就是全部家当）
+#   items  [item: 内容 id, count: 件数]；空列表表示这一组只有钱
+#
+# 自动装备（哪件穿上、哪把拿在手上）不写在这里，由 rules/starting.py 按类别推断。
+
+- class: dnd2024.class.barbarian
+  options:
+    - id: dnd2024.package.barbarian.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 15
+      items:
+        - {item: dnd2024.item.weapon.greataxe, count: 1}
+        - {item: dnd2024.item.weapon.handaxe, count: 4}
+        - {item: dnd2024.item.gear.explorers_pack, count: 1}
+    - id: dnd2024.package.barbarian.b
+      label: {zh: 金币, en: Gold}
+      gold: 75
+      items: []
+- class: dnd2024.class.bard
+  options:
+    - id: dnd2024.package.bard.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 19
+      items:
+        - {item: dnd2024.item.armor.leather, count: 1}
+        - {item: dnd2024.item.weapon.dagger, count: 2}
+        - {item: dnd2024.item.gear.entertainers_pack, count: 1}
+    - id: dnd2024.package.bard.b
+      label: {zh: 金币, en: Gold}
+      gold: 90
+      items: []
+- class: dnd2024.class.cleric
+  options:
+    - id: dnd2024.package.cleric.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 7
+      items:
+        - {item: dnd2024.item.armor.chain_shirt, count: 1}
+        - {item: dnd2024.item.armor.shield, count: 1}
+        - {item: dnd2024.item.weapon.mace, count: 1}
+        - {item: dnd2024.item.gear.holy_symbol, count: 1}
+        - {item: dnd2024.item.gear.priests_pack, count: 1}
+    - id: dnd2024.package.cleric.b
+      label: {zh: 金币, en: Gold}
+      gold: 110
+      items: []
+- class: dnd2024.class.druid
+  options:
+    - id: dnd2024.package.druid.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 9
+      items:
+        - {item: dnd2024.item.armor.leather, count: 1}
+        - {item: dnd2024.item.armor.shield, count: 1}
+        - {item: dnd2024.item.weapon.sickle, count: 1}
+        - {item: dnd2024.item.weapon.quarterstaff, count: 1}
+        - {item: dnd2024.item.gear.explorers_pack, count: 1}
+        - {item: dnd2024.item.gear.herbalism_kit, count: 1}
+    - id: dnd2024.package.druid.b
+      label: {zh: 金币, en: Gold}
+      gold: 50
+      items: []
+- class: dnd2024.class.fighter
+  options:
+    - id: dnd2024.package.fighter.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 4
+      items:
+        - {item: dnd2024.item.armor.chain_mail, count: 1}
+        - {item: dnd2024.item.weapon.greatsword, count: 1}
+        - {item: dnd2024.item.weapon.flail, count: 1}
+        - {item: dnd2024.item.weapon.javelin, count: 8}
+        - {item: dnd2024.item.gear.dungeoneers_pack, count: 1}
+    - id: dnd2024.package.fighter.b
+      label: {zh: 装备包 B, en: Equipment pack B}
+      gold: 11
+      items:
+        - {item: dnd2024.item.armor.studded_leather, count: 1}
+        - {item: dnd2024.item.weapon.scimitar, count: 1}
+        - {item: dnd2024.item.weapon.shortsword, count: 1}
+        - {item: dnd2024.item.weapon.longbow, count: 1}
+        - {item: dnd2024.item.gear.arrows, count: 20}
+        - {item: dnd2024.item.gear.quiver, count: 1}
+        - {item: dnd2024.item.gear.dungeoneers_pack, count: 1}
+    - id: dnd2024.package.fighter.c
+      label: {zh: 金币, en: Gold}
+      gold: 155
+      items: []
+- class: dnd2024.class.monk
+  options:
+    - id: dnd2024.package.monk.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 11
+      items:
+        - {item: dnd2024.item.weapon.spear, count: 1}
+        - {item: dnd2024.item.weapon.dagger, count: 5}
+        - {item: dnd2024.item.gear.explorers_pack, count: 1}
+    - id: dnd2024.package.monk.b
+      label: {zh: 金币, en: Gold}
+      gold: 50
+      items: []
+- class: dnd2024.class.paladin
+  options:
+    - id: dnd2024.package.paladin.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 9
+      items:
+        - {item: dnd2024.item.armor.chain_mail, count: 1}
+        - {item: dnd2024.item.armor.shield, count: 1}
+        - {item: dnd2024.item.weapon.longsword, count: 1}
+        - {item: dnd2024.item.weapon.javelin, count: 6}
+        - {item: dnd2024.item.gear.holy_symbol, count: 1}
+        - {item: dnd2024.item.gear.priests_pack, count: 1}
+    - id: dnd2024.package.paladin.b
+      label: {zh: 金币, en: Gold}
+      gold: 150
+      items: []
+- class: dnd2024.class.ranger
+  options:
+    - id: dnd2024.package.ranger.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 7
+      items:
+        - {item: dnd2024.item.armor.studded_leather, count: 1}
+        - {item: dnd2024.item.weapon.scimitar, count: 1}
+        - {item: dnd2024.item.weapon.shortsword, count: 1}
+        - {item: dnd2024.item.weapon.longbow, count: 1}
+        - {item: dnd2024.item.gear.arrows, count: 20}
+        - {item: dnd2024.item.gear.quiver, count: 1}
+        - {item: dnd2024.item.gear.sprig_of_mistletoe, count: 1}
+        - {item: dnd2024.item.gear.explorers_pack, count: 1}
+    - id: dnd2024.package.ranger.b
+      label: {zh: 金币, en: Gold}
+      gold: 150
+      items: []
+- class: dnd2024.class.rogue
+  options:
+    - id: dnd2024.package.rogue.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 8
+      items:
+        - {item: dnd2024.item.armor.leather, count: 1}
+        - {item: dnd2024.item.weapon.dagger, count: 2}
+        - {item: dnd2024.item.weapon.shortsword, count: 1}
+        - {item: dnd2024.item.weapon.shortbow, count: 1}
+        - {item: dnd2024.item.gear.arrows, count: 20}
+        - {item: dnd2024.item.gear.quiver, count: 1}
+        - {item: dnd2024.item.gear.thieves_tools, count: 1}
+        - {item: dnd2024.item.gear.burglars_pack, count: 1}
+    - id: dnd2024.package.rogue.b
+      label: {zh: 金币, en: Gold}
+      gold: 100
+      items: []
+- class: dnd2024.class.sorcerer
+  options:
+    - id: dnd2024.package.sorcerer.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 28
+      items:
+        - {item: dnd2024.item.weapon.spear, count: 1}
+        - {item: dnd2024.item.weapon.dagger, count: 2}
+        - {item: dnd2024.item.gear.crystal, count: 1}
+        - {item: dnd2024.item.gear.dungeoneers_pack, count: 1}
+    - id: dnd2024.package.sorcerer.b
+      label: {zh: 金币, en: Gold}
+      gold: 50
+      items: []
+- class: dnd2024.class.warlock
+  options:
+    - id: dnd2024.package.warlock.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 15
+      items:
+        - {item: dnd2024.item.armor.leather, count: 1}
+        - {item: dnd2024.item.weapon.sickle, count: 1}
+        - {item: dnd2024.item.weapon.dagger, count: 2}
+        - {item: dnd2024.item.gear.orb, count: 1}
+        - {item: dnd2024.item.gear.book, count: 1}
+        - {item: dnd2024.item.gear.scholars_pack, count: 1}
+    - id: dnd2024.package.warlock.b
+      label: {zh: 金币, en: Gold}
+      gold: 100
+      items: []
+- class: dnd2024.class.wizard
+  options:
+    - id: dnd2024.package.wizard.a
+      label: {zh: 装备包 A, en: Equipment pack A}
+      gold: 5
+      items:
+        - {item: dnd2024.item.weapon.dagger, count: 2}
+        - {item: dnd2024.item.weapon.quarterstaff, count: 1}
+        - {item: dnd2024.item.gear.robe, count: 1}
+        - {item: dnd2024.item.gear.spellbook, count: 1}
+        - {item: dnd2024.item.gear.scholars_pack, count: 1}
+    - id: dnd2024.package.wizard.b
+      label: {zh: 金币, en: Gold}
+      gold: 55
+      items: []

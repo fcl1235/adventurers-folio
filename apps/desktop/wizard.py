@@ -238,6 +238,9 @@ class WizardView(ttk.Frame):
         self.draft["cantrips"] = {}
         self.draft["prepared"] = {}
         self.draft["subclass"] = ""
+        # 起始装备是**按职业**给的：不清掉就会带着上个职业的包 id 去建卡，
+        # 校验会报「没有这组起始装备」，而人还停在职业这一步。
+        self.draft["starting_pack"] = ""
         self._fill_class_info()
         self._report()
 
@@ -736,13 +739,69 @@ class WizardView(ttk.Frame):
         ttk.Entry(en_box, textvariable=self.name_en_var, width=24).pack(side="left")
         self.name_en_var.trace_add("write", lambda *_: self._on_name_en())
 
+        # 起始装备：改卡模式不画 —— 改卡走 rebuild，背包原样保留，
+        # 摆一排单选只会让人以为「换套餐会重发装备」。
+        if not self.editing:
+            self._build_starting()
+
         table = section(self.body, "确认一下")
         table.pack(fill="both", expand=True, pady=(8, 0))
-        # 9 行正好是 `_fill_summary()` 铺的条数。多给几行只会多出 3 条空白，
+        # 10 行正好是 `_fill_summary()` 铺的条数。多给几行只会多出 3 条空白，
         # 白占高度（这个窗口的高度预算是按像素算的）。
-        self.summary = KeyValue(table, rows=9)
+        self.summary = KeyValue(table, rows=10)
         self.summary.pack(anchor="w")
         self._fill_summary()
+
+    def _build_starting(self) -> None:
+        """起始装备单选：一组 = 一批物品 + 一点金币；「金币」那组只有钱。
+
+        默认选中第一组（内容里写的是 A 包）。`draft["starting_pack"]` 写具体 id，
+        空串的语义留给 `build_actor`（= 默认那一组），界面不依赖那个默认值。
+        """
+        class_id = str(self.draft.get("class_id") or "")
+        options = api.starting_options(self.app.bundle, class_id,
+                                       self.app.locale)["options"]
+        if not options:
+            return
+        ids = [row["id"] for row in options]
+        current = str(self.draft.get("starting_pack") or "")
+        if current not in ids:
+            current = ids[0]
+        self.draft["starting_pack"] = current
+        box = section(self.body, "起始装备",
+                      "建卡时直接穿在身上、放进背包的那一组。之后可以在装备页改。")
+        box.pack(fill="x", pady=(8, 0))
+        self.starting_var = tk.StringVar(value=current)
+        for row in options:
+            ttk.Radiobutton(box, text=row["label"], value=row["id"],
+                            variable=self.starting_var,
+                            command=self._on_starting).pack(side="left", padx=(0, 12))
+
+    def _on_starting(self) -> None:
+        self.draft["starting_pack"] = self.starting_var.get()
+        self._fill_summary()
+
+    def _starting_text(self) -> str:
+        """汇总行用的一行摘要：标签 + 前几件 + 金币。"""
+        bundle = self.app.bundle
+        class_id = str(self.draft.get("class_id") or "")
+        pack_id = str(self.draft.get("starting_pack") or "")
+        options = api.starting_options(bundle, class_id, self.app.locale)["options"]
+        row = next((item for item in options if item["id"] == pack_id), None)
+        if row is None:
+            return "—"
+        # 只列前 3 件：这一栏是 label + value 两列，长了自己会把表格撑宽
+        names = "、".join(
+            "%s×%d" % (item["name"], item["count"]) if item["count"] > 1 else item["name"]
+            for item in row["items"][:3])
+        if len(row["items"]) > 3:
+            names += " …"
+        text = row["label"]
+        if names:
+            text += "：" + names
+        if row["gold"]:
+            text += "（%d gp）" % row["gold"]
+        return text
 
     def _on_name(self) -> None:
         self.draft["name_zh"] = self.name_var.get()
@@ -775,6 +834,8 @@ class WizardView(ttk.Frame):
         class_id = str(draft.get("class_id") or "")
         rows.append(("戏法", str(len((draft.get("cantrips") or {}).get(class_id, ())))))
         rows.append(("法术", str(len((draft.get("prepared") or {}).get(class_id, ())))))
+        if not self.editing:
+            rows.append(("起始装备", self._starting_text()))
         self.summary.clear()
         for index, (caption, value) in enumerate(rows):
             self.summary.set_row(index, caption, value)

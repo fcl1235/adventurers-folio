@@ -31,6 +31,7 @@ from .powers import Power
 from .progression import proficiency_bonus
 from .spellcasting import check_spell_picks
 from .scores import ScoreBonus, apply_score_bonuses, merge_bonuses, score_bonuses
+from .starting import apply_starting_pack, resolve_pack
 # 背景加值的合法形态（+2/+1 或 +1/+1/+1）在 abilities 里判，这里只负责落成通道
 from .abilities import background_bonus as resolve_background_bonus
 
@@ -193,6 +194,7 @@ def build_actor(
     background: str = "",
     background_bonus: Mapping[str, int] | None = None,
     masteries: "Sequence[str]" = (),
+    starting_pack: str | None = None,
 ) -> Actor:
     """建角色（支持兼职）。事实的拼装：职业等级、属性、熟练、资源池、HP 上限。
 
@@ -425,6 +427,13 @@ def build_actor(
     _build_slot_pools(bundle, actor, all_defs)
     for def_, lv in all_defs:
         actor.resources.add(hit_dice_pool(def_.id, def_.hit_die, lv))
+    # 起始装备（2024 的 A/B 选项）：`None` = 不给，空串 = 该职业的默认那一组。
+    # 默认**不给**是刻意的 —— 底层建角色的调用方（对账、单测、造 NPC）不该
+    # 因为内容里多了一组装备就换来不同的 AC；界面那条路会显式传。
+    if starting_pack is not None:
+        pack = resolve_pack(bundle, class_id, starting_pack)
+        if pack is not None:
+            apply_starting_pack(bundle, actor.inventory, pack)
     return actor
 
 

@@ -188,6 +188,7 @@ def new_character(
     masteries: Sequence[str] = (),
     extra_proficiencies: Sequence[str] = (),
     extra_expertise: Sequence[str] = (),
+    starting_pack: str | None = None,
 ) -> Actor:
     """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。
 
@@ -200,6 +201,11 @@ def new_character(
     兼职职业的子职用 `extra_subclasses`。
     `cantrips` / `prepared` 是法术选择：键都是**职业 id**，值是法术 id。
     数量与环级的校验在 `rules/spellcasting.check_spell_picks` 里，选错当场拒绝。
+
+    `starting_pack` 是起始装备（2024 的 A/B 选项）：`None` 表示不给，
+    `""` 表示这个职业的默认那一组，也可以给具体 id（`dnd2024.package.fighter.b`）。
+    **默认不给**：底层调用方（对账、单测、造 NPC）不该因为内容里多了一组装备
+    就换来不同的 AC；建卡向导那条路会显式传 `""`。
     """
     return build_actor(
         content,
@@ -222,6 +228,7 @@ def new_character(
         masteries=tuple(masteries),
         extra_proficiencies=tuple(extra_proficiencies),
         extra_expertise=tuple(extra_expertise),
+        starting_pack=starting_pack,
     )
 
 

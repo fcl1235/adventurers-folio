@@ -27,6 +27,7 @@ from ..rules.abilities import (
     CHARACTER_SCORE_MAX, background_bonus, score_range_ok, validate_point_buy,
 )
 from ..rules.spellcasting import check_spell_picks
+from ..rules.starting import starting_options
 from .character import new_character
 from .origin import (
     SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, species_catalog,
@@ -267,7 +268,10 @@ def step_options(content: ContentBundle, step: str, draft: Mapping[str, Any],
                     "cantrips": [], "levels": [], "slots": [0] * 9}
         return spell_choices(content, class_id, level, locale)
     if step == "summary":
-        return {"steps": [dict(item) for item in WIZARD_STEPS]}
+        return {"steps": [dict(item) for item in WIZARD_STEPS],
+                # 起始装备的互斥选项（A 包 / 纯金币…）。没有内容的职业是空列表。
+                "starting": starting_options(content, class_id, locale)
+                if class_id else {"count": 0, "options": []}}
     raise RuleError("不认识的建卡步骤：%r" % (step,))
 
 
@@ -415,6 +419,13 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
                                       cantrips_map, prepared_map, locale):
             add("spells", text)
 
+    # --- 起始装备 ---
+    # 空串是合法的（= 默认那一组），这里只拦「写了具体 id 却不是这个职业的」。
+    pack_id = str(draft.get("starting_pack") or "")
+    if pack_id:
+        if not any(pack.id == pack_id for pack in content.starting_packs(class_id)):
+            add("summary", "没有这组起始装备：%s" % pack_id)
+
     return problems
 
 
@@ -439,6 +450,8 @@ def _clean_draft(draft: Mapping[str, Any]) -> dict:
                      for key, value in (draft.get("cantrips") or {}).items() if value},
         "prepared": {str(key): [str(item) for item in value]
                      for key, value in (draft.get("prepared") or {}).items() if value},
+        # 空串交给 `build_actor` 解释成「默认那一组」；None 才是「不给装备」
+        "starting_pack": str(draft.get("starting_pack") or ""),
     }
 
 
@@ -480,6 +493,8 @@ def empty_draft() -> dict:
         "masteries": [],
         "cantrips": {},
         "prepared": {},
+        # 空串 = 用这个职业的默认那一组（A 包）。界面上的单选写的是具体 id。
+        "starting_pack": "",
     }
 
 

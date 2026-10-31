@@ -25,7 +25,10 @@ from .classes import (
 )
 from .feats import FeatDef, SPELL_LIST_ANY, parse_feat
 from .backgrounds import BackgroundDef, parse_background
-from .items import ArmorDef, WeaponDef, parse_armor, parse_weapon
+from .items import (
+    ArmorDef, GearDef, WeaponDef, parse_armor, parse_gear, parse_weapon,
+)
+from .packages import StartingPack, parse_starting_pack
 from .skills import SkillDef, ToolDef, parse_skill, parse_tool
 from .species import SpeciesDef, parse_species
 from .spells import SpellDef, parse_spell, parse_spell_list
@@ -52,6 +55,8 @@ class PluginContent:
     caster_progression: dict[int, dict[int, int]] = field(default_factory=dict)
     species: dict[str, "SpeciesDef"] = field(default_factory=dict)
     backgrounds: dict[str, "BackgroundDef"] = field(default_factory=dict)
+    gears: dict[str, GearDef] = field(default_factory=dict)
+    starting_gear: dict[str, tuple[StartingPack, ...]] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -78,6 +83,9 @@ class ContentBundle:
     caster_progression: dict[int, dict[int, int]] = field(default_factory=dict)
     species: dict[str, "SpeciesDef"] = field(default_factory=dict)
     backgrounds: dict[str, "BackgroundDef"] = field(default_factory=dict)
+    gears: dict[str, GearDef] = field(default_factory=dict)
+    # 职业 id → 该职业可选的起始装备（互斥，顺序即界面顺序）
+    starting_gear: dict[str, tuple[StartingPack, ...]] = field(default_factory=dict)
     manifests: list[Manifest] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     # overlay 账本：谁替换了谁（P14）。存的是人话行，供自检与排查打印。
@@ -118,6 +126,27 @@ class ContentBundle:
         if weapon_id not in self.weapons:
             raise PluginError("没有这件武器：%s" % weapon_id)
         return self.weapons[weapon_id]
+
+    # --- 冒险装备与起始装备 --------------------------------------------
+    def gear(self, gear_id: str) -> GearDef:
+        if gear_id not in self.gears:
+            raise PluginError("没有这件装备：%s" % gear_id)
+        return self.gears[gear_id]
+
+    def starting_packs(self, class_id: str) -> tuple[StartingPack, ...]:
+        """该职业的起始装备选项。**没有内容时返回空元组**，调用方据此跳过 ——
+        不是每个插件都得给起始装备（老内容里就没有这一块）。"""
+        return self.starting_gear.get(class_id, ())
+
+    def starting_pack(self, pack_id: str) -> StartingPack:
+        for rows in self.starting_gear.values():
+            for pack in rows:
+                if pack.id == pack_id:
+                    return pack
+        raise PluginError("没有这组起始装备：%s（已加载：%s）"
+                          % (pack_id, ", ".join(
+                              sorted(pack.id for rows in self.starting_gear.values()
+                                     for pack in rows)) or "无"))
 
     # --- 物种与背景（2024 的「出身」两块）------------------------------
     def species_def(self, species_id: str) -> "SpeciesDef":
@@ -211,6 +240,8 @@ class ContentBundle:
             "forms": len(self.forms),
             "armors": len(self.armors),
             "weapons": len(self.weapons),
+            "gears": len(self.gears),
+            "starting_gear": sum(len(rows) for rows in self.starting_gear.values()),
             "spells": len(self.spells),
             "spell_lists": len(self.spell_lists),
             "skills": len(self.skills),
@@ -296,6 +327,7 @@ def load_plugin(folder: str | Path) -> PluginContent:
                 result.forms[form.id] = form
 
     _load_items(base, result)
+    _load_starting_gear(base, result)
     _load_multiclass(base, result)
     _load_caster_progression(base, result)
     _load_spells(base, result)
@@ -591,7 +623,7 @@ def _load_caster_progression(base: Path, result: PluginContent) -> None:
 
 
 def _load_items(base: Path, result: PluginContent) -> None:
-    """物品目录：按条目的 `kind` 分派。现在只有护甲，武器随 P5c 接入。"""
+    """物品目录：按条目的 `kind` 分派（armor / weapon / gear）。"""
     folder = base / "items"
     if not folder.exists():
         return
@@ -617,10 +649,75 @@ def _load_items(base: Path, result: PluginContent) -> None:
                     if weapon.id in result.weapons:
                         raise PluginError("%s 的武器 id 重复：%s" % (rel, weapon.id))
                     result.weapons[weapon.id] = weapon
+                elif kind == "gear":
+                    gear = parse_gear(row, where=rel)
+                    if gear.id in result.gears:
+                        raise PluginError("%s 的装备 id 重复：%s" % (rel, gear.id))
+                    result.gears[gear.id] = gear
                 else:
-                    raise PluginError("%s 未知物品类型 %r（支持 armor / weapon）" % (rel, kind))
+                    raise PluginError("%s 未知物品类型 %r（支持 armor / weapon / gear）"
+                                      % (rel, kind))
             except (PluginError, DndError) as exc:
                 result.errors.append(str(exc))
+
+
+def _load_starting_gear(base: Path, result: PluginContent) -> None:
+    """起始装备：一个插件一份 `starting-gear.yaml`，按 `class:` 分组。
+
+    物品是否存在**这里不查**：包里的东西可能由别的插件提供，只有 `load_all`
+    合成完才看得全。那份检查在 `_check_starting_gear`。
+    """
+    path = base / "starting-gear.yaml"
+    if not path.exists():
+        return
+    rel = "%s/starting-gear.yaml" % base.name
+    try:
+        rows = _read_yaml(path) or []
+    except PluginError as exc:
+        result.errors.append(str(exc))
+        return
+    if isinstance(rows, Mapping):
+        rows = [rows]
+    seen: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, Mapping):
+            result.errors.append("%s 的条目必须是映射" % rel)
+            continue
+        class_id = str(row.get("class", "") or "")
+        if not is_valid(class_id):
+            result.errors.append("%s 的职业 id 不合规范：%r" % (rel, class_id or None))
+            continue
+        if class_id in result.starting_gear:
+            result.errors.append("%s 的职业 %s 出现了两次" % (rel, class_id))
+            continue
+        packs: list[StartingPack] = []
+        for entry in row.get("options") or ():
+            try:
+                pack = parse_starting_pack(entry, class_id=class_id, where=rel)
+            except (PluginError, DndError) as exc:
+                result.errors.append(str(exc))
+                continue
+            if pack.id in seen:
+                result.errors.append("%s 的起始装备 id 重复：%s" % (rel, pack.id))
+                continue
+            seen[pack.id] = class_id
+            packs.append(pack)
+        if packs:
+            result.starting_gear[class_id] = tuple(packs)
+
+
+def _check_starting_gear(bundle: "ContentBundle") -> None:
+    """包里的物品与职业都得真的存在。缺一件就少一件武器，必须当场报错。"""
+    known = set(bundle.weapons) | set(bundle.armors) | set(bundle.gears)
+    for class_id, packs in bundle.starting_gear.items():
+        if class_id not in bundle.classes:
+            bundle.errors.append("起始装备挂在不存在的职业 %s 上" % class_id)
+            continue
+        for pack in packs:
+            for item_id, _ in pack.items:
+                if item_id not in known:
+                    bundle.errors.append(
+                        "%s 引用了不存在的物品 %s" % (pack.id, item_id))
 
 
 def _absorb(bundle: "ContentBundle", content: PluginContent,
@@ -685,6 +782,9 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
         _absorb(bundle, content, "形态", bundle.forms, content.forms)
         _absorb(bundle, content, "护甲", bundle.armors, content.armors)
         _absorb(bundle, content, "武器", bundle.weapons, content.weapons)
+        _absorb(bundle, content, "装备", bundle.gears, content.gears)
+        _absorb(bundle, content, "起始装备", bundle.starting_gear,
+                content.starting_gear)
         _absorb(bundle, content, "技能", bundle.skills, content.skills)
         _absorb(bundle, content, "工具", bundle.tools, content.tools)
         _absorb(bundle, content, "召唤物", bundle.summons, content.summons)
@@ -718,6 +818,7 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
     _check_spell_lists(bundle)
     _check_feat_spell_refs(bundle)
     _check_summon_spells(bundle)
+    _check_starting_gear(bundle)
     bundle.book.validate_augments()
     return bundle
 

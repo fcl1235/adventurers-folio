@@ -1,0 +1,119 @@
+# 冒险装备（非武器 / 非护甲 / 非盾）。由 tools/gen_gear.py 从 data/raw/equipment.json
+# 的 2024 SRD 5.2 快照生成，价格与重量照抄快照，中文名为本插件文本。
+#
+# 字段：
+#   category   pack / tool / focus / book / clothing / ammo / gear
+#   cost_cp    价格（铜币；1 gp = 100 cp）
+#   weight     磅
+#   contains   背包类内含的件数（内容清单不展开：展开要再收 40 件物品并逐条翻译，
+#              界面上「含 11 件」已经够用）
+#
+# 这些物品**不参与 AC、攻击、施法**的结算 —— 它们是背包里的东西。
+
+- id: dnd2024.item.gear.explorers_pack
+  kind: gear
+  name: {zh: 探索者背包, en: 'Explorer''s Pack'}
+  category: pack
+  cost_cp: 1000
+  weight: 55
+  contains: 8
+- id: dnd2024.item.gear.dungeoneers_pack
+  kind: gear
+  name: {zh: 地城探险背包, en: 'Dungeoneer''s Pack'}
+  category: pack
+  cost_cp: 1200
+  weight: 55
+  contains: 10
+- id: dnd2024.item.gear.priests_pack
+  kind: gear
+  name: {zh: 祭司背包, en: 'Priest''s Pack'}
+  category: pack
+  cost_cp: 3300
+  weight: 29
+  contains: 7
+- id: dnd2024.item.gear.scholars_pack
+  kind: gear
+  name: {zh: 学者背包, en: 'Scholar''s Pack'}
+  category: pack
+  cost_cp: 4000
+  weight: 22
+  contains: 9
+- id: dnd2024.item.gear.entertainers_pack
+  kind: gear
+  name: {zh: 艺人背包, en: 'Entertainer''s Pack'}
+  category: pack
+  cost_cp: 4000
+  contains: 7
+- id: dnd2024.item.gear.burglars_pack
+  kind: gear
+  name: {zh: 窃贼背包, en: 'Burglar''s Pack'}
+  category: pack
+  cost_cp: 1600
+  weight: 20
+  contains: 12
+- id: dnd2024.item.gear.herbalism_kit
+  kind: gear
+  name: {zh: 草药工具, en: Herbalism Kit}
+  category: tool
+  cost_cp: 500
+  weight: 3
+- id: dnd2024.item.gear.thieves_tools
+  kind: gear
+  name: {zh: 盗贼工具, en: 'Thieves'' Tools'}
+  category: tool
+  cost_cp: 2500
+  weight: 1
+- id: dnd2024.item.gear.sprig_of_mistletoe
+  kind: gear
+  name: {zh: 槲寄生枝, en: Sprig of Mistletoe}
+  category: focus
+  cost_cp: 100
+  weight: 0
+- id: dnd2024.item.gear.crystal
+  kind: gear
+  name: {zh: 水晶, en: Crystal}
+  category: focus
+  cost_cp: 1000
+  weight: 1
+- id: dnd2024.item.gear.orb
+  kind: gear
+  name: {zh: 法球, en: Orb}
+  category: focus
+  cost_cp: 2000
+  weight: 3
+- id: dnd2024.item.gear.book
+  kind: gear
+  name: {zh: 书, en: Book}
+  category: focus
+  cost_cp: 2500
+  weight: 5
+- id: dnd2024.item.gear.spellbook
+  kind: gear
+  name: {zh: 法术书, en: Spellbook}
+  category: book
+  cost_cp: 5000
+  weight: 3
+- id: dnd2024.item.gear.robe
+  kind: gear
+  name: {zh: 长袍, en: Robe}
+  category: clothing
+  cost_cp: 100
+  weight: 1
+- id: dnd2024.item.gear.arrows
+  kind: gear
+  name: {zh: 箭矢（20 支）, en: Arrows}
+  category: ammo
+  cost_cp: 100
+  weight: 1
+- id: dnd2024.item.gear.quiver
+  kind: gear
+  name: {zh: 箭袋, en: Quiver}
+  category: ammo
+  cost_cp: 100
+  weight: 1
+- id: dnd2024.item.gear.holy_symbol
+  kind: gear
+  name: {zh: 圣徽, en: Holy Symbols}
+  category: focus
+  cost_cp: 500
+  weight: 1.0

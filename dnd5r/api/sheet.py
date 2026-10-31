@@ -34,6 +34,9 @@ from ._support import (
     resolver_for,
 )
 from .origin import origin_view
+# 背包投影：`loadout` 在函数级反向 import 本模块（`morph_forms` → `form_options`），
+# 顶部单向引用不会成环。
+from .loadout import inventory_view
 
 def _ability_rows(actor: Actor, content: ContentBundle, morphed: bool = False) -> dict:
     """属性行：值 / 调整值 / 「白给了多少」。
@@ -311,6 +314,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         "base_scores": (dict(profile.base_scores) if profile and profile.base_scores
                         else {}),
         "gear": loadout.to_dict(locale),
+        # 背包里的全部东西（含起始装备）。`gear` 只有能算 AC 的那两件，
+        # 这一份是「我身上有什么」，界面自己不会再从 ItemRef 拼名字。
+        "inventory": inventory_view(actor, content, locale),
         # 槽位 → 物品 id。界面标「现在装着哪个」用；`gear` 只给了能算 AC 的那两件。
         "equipped": {slot.value: ident
                      for slot, ident in root.inventory.equipped.items()},

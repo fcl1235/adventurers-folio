@@ -49,9 +49,9 @@ from .state import (
     roll_death_save, set_condition, set_exhaustion,
 )
 from .loadout import (
-    SLOT_ZH, SUPPORTED_SLOTS, armor_catalog, current_form, equip_item,
-    equipped_map, leave_form_now, morph_forms, parse_slot, set_base_scores,
-    weapon_catalog,
+    ALL_SLOT_ZH, SLOT_ZH, SUPPORTED_SLOTS, armor_catalog, current_form, equip_item,
+    equipped_map, inventory_view, leave_form_now, morph_forms, parse_slot,
+    set_base_scores, starting_options, weapon_catalog,
 )
 from .origin import (
     SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, check_scores,
@@ -99,6 +99,7 @@ __all__ = [
     # 换装与属性编辑（P5）
     "armor_catalog", "weapon_catalog", "equip_item", "equipped_map",
     "SLOT_ZH", "SUPPORTED_SLOTS", "parse_slot", "set_base_scores",
+    "inventory_view", "starting_options", "ALL_SLOT_ZH",
     "morph_forms", "current_form", "leave_form_now",
     # 出身：物种 / 背景 / 武器精通 / 属性生成（P6）
     "species_catalog", "background_catalog", "origin_view", "set_origin",

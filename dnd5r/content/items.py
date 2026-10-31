@@ -182,3 +182,70 @@ def parse_weapon(data: Any, where: str = "") -> WeaponDef:
         properties=tuple(str(item).lower() for item in props),
         mastery=str(data.get("mastery", "")).lower(),
     )
+
+
+# --- 物品：冒险装备 ---------------------------------------------------
+# 背包里的东西。**不参与 AC / 攻击 / 施法**的任何计算 —— 那一类只认护甲与武器。
+# 分这七类只为了界面分组，以及「哪件是包、哪件是法器」这种展示上的区别。
+GEAR_CATEGORIES = ("pack", "tool", "focus", "book", "clothing", "ammo", "gear")
+
+
+@dataclass(frozen=True)
+class GearDef:
+    """一件冒险装备。
+
+    `contains` 是背包类物品**内含的件数**（问号：为什么不列清单）：清单要再收
+    40 件物品并逐条翻译，而界面上「含 11 件」已经够用。它不展开、也不影响负重
+    —— 重量已经算在包身上了。
+    """
+
+    id: str
+    name: Text
+    category: str = "gear"
+    cost_cp: int | None = None
+    weight: float | None = None
+    contains: int = 0
+
+    def __post_init__(self) -> None:
+        if not is_valid(self.id):
+            raise PluginError("装备 id 不合规范：%r" % (self.id,))
+        if self.category not in GEAR_CATEGORIES:
+            raise PluginError("%s 的装备类别必须是 %s"
+                              % (self.id, "/".join(GEAR_CATEGORIES)))
+        if self.cost_cp is not None and self.cost_cp < 0:
+            raise PluginError("%s 的价格不能为负：%r" % (self.id, self.cost_cp))
+        if self.weight is not None and self.weight < 0:
+            raise PluginError("%s 的重量不能为负：%r" % (self.id, self.weight))
+        if self.contains < 0:
+            raise PluginError("%s 的内含件数不能为负" % self.id)
+
+    def to_dict(self, locale: str = "zh") -> dict:
+        return {
+            "id": self.id, "name": self.name.get(locale),
+            "category": self.category, "cost_cp": self.cost_cp,
+            "weight": self.weight, "contains": self.contains,
+        }
+
+
+def parse_gear(data: Any, where: str = "") -> GearDef:
+    prefix = ("%s: " % where) if where else ""
+    if not isinstance(data, Mapping):
+        raise PluginError("%s装备条目必须是映射" % prefix)
+    ident = data.get("id")
+    if not ident:
+        raise PluginError("%s装备缺少 id" % prefix)
+    if "name" not in data:
+        raise PluginError("%s %s 缺少 name" % (prefix, ident))
+    cost = data.get("cost_cp")
+    weight = data.get("weight")
+    try:
+        return GearDef(
+            id=str(ident),
+            name=Text.from_dict(data["name"], where="%s name" % ident),
+            category=str(data.get("category", "gear")).lower(),
+            cost_cp=None if cost in (None, "") else int(cost),
+            weight=None if weight in (None, "") else float(weight),
+            contains=int(data.get("contains", 0) or 0),
+        )
+    except (TypeError, ValueError) as exc:
+        raise PluginError("%s %s 的数值字段不合法：%s" % (prefix, ident, exc))

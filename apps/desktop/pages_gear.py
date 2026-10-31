@@ -81,6 +81,17 @@ class GearPage(ttk.Frame):
         ttk.Label(armor, textvariable=self.ac_note_var, style="Dim.TLabel",
                   wraplength=220, justify="left").pack(anchor="w", pady=(2, 0))
 
+        # --- 左：背包（起始装备就落在这里）---------------------------------
+        # 只读清单：这一页的「写事实」入口是装备槽，往背包里加减东西要等到
+        # 有物品来源（购买/拾取）之后再做，先不摆点不动的按钮。
+        bag = section(left, "背包")
+        bag.pack(fill="both", expand=True, pady=(8, 0))
+        self.bag_note_var = tk.StringVar(value="")
+        ttk.Label(bag, textvariable=self.bag_note_var, style="Dim.TLabel",
+                  justify="left").pack(anchor="w")
+        self.bag_list = ListPane(bag, height=7, width=24)
+        self.bag_list.pack(fill="both", expand=True)
+
         # --- 中：护甲表 ----------------------------------------------------
         listed = section(mid, "护甲与盾", "双击也行：选中后点下面两个按钮")
         listed.pack(fill="both", expand=True)
@@ -128,8 +139,21 @@ class GearPage(ttk.Frame):
         self._equipped = dict(sheet.get("equipped") or {})
         self._fill_lists(self._equipped)
         self._fill_slots(sheet)
+        self._fill_bag(sheet)
         self._show_armor_detail()
         self._show_weapon_detail()
+
+    def _fill_bag(self, sheet: dict) -> None:
+        """背包清单。`●` 标「正穿在身上」，与两份武器/护甲表的记号一致。"""
+        bag = sheet.get("inventory") or {}
+        self.bag_note_var.set("%d gp · %d 种" % (int(bag.get("coins_gp") or 0),
+                                                int(bag.get("count") or 0)))
+        rows = []
+        for index, row in enumerate(bag.get("items") or ()):
+            mark = "●" if row.get("equipped_in") else "　"
+            count = "×%d" % row["count"] if int(row["count"]) > 1 else ""
+            rows.append(("bag-%d" % index, "%s%s%s" % (mark, row["name"], count)))
+        self.bag_list.fill(rows)
 
     def _fill_lists(self, equipped: dict) -> None:
         """重画两份清单并给已装备的打 ●。

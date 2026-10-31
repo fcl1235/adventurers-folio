@@ -775,6 +775,26 @@ class GearPageTest(unittest.TestCase):
         self.assertFalse(page.unequip_armor())
         self.assertIn("空着", page.status_var.get())
 
+    def test_bag_shows_starting_gear_and_coins(self):
+        """背包清单：起始装备的名字、件数、● 标记与金币都要真的画在屏幕上。
+
+        `sheet["inventory"]` 是纯数据，「界面有没有把它接上去」是另一回事 ——
+        这一页之前只有护甲/武器的**目录**，玩家看不出自己身上到底有什么。
+        """
+        actor = api.new_character(self.bundle, FIGHTER, 1, SCORES,
+                                  starting_pack="dnd2024.package.fighter.b")
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        page = app.gear
+        app.update_idletasks()
+        self.assertEqual(page.bag_list.row_count, len(actor.inventory.items))
+        self.assertEqual(page.bag_note_var.get(), "11 gp · 7 种")
+        texts = [page.bag_list.text_at(i) for i in range(page.bag_list.row_count)]
+        self.assertTrue(any("●" in text and "弯刀" in text for text in texts),
+                        "已装备的武器要有 ● 标记：%r" % (texts,))
+        self.assertTrue(any("箭矢" in text and "×20" in text for text in texts),
+                        "件数要显示成 ×20：%r" % (texts,))
+
     def test_survives_save_load(self):
         """换装要能存下来：v1 存档漏了 inventory，读回来 AC 会悄悄变回 10。"""
         app = self._app()
@@ -1049,6 +1069,58 @@ class WizardTest(unittest.TestCase):
         self.assertEqual(wizard.draft["background_bonus"], plans[0])
         # 加值必须真的出现在「加值后」那一行，否则玩家看不出选了有什么用
         self.assertIn("加值后", wizard.cost_var.get())
+
+    def test_starting_pack_radio_writes_back_and_builds_gear(self):
+        """汇总步的起始装备单选：点了改草案，建出来甲要真的穿着。
+
+        界面只负责选；「哪些东西上身」是 `rules/starting.py` 的推断。这条测的是
+        **接线**：`Radiobutton` 的 variable 与 `draft["starting_pack"]` 同步，
+        并且这个值真的传到了建卡那一步（少了这一环，界面选什么都白搭）。
+        """
+        app = self._app()
+        app.open_wizard()
+        wizard = app.wizard
+        wizard.draft.update(self._valid_draft())
+        wizard.go(len(api.WIZARD_STEPS) - 1)
+        app.update_idletasks()
+        radios = _descendants(wizard, "TRadiobutton")
+        self.assertEqual([row.cget("text") for row in radios],
+                         ["装备包 A", "装备包 B", "金币"])
+        self.assertEqual(wizard.draft["starting_pack"], "dnd2024.package.fighter.a")
+
+        radios[1].invoke()                      # 战士 B 包
+        app.update_idletasks()
+        self.assertEqual(wizard.draft["starting_pack"], "dnd2024.package.fighter.b")
+        # 汇总行要跟着变，否则选完看不出选了哪一组
+        self.assertIn("装备包 B", wizard._starting_text())
+
+        wizard.finish()
+        app.update_idletasks()
+        inventory = app.actor.inventory
+        self.assertEqual(inventory.coins_gp, 11)
+        self.assertTrue(inventory.has_item("dnd2024.item.armor.studded_leather"))
+        self.assertEqual(app.sheet["ac"]["total"], 14)      # 镶钉皮甲 12 + 敏捷 2
+        self.assertIn("弯刀", [row.get("name") for row in app.sheet["attacks"]])
+
+    def test_starting_pack_hidden_when_editing(self):
+        """改卡模式不画起始装备：改卡走 rebuild，背包原样保留。"""
+        app = self._app()
+        app.open_wizard(api.draft_from_actor(self.bundle, app.actor), editing=True)
+        wizard = app.wizard
+        wizard.draft.update(self._valid_draft())
+        wizard.go(len(api.WIZARD_STEPS) - 1)
+        app.update_idletasks()
+        self.assertEqual(_descendants(wizard, "TRadiobutton"), [])
+
+
+def _descendants(node, widget_class):
+    """递归找某一类控件。`winfo_children` 只给直接子控件。"""
+    found = []
+    for child in node.winfo_children():
+        if child.winfo_class() == widget_class:
+            found.append(child)
+        found.extend(_descendants(child, widget_class))
+    return found
 
 
 class LevelUpUiTest(unittest.TestCase):

@@ -22,6 +22,7 @@ from ..model.inventory import EquipSlot, ItemRef
 from ..model.statblock import ABILITY_KEYS
 from ..rules.build import rebuild_actor
 from ..rules.morph import FORM_PREFIX, leave_form
+from ..rules.starting import starting_options as _starting_options
 
 # 只支持这四个槽：护甲、盾、主手、副手。头/披风/戒指要等物品内容补齐（items/ 现在只有
 # armors.yaml 与 weapons.yaml），先不摆出四个点不动的下拉框。
@@ -219,3 +220,66 @@ def current_form(actor: Actor) -> str | None:
 def equipped_map(actor: Actor) -> dict[str, str]:
     """{槽: 物品 id}。界面拿它标「现在装着哪个」。"""
     return {slot.value: ident for slot, ident in actor.root().inventory.equipped.items()}
+
+
+def starting_options(bundle: ContentBundle, class_id: str, locale: str = "zh") -> dict:
+    """某职业可选的起始装备（装备包 / 纯金币）。内容没给就是空列表。
+
+    建卡向导的汇总步与「新建角色」都用它；`None` 与空串的语义在
+    `rules.starting.resolve_pack` 里定（空串 = 默认那一组）。
+    """
+    return _starting_options(bundle, class_id, locale)
+
+
+# 十个槽的中文名（`SLOT_ZH` 只有支持换装的四个，背包要用全的）
+ALL_SLOT_ZH = {
+    EquipSlot.MAIN_HAND: "主手", EquipSlot.OFF_HAND: "副手",
+    EquipSlot.ARMOR: "护甲", EquipSlot.SHIELD: "盾牌",
+    EquipSlot.HEAD: "头部", EquipSlot.CLOAK: "披风", EquipSlot.HANDS: "手部",
+    EquipSlot.FEET: "脚部", EquipSlot.RING: "戒指", EquipSlot.AMULET: "护符",
+}
+
+
+def inventory_view(actor: Actor, bundle: ContentBundle, locale: str = "zh") -> dict:
+    """背包清单：每件物品的名字、件数、装在哪个槽。
+
+    **不报总重量**：`WeaponDef` 没有 weight 字段，算出来必然偏轻，那种「340 磅」
+    比不显示更糟。展示层只逐件给已知的重量。
+    """
+    gear = actor.root().inventory
+    where: dict[str, list[str]] = {}
+    for slot, item_id in gear.equipped.items():
+        where.setdefault(item_id, []).append(ALL_SLOT_ZH.get(slot, slot.value))
+
+    rows = []
+    for ref in gear.items:
+        row: dict[str, Any] = {
+            "id": ref.item_id, "count": ref.quantity,
+            "equipped_in": where.get(ref.item_id, []),
+            "note": ref.notes,
+        }
+        armor = bundle.armors.get(ref.item_id)
+        weapon = bundle.weapons.get(ref.item_id)
+        item = bundle.gears.get(ref.item_id)
+        if armor is not None:
+            row.update(name=armor.name.get(locale), kind="armor",
+                       detail="AC %d" % armor.ac_base if armor.category != "shield"
+                       else "AC +%d" % armor.bonus, weight=armor.weight)
+        elif weapon is not None:
+            row.update(name=weapon.name.get(locale), kind="weapon",
+                       detail=weapon.damage, weight=None)
+        elif item is not None:
+            detail = item.category
+            if item.contains:
+                detail += " · 内含 %d 件" % item.contains
+            row.update(name=item.name.get(locale), kind=item.category,
+                       detail=detail, weight=item.weight)
+        else:
+            # 存档里有内容里没有的 id（旧档 / 别的插件）—— 显示 id，不隐藏
+            row.update(name=ref.item_id, kind="unknown", detail="不在内容里", weight=None)
+        rows.append(row)
+    return {
+        "coins_gp": int(gear.coins_gp),
+        "count": len(rows),
+        "items": rows,
+    }
