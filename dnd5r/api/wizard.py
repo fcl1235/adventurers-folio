@@ -26,6 +26,7 @@ from ..model.statblock import ABILITY_KEYS, SCORE_MIN
 from ..rules.abilities import (
     CHARACTER_SCORE_MAX, background_bonus, score_range_ok, validate_point_buy,
 )
+from ..rules.spellcasting import check_spell_picks
 from .character import new_character
 from .origin import (
     SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, species_catalog,
@@ -311,6 +312,12 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
         elif level < int(class_def.subclass_level):
             add("class", "%d 级还选不了子职（%d 级解锁）"
                 % (level, int(class_def.subclass_level)))
+    elif level >= int(class_def.subclass_level):
+        # 到解锁等级还没选：子职特性一条都不会有，卡是残的。这不是「可选项」——
+        # 2024 的每个职业在解锁等级都必须选一个（解锁等级 1 的职业连 1 级就要）。
+        add("class", "%d 级必须选子职（%d 级解锁，这个职业有 %d 个可选）"
+            % (level, int(class_def.subclass_level),
+               len(content.subclasses_for(class_id))))
 
     background_id = str(draft.get("background") or "")
     if background_id and background_id not in content.backgrounds:
@@ -392,6 +399,21 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
         elif len(masteries) != count and not unknown:
             add("masteries", "%d 级能精通 %d 件武器，现在选了 %d 件"
                 % (level, count, len(masteries)))
+
+    # --- 法术 ---
+    # 配额、环级上限、是否本职业法术表 —— 全都由 `check_spell_picks` 说了算，
+    # 这里只**转述**它的话并标成 spells 步。不转述就会出现「汇总页说没问题、
+    # 点完成却报错」，而界面不知道该跳回哪一步（实测：选了重复戏法只在状态行
+    # 留一句话，人卡在汇总页）。两处共用一份规则，正是本模块开头的约定。
+    cantrips_map = {str(key): [str(item) for item in value]
+                    for key, value in (draft.get("cantrips") or {}).items() if value}
+    prepared_map = {str(key): [str(item) for item in value]
+                    for key, value in (draft.get("prepared") or {}).items() if value}
+    if cantrips_map or prepared_map:
+        usable_level = as_class_level(max(1, min(level, 20)))
+        for text in check_spell_picks(content, {class_id: usable_level},
+                                      cantrips_map, prepared_map, locale):
+            add("spells", text)
 
     return problems
 

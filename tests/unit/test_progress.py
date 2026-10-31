@@ -20,11 +20,15 @@ FIGHTER = "dnd2024.class.fighter"
 WIZARD = "dnd2024.class.wizard"
 DWARF = "dnd2024.species.dwarf"
 SOLDIER = "dnd2024.background.soldier"
+SAGE = "dnd2024.background.sage"
 CHAMPION = "dnd2024.subclass.fighter.champion"
 CHAIN_MAIL = "dnd2024.item.armor.chain_mail"
 LONGSWORD = "dnd2024.item.weapon.longsword"
 GREATAXE = "dnd2024.item.weapon.greataxe"
 LONGBOW = "dnd2024.item.weapon.longbow"
+SHORTBOW = "dnd2024.item.weapon.shortbow"
+ASI = "dnd2024.feat.ability_score_improvement"
+SKILLED = "dnd2024.feat.skilled"
 
 SCORES = {"str": 15, "dex": 14, "con": 13, "int": 10, "wis": 12, "cha": 8}
 INT_SCORES = {"str": 8, "dex": 14, "con": 13, "int": 15, "wis": 12, "cha": 10}
@@ -161,6 +165,7 @@ class LevelUpTest(unittest.TestCase):
         # 空表要整个键都没有：非施法职业带 `{class: []}` 被判成「战士不该有戏法」
         caster = api.new_character(self.bundle, WIZARD, 3, INT_SCORES,
                                    name_zh="法师", name_en="Mage",
+                                   subclass="dnd2024.subclass.wizard.evoker",
                                    extra_proficiencies=["skill.arcana",
                                                         "skill.investigation"])
         draft = api.draft_from_actor(self.bundle, caster)
@@ -197,6 +202,71 @@ class LevelUpTest(unittest.TestCase):
                                     self.bundle)
         self.assertEqual(after["ac"]["total"], before_ac)
         self.assertEqual(len(after["origin"]["masteries"]), 3)
+
+    # --- 改卡不能把「草案没描述的东西」弄丢 ---------------------------
+    # 草案只写主职业 + 技能 / 精通 / 法术 / 出身。专长、专长选择、额外职业、
+    # 其他子职、专精都由 `apply_draft` 从旧档案搬回来。这四条各盯一样：
+    # 2026-10-31 实测过一次「5 级战士带属性值提升走改卡，力量 17 → 15、专长清零」。
+    def test_apply_draft_keeps_feats_and_choices(self):
+        actor = self.fighter(5, subclass=CHAMPION,
+                             masteries=[LONGSWORD, GREATAXE, LONGBOW, SHORTBOW],
+                             feats=[ASI], choices={ASI + ".boost": ["str", "str"]})
+        before = api.character_sheet(actor, self.bundle)
+        self.assertEqual(before["abilities"]["str"]["score"], SCORES["str"] + 4,
+                         "前提：背景 +2 与专长 +2 都已生效")
+
+        draft = api.draft_from_actor(self.bundle, actor)
+        after = api.apply_draft(self.bundle, actor, draft)
+        self.assertEqual(set(after.profile.feats), set(actor.profile.feats),
+                         "改卡把专长弄丢了（含背景给的起始专长）")
+        self.assertIn(ASI, after.profile.feats)
+        self.assertEqual(dict(after.profile.choices),
+                         {ASI + ".boost": ("str", "str")}, "改卡把专长选择弄丢了")
+        self.assertEqual(api.character_sheet(after, self.bundle)["abilities"]["str"],
+                         before["abilities"]["str"], "专长加值没算回来")
+
+    def test_apply_draft_keeps_extra_classes(self):
+        scores = {"str": 15, "dex": 14, "con": 12, "int": 13, "wis": 10, "cha": 8}
+        actor = api.new_character(
+            self.bundle, FIGHTER, 5, scores, species=DWARF, background=SOLDIER,
+            background_bonus={"str": 2, "con": 1}, subclass=CHAMPION,
+            extra_proficiencies=["skill.perception", "skill.insight"],
+            masteries=[LONGSWORD, GREATAXE, LONGBOW, SHORTBOW],
+            extra_classes=[(WIZARD, 3)])
+        self.assertTrue(actor.profile.is_multiclass)
+
+        draft = api.draft_from_actor(self.bundle, actor)
+        after = api.apply_draft(self.bundle, actor, draft)
+        self.assertEqual([int(entry.class_level) for entry in after.profile.classes],
+                         [5, 3], "改卡把兼职等级删了")
+        self.assertEqual(int(after.profile.total), 8)
+
+    def test_draft_ignores_skills_granted_by_feats(self):
+        """专长给的熟练不能进草案：那会让「改卡」被判成技能表非法而卡死。"""
+        actor = self.fighter(5, subclass=CHAMPION,
+                            masteries=[LONGSWORD, GREATAXE, LONGBOW, SHORTBOW],
+                            feats=[SKILLED],
+                            choices={SKILLED + ".proficiency":
+                                     ["skill.arcana", "skill.stealth", "tool.cooks_utensils"]})
+        draft = api.draft_from_actor(self.bundle, actor)
+        self.assertNotIn("arcana", draft["skills"])
+        blocking = [item for item in api.draft_problems(self.bundle, draft)
+                    if item["level"] != "warn"]
+        self.assertEqual(blocking, [], "草案自己被卡住，升级后改卡就进不去了")
+
+        after = api.apply_draft(self.bundle, actor, draft)
+        self.assertIn("skill.arcana", after.profile.proficiencies, "专长给的技能丢了")
+
+    def test_draft_problems_flags_spell_overflow(self):
+        """法术超额要报在 spells 步 —— 否则界面停在汇总页，人不知道跳回哪。"""
+        draft = api.empty_draft()
+        draft.update(class_id=WIZARD, class_level=1, background=SAGE,
+                     skills=["arcana", "insight"], masteries=[])
+        options = api.spell_choices(self.bundle, WIZARD, 1)
+        spell = options["cantrips"][0]["id"]
+        draft["cantrips"] = {WIZARD: [spell] * (options["cantrip_limit"] + 1)}
+        problems = api.draft_problems(self.bundle, draft)
+        self.assertIn("spells", [item["step"] for item in problems])
 
 
 class WithClassLevelTest(unittest.TestCase):

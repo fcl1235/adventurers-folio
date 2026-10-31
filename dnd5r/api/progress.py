@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Mapping
 
 from ..content import ContentBundle
@@ -128,13 +129,17 @@ def level_up(content: ContentBundle, actor: Actor, locale: str = "zh") -> Actor:
 def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
     """现有角色 → 建卡草案。用于「升级后发现还差选择」时把向导开到那一步。
 
-    两处必须扣掉，否则草案一进向导就报错：
+    三处必须收窄，否则草案一进向导就报错或改坏角色：
 
     * **属性取 `base_scores`**（加值之前的原始值）：草案里的 `scores` 表示
       「玩家填进输入框的数」，读显示值会让背景/专长的加值被算第二遍。
     * **技能要扣掉背景已给的那几项**：`Profile.proficiencies` 是合并后的全集，
       而向导里的「已选 N 项」只数**玩家自己挑的**。士兵背景给运动和威吓，
       不扣就会变成「要选 2 项、现在选了 3 项」—— 实测踩到。
+    * **技能还要扣掉「不在本职业技能表里的」**：专长（熟习、技能专家）与物种
+      给的熟练也在 `proficiencies` 里，带上会被向导判成「这些技能不在本职业的
+      技能表里」而**卡死改卡流程**。这些熟练由 `rebuild_actor` 从专长重新算，
+      草案里不该出现。
     """
     profile = actor.profile
     if profile is None:
@@ -144,8 +149,14 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
     name = actor.statblock.name
     background = content.backgrounds.get(profile.background)
     granted = set(background.skills) if background is not None else set()
+    in_table = set(content.class_def(class_id).skill_list)
     picked = [token.split(".", 1)[1] for token in profile.proficiencies
               if token.startswith("skill.")]
+    # 子职按**父职业**找，不能取 `subclasses[0]`：兼职时顺序不定，
+    # 取错会把别人的子职写进主职业那一栏。
+    subclass = next((item for item in profile.subclasses
+                     if item in content.subclasses
+                     and content.subclasses[item].class_id == class_id), "")
     # **空列表不能写成 `{class_id: []}`**：非施法职业带着一个空的戏法表进
     # `new_character`，会被判成「战士不该有戏法」—— 空和没有是两件事。
     cantrips = list(profile.cantrips_of(class_id))
@@ -155,7 +166,7 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
         "name_en": name.en,
         "class_id": class_id,
         "class_level": int(primary.class_level),
-        "subclass": profile.subclasses[0] if profile.subclasses else "",
+        "subclass": subclass,
         "species": profile.species,
         "background": profile.background,
         "background_bonus": dict(profile.background_bonus),
@@ -163,7 +174,8 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
         # 这里不需要知道当初用的是哪种方式 —— 校验只看数在这一级合不合法。
         "score_mode": "standard_array",
         "scores": {key: int(value) for key, value in profile.base_scores.items()},
-        "skills": sorted(key for key in picked if key not in granted),
+        "skills": sorted(key for key in picked
+                         if key in in_table and key not in granted),
         "masteries": sorted(profile.masteries),
         "cantrips": {class_id: cantrips} if cantrips else {},
         "prepared": {class_id: prepared} if prepared else {},
@@ -176,9 +188,56 @@ def apply_draft(content: ContentBundle, actor: Actor, draft: Mapping[str, Any],
 
     与建卡向导的 `build_from_draft` 的区别就在这一点：那条路造新角色（背包清空），
     这条路改现有角色。改完 `str` 不该把护甲脱了、血也不该回满。
+
+    **草案只描述「主职业 + 技能 / 精通 / 法术 / 出身」**，其余全部从旧档案搬回来：
+    专长与专长选择、额外职业等级、其他子职、专精、语言、抗性。不搬会**静默退卡**——
+    实测 5 级战士带「属性值提升」走一次改卡，力量从 17 掉回 15、专长清零；
+    兼职角色走一次只剩主职业。这些都不是草案的编辑对象，丢了没有任何提示。
     """
     from .wizard import build_from_draft      # 循环导入：wizard 侧不反向依赖本模块
 
+    old = actor.profile
+    if old is None:
+        raise RuleError("角色没有职业档案")
+    # 改卡不换主职业：换成另一个职业等于「重新建卡」，而草案里没有地方放
+    # 旧职业的等级，硬换会让旧等级凭空消失。
+    primary_id = old.classes[0].class_id
+    wanted = str(draft.get("class_id") or "")
+    if wanted and wanted != primary_id:
+        raise RuleError("改卡不能换主职业（%s → %s）：要换职业请新建角色"
+                        % (primary_id, wanted))
+
     fresh = build_from_draft(content, draft, locale)
     profile: Profile = fresh.profile
+
+    # 1) 其他职业等级：草案只写主职业，兼职的其余几段照旧
+    for entry in old.classes[1:]:
+        if not profile.has_class(entry.class_id):
+            profile = profile.add_class(entry.class_id, int(entry.class_level))
+
+    # 2) 其他子职：主职业那个已被草案接管，其余照旧
+    keep_subs = tuple(item for item in old.subclasses
+                      if item in content.subclasses
+                      and content.subclasses[item].class_id != primary_id)
+    if keep_subs:
+        profile = replace(profile,
+                          subclasses=tuple(dict.fromkeys(profile.subclasses + keep_subs)))
+
+    # 3) 旧背景的起始专长要摘掉（换了背景就不该留着上一个人的奖励），
+    #    其余的旧专长一律保留并与草案的合并去重。**该专长的选择项也要一起摘**：
+    #    `feats` 里没有它、`choices` 里还留着 `dnd2024.feat.skilled.proficiency`
+    #    这种孤儿键，选专长时会对不上号。
+    stale_feat = ""
+    if old.background in content.backgrounds:
+        stale_feat = content.backgrounds[old.background].origin_feat
+    feats = tuple(dict.fromkeys(
+        [item for item in old.feats if item != stale_feat] + list(profile.feats)))
+    # 专长选择 / 专精 / 语言 / 抗性：草案不编辑，全部并回（同名项草案优先）
+    choices = {key: value for key, value in old.choices.items()
+               if not (stale_feat and key.startswith(stale_feat + "."))}
+    choices.update({key: tuple(value) for key, value in profile.choices.items()})
+    profile = replace(profile, feats=feats, choices=choices,
+                      expertise=old.expertise | profile.expertise,
+                      languages=old.languages,
+                      resistances=old.resistances | profile.resistances)
     return rebuild_actor(content, actor, profile)

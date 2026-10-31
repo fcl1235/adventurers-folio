@@ -178,6 +178,7 @@ class DesktopApp(tk.Tk):
         for key, text, action in (("new", "新建", self.new_character),
                                   ("open", "打开", self.open_dialog),
                                   ("save", "保存", self.save_dialog),
+                                  ("edit", "改卡", self.edit_character),
                                   ("level", "升级", self.level_up)):
             button = ttk.Button(files, text=text, style="Mini.TButton",
                                 command=action, width=5)
@@ -387,6 +388,20 @@ class DesktopApp(tk.Tk):
                               foreground=theme.TEXT)
 
     # --- 升级 -------------------------------------------------------------
+    def edit_character(self) -> None:
+        """改现有角色：把向导整程打开，完成时走 `apply_draft`。
+
+        没有这个入口时，专长修好也没人能用上 —— 建完卡之后物种、背景、技能、
+        精通就全锁死了，只有「升级」碰巧遇到「还差选择」时才顺带进得去。
+        人物卡软件的核心是**卡要能改**，所以这里给一个直白的按钮。
+        """
+        try:
+            draft = api.draft_from_actor(self.bundle, self.actor)
+        except api.DndError as exc:
+            self.status.configure(text="这张卡改不了：%s" % exc, foreground=theme.WARN)
+            return
+        self.open_wizard(draft=draft, editing=True)
+
     def level_up(self) -> None:
         """升一级主职业。保留背包/装备/HP；还差选择就把向导开到那一步。
 

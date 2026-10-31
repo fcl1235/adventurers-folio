@@ -299,6 +299,8 @@ class BuildDraftTest(unittest.TestCase):
     def test_wizard_keeps_spells(self):
         draft = api.empty_draft()
         draft.update(class_id=WIZARD, class_level=3, species=ELF, background=SAGE,
+                     # 3 级法师必须选子职（子职特性一条都不带的话卡是残的）
+                     subclass="dnd2024.subclass.wizard.evoker",
                      background_bonus={"int": 2, "con": 1},
                      scores={"str": 8, "dex": 14, "con": 13,
                              "int": 15, "wis": 12, "cha": 10},
@@ -320,6 +322,8 @@ class BuildDraftTest(unittest.TestCase):
         """建出来的角色存盘再读回，出身四项不能丢。"""
         draft = api.empty_draft()
         draft.update(class_id=FIGHTER, class_level=3, species=DWARF,
+                     # 3 级必须带子职：这是 draft_problems 的硬校验
+                     subclass="dnd2024.subclass.fighter.champion",
                      background=SOLDIER, background_bonus={"str": 2, "con": 1},
                      scores=dict(SCORES), skills=["perception", "insight"],
                      masteries=["dnd2024.item.weapon.longsword",

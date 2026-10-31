@@ -221,6 +221,11 @@ class WizardView(ttk.Frame):
         if self.draft.get("class_id"):
             pane.select_id(self.draft["class_id"])
         self._fill_class_info()
+        # 改卡时**不能换主职业、不能改等级**：换职业等于重建（`apply_draft` 会拒绝），
+        # 改等级有「升级」按钮专管。控件禁掉比让人改完被拒更好 —— 后者看起来像 bug。
+        if self.editing:
+            pane.list.configure(state="disabled")
+            spin.configure(state="disabled")
 
     def _on_class(self, _event=None) -> None:
         class_id = self.class_pane.selected_id()
