@@ -171,7 +171,29 @@ class LevelUpTest(unittest.TestCase):
         draft = api.draft_from_actor(self.bundle, caster)
         self.assertEqual(draft["cantrips"], {})
         self.assertEqual(draft["prepared"], {})
-        self.assertEqual(api.draft_problems(self.bundle, draft), [])
+        # 空表本身不是问题：「还没选满」是提醒（warn），不该拦住建卡/改卡
+        blocking = [row for row in api.draft_problems(self.bundle, draft)
+                    if row.get("level") != "warn"]
+        self.assertEqual(blocking, [])
+        self.assertTrue(any(row["step"] == "spells" and "还没选满" in row["text"]
+                            for row in api.draft_problems(self.bundle, draft)),
+                        "零法术的施法者至少该有一条提醒")
+
+    def test_draft_fills_skill_slots_wasted_on_background(self):
+        """把名额浪费在背景技能上（向导只 warn 不拦）：扣掉背景那几项就会不够，
+        改卡撞「要选 2 项技能，现在选了 1 项」—— 草案要把被剔掉的补回来。"""
+        actor = self.fighter(1, extra_proficiencies=["skill.athletics",
+                                                     "skill.perception"],
+                             masteries=[LONGSWORD, GREATAXE, LONGBOW])
+        draft = api.draft_from_actor(self.bundle, actor)
+        self.assertEqual(sorted(draft["skills"]), ["athletics", "perception"])
+        blocking = [row for row in api.draft_problems(self.bundle, draft)
+                    if row.get("level") != "warn"]
+        self.assertEqual(blocking, [], "草案本身不该带拦得住的问题")
+        after = api.apply_draft(self.bundle, actor, draft)
+        keys = {row["key"] for row in api.character_sheet(after, self.bundle)["skills"]
+                if row["proficient"]}
+        self.assertEqual(keys, {"athletics", "intimidation", "perception"})
 
     def test_apply_draft_round_trip_keeps_everything(self):
         actor = self.fighter(3, subclass=CHAMPION,

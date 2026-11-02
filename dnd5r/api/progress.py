@@ -26,6 +26,7 @@ from ..model.levels import ClassLevel, TotalLevel
 from ..model.profile import Profile
 from ..rules.build import available_powers, rebuild_actor
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus
+from ..rules.spellcasting import spell_gaps
 
 
 def _power_rows(content: ContentBundle, actor: Actor, locale: str) -> dict[str, dict]:
@@ -74,7 +75,8 @@ def level_up_view(content: ContentBundle, actor: Actor, locale: str = "zh") -> d
         needs.append({"step": "masteries",
                       "text": "%d 级可以精通 %d 件武器，现在记了 %d 件"
                               % (target, mastery_need, len(profile.masteries))})
-    gaps = _spell_gaps(class_def, ClassLevel(target), profile, class_id)
+    gaps = spell_gaps(content, class_id, ClassLevel(target),
+                      profile.cantrips_of(class_id), profile.spells_of(class_id))
     if gaps:
         needs.append({"step": "spells", "text": "还没选满：" + "、".join(gaps)})
 
@@ -93,25 +95,6 @@ def level_up_view(content: ContentBundle, actor: Actor, locale: str = "zh") -> d
         "hp_before": int(actor.root().hp.maximum),
         "hp_after": int(preview.root().hp.maximum),
     }
-
-
-def _spell_gaps(class_def, level: ClassLevel, profile: Profile,
-                class_id: str) -> list[str]:
-    """这个等级的法术上限与已选数的差。非施法职业返回空 —— 没有「没选满」这种事。"""
-    gaps = []
-    want_cantrips = _table_at(class_def.cantrips, int(level))
-    want_prepared = _table_at(class_def.prepared, int(level))
-    if want_cantrips > len(profile.cantrips_of(class_id)):
-        gaps.append("戏法 %d/%d" % (len(profile.cantrips_of(class_id)), want_cantrips))
-    if want_prepared > len(profile.spells_of(class_id)):
-        gaps.append("法术 %d/%d" % (len(profile.spells_of(class_id)), want_prepared))
-    return gaps
-
-
-def _table_at(table: Mapping[int, int], level: int) -> int:
-    """等级表查值：取「不超过 level 的最大那一行」，不是精确匹配。"""
-    usable = [int(key) for key in table if int(key) <= int(level)]
-    return int(table[max(usable)]) if usable else 0
 
 
 def level_up(content: ContentBundle, actor: Actor, locale: str = "zh") -> Actor:
@@ -140,6 +123,8 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
       给的熟练也在 `proficiencies` 里，带上会被向导判成「这些技能不在本职业的
       技能表里」而**卡死改卡流程**。这些熟练由 `rebuild_actor` 从专长重新算，
       草案里不该出现。
+    * **但扣完不足额时要补回来**：名额被背景技能占掉时（向导只警告不拦），
+      扣掉背景那几项就少于要求，改卡立刻报「要选 2 项，现在选了 1 项」。
     """
     profile = actor.profile
     if profile is None:
@@ -149,9 +134,22 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
     name = actor.statblock.name
     background = content.backgrounds.get(profile.background)
     granted = set(background.skills) if background is not None else set()
-    in_table = set(content.class_def(class_id).skill_list)
     picked = [token.split(".", 1)[1] for token in profile.proficiencies
               if token.startswith("skill.")]
+    in_table = set(content.class_def(class_id).skill_list)
+    keep = [key for key in picked if key in in_table and key not in granted]
+    need = int(content.class_def(class_id).skill_choices)
+    # **名额浪费在背景技能上时要把被剔掉的补回来**：向导对「选了背景已给的技能」
+    # 只 warn 不拦（2024 允许这么选），可这里把背景那几项扣掉之后会少于要求，
+    # 改卡就撞上「要选 2 项技能，现在选了 1 项」—— 而玩家其实什么都没改。
+    # 补的是他自己选过的、且在本职业表里的项，不会凭空多给熟练。
+    if len(keep) < need:
+        for key in sorted(key for key in picked if key in in_table):
+            if key in keep:
+                continue
+            keep.append(key)
+            if len(keep) >= need:
+                break
     # 子职按**父职业**找，不能取 `subclasses[0]`：兼职时顺序不定，
     # 取错会把别人的子职写进主职业那一栏。
     subclass = next((item for item in profile.subclasses
@@ -174,8 +172,7 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
         # 这里不需要知道当初用的是哪种方式 —— 校验只看数在这一级合不合法。
         "score_mode": "standard_array",
         "scores": {key: int(value) for key, value in profile.base_scores.items()},
-        "skills": sorted(key for key in picked
-                         if key in in_table and key not in granted),
+        "skills": sorted(keep),
         "masteries": sorted(profile.masteries),
         "cantrips": {class_id: cantrips} if cantrips else {},
         "prepared": {class_id: prepared} if prepared else {},

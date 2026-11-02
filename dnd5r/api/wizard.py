@@ -26,7 +26,7 @@ from ..model.statblock import ABILITY_KEYS, SCORE_MIN
 from ..rules.abilities import (
     CHARACTER_SCORE_MAX, background_bonus, score_range_ok, validate_point_buy,
 )
-from ..rules.spellcasting import check_spell_picks
+from ..rules.spellcasting import check_spell_picks, spell_gaps
 from ..rules.starting import starting_options
 from .character import new_character
 from .origin import (
@@ -418,6 +418,17 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
         for text in check_spell_picks(content, {class_id: usable_level},
                                       cantrips_map, prepared_map, locale):
             add("spells", text)
+    # 「一个法术都没选」以前完全静默：建出来的法师戏法/法术两栏全空，卡上一片空白，
+    # 而升级时同一件事又被报成「还没选满」—— 同一状态两种说法。这里补一条**提醒**
+    # （不拦：建到一半的草案、老存档都可能少选，少选不是非法状态）。
+    if class_def.casting_ability:
+        missing = spell_gaps(content, class_id,
+                             as_class_level(max(1, min(level, 20))),
+                             cantrips_map.get(class_id, ()),
+                             prepared_map.get(class_id, ()))
+        if missing:
+            add("spells", "还没选满：%s（可以留空，稍后在法术页补）"
+                % "、".join(missing), level="warn")
 
     # --- 起始装备 ---
     # 空串是合法的（= 默认那一组），这里只拦「写了具体 id 却不是这个职业的」。

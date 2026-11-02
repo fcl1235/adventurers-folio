@@ -150,7 +150,9 @@ class FeatPage(ttk.Frame):
         if self._feat_id:
             self.feats.select_id(self._feat_id)
         if not self._feats:
-            self._status("这个角色还没有专长：建角色时选，或用升级流程加。")
+            # 别写成「用升级流程加」—— 升级（`level_up`）只做 rebuild，拿不了新专长。
+            self._status("这个角色还没有专长：背景的起始专长建卡时自动给；"
+                         "4 级起的属性提升 / 自选专长暂时没有入口（G35）。")
 
     def _feat(self) -> dict:
         for row in self._feats:

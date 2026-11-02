@@ -32,7 +32,17 @@ ALIAS = {
     "Holy Symbols": "Holy Symbol",
 }
 
-UNIT_CP = {"cp": 1, "sp": 10, "gp": 100, "pp": 1000}
+def _gold(count: int, unit: str) -> int:
+    """包里的钱换算成金币。**只收 gp**。
+
+    `Inventory.coins_gp` 是单一整数币种；按 `count * UNIT_CP // 100` 换，
+    5 sp 会变成 0 gp —— 静默丢钱比报错更糟。2024 的起始包全是 gp，
+    所以这里硬拦：真遇到银/铜，先给 `Inventory` 加字段，别在这层截断。
+    """
+    if unit != "gp":
+        raise SystemExit("起始包装了 %d %s：背包只记金币，先支持分币种再生成"
+                         % (int(count), unit))
+    return int(count)
 
 
 def _load_items() -> dict[str, str]:
@@ -81,14 +91,14 @@ def build(lines_out: list[str]) -> int:
                     items = []
                     gold = 0
                     unit = str(option.get("unit", "gp")).lower()
-                    gold = int(option["count"]) * UNIT_CP[unit] // 100
+                    gold = _gold(option["count"], unit)
                 elif option["option_type"] == "multiple":
                     items = []
                     gold = 0
                     for entry in option.get("items", ()):
                         if entry.get("option_type") == "money":
                             unit = str(entry.get("unit", "gp")).lower()
-                            gold += int(entry["count"]) * UNIT_CP[unit] // 100
+                            gold += _gold(entry["count"], unit)
                             continue
                         ref = entry.get("of") or {}
                         if not ref:

@@ -27,6 +27,7 @@ LEATHER = "dnd2024.item.armor.leather"
 SHIELD = "dnd2024.item.armor.shield"
 LONGSWORD = "dnd2024.item.weapon.longsword"
 GREATSWORD = "dnd2024.item.weapon.greatsword"
+DAGGER = "dnd2024.item.weapon.dagger"
 
 
 class EquipTest(unittest.TestCase):
@@ -96,6 +97,20 @@ class EquipTest(unittest.TestCase):
                          "一手剑一手盾不该按双手握持算")
         api.equip_item(self.actor, self.bundle, "shield", None)
         self.assertEqual(self.sheet()["attacks"][0]["damage"], "1d10")
+
+    def test_shield_and_off_hand_weapon_are_exclusive(self):
+        """盾占一只手：主手武器 + 副手武器 + 盾 = 三只手，两条路都要拦住。"""
+        api.equip_item(self.actor, self.bundle, "main_hand", LONGSWORD)
+        api.equip_item(self.actor, self.bundle, "shield", SHIELD)
+        with self.assertRaises(api.RuleError):
+            api.equip_item(self.actor, self.bundle, "off_hand", DAGGER)
+        self.assertNotIn("off_hand", api.equipped_map(self.actor))
+        # 反过来：副手拿着武器时装不上盾，且状态不变
+        api.equip_item(self.actor, self.bundle, "shield", None)
+        api.equip_item(self.actor, self.bundle, "off_hand", DAGGER)
+        with self.assertRaises(api.RuleError):
+            api.equip_item(self.actor, self.bundle, "shield", SHIELD)
+        self.assertNotIn("shield", api.equipped_map(self.actor))
 
     def test_same_item_cannot_hold_both_hands(self):
         api.equip_item(self.actor, self.bundle, "main_hand", LONGSWORD)

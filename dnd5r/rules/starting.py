@@ -142,26 +142,24 @@ def apply_starting_pack(bundle: ContentBundle, inventory: Inventory,
         equipped[EquipSlot.ARMOR] = armor_id
 
     main_id = weapons[0] if weapons else None
-    off_id = None
     if main_id:
         inventory.equip(EquipSlot.MAIN_HAND, main_id)
         equipped[EquipSlot.MAIN_HAND] = main_id
-        if not _two_handed(bundle.weapons[main_id]):
-            for candidate in weapons[1:]:
-                weapon = bundle.weapons[candidate]
-                # 双手武器不能进副手；两用武器（versatile）可以单手用，能进
-                if _two_handed(weapon):
-                    continue
-                off_id = candidate
-                break
-            if off_id:
-                inventory.equip(EquipSlot.OFF_HAND, off_id)
-                equipped[EquipSlot.OFF_HAND] = off_id
 
-    # 盾在双手武器之后判定：主手是双手武器时拿不了盾（这条与 loadout 同一口径）
+    # 盾与副手武器**互斥**：盾是「一只手拎着」的，主手武器 + 副手武器 + 盾
+    # 就是三只手。盾优先 —— 它给的是常驻 AC，副手武器只多一条不加属性值的攻击。
+    # （这条与 `api.loadout.equip_item` 的拒绝口径一致。）
     if shield_id and not (main_id and _two_handed(bundle.weapons[main_id])):
         inventory.equip(EquipSlot.SHIELD, shield_id)
         equipped[EquipSlot.SHIELD] = shield_id
+    elif main_id and not _two_handed(bundle.weapons[main_id]):
+        for candidate in weapons[1:]:
+            # 双手武器不能进副手；两用武器（versatile）可以单手用，能进
+            if _two_handed(bundle.weapons[candidate]):
+                continue
+            inventory.equip(EquipSlot.OFF_HAND, candidate)
+            equipped[EquipSlot.OFF_HAND] = candidate
+            break
 
     used = set(equipped.values())
     stowed = tuple(item_id for item_id in ids if item_id not in used)

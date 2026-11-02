@@ -117,6 +117,26 @@ powers:
     effects:
       - modify_roll: { dice: 1d10, mode: add, applies_to: skill_check }
 
+  # 2024 战士的属性提升在 4/6/8/12/14/16 级（比其他职业多两级）。这里只登记
+  # 4 级那一条，与其余 11 个职业的口径一致（都只登记首次）；条目本身是规则文字，
+  # 真正加属性/换专长的入口还没做 —— 见架构文档 §15 的 G35。
+  - id: dnd2024.class.fighter.ability_score_improvement
+    name: { zh: 属性提升 / 专长, en: Ability Score Improvement }
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（或 +1/+1/+1，上限 20），或换 1 个专长。战士在 4、6、8、12、14、16 级各得一次。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Fighter levels 6, 8, 12, 14, and 16.
+    effects:
+      - note:
+          zh: |-
+            属性加值与专长选择还没有入口：这条只登记规则原文。
+          en: |-
+            No entry point for the bonus or the feat yet; the rule text is registered here.
+
   - id: dnd2024.class.fighter.extra_attack
     name: { zh: 额外攻击, en: Extra Attack }
     level: 5

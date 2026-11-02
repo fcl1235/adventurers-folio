@@ -76,6 +76,32 @@ def max_prepared(class_def: ClassDef, class_level: ClassLevel) -> int:
     return _at(class_def.prepared, int(class_level))
 
 
+def spell_gaps(
+    bundle: ContentBundle,
+    class_id: str,
+    class_level: ClassLevel,
+    cantrips: Sequence[str] = (),
+    prepared: Sequence[str] = (),
+) -> list[str]:
+    """**还差几个**：`["戏法 0/3", "法术 2/5"]`。选满或非施法职业返回空。
+
+    与 `check_spell_picks` 分工：那个只管「选多了、选错了」（越界即错误），
+    这里只管「还没选满」。少选不是非法状态（建卡建到一半、老存档都可能少），
+    所以这条只该当提醒，不能拦。
+    """
+    class_def = bundle.classes.get(class_id)
+    if class_def is None or not class_def.casting_ability:
+        return []
+    gaps = []
+    for label, want, have in (
+        ("戏法", max_cantrips(class_def, class_level), len(set(cantrips))),
+        ("法术", max_prepared(class_def, class_level), len(set(prepared))),
+    ):
+        if have < want:
+            gaps.append("%s %d/%d" % (label, have, want))
+    return gaps
+
+
 def _at(table, class_level: int) -> int:
     """查表：取不超过该职业等级的最大档（与资源表同一条规则）。
 

@@ -109,10 +109,12 @@ def equip_item(actor: Actor, bundle: ContentBundle, slot, item_id: str | None = 
                locale: str = "zh") -> dict:
     """装上一件、或卸下（`item_id` 为空）。返回 `{slot, item_id, changed, message}`。
 
-    三条会当场拒绝的情况，都是「装上去也算不出对的数」的：
+    四条会当场拒绝的情况，都是「装上去也算不出对的数」的：
       1. 护甲/盾装错槽（把盾塞进护甲槽会得到两件盾都生效）
       2. 双手武器配盾或配副手武器（规则上拿不动）
-      3. 同一件物品占两只手（两把相同的剑不是「双手握持」，那是 1d10 两用武器的写法）
+      3. **盾与副手武器互斥**：盾要占用一只手，主手武器 + 副手武器 + 盾就是
+         三只手 —— 以前能装出来，卡上会多出一条根本打不出的攻击
+      4. 同一件物品占两只手（两把相同的剑不是「双手握持」，那是 1d10 两用武器的写法）
     """
     found = parse_slot(slot)
     gear = actor.root().inventory
@@ -139,11 +141,13 @@ def equip_item(actor: Actor, bundle: ContentBundle, slot, item_id: str | None = 
             main = bundle.weapons.get(gear.equipped_at(EquipSlot.MAIN_HAND) or "")
             if main is not None and _two_handed(main):
                 raise RuleError("主手是双手武器 %s，用不了盾" % main.name.get(locale))
+            off = bundle.weapons.get(gear.equipped_at(EquipSlot.OFF_HAND) or "")
+            if off is not None:
+                raise RuleError("副手拿着 %s，那只手挂不了盾：先卸下副手武器"
+                                % off.name.get(locale))
     else:
         if weapon is None:
             raise RuleError("%s 不是武器（%s槽只收武器）" % (ident, SLOT_ZH[found]))
-        other = (EquipSlot.OFF_HAND if found is EquipSlot.MAIN_HAND
-                 else EquipSlot.MAIN_HAND)
         if _two_handed(weapon):
             busy = _busy_hands(gear, bundle)
             if busy:
@@ -154,6 +158,11 @@ def equip_item(actor: Actor, bundle: ContentBundle, slot, item_id: str | None = 
             if main is not None and _two_handed(main):
                 raise RuleError("主手是双手武器 %s，用不了副手武器"
                                 % main.name.get(locale))
+            shield_id = gear.equipped_at(EquipSlot.SHIELD)
+            if shield_id:
+                shield = bundle.armors.get(shield_id)
+                raise RuleError("盾（%s）占着一只手，副手装不了武器：先卸下盾"
+                                % (shield.name.get(locale) if shield else shield_id))
 
     if current == ident:
         return {"slot": found.value, "item_id": ident, "changed": False,

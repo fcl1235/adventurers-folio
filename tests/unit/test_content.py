@@ -59,7 +59,21 @@ class RealPluginTest(unittest.TestCase):
         fighter = self.bundle.classes[FIGHTER]
         self.assertEqual(len(fighter.powers_at(ClassLevel(1))), 3)
         self.assertEqual(len(fighter.powers_at(ClassLevel(2))), 5)
-        self.assertEqual(len(fighter.powers_at(ClassLevel(20))), 12)
+        # 4 级那条「属性提升 / 专长」是全职业统一登记的（此前战士与德鲁伊漏了）
+        self.assertEqual(len(fighter.powers_at(ClassLevel(20))), 13)
+        self.assertIn("ability_score_improvement",
+                      {power.id.rsplit(".", 1)[-1] for power in fighter.powers})
+
+    def test_every_class_registers_ability_score_improvement(self):
+        """12 个职业都该有 4 级那条「属性提升 / 专长」。
+
+        战士与德鲁伊曾经漏登记：升到 4 级时「新解锁」是空的，玩家看不出
+        自己该拿 +2 或一个专长（机制入口本身还没做，见 §15 的 G35）。
+        """
+        missing = [class_id for class_id, class_def in self.bundle.classes.items()
+                   if not any(power.id.endswith(".ability_score_improvement")
+                              for power in class_def.powers)]
+        self.assertEqual(missing, [])
 
     def test_buttons(self):
         fighter = self.bundle.classes[FIGHTER]

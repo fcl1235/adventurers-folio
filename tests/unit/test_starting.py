@@ -22,12 +22,15 @@ PLUGINS = ROOT / "plugins"
 FIGHTER = "dnd2024.class.fighter"
 WIZARD = "dnd2024.class.wizard"
 BARBARIAN = "dnd2024.class.barbarian"
+PALADIN = "dnd2024.class.paladin"
 FIGHTER_A = "dnd2024.package.fighter.a"
 FIGHTER_B = "dnd2024.package.fighter.b"
 FIGHTER_GOLD = "dnd2024.package.fighter.c"
 CHAIN_MAIL = "dnd2024.item.armor.chain_mail"
 STUDDED = "dnd2024.item.armor.studded_leather"
+SHIELD = "dnd2024.item.armor.shield"
 GREATSWORD = "dnd2024.item.weapon.greatsword"
+LONGSWORD = "dnd2024.item.weapon.longsword"
 SCIMITAR = "dnd2024.item.weapon.scimitar"
 SHORTSWORD = "dnd2024.item.weapon.shortsword"
 LONGBOW = "dnd2024.item.weapon.longbow"
@@ -115,6 +118,18 @@ class ApplyPackTest(unittest.TestCase):
         self.assertEqual(actor.inventory.equipped[EquipSlot.OFF_HAND], SHORTSWORD)
         self.assertEqual(actor.inventory.equipped[EquipSlot.ARMOR], STUDDED)
         self.assertTrue(actor.inventory.has_item(LONGBOW), "长弓该留在背包里")
+
+    def test_shield_takes_the_off_hand(self):
+        """圣武士 A 包：锁甲 + 长剑 + 盾 + 6 标枪。盾占着一只手，标枪只能留在包里 ——
+        以前会装成「长剑主手 + 标枪副手 + 盾」三只手，卡上多一条打不出的攻击。"""
+        actor = api.new_character(self.bundle, PALADIN, 1, SCORES,
+                                  starting_pack="")
+        equipped = actor.inventory.equipped
+        self.assertEqual(equipped[EquipSlot.MAIN_HAND], LONGSWORD)
+        self.assertEqual(equipped[EquipSlot.SHIELD], SHIELD)
+        self.assertNotIn(EquipSlot.OFF_HAND, equipped)
+        sheet = api.character_sheet(actor, self.bundle)
+        self.assertEqual(len(sheet["attacks"]), 1, "只能有一条攻击")
 
     def test_gold_option_gives_only_money(self):
         actor = self._build(FIGHTER_GOLD)

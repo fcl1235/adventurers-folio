@@ -483,9 +483,15 @@ class DesktopApp(tk.Tk):
         classes = "、".join("%s %d" % (row["name"], row["class_level"])
                             for row in sheet.get("classes", []))
         subs = "、".join(row["name"] for row in sheet.get("subclasses", []) if row.get("unlocked"))
+        # **出身也是身份**：物种与背景以前只在建卡向导里出现过，建完卡在界面上
+        # 彻底消失 —— 「我是矮人/士兵」是人物卡的一等信息，不能只体现在派生数值里。
+        origin = sheet.get("origin") or {}
+        species = (origin.get("species") or {}).get("name") or ""
+        background = (origin.get("background") or {}).get("name") or ""
+        born = " · ".join(item for item in (species, background) if item)
         total = sheet.get("total_level", 0)
         self.sub_var.set(" · ".join(item for item in
-                                    [classes, subs, "总等级 %d" % total] if item))
+                                    [classes, subs, born, "总等级 %d" % total] if item))
         marks = []
         if sheet.get("morphed"):
             marks.append("变形中")

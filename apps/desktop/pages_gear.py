@@ -19,17 +19,12 @@ from tkinter import ttk
 import dnd5r.api as api
 
 from . import theme
-from .widgets import (COL_LEFT, COL_MID, COL_RIGHT, DAMAGE_ZH, KeyValue, ListPane,
-                      section)
+from .widgets import (COL_LEFT, COL_MID, COL_RIGHT, DAMAGE_ZH, MASTERY_ZH, KeyValue,
+                      ListPane, section)
 
 CATEGORY_ZH = {
     "light": "轻甲", "medium": "中甲", "heavy": "重甲", "shield": "盾牌",
     "simple": "简易", "martial": "军用",
-}
-# 精通的中文名只是**显示用**：效果不结算，所以不做机制说明，只给桌上一眼能认的词
-MASTERY_ZH = {
-    "cleave": "劈砍", "graze": "擦伤", "nick": "快手", "push": "推撞",
-    "sap": "削弱", "slow": "迟缓", "topple": "击倒", "vex": "扰乱",
 }
 PROPERTY_ZH = {
     "light": "轻型", "finesse": "灵巧", "two_handed": "双手", "versatile": "两用",

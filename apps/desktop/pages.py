@@ -124,11 +124,20 @@ class OverviewPage(ttk.Frame):
         # `api.roll_check(kind="tool")` 任意指定都行。一行文本还不会随熟练数长高。
         # 打包顺序：先把底部这块 `side="bottom"` 钉住，再让技能吃掉剩余空间。
         self.tools_var = tk.StringVar(value="")
-        tools = section(mid, "工具熟练")
+        tools = section(mid, "熟练与精通", "工具熟练 / 武器精通（精通效果未结算）")
         tools.pack(side="bottom", fill="x", pady=(6, 0))
         self.tools_label = ttk.Label(tools, textvariable=self.tools_var,
-                                     wraplength=560, justify="left")
+                                     wraplength=400, justify="left")
         self.tools_label.pack(anchor="w")
+        # 武器精通是 2024 的核心新机制：以前只在建卡向导与装备页逐件出现，
+        # 建完卡在卡面上找不到「我精通哪几件」。一行折行文本，不随件数长高。
+        # **wraplength 必须小于中栏宽度（约 441）**：中栏是被技能表撑开的，
+        # 这里给 560 会把整页顶到 1237（窗口只有 1122）—— 实测踩过。
+        self.mastery_var = tk.StringVar(value="")
+        self.mastery_label = ttk.Label(tools, textvariable=self.mastery_var,
+                                       style="Dim.TLabel", wraplength=400,
+                                       justify="left")
+        self.mastery_label.pack(anchor="w", pady=(2, 0))
 
         skills = section(mid, "技能", "熟练加熟练加值，专精再加一份；明细在右侧说明栏")
         skills.pack(fill="both", expand=True)
@@ -250,6 +259,7 @@ class OverviewPage(ttk.Frame):
 
         self.refresh_skills(sheet)
         self.refresh_tools(sheet)
+        self.refresh_masteries(sheet)
         self.refresh_fight(sheet)
         self.refresh_attacks(sheet)
         self.state_panel.refresh(sheet)
@@ -273,6 +283,20 @@ class OverviewPage(ttk.Frame):
             return
         self.tools_var.set("、".join("%s %s" % (row["name"], _signed(row["total"]))
                                      for row in known))
+
+    def refresh_masteries(self, sheet: dict) -> None:
+        """武器精通：只列**哪几件**（效果名在装备页逐件看）。
+
+        这里刻意不带效果（「擦伤」「击倒」）：带上之后一行装不下、折成两行时
+        整页高度会顶到 636/646，6 件武器名字再长一点就越过预算。卡面要回答的是
+        「我精通哪几件」，效果本来也没结算。
+        """
+        rows = (sheet.get("origin") or {}).get("masteries") or []
+        if not rows:
+            self.mastery_var.set("")
+            return
+        self.mastery_var.set("武器精通：%s（效果未结算）"
+                             % "、".join(row["name"] for row in rows))
 
     def refresh_fight(self, sheet: dict) -> None:
         """0–7 行的**语义冻结**（测试按索引读，别挪）：AC/先攻/HP/速度/熟练/抗性/感官/暴击。"""

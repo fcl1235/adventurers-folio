@@ -205,6 +205,25 @@ powers:
           zh: 子职内容在 P5 逐一落地；子职永远按本职业 3 级解锁，不看总等级。
           en: Subclass content lands in P5; subclasses unlock at class level 3, never total level.
 
+  # 2024 德鲁伊的属性提升在 4/8/12/16 级。与其他职业同口径，只登记首次（4 级）。
+  # 真正加属性/换专长的入口还没做 —— 见架构文档 §15 的 G35。
+  - id: dnd2024.class.druid.ability_score_improvement
+    name: { zh: 属性提升 / 专长, en: Ability Score Improvement }
+    level: 4
+    kind: passive
+    target: self
+    text:
+      zh: |-
+        属性 +2/+1（或 +1/+1/+1，上限 20），或换 1 个专长。德鲁伊在 4、8、12、16 级各得一次。
+      en: |-
+        You gain the Ability Score Improvement feat (see "Feats") or another feat of your choice for which you qualify. You gain this feature again at Druid levels 8, 12, and 16.
+    effects:
+      - note:
+          zh: |-
+            属性加值与专长选择还没有入口：这条只登记规则原文。
+          en: |-
+            No entry point for the bonus or the feat yet; the rule text is registered here.
+
   - id: dnd2024.class.druid.wild_resurgence
     name: { zh: 荒野复生, en: Wild Resurgence }
     level: 5

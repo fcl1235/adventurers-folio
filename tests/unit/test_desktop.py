@@ -76,6 +76,30 @@ class DesktopAppTest(unittest.TestCase):
         self.assertIn("战士", text)
         self.assertIn("5", text)
 
+    def test_header_shows_species_and_background(self):
+        """出身是身份，不能只体现在派生数值里：建完卡界面上要看得见选了矮人/士兵。"""
+        app = self._app(species="dnd2024.species.dwarf",
+                        background="dnd2024.background.soldier",
+                        background_bonus={"str": 2, "con": 1})
+        text = app.sub_var.get()
+        self.assertIn("矮人", text)
+        self.assertIn("士兵", text)
+        # 老角色（v2 及更早的档）没有出身，标题不该多出空的分隔符
+        plain = self._app()
+        self.assertNotIn(" ·  · ", plain.sub_var.get())
+
+    def test_mastery_line_lists_picked_weapons(self):
+        """武器精通以前建完卡就看不见了：卡面上要能读出「我精通哪几件」。"""
+        app = self._app(masteries=["dnd2024.item.weapon.longsword",
+                                   "dnd2024.item.weapon.greatsword",
+                                   "dnd2024.item.weapon.longbow"])
+        text = app.overview.mastery_var.get()
+        self.assertIn("长剑", text)
+        self.assertIn("巨剑", text)
+        self.assertIn("未结算", text)
+        self.assertEqual(self._app().overview.mastery_var.get(), "",
+                         "没记精通时不该画一行假文字")
+
     def test_layout_fits_min_window(self):
         """每页的 reqsize 都要塞得进「窗口高 − 现量的 chrome」。
 

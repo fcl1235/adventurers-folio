@@ -23,7 +23,7 @@ from tkinter import ttk
 import dnd5r.api as api
 
 from . import theme
-from .widgets import ABILITY_ZH, KeyValue, ListPane, ScrollFrame, section
+from .widgets import ABILITY_ZH, MASTERY_ZH, KeyValue, ListPane, ScrollFrame, section
 
 
 def _clear(master) -> None:
@@ -621,7 +621,9 @@ class WizardView(ttk.Frame):
         chosen = set(self.draft.get("masteries") or ())
         for row in options["options"]:
             var = tk.IntVar(value=1 if row["id"] in chosen else 0)
-            mastery = row["mastery"] or "—"
+            key = row["mastery"] or ""
+            # 印中文名，别把 `graze`/`topple` 这种内部值直接摆给玩家
+            mastery = MASTERY_ZH.get(key, key) if key else "—"
             text = "%s　%s　精通:%s" % (row["name"], row["damage"], mastery)
             ttk.Checkbutton(scroller.body, text=text, variable=var,
                             command=self._on_masteries).pack(anchor="w", pady=1)
