@@ -31,6 +31,7 @@ from .pages_feats import FeatPage
 from .pages_gear import GearPage
 from .pages_powers import PowersPage
 from .pages_spells import SpellPage
+from .pages_status import StatusPage
 from .wizard import WizardView
 from .widgets import COL_MID, hit_dice_text, hint_bar
 
@@ -120,8 +121,12 @@ class DesktopApp(tk.Tk):
         self.book.add(self.powers_page, text="能力")
         self.encounter_page = EncounterPage(self.book, self)
         self.book.add(self.encounter_page, text="战斗")
+        # 状态（条件 / 力竭 / 濒死 / 专注）单独一页：塞在概览右栏那个 300×400
+        # 的滚动区里时，死亡豁免默认在视野外，滚动还会重影（见 pages_status 说明）。
+        self.status_page = StatusPage(self.book, on_action=self.on_state_action)
+        self.book.add(self.status_page, text="状态")
         self.pages = [self.overview, self.gear, self.spells, self.feats,
-                      self.powers_page, self.encounter_page]
+                      self.powers_page, self.encounter_page, self.status_page]
 
     def _build_hero(self) -> ttk.Frame:
         """身份 + 生命值 + 5 个数值胶囊。
@@ -271,7 +276,7 @@ class DesktopApp(tk.Tk):
                 if roll is None:
                     return None
                 ok = roll["total"] >= dc
-                self.overview.state_panel.set_concentration_dc(
+                self.status_page.state_panel.set_concentration_dc(
                     dc, "成功" if ok else "失败")
                 self.status.configure(
                     text="专注检定　DC %d → %d，%s" % (dc, roll["total"],

@@ -13,10 +13,8 @@ from tkinter import ttk
 from . import theme
 from .cards import AbilityCard
 from .dice import DiceLog
-from .state_panel import StatePanel
 from .widgets import (ABILITY_ZH, CARD_LEFT, COL_MID, COL_RIGHT, GridTable,
-                      KeyValue, RollGrid, ScrollFrame, hit_dice_text, section,
-                      sense_text)
+                      KeyValue, RollGrid, hit_dice_text, section, sense_text)
 
 ABILITY_ORDER = ("str", "dex", "con", "int", "wis", "cha")
 # 列宽是**字符数**（ttk.Label 的单位）。像素预算由布局审计现量 reqwidth 得出，
@@ -145,42 +143,29 @@ class OverviewPage(ttk.Frame):
                                on_roll=lambda key: self._roll("skill", key))
         self.skills.pack(fill="both", expand=True)
 
-        # --- 右：战斗数值 + 攻击（可滚动）+ 掷骰记录（钉在底部）----------------
-        # 打包顺序是铁律：**先 side="bottom" 钉住记录**，再让滚动的战斗区吃掉剩余空间。
-        # 反过来做，内容一长记录就被挤到看不见的地方 —— 而且玩家每掷一次都要滚动才能
-        # 看到结果，那这个面板就白做了。
+        # --- 右：战斗数值 + 攻击 + 掷骰记录（全部定高，不滚动）------------------
+        # 打包顺序是铁律：**先 side="bottom" 钉住记录**，再让上面的区块吃剩余空间。
+        # 反过来做，内容一长记录就被挤到看不见的地方。
+        #
+        # 这里**不用 ScrollFrame**：以前右栏是 Canvas 里嵌一个 1121px 的 Frame
+        # 塞进 402px 的视口，滚动时旧位置不擦，整块内容重影（「倒地」两遍）。
+        # 状态面板搬去「状态」页之后，剩下的两块定高就够，不需要滚动。
         dice = section(right, "掷骰记录")
         dice.pack(side="bottom", fill="x", pady=(4, 0))
         self.dice_log = DiceLog(dice, height=5, width=30)
         self.dice_log.pack(fill="both", expand=True)
 
-        # 定高滚动容器：内容长了就滚，**不会把页面 reqheight 顶出去**。
-        # 以前这里是两条会长的竖排，攻击表一多就把整页顶破预算。
-        # 定高滚动容器：内容长了就滚，**不会把页面 reqheight 顶出去**。
-        # 以前这里是两条会长的竖排，攻击表一多就把整页顶破预算。
-        # 400 是实测过的：加到 460 就把概览顶到 635（预算 646），余量只剩 11px，
-        # 换 60px 可视高度不值那个风险。
-        scroll = ScrollFrame(right, height=400, width=COL_RIGHT)
-        scroll.pack(fill="both", expand=True)
-        self.right_scroll = scroll
-        body = scroll.body
-
+        body = right
         fight = section(body, "战斗")
         fight.pack(fill="x")
         # 抗性/感官以前全仓库零显示点（§P6 方案里点名过的缺口），一并补在这里
-        self.fight = KeyValue(fight, rows=11)
+        self.fight = KeyValue(fight, rows=10)
         self.fight.pack(fill="x", pady=(0, 6))
 
         attacks = section(body, "攻击")
         attacks.pack(fill="x", pady=(6, 0))
         self.attacks = GridTable(attacks, ATTACK_COLUMNS, rows=8)
         self.attacks.pack(fill="x")
-
-        # 状态（条件 / 力竭 / 死亡豁免 / 专注）。放在右栏滚动区里：
-        # 这四块加起来 400px 上下，钉死在页面上会把概览顶破预算；
-        # 放进定高滚动容器则**不影响页面 reqheight**，往下滚就能看到。
-        self.state_panel = StatePanel(body, on_action=self._on_action)
-        self.state_panel.pack(fill="x", pady=(6, 0))
 
     def _roll(self, kind: str, key: str) -> None:
         if self._on_roll is not None:
@@ -262,7 +247,6 @@ class OverviewPage(ttk.Frame):
         self.refresh_masteries(sheet)
         self.refresh_fight(sheet)
         self.refresh_attacks(sheet)
-        self.state_panel.refresh(sheet)
 
     def refresh_skills(self, sheet: dict) -> None:
         rows = []
@@ -299,7 +283,11 @@ class OverviewPage(ttk.Frame):
                              % "、".join(row["name"] for row in rows))
 
     def refresh_fight(self, sheet: dict) -> None:
-        """0–7 行的**语义冻结**（测试按索引读，别挪）：AC/先攻/HP/速度/熟练/抗性/感官/暴击。"""
+        """0–7 行的**语义冻结**（测试按索引读，别挪）：AC/先攻/HP/速度/熟练/抗性/感官/暴击。
+
+        8–9 是后来补的两行：生命骰 + 攻击次数合成一行、力竭一行。右栏不再滚动，
+        11 行塞不进预算 —— 生命骰与攻击次数都是「战斗节奏」信息，合成一行读得通。
+        """
         hp = sheet.get("hp") or {}
         speed = (sheet.get("speed") or {}).get("walk", 0)
         init = sheet.get("initiative") or {}
@@ -313,19 +301,18 @@ class OverviewPage(ttk.Frame):
         self.fight.set_row(5, "抗性", "、".join(resist) if resist else "—")
         self.fight.set_row(6, "感官", sense_text(sheet.get("senses") or {}) or "—")
         self.fight.set_row(7, "暴击", "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)))
-        # 8–9 是新增的两行：hero 上没地方放，但也不能不显示。
-        self.fight.set_row(8, "生命骰",
-                           hit_dice_text(hp.get("hit_dice"), sheet.get("classes")) or "—")
-        self.fight.set_row(9, "攻击次数", str(sheet.get("attacks_per_action", "—")))
-        # 10 = 力竭。**这里必须写清它是真扣了的**，与状态那一栏「只记录」相反。
+        dice = hit_dice_text(hp.get("hit_dice"), sheet.get("classes")) or "—"
+        self.fight.set_row(8, "生命骰", "%s · 攻击 %s"
+                           % (dice, sheet.get("attacks_per_action", "—")))
+        # 9 = 力竭。**这里必须写清它是真扣了的**，与状态页「只记录」相反。
         exh = sheet.get("exhaustion") or {}
         level = int(exh.get("level", 0))
         if level:
-            self.fight.set_row(10, "力竭", "%d 级（d20 %+d · 速度 %+d 尺）"
+            self.fight.set_row(9, "力竭", "%d 级（d20 %+d · 速度 %+d 尺）"
                                % (level, int(exh.get("penalty", 0)),
                                   int(exh.get("speed", 0))))
         else:
-            self.fight.set_row(10, "力竭", "无")
+            self.fight.set_row(9, "力竭", "无")
 
     def refresh_attacks(self, sheet: dict) -> None:
         rows = []

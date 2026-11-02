@@ -5,6 +5,11 @@
 与概览页那些只读数字不是一类东西；P7 的建卡向导与后续的遭遇战面板
 也要复用它，塞在 `pages.py` 里就得复制粘贴。
 
+**它现在整页都是自己的**（`pages_status.py`）：以前它被塞进概览右栏那个
+300×400 的滚动容器里 —— 自己就 557px 高，必须滚才能看见死亡豁免，而
+Canvas 里嵌 Frame 的滚动在 Windows 上不擦旧像素，表现为整块内容重影。
+搬出来之后它有两列宽度，14 个条件排 4 列，一屏看完。
+
 **诚实原则**（写死）：
   * 条件 = 已记录，未计入数值。规则的后果大片取决于具体情形（麻痹=近战必中、
     束缚=速度 0），没有目标模型时硬算只会算错 —— 界面必须说出来。
@@ -20,8 +25,8 @@ from . import theme
 from .conditions import CONDITIONS, name_of
 from .widgets import section
 
-# 勾选列数：右栏约 300px，两个「☐ 倒地」放得下三个就挤了
-CONDITION_COLUMNS = 2
+# 勾选列数：整页宽度下 4 列正好（14 个条件 = 4 行），两列会拖成 7 行白占高度
+CONDITION_COLUMNS = 4
 
 
 def _dot(filled: int, total: int) -> str:
@@ -40,8 +45,16 @@ class StatePanel(ttk.Frame):
 
     # --- 构建 ---------------------------------------------------------
     def _build(self) -> None:
+        # 两列：左列是三个「改一个数」的块，右列是 14 个条件（4 列勾选）。
+        # 单列排下来 557px，整页放不满；两列排开一屏看完，也不用滚动。
+        left = ttk.Frame(self)
+        left.grid(row=0, column=0, sticky="nw", padx=(0, 12))
+        right = ttk.Frame(self)
+        right.grid(row=0, column=1, sticky="nsew")
+        self.columnconfigure(1, weight=1)
+
         # 力竭
-        box = section(self, "力竭", "每级全部 d20 −2、速度 −5 尺（已计入数值）")
+        box = section(left, "力竭", "每级全部 d20 −2、速度 −5 尺（已计入数值）")
         box.pack(fill="x")
         row = ttk.Frame(box)
         row.pack(fill="x", pady=(2, 0))
@@ -57,8 +70,8 @@ class StatePanel(ttk.Frame):
         self.exhaustion_note.pack(side="left")
 
         # 条件
-        box = section(self, "状态", "已记录，未计入数值")
-        box.pack(fill="x", pady=(6, 0))
+        box = section(right, "状态", "已记录，未计入数值")
+        box.pack(fill="both", expand=True)
         self.condition_vars: dict[str, tk.BooleanVar] = {}
         grid = ttk.Frame(box)
         grid.pack(fill="x")
@@ -74,10 +87,15 @@ class StatePanel(ttk.Frame):
         # 内容包自己施加的状态（狂暴 …）没有勾选框，但要看得见，否则「状态栏里没有」
         self.extra_var = tk.StringVar(value="")
         ttk.Label(box, textvariable=self.extra_var, style="Dim.TLabel",
-                  wraplength=280, justify="left").pack(anchor="w", pady=(2, 0))
+                  wraplength=560, justify="left").pack(anchor="w", pady=(2, 0))
+        # 这一栏最容易误会成「勾了就自动扣数值」。写明它是什么、不是什么。
+        ttk.Label(box, text="勾只代表「记上了」。具体后果（麻痹=近战必中、束缚=速度 0）"
+                            "取决于当时的情形，本程序没有目标模型，所以不替你算。",
+                  style="Dim.TLabel", wraplength=560, justify="left").pack(
+            anchor="w", pady=(6, 0))
 
         # 死亡豁免
-        box = section(self, "死亡豁免", "HP 为 0 时掷：10 以上成功，三次成功稳定")
+        box = section(left, "死亡豁免", "HP 为 0 时掷：10 以上成功，三次成功稳定")
         box.pack(fill="x", pady=(6, 0))
         row = ttk.Frame(box)
         row.pack(fill="x")
@@ -102,7 +120,7 @@ class StatePanel(ttk.Frame):
                   style="Dim.TLabel").pack(anchor="w", pady=(2, 0))
 
         # 专注
-        box = section(self, "专注", "受伤时掷体质豁免，DC = max(10, 伤害 ÷ 2)")
+        box = section(left, "专注", "受伤时掷体质豁免，DC = max(10, 伤害 ÷ 2)")
         box.pack(fill="x", pady=(6, 0))
         row = ttk.Frame(box)
         row.pack(fill="x")

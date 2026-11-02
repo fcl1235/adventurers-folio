@@ -218,6 +218,26 @@ class DraftCheckTest(unittest.TestCase):
         self.assertTrue(any("超支" in text
                             for text in _messages(api.draft_problems(self.bundle, draft))))
 
+    def test_standard_array_must_use_the_six_values(self):
+        """标准数组以前完全不校验：六项填 18 也能建卡。"""
+        draft = self.fighter()
+        draft["score_mode"] = "standard_array"
+        draft["scores"] = {key: 18 for key in SCORES}
+        self.assertTrue(any("标准数组" in text
+                            for text in _messages(api.draft_problems(self.bundle, draft))))
+        draft["scores"] = {"str": 15, "dex": 14, "con": 13,
+                           "int": 12, "wis": 10, "cha": 8}
+        self.assertFalse(any("标准数组" in text
+                             for text in _messages(api.draft_problems(self.bundle, draft))))
+
+    def test_roll_out_of_range(self):
+        """4d6 弃最低掷不出 20。只查 1–30 时这种数字能蒙过去。"""
+        draft = self.fighter()
+        draft["score_mode"] = "roll"
+        draft["scores"] = dict(SCORES, str=20)
+        self.assertTrue(any("3–18" in text
+                            for text in _messages(api.draft_problems(self.bundle, draft))))
+
     def test_skill_outside_class_list(self):
         draft = self.fighter()
         draft["skills"] = ["athletics", "arcana"]      # 战士没有奥秘

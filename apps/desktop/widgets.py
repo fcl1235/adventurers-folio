@@ -113,8 +113,9 @@ class KeyValue(ttk.Frame):
             value = tk.StringVar(value="")
             shown = ttk.Label(self, textvariable=value, anchor="e",
                               font=(theme.UI_FONT, 11, "bold"))
-            caption.grid(row=index, column=0, sticky="w", pady=1)
-            shown.grid(row=index, column=1, sticky="e", pady=1)
+            # pady 从 1 改成 0：概览右栏不再滚动，11 行省下的 11px 是预算内的实数
+            caption.grid(row=index, column=0, sticky="w")
+            shown.grid(row=index, column=1, sticky="e")
             self.columnconfigure(1, weight=1)
             self._labels.append(caption)
             self._values.append(value)
@@ -156,7 +157,8 @@ class GridTable(ttk.Frame):
             line = []
             for index, (_, width) in enumerate(columns):
                 cell = ttk.Label(self, text="", width=width, anchor="w")
-                cell.grid(row=row + 1, column=index, sticky="w", padx=(0, 6), pady=1)
+                # 与 KeyValue 同理：定高表里每行省 2px，8 行就是 16px
+                cell.grid(row=row + 1, column=index, sticky="w", padx=(0, 6))
                 line.append(cell)
             self._cells.append(line)
 
@@ -363,6 +365,125 @@ def section(master, title: str, note: str = "") -> ttk.LabelFrame:
     if note:
         ttk.Label(frame, text=note, style="Dim.TLabel").pack(anchor="w")
     return frame
+
+
+class Tooltip:
+    """悬停说明框：指针停住一会儿才弹，离开立刻销毁。
+
+    为什么不用页面里的标签：法术说明是整段正文（施法/距离/成分/持续 + 描述），
+    塞进勾选清单会把行高撑到没法扫。悬浮框是唯一既给全文又不占版面的做法。
+
+    **零弹窗铁律**：`selftest=True` 的窗口里永远不建这个 Toplevel ——
+    探针不许把任何窗口亮到前台，哪怕是提示框。所以测试只验证「挂了绑定、
+    文字取得出来」，不验证「框真的弹出来了」。
+
+    `text` 既可以是字符串，也可以是返回字符串的函数（说明通常按行现取，
+    一次性给几百行拼好的文本会让建卡那一步变慢）。
+    """
+
+    DELAY = 350
+    WRAP = 430
+
+    def __init__(self, widget, text, delay: int | None = None,
+                 wraplength: int = WRAP) -> None:
+        self.widget = widget
+        self._text = text
+        self._delay = self.DELAY if delay is None else int(delay)
+        self._wraplength = wraplength
+        self._after: str | None = None
+        self._tip: tk.Toplevel | None = None
+        widget.bind("<Enter>", self._schedule, add="+")
+        widget.bind("<Leave>", self._hide, add="+")
+        widget.bind("<ButtonPress>", self._hide, add="+")
+        widget.bind("<Destroy>", self._hide, add="+")
+
+    # --- 内部 -------------------------------------------------------------
+    def _selftest(self) -> bool:
+        try:
+            return bool(getattr(self.widget.winfo_toplevel(), "selftest", False))
+        except tk.TclError:
+            return True
+
+    def _schedule(self, _event=None) -> None:
+        if self._selftest():
+            return
+        self._cancel()
+        self._after = self.widget.after(self._delay, self._show)
+
+    def _cancel(self) -> None:
+        if self._after is not None:
+            try:
+                self.widget.after_cancel(self._after)
+            except tk.TclError:
+                pass
+            self._after = None
+
+    def _text_now(self) -> str:
+        value = self._text() if callable(self._text) else self._text
+        return str(value or "")
+
+    def _show(self, dry_run: bool = False) -> None:
+        """`dry_run=True` 只把框**建出来**、不进屏幕 —— 给测试用：
+        真的建一次才能发现配色/字体/定位里的 TclError，而又不违反零弹窗铁律。"""
+        self._after = None
+        if self._tip is not None:
+            return
+        if self._selftest() and not dry_run:
+            return
+        text = self._text_now()
+        if not text:
+            return
+        try:
+            x = self.widget.winfo_pointerx() + 16
+            y = self.widget.winfo_pointery() + 18
+            screen_w = self.widget.winfo_screenwidth()
+            screen_h = self.widget.winfo_screenheight()
+            tip = tk.Toplevel(self.widget)
+            # 先藏起来再摆：直接建出来的 Toplevel 会先在 (0,0) 闪一下，
+            # 然后把位置跳过去 —— 看上去像个抽风的黑块。
+            tip.withdraw()
+            tip.overrideredirect(True)          # 没有标题栏，也不抢焦点
+            tip.configure(background=theme.BORDER)
+            label = tk.Label(tip, text=text, justify="left", anchor="w",
+                             background=theme.PANEL, foreground=theme.TEXT,
+                             font=(theme.UI_FONT, 9), wraplength=self._wraplength,
+                             padx=8, pady=6)
+            label.pack(padx=1, pady=1)
+            tip.update_idletasks()
+            # 贴到屏幕外就把框拽回来（右下角的行最容易超出）
+            width, height = tip.winfo_reqwidth(), tip.winfo_reqheight()
+            if x + width > screen_w - 8:
+                x = max(8, screen_w - width - 8)
+            if y + height > screen_h - 40:
+                y = max(8, y - height - 30)
+            tip.geometry("+%d+%d" % (x, y))
+            if not dry_run:
+                tip.deiconify()
+            self._tip = tip
+        except tk.TclError:                     # 窗口正在销毁（关程序时）就放弃
+            self._tip = None
+
+    def _hide(self, _event=None) -> None:
+        self._cancel()
+        if self._tip is not None:
+            try:
+                self._tip.destroy()
+            except tk.TclError:
+                pass
+            self._tip = None
+
+    # --- 给测试用 ---------------------------------------------------------
+    def is_shown(self) -> bool:
+        """**真的在屏幕上**才算显示（只要求「建出来了」会漏掉干跑出来的框）。"""
+        if self._tip is None:
+            return False
+        try:
+            return bool(self._tip.winfo_ismapped())
+        except tk.TclError:
+            return False
+
+    def text_now(self) -> str:
+        return self._text_now()
 
 
 def hint_bar(master) -> ttk.Label:

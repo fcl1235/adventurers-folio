@@ -172,11 +172,11 @@ class LevelUpTest(unittest.TestCase):
         self.assertEqual(draft["cantrips"], {})
         self.assertEqual(draft["prepared"], {})
         # 空表本身不是问题：「还没选满」是提醒（warn），不该拦住建卡/改卡
-        blocking = [row for row in api.draft_problems(self.bundle, draft)
+        blocking = [row for row in api.draft_problems(self.bundle, draft, editing=True)
                     if row.get("level") != "warn"]
         self.assertEqual(blocking, [])
         self.assertTrue(any(row["step"] == "spells" and "还没选满" in row["text"]
-                            for row in api.draft_problems(self.bundle, draft)),
+                            for row in api.draft_problems(self.bundle, draft, editing=True)),
                         "零法术的施法者至少该有一条提醒")
 
     def test_draft_fills_skill_slots_wasted_on_background(self):
@@ -187,13 +187,31 @@ class LevelUpTest(unittest.TestCase):
                              masteries=[LONGSWORD, GREATAXE, LONGBOW])
         draft = api.draft_from_actor(self.bundle, actor)
         self.assertEqual(sorted(draft["skills"]), ["athletics", "perception"])
-        blocking = [row for row in api.draft_problems(self.bundle, draft)
+        blocking = [row for row in api.draft_problems(self.bundle, draft, editing=True)
                     if row.get("level") != "warn"]
         self.assertEqual(blocking, [], "草案本身不该带拦得住的问题")
         after = api.apply_draft(self.bundle, actor, draft)
         keys = {row["key"] for row in api.character_sheet(after, self.bundle)["skills"]
                 if row["proficient"]}
         self.assertEqual(keys, {"athletics", "intimidation", "perception"})
+
+    def test_edit_draft_is_not_judged_by_score_generation_method(self):
+        """改卡不能再被「标准数组必须用完 15/14/13/12/10/8」挡住。
+
+        那六个数是角色身上既成的事实（这只有 16，点买买不到、数组也没有），
+        拿生成方式的规矩去卡它，等于所有非标准数组的角色一改卡就失败 ——
+        实测升级后改卡直接「建卡失败」。
+        """
+        actor = self.fighter(3, subclass=CHAMPION,
+                             masteries=[LONGSWORD, GREATAXE, LONGBOW])
+        draft = api.draft_from_actor(self.bundle, actor)
+        self.assertEqual(draft["score_mode"], "edit")
+        scores = [row for row in api.draft_problems(self.bundle, draft, editing=True)
+                  if row["step"] == "scores"]
+        self.assertEqual(scores, [], "改卡草案被属性生成方式的规矩挡住了")
+        # 反过来：这份草案**不能**拿去建新角色（`edit` 不是生成方式）
+        self.assertTrue(any("不是建卡用的属性生成方式" in row["text"]
+                            for row in api.draft_problems(self.bundle, draft)))
 
     def test_apply_draft_round_trip_keeps_everything(self):
         actor = self.fighter(3, subclass=CHAMPION,
@@ -203,7 +221,7 @@ class LevelUpTest(unittest.TestCase):
         before = api.character_sheet(actor, self.bundle)
 
         draft = api.draft_from_actor(self.bundle, actor)
-        self.assertEqual(api.draft_problems(self.bundle, draft), [],
+        self.assertEqual(api.draft_problems(self.bundle, draft, editing=True), [],
                          "现有角色转成的草案自己过不了校验，升级后会被卡住")
         after = api.character_sheet(api.apply_draft(self.bundle, actor, draft),
                                     self.bundle)
@@ -272,7 +290,7 @@ class LevelUpTest(unittest.TestCase):
                                      ["skill.arcana", "skill.stealth", "tool.cooks_utensils"]})
         draft = api.draft_from_actor(self.bundle, actor)
         self.assertNotIn("arcana", draft["skills"])
-        blocking = [item for item in api.draft_problems(self.bundle, draft)
+        blocking = [item for item in api.draft_problems(self.bundle, draft, editing=True)
                     if item["level"] != "warn"]
         self.assertEqual(blocking, [], "草案自己被卡住，升级后改卡就进不去了")
 
@@ -287,7 +305,7 @@ class LevelUpTest(unittest.TestCase):
         options = api.spell_choices(self.bundle, WIZARD, 1)
         spell = options["cantrips"][0]["id"]
         draft["cantrips"] = {WIZARD: [spell] * (options["cantrip_limit"] + 1)}
-        problems = api.draft_problems(self.bundle, draft)
+        problems = api.draft_problems(self.bundle, draft, editing=True)
         self.assertIn("spells", [item["step"] for item in problems])
 
 

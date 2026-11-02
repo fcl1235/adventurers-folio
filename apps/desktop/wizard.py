@@ -23,7 +23,28 @@ from tkinter import ttk
 import dnd5r.api as api
 
 from . import theme
-from .widgets import ABILITY_ZH, MASTERY_ZH, KeyValue, ListPane, ScrollFrame, section
+from .pages_spells import spell_text
+from .widgets import (ABILITY_ZH, MASTERY_ZH, KeyValue, ListPane, ScrollFrame,
+                      Tooltip, section)
+
+# 三种属性生成方式各自的**输入范围**。数字框与键盘校验都照这个来 ——
+# 以前框写死 1–20，点买填 18 也能停在框里，只等建卡时才报错。
+SCORE_BOUNDS = {
+    "point_buy": (8, 15),        # 买不到 16+（加值来自背景与专长）
+    "standard_array": (8, 15),   # 15/14/13/12/10/8，端点就是 8 与 15
+    "roll": (3, 18),             # 4d6 弃最低的实数范围
+    # 改卡：数是已经存在的，可能是 16（点买买不到，但专长/背景抬上来的）
+    "edit": (8, 20),
+}
+
+# 属性框上那句说明。三种方式约束完全不同，不能共用一句话。
+SCORE_NOTES = {
+    "point_buy": "8–15 之间购买，16 以上只能由背景与专长提供；超支会当场标红。",
+    "standard_array": "15/14/13/12/10/8 各用一次。选一个已经被别人拿走的数，"
+                      "会和对方交换位置。",
+    "roll": "4d6 弃最低，范围 3–18。想重掷就点「掷 4d6 弃最低」。",
+    "edit": "范围 8–20。",
+}
 
 
 def _clear(master) -> None:
@@ -65,10 +86,14 @@ class WizardView(ttk.Frame):
         nav = ttk.Frame(self.footer)
         nav.pack(side="top", fill="x", pady=(2, 0))
         self.buttons: dict[str, ttk.Button] = {}
+        # **顺序 = 屏幕从右到左**：`side="right"` 先 pack 的贴最右，所以元组
+        # 反过来写（取消 → 建卡 → 下一步 → 上一步）屏幕才是
+        # 「← 上一步 | 下一步 → | 建卡 | 取消」。正着写会出现「下一步」在左、
+        # 「上一步」在右 —— 手会按错。
         for key, text, action in (("cancel", "取消", self.cancel),
-                                  ("back", "← 上一步", self.prev_step),
+                                  ("finish", "建卡", self.finish),
                                   ("next", "下一步 →", self.next_step),
-                                  ("finish", "建卡", self.finish)):
+                                  ("back", "← 上一步", self.prev_step)):
             button = ttk.Button(nav, text=text, command=action, width=10)
             button.pack(side="right", padx=(6, 0))
             self.buttons[key] = button
@@ -110,10 +135,16 @@ class WizardView(ttk.Frame):
     def cancel(self) -> None:
         self.app.close_wizard()
 
+    def problems(self) -> list[dict]:
+        """当前草案的问题清单。**只有这一处**该问 `draft_problems` ——
+        改卡与建卡的差别（属性只查范围 vs 按生成方式查）在这里统一带上。"""
+        return api.draft_problems(self.app.bundle, self.draft, self.app.locale,
+                                  editing=self.editing)
+
     def finish(self) -> None:
         """建卡 / 改卡。有错就跳回第一个出错的那一步，**不弹窗** —— 弹窗在零弹窗
         铁律下是禁止的，而且一个「有错误」的弹窗什么也没告诉玩家。"""
-        problems = api.draft_problems(self.app.bundle, self.draft, self.app.locale)
+        problems = self.problems()
         blocking = [item for item in problems if item.get("level", "error") != "warn"]
         if blocking:
             first = blocking[0]
@@ -163,9 +194,7 @@ class WizardView(ttk.Frame):
         """把当前步的校验结果写到状态行。**只报当前步**，不然 8 步的问题
         一起堆上来，没人知道先改哪个。"""
         key = step or self.current["key"]
-        problems = [item for item in
-                    api.draft_problems(self.app.bundle, self.draft, self.app.locale)
-                    if item["step"] == key]
+        problems = [item for item in self.problems() if item["step"] == key]
         if not problems:
             self._set_status(self.current["hint"])
             return
@@ -427,42 +456,87 @@ class WizardView(ttk.Frame):
                                    self.app.locale)
         top = ttk.Frame(self.body)
         top.pack(fill="x")
-        box = section(top, "生成方式")
-        box.pack(side="left", fill="x")
-        self.mode_var = tk.StringVar(value=str(self.draft.get("score_mode")
-                                               or "standard_array"))
-        for key in options["modes"]:
-            ttk.Radiobutton(box, text=options["mode_zh"].get(key, key),
-                            value=key, variable=self.mode_var,
-                            command=self._on_mode).pack(anchor="w")
+        roll = None
+        if self.editing:
+            # 改卡：属性是已经存在的数（点买/数组/4d6 都可能，专长还抬过），
+            # 再摆「生成方式」只会误导 —— 那三种方式算出来的值会覆盖他现在的卡。
+            box = section(top, "改的是卡上的原始属性",
+                          "这里填建卡时那一组数（不含专长与背景加值）。"
+                          "改完 HP 上限、熟练与攻击会重算，装备与当前 HP 不动。")
+            box.pack(fill="x")
+            self.mode_var = tk.StringVar(value="edit")
+        else:
+            box = section(top, "生成方式")
+            box.pack(side="left", fill="x")
+            self.mode_var = tk.StringVar(value=str(self.draft.get("score_mode")
+                                                   or "standard_array"))
+            for key in options["modes"]:
+                ttk.Radiobutton(box, text=options["mode_zh"].get(key, key),
+                                value=key, variable=self.mode_var,
+                                command=self._on_mode).pack(anchor="w")
 
-        roll = section(top, "快捷")
-        roll.pack(side="left", fill="both", expand=True, padx=(8, 0))
-        ttk.Button(roll, text="标准数组", style="Mini.TButton",
-                   command=lambda: self._preset_scores("standard_array")).pack(anchor="w")
-        ttk.Button(roll, text="掷 4d6 弃最低", style="Mini.TButton",
-                   command=lambda: self._preset_scores("roll")).pack(anchor="w")
+            roll = section(top, "快捷")
+            roll.pack(side="left", fill="both", expand=True, padx=(8, 0))
+            ttk.Button(roll, text="标准数组", style="Mini.TButton",
+                       command=lambda: self._preset_scores("standard_array")
+                       ).pack(anchor="w")
+            ttk.Button(roll, text="掷 4d6 弃最低", style="Mini.TButton",
+                       command=lambda: self._preset_scores("roll")).pack(anchor="w")
         self.cost_var = tk.StringVar()
-        ttk.Label(roll, textvariable=self.cost_var, style="Dim.TLabel").pack(anchor="w")
+        if roll is not None:
+            ttk.Label(roll, textvariable=self.cost_var,
+                      style="Dim.TLabel").pack(anchor="w")
 
         # `section()` 内部已经 pack 了一个说明标签，直接往里 grid 会撞管理器。
         # 所以这里自己建区框，再把网格放进一个中间 Frame。
         grid_box = ttk.LabelFrame(self.body, text="属性值", padding=(8, 4))
         grid_box.pack(fill="x", pady=(8, 0))
-        ttk.Label(grid_box, text="上限 15 是购买上限；16 以上只能由背景与专长提供。",
-                  style="Dim.TLabel").pack(anchor="w")
+        head = ttk.Frame(grid_box)
+        head.pack(fill="x")
+        # 说明跟着生成方式走（点买上限 / 标准数组要互换 / 掷骰范围）
+        self.budget_note_var = tk.StringVar()
+        ttk.Label(head, textvariable=self.budget_note_var, style="Dim.TLabel",
+                  wraplength=520, justify="left").pack(side="left", anchor="w")
+        # 「还剩 N 点」必须和输入框在**同一段视线里**：以前它画在「快捷」框，
+        # 而且一越界就被错误文本顶掉，玩家根本不知道还剩多少。
+        self.points_var = tk.StringVar()
+        self.points_label = ttk.Label(head, textvariable=self.points_var,
+                                      font=(theme.UI_FONT, 11, "bold"))
+        self.points_label.pack(side="right", anchor="e", padx=(8, 0))
         grid = ttk.Frame(grid_box)
         grid.pack(anchor="w")
         self.score_vars: dict[str, tk.IntVar] = {}
+        self.score_spins: dict[str, ttk.Spinbox] = {}
+        self.score_combos: dict[str, ttk.Combobox] = {}
+        self._array_values: dict[str, int] = {}
+        self._syncing = False
+        # `validate="key"` 让非法数字打不进去（详见 `_score_prefix_ok`）：
+        # 以前的框是 1–20 死值，点买填 18 也照样停在框里，只等建卡时才报错。
+        lo, hi = SCORE_BOUNDS[self._mode()]
         for index, key in enumerate(options["keys"]):
             cell = ttk.Frame(grid)
             cell.grid(row=0, column=index, padx=(0, 12), sticky="w")
             ttk.Label(cell, text=ABILITY_ZH.get(key, key.upper())).pack()
             var = tk.IntVar(value=int((self.draft.get("scores") or {}).get(key, 10)))
-            ttk.Spinbox(cell, from_=1, to=20, width=4, textvariable=var,
-                        command=self._on_scores).pack()
+            spin = ttk.Spinbox(cell, from_=lo, to=hi, width=4, textvariable=var,
+                               justify="center", command=self._on_scores)
+            spin.configure(validate="key",
+                           validatecommand=(self._watched(spin), "%P"))
+            # 标准数组用下拉：六个数只能各用一次，选过的数字与对方**交换**。
+            # 用数字框做不到这件事 —— 玩家能填出两个 15。
+            combo = ttk.Combobox(cell, width=4, state="readonly",
+                                 justify="center", textvariable=var)
+            combo.bind("<<ComboboxSelected>>",
+                       lambda _event, name=key: self._on_array_pick(name))
+            # 离开输入框就收口：框里剩个半截数（"1"）要夹到最近的合法值，
+            # 否则「框里显示 1、草案里还是 15」，玩家看到的和实际用的不是一回事。
+            spin.bind("<FocusOut>", self._commit_scores)
+            spin.bind("<Return>", self._commit_scores)
             var.trace_add("write", lambda *_: self._on_scores())
             self.score_vars[key] = var
+            self.score_spins[key] = spin
+            self.score_combos[key] = combo
+        self._sync_score_widgets()
 
         bonus = section(self.body, "背景加值",
                         "从背景给的那几项属性里分：一项 +2 加一项 +1，或三项各 +1。")
@@ -475,8 +549,131 @@ class WizardView(ttk.Frame):
         self._fill_bonus_box()
         self._refresh_cost()
 
+    def _mode(self) -> str:
+        """当前生成方式。控件还没建时退回草案里的值。"""
+        try:
+            return str(self.mode_var.get()) or "point_buy"
+        except (AttributeError, tk.TclError):
+            return str(self.draft.get("score_mode") or "point_buy")
+
+    def _value_of(self, key: str) -> int:
+        try:
+            return int(self.score_vars[key].get())
+        except (KeyError, tk.TclError, ValueError):
+            return 0
+
+    def _score_prefix_ok(self, proposed: str) -> bool:
+        """键盘校验：只放行「还能补成一个合法值的半截数字」。
+
+        这样点买模式里 `16` 根本打不进去（16–20 没有合法的补全），而 `1` 能打
+        —— 它是 10–15 的前半截。空串也放行（删光是输入过程的一部分）。
+        """
+        if proposed == "":
+            return True
+        if not proposed.isdigit():
+            return False
+        lo, hi = SCORE_BOUNDS[self._mode()]
+        return any(str(value).startswith(proposed) for value in range(lo, hi + 1))
+
+    def _watched(self, widget):
+        """把前缀校验装到某个输入框上，**被拒之后重新武装**。
+
+        Tk 的规矩：`validatecommand` 一旦返回 0，它自己就把 `validate` 改成
+        `none` —— 也就是「拒一次之后再也不校验」。不重新装回去，玩家打一个
+        16 被拒，接下来 18、20 全都能进框（比一开始就不拦还糟）。
+        """
+        def check(proposed: str) -> bool:
+            ok = self._score_prefix_ok(proposed)
+            if not ok:
+                widget.after_idle(lambda: widget.configure(validate="key"))
+            return ok
+        return self.register(check)
+
     def _on_mode(self) -> None:
-        self.draft["score_mode"] = self.mode_var.get()
+        mode = self._mode()
+        self.draft["score_mode"] = mode
+        scores = dict(self.draft.get("scores") or {})
+        try:
+            problems = api.check_scores(mode, scores)
+        except api.DndError:
+            problems = ["不认识的生成方式"]
+        if problems:
+            # 当前这六个数在新方式下不合法（点买的 17 拿去当标准数组）。
+            # **换一套合法的**，而不是留一堆非法值让人自己找 —— 换之前不会掉到
+            # 更差的组合：点买与标准数组共用 15/14/13/12/10/8（正好 27 点）。
+            scores = self._preset_for(mode)
+            self.draft["scores"] = dict(scores)
+            self._syncing = True
+            try:
+                for key, var in self.score_vars.items():
+                    var.set(int(scores.get(key, 10)))
+            finally:
+                self._syncing = False
+        self._array_values = dict(scores)
+        self._sync_score_widgets()
+        self._refresh_cost()
+        self._report()
+        if problems:
+            # 换数必须说出来：静默把 17 改成 12 会让玩家以为自己的输入丢了
+            self._set_status("「%s」下原来的属性不合法（%s），已换成一套合法的数值"
+                             % (api.SCORE_MODE_ZH.get(mode, mode), problems[0]),
+                             warn=True)
+
+    def _preset_for(self, mode: str) -> dict[str, int]:
+        """这种方式的一套合法初始值。掷骰走内核的 rng（C4：界面不 import random）。"""
+        if mode == "roll":
+            return dict(api.random_scores())
+        return {key: int(value) for key, value in api.score_presets()["standard"].items()}
+
+    def _sync_score_widgets(self) -> None:
+        """按生成方式换控件：点买/掷骰用数字框，标准数组用只读下拉。"""
+        mode = self._mode()
+        lo, hi = SCORE_BOUNDS.get(mode, (1, 20))
+        standard = mode == "standard_array"
+        for key, spin in self.score_spins.items():
+            combo = self.score_combos[key]
+            if standard:
+                spin.pack_forget()
+                combo.pack()
+            else:
+                combo.pack_forget()
+                spin.configure(from_=lo, to=hi)
+                if not spin.winfo_manager():
+                    spin.pack()
+        self.budget_note_var.set(SCORE_NOTES.get(mode, ""))
+        self._refresh_array_choices()
+
+    def _refresh_array_choices(self) -> None:
+        """标准数组的下拉列**全部六个数**。
+
+        不是只列「没人拿的」—— 六个值永远都被谁拿着，那样就一个都选不了。
+        选中一个已被别人拿走的数，由 `_on_array_pick` 做交换。
+        """
+        pool = [str(value) for value in api.score_presets()["standard"].values()]
+        for combo in self.score_combos.values():
+            combo.configure(values=pool)
+
+    def _on_array_pick(self, key: str) -> None:
+        """标准数组：选中一个数就与「原来拿着它」的那格**交换**。
+
+        交换而不是直接赋值，是因为六个数必须是 15/14/13/12/10/8 的排列 ——
+        直接赋值会让两格都变成 15，而第三格的 15 失踪。
+        """
+        old = int(self._array_values.get(key, 10))
+        new = self._value_of(key)
+        holder = next((other for other, value in self._array_values.items()
+                       if other != key and value == new), None)
+        self._array_values[key] = new
+        if holder is not None:
+            self._array_values[holder] = old
+            self._syncing = True
+            try:
+                self.score_vars[holder].set(old)
+            finally:
+                self._syncing = False
+        self._refresh_array_choices()
+        self.draft["scores"] = {name: int(var.get())
+                               for name, var in self.score_vars.items()}
         self._refresh_cost()
         self._report()
 
@@ -485,28 +682,79 @@ class WizardView(ttk.Frame):
         self.draft["score_mode"] = mode
         if self.mode_var.get() != mode:
             self.mode_var.set(mode)
-        if mode == "standard_array":
-            scores = api.score_presets()["standard"]
-        elif mode == "roll":
-            scores = api.random_scores()
-        else:
+        if mode not in ("standard_array", "roll"):
             return
+        scores = self._preset_for(mode)
         self.draft["scores"] = dict(scores)
-        for key, var in getattr(self, "score_vars", {}).items():
-            var.set(int(scores.get(key, 10)))
+        self._syncing = True
+        try:
+            for key, var in getattr(self, "score_vars", {}).items():
+                var.set(int(scores.get(key, 10)))
+        finally:
+            self._syncing = False
+        self._array_values = dict(scores)
+        self._sync_score_widgets()
         self._refresh_cost()
         self._report()
 
     def _on_scores(self) -> None:
+        if getattr(self, "_syncing", False):
+            return
+        mode = self._mode()
         scores = {}
         for key, var in self.score_vars.items():
             try:
                 scores[key] = int(var.get())
             except (tk.TclError, ValueError):
                 return                       # 输入框里是空的/半个字符，等它填完
+        standard = api.score_presets()["standard"].values()
+        if mode == "standard_array":
+            if sorted(scores.values()) != sorted(int(v) for v in standard):
+                return                       # 交换进行中，等 `_on_array_pick` 收尾
+            self._array_values = dict(scores)
+        else:
+            lo, hi = SCORE_BOUNDS.get(mode, (1, 20))
+            if any(not lo <= value <= hi for value in scores.values()):
+                # 框里是半截数（"1" 是 15 的前半截）：先不写草案，
+                # 否则每按一个键状态行就闪一句「STR 必须在 8–15 之间」
+                self._set_points("…", theme.DIM)
+                return
         self.draft["scores"] = scores
         self._refresh_cost()
         self._report()
+
+    def _commit_scores(self, _event=None) -> None:
+        """离开输入框时收口：半截数（"1"）夹到最近的合法值。
+
+        不这么做，框里显示的数和草案里的数会不一致 —— 而玩家只会看框。
+        """
+        mode = self._mode()
+        if mode == "standard_array":
+            return
+        lo, hi = SCORE_BOUNDS.get(mode, (1, 20))
+        changed = False
+        for var in self.score_vars.values():
+            try:
+                value = int(var.get())
+            except (tk.TclError, ValueError):
+                value = lo
+            fixed = max(lo, min(hi, value))
+            if fixed != value:
+                self._syncing = True
+                try:
+                    var.set(fixed)
+                finally:
+                    self._syncing = False
+                changed = True
+        if changed:
+            self.draft["scores"] = {key: int(var.get())
+                                    for key, var in self.score_vars.items()}
+            self._refresh_cost()
+            self._report()
+
+    def _set_points(self, text: str, color: str) -> None:
+        self.points_var.set(text)
+        self.points_label.configure(foreground=color)
 
     def _fill_bonus_box(self) -> None:
         plans = self._bonus_plans()
@@ -535,20 +783,38 @@ class WizardView(ttk.Frame):
         self._report()
 
     def _refresh_cost(self) -> None:
+        """点数 / 剩余点数 / 加值预览。三种方式各有各的「还剩多少」。"""
         scores = self.draft.get("scores") or {}
-        if self.draft.get("score_mode") == "point_buy":
+        mode = self._mode()
+        if mode == "point_buy":
+            budget = api.score_presets()["budget"]
             try:
                 spent = api.score_cost(scores)
             except api.DndError as exc:
-                self.cost_var.set(str(exc))
+                self._set_points(str(exc), theme.WARN)
+                self.cost_var.set("")
                 return
-            budget = api.score_presets()["budget"]
-            self.cost_var.set("点买已花 %d / %d 点" % (spent, budget))
+            left = budget - spent
+            if left > 0:
+                self._set_points("还剩 %d 点" % left, theme.GOLD2)
+            elif left == 0:
+                self._set_points("刚好用完 %d 点" % budget, theme.OK)
+            else:
+                self._set_points("超支 %d 点" % -left, theme.WARN)
+            self.cost_var.set("点买 %d 点：8–15 之间买，已花 %d" % (budget, spent))
             return
+        if mode == "standard_array":
+            self._set_points("六项各一次", theme.DIM)
+        elif mode == "edit":
+            # 备注里已经写了范围，这里不再重复一个「8–20」
+            self._set_points("", theme.DIM)
+        elif mode == "roll":
+            self._set_points("总和 %d" % sum(int(v) for v in scores.values()),
+                             theme.DIM)
         final = dict(scores)
         for key, value in (self.draft.get("background_bonus") or {}).items():
             if key in final:
-                final[key] = final[key] + int(value)
+                final[key] = min(20, final[key] + int(value))
         pairs = "　".join("%s %d" % (ABILITY_ZH.get(k, k.upper()), final.get(k, 0))
                           for k in scores)
         self.cost_var.set("加值后：" + pairs if pairs else "")
@@ -655,6 +921,7 @@ class WizardView(ttk.Frame):
         options = api.step_options(self.app.bundle, "spells", self.draft,
                                    self.app.locale)
         class_id = str(self.draft.get("class_id") or "")
+        self.spell_tips: list[Tooltip] = []      # 测试要能数；非施法职业就是空表
         if not options["caster"]:
             ttk.Label(self.body, text="这个职业不施法，这一步直接跳过。",
                       style="Dim.TLabel").pack(anchor="w", pady=12)
@@ -668,6 +935,8 @@ class WizardView(ttk.Frame):
         self.spell_count_var = tk.StringVar()
         ttk.Label(head, textvariable=self.spell_count_var).pack(side="right")
 
+        dim_hint = "把鼠标停在一个法术上，会弹出它的完整说明（施法/距离/成分/持续/正文）。"
+        ttk.Label(self.body, text=dim_hint, style="Dim.TLabel").pack(anchor="w", pady=(2, 0))
         columns = ttk.Frame(self.body)
         columns.pack(fill="both", expand=True, pady=(6, 0))
         left = ttk.Frame(columns)
@@ -686,10 +955,14 @@ class WizardView(ttk.Frame):
         scroller.pack(fill="both", expand=True)
         for row in options["cantrips"]:
             var = tk.IntVar(value=1 if row["id"] in chosen_cantrips else 0)
-            ttk.Checkbutton(scroller.body, text=row["name"], variable=var,
-                            command=self._on_spells).pack(anchor="w")
+            check = ttk.Checkbutton(scroller.body, text=row["name"], variable=var,
+                                    command=self._on_spells)
+            check.pack(anchor="w")
             var.trace_add("write", lambda *_: self._on_spells(silent=True))
             self.cantrip_vars[row["id"]] = var
+            # 悬停出全文。文字**延迟取**：一次建卡几十行，全部拼好会明显拖慢
+            self.spell_tips.append(
+                Tooltip(check, lambda item=row: spell_text(item["detail"])))
 
         prepared_box = section(right, "准备法术（按环）")
         prepared_box.pack(fill="both", expand=True)
@@ -701,10 +974,13 @@ class WizardView(ttk.Frame):
             for row in group["spells"]:
                 mark = "（专注）" if row["concentration"] else ""
                 var = tk.IntVar(value=1 if row["id"] in chosen_prepared else 0)
-                ttk.Checkbutton(scroller2.body, text=row["name"] + mark, variable=var,
-                                command=self._on_spells).pack(anchor="w")
+                check = ttk.Checkbutton(scroller2.body, text=row["name"] + mark,
+                                        variable=var, command=self._on_spells)
+                check.pack(anchor="w")
                 var.trace_add("write", lambda *_: self._on_spells(silent=True))
                 self.prepared_vars[row["id"]] = var
+                self.spell_tips.append(
+                    Tooltip(check, lambda item=row: spell_text(item["detail"])))
         self._refresh_spell_count()
 
     def _on_spells(self, silent: bool = False) -> None:

@@ -8,8 +8,10 @@
 """
 
 import tempfile
+import tkinter as tk
 import unittest
 from pathlib import Path
+from tkinter import ttk
 
 import dnd5r.api as api
 from apps.desktop import theme
@@ -861,14 +863,14 @@ class StatePanelTest(unittest.TestCase):
     def test_honesty_texts_are_on_screen(self):
         """状态=只记录，力竭=已计入。两句话必须在界面上，不能只写在注释里。"""
         app = self._app()
-        panel = app.overview.state_panel
+        panel = app.status_page.state_panel
         text = self._labels(panel)
         self.assertIn("未计入数值", text)
         self.assertIn("已计入", text)
 
     def test_condition_checkbox_writes_fact(self):
         app = self._app()
-        panel = app.overview.state_panel
+        panel = app.status_page.state_panel
         panel.condition_vars["prone"].set(True)
         panel._apply_condition("prone")
         self.assertIn("prone", app.sheet["conditions"])
@@ -881,17 +883,17 @@ class StatePanelTest(unittest.TestCase):
         app = self._app()
         app.on_state_action("exhaustion", 2)
         self.assertEqual(app.sheet["exhaustion"]["level"], 2)
-        self.assertEqual(app.overview.state_panel.exhaustion_var.get(), 2)
-        self.assertIn("-4", app.overview.fight.value_at(10))
-        self.assertIn("力竭", app.overview.fight.label_at(10))
+        self.assertEqual(app.status_page.state_panel.exhaustion_var.get(), 2)
+        self.assertIn("-4", app.overview.fight.value_at(9))
+        self.assertIn("力竭", app.overview.fight.label_at(9))
 
     def test_death_save_disabled_while_alive(self):
         app = self._app()
-        self.assertEqual(str(app.overview.state_panel.death_button.cget("state")),
+        self.assertEqual(str(app.status_page.state_panel.death_button.cget("state")),
                          "disabled")
         app.actor.hp.current = 0
         app.refresh()
-        self.assertEqual(str(app.overview.state_panel.death_button.cget("state")),
+        self.assertEqual(str(app.status_page.state_panel.death_button.cget("state")),
                          "normal")
 
     def test_death_save_roll_is_logged(self):
@@ -902,17 +904,17 @@ class StatePanelTest(unittest.TestCase):
         self.assertEqual(result["outcome"], "ongoing")
         self.assertEqual(result["failed"], 2)
         self.assertIn("死亡豁免", app.overview.dice_log.lines()[0])
-        self.assertEqual(app.overview.state_panel.success_var.get(), "○○○")
-        self.assertEqual(app.overview.state_panel.failed_var.get(), "●●○")
+        self.assertEqual(app.status_page.state_panel.success_var.get(), "○○○")
+        self.assertEqual(app.status_page.state_panel.failed_var.get(), "●●○")
 
     def test_concentration_rolls_con_save(self):
         app = self._app()
         con = app.sheet["saves"]["con"]["total"]
         app.on_state_action("concentration", 24, rng=ScriptedRng([15]))
         dc = 12                                  # max(10, 24 // 2)
-        self.assertIn("DC %d" % dc, app.overview.state_panel.dc_var.get())
+        self.assertIn("DC %d" % dc, app.status_page.state_panel.dc_var.get())
         expected = "成功" if 15 + con >= dc else "失败"
-        self.assertIn(expected, app.overview.state_panel.dc_var.get())
+        self.assertIn(expected, app.status_page.state_panel.dc_var.get())
         self.assertIn("专注", app.overview.dice_log.lines()[0])
 
 
@@ -1224,6 +1226,249 @@ class LevelUpUiTest(unittest.TestCase):
         self.assertEqual(len(app.sheet["origin"]["masteries"]), 3)
         # 改卡不清当前文件与掷骰记录 —— 改的还是同一个角色
         self.assertIn("已改卡", app.status.cget("text"))
+
+
+class SheetRenderingTest(unittest.TestCase):
+    """概览页**不许**再有「Canvas 里嵌 Frame」的滚动区。
+
+    那块 300×400 的滚动区塞了 1121px 的内容，滚动时旧位置不重绘 ——
+    截图里「倒地」「成功○○○」各出现两遍，就是这么来的。状态搬去独立页之后，
+    概览右栏三块都是定高，不需要滚动。这几条盯的是「别再加回来」。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _app(self):
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def test_overview_has_no_scrolling_canvas(self):
+        app = self._app()
+        self.assertFalse(hasattr(app.overview, "right_scroll"),
+                         "概览右栏又加回滚动容器了")
+        canvases = [node for node in _walk(app.overview)
+                    if isinstance(node, tk.Canvas)]
+        self.assertEqual(canvases, [], "概览页不该出现 Canvas（嵌 Frame 滚动会重影）")
+
+    def test_status_lives_on_its_own_tab(self):
+        app = self._app()
+        self.assertIn(app.status_page, app.pages)
+        self.assertEqual(str(app.book.tab(app.status_page, "text")), "状态")
+        # 14 个条件全在，不是缩水版
+        self.assertEqual(len(app.status_page.state_panel.condition_vars), 14)
+        self.assertEqual(app.status_page.hp_var.get(),
+                         "HP %d / %d" % (app.sheet["hp"]["current"],
+                                         app.sheet["hp"]["maximum"]))
+
+    def test_every_page_still_fits_the_budget(self):
+        """加了一页之后每页都要重新过预算 —— 这一条以前漏过（绿着但超了）。"""
+        app = self._app()
+        avail_h = WINDOW_MIN[1] - app.chrome_height()
+        avail_w = WINDOW_MIN[0] - 16
+        for row in app.layout_report()["pages"]:
+            width, height = row["req"]
+            self.assertLessEqual(width, avail_w, "%s 横向溢出" % row["name"])
+            self.assertLessEqual(height, avail_h, "%s 纵向溢出" % row["name"])
+
+
+class ScoresStepTest(unittest.TestCase):
+    """属性步：约束要发生在**框里**，不能等建卡时才报错。
+
+    以前的三个坑：数字框写死 1–20（点买填 18 也能停在框里）、剩余点数被错误
+    文本顶掉、标准数组填六个 18 也能建卡。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _wizard(self, class_id=FIGHTER):
+        actor = api.new_character(self.bundle, class_id, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        app.open_wizard()
+        wizard = app.wizard
+        wizard.go(api.STEP_INDEX["scores"])
+        app.update_idletasks()
+        return app, wizard
+
+    def _use_mode(self, wizard, mode):
+        wizard.mode_var.set(mode)
+        wizard._on_mode()
+        wizard.winfo_toplevel().update_idletasks()
+
+    def test_point_buy_bounds(self):
+        _, wizard = self._wizard()
+        self._use_mode(wizard, "point_buy")
+        for spin in wizard.score_spins.values():
+            self.assertEqual(int(spin.cget("from")), 8)
+            self.assertEqual(int(spin.cget("to")), 15)
+
+    def test_sixteen_cannot_be_typed_in_point_buy(self):
+        _, wizard = self._wizard()
+        self._use_mode(wizard, "point_buy")
+        self.assertFalse(wizard._score_prefix_ok("16"))
+        self.assertFalse(wizard._score_prefix_ok("20"))
+        self.assertTrue(wizard._score_prefix_ok("15"))
+        self.assertTrue(wizard._score_prefix_ok("1"), "1 是 10–15 的前半截，得能打")
+        self.assertTrue(wizard._score_prefix_ok(""))
+
+    def test_roll_bounds(self):
+        _, wizard = self._wizard()
+        self._use_mode(wizard, "roll")
+        self.assertEqual(int(wizard.score_spins["str"].cget("from")), 3)
+        self.assertEqual(int(wizard.score_spins["str"].cget("to")), 18)
+
+    def test_remaining_points_are_visible(self):
+        _, wizard = self._wizard()
+        self._use_mode(wizard, "point_buy")
+        # 换成点买会发一套 27 点正好用完的数组
+        self.assertIn("点", wizard.points_var.get())
+        wizard.score_vars["str"].set(8)
+        wizard.score_vars["str"].set(8)          # 力量从 15 降到 8，退 9 点
+        wizard._on_scores()
+        self.assertIn("还剩", wizard.points_var.get())
+        self.assertIn("9", wizard.points_var.get())
+
+    def test_half_typed_value_is_clamped_on_leave(self):
+        _, wizard = self._wizard()
+        self._use_mode(wizard, "point_buy")
+        wizard.score_vars["str"].set(1)          # 半截数，还没填完
+        wizard._commit_scores()
+        self.assertEqual(wizard.score_vars["str"].get(), 8)
+        self.assertEqual(wizard.draft["scores"]["str"], 8)
+
+    def test_standard_array_swaps_instead_of_duplicating(self):
+        _, wizard = self._wizard()
+        self._use_mode(wizard, "standard_array")
+        # 下拉里必须列全六个数，否则一个都换不动
+        self.assertEqual(sorted(int(v) for v in
+                                wizard.score_combos["str"].cget("values")),
+                         [8, 10, 12, 13, 14, 15])
+        self.assertEqual(wizard.score_spins["str"].winfo_manager(), "",
+                         "标准数组下不该还显示数字框")
+        before = dict(wizard.draft["scores"])
+        wizard.score_vars["str"].set(8)
+        wizard._on_array_pick("str")
+        after = wizard.draft["scores"]
+        self.assertEqual(after["str"], 8)
+        self.assertEqual(sorted(after.values()), sorted(before.values()),
+                         "交换后六个数必须还是那六个（不能凭空多一个 15）")
+        self.assertEqual(sum(1 for value in after.values() if value == 15), 1)
+
+    def test_editing_shows_plain_number_boxes(self):
+        """改卡：数是既成事实，不摆「生成方式」，六个数字框直接改（8–20）。"""
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        app.edit_character()
+        app.wizard.go(api.STEP_INDEX["scores"])
+        app.update_idletasks()
+        wizard = app.wizard
+        self.assertEqual(wizard.mode_var.get(), "edit")
+        self.assertEqual(wizard.score_spins["str"].winfo_manager(), "pack")
+        self.assertEqual(wizard.score_combos["str"].winfo_manager(), "")
+        self.assertEqual(int(wizard.score_spins["str"].cget("to")), 20)
+        wording = []
+        for node in _walk(wizard.body):
+            try:
+                wording.append(str(node.cget("text")))
+            except Exception:
+                continue
+        self.assertTrue(any("改的是卡上的原始属性" in text for text in wording),
+                        "改卡属性步没说清楚它在改什么")
+
+    def test_switching_mode_replaces_illegal_scores_and_says_so(self):
+        _, wizard = self._wizard()
+        wizard.draft["scores"] = {"str": 17, "dex": 14, "con": 13,
+                                  "int": 12, "wis": 10, "cha": 8}
+        self._use_mode(wizard, "point_buy")
+        self.assertTrue(all(8 <= value <= 15
+                            for value in wizard.draft["scores"].values()))
+        self.assertIn("不合法", wizard.status_var.get())
+
+
+class SpellTooltipTest(unittest.TestCase):
+    """法术悬停说明：以前法术列表只有名字，一点介绍都没有。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _wizard(self, class_id=WIZARD, scores=INT_SCORES):
+        actor = api.new_character(self.bundle, class_id, 5, scores)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        app.open_wizard(draft=api.draft_from_actor(self.bundle, actor),
+                        editing=True, step=api.STEP_INDEX["spells"])
+        app.update_idletasks()
+        return app, app.wizard
+
+    def test_every_spell_row_has_a_tooltip(self):
+        _, wizard = self._wizard()
+        self.assertEqual(len(wizard.spell_tips),
+                         len(wizard.cantrip_vars) + len(wizard.prepared_vars))
+        text = wizard.spell_tips[0].text_now()
+        self.assertIn("施法", text)
+        self.assertIn("距离", text)
+        self.assertGreater(len(text), 30)
+
+    def test_tooltip_never_pops_in_selftest(self):
+        _, wizard = self._wizard()
+        tip = wizard.spell_tips[0]
+        tip._show()
+        self.assertFalse(tip.is_shown(), "selftest 下弹了悬浮框 —— 违反零弹窗铁律")
+        self.assertIsNone(tip._tip, "selftest 下连框都不该建")
+
+    def test_tooltip_box_can_be_built_without_showing(self):
+        """干跑一次：真的建 Toplevel、真的排一次版，但不进屏幕。
+
+        不这么做的话，`_show` 里任何 TclError 都会被 `except` 吞掉 ——
+        玩家悬停时什么都不会发生，而测试全绿。
+        """
+        _, wizard = self._wizard()
+        tip = wizard.spell_tips[0]
+        tip._show(dry_run=True)
+        self.assertIsNotNone(tip._tip, "悬浮框没建起来（代码在 try 里吞了错）")
+        self.assertFalse(tip.is_shown(), "试建时不该真的显示")
+        self.assertGreater(tip._tip.winfo_reqwidth(), 100)
+        tip._hide()
+
+    def test_non_caster_has_no_tooltips(self):
+        _, wizard = self._wizard(FIGHTER, SCORES)
+        self.assertEqual(wizard.spell_tips, [])
+
+
+class WizardButtonOrderTest(unittest.TestCase):
+    """底部按钮从左到右必须是 上一步 · 下一步 · 建卡 · 取消。
+
+    以前 `pack(side="right")` 的元组顺序写反了，屏幕上「下一步」在左、
+    「上一步」在右 —— 手会按错。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def test_nav_order(self):
+        actor = api.new_character(self.bundle, FIGHTER, 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        app.open_wizard()
+        app.update_idletasks()
+        wizard = app.wizard
+        nav = wizard.buttons["next"].master
+        packed = [button for button in nav.pack_slaves()
+                  if isinstance(button, ttk.Button)]
+        # 未映射的窗口量不到 winfo_x（全是 0），所以按机制推：
+        # `side="right"` 是「先 pack 的贴最右」，屏幕从左到右正好是 pack 顺序的反向。
+        left_to_right = list(reversed(packed))
+        self.assertEqual([button.cget("text") for button in left_to_right],
+                         ["← 上一步", "下一步 →", "建卡", "取消"])
 
 
 if __name__ == "__main__":

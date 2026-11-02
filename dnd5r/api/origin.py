@@ -127,10 +127,17 @@ def score_presets() -> dict:
 
 
 def check_scores(mode: str, scores: Mapping[str, int]) -> list[str]:
-    """属性是否可用。返回问题清单（空 = 通过），不抛异常 —— 界面要边输边提示。"""
+    """属性是否可用。返回问题清单（空 = 通过），不抛异常 —— 界面要边输边提示。
+
+    `"edit"` 是**改卡**用的伪方式（不是建卡三选一）：那六个数是角色身上已经
+    存在的（点买/标准数组/4d6 都可能，专长还抬过），所以只查范围，不查
+    「27 点预算」或「必须用完六个值」。建卡时用它会单独报错。
+    """
     problems = score_range_ok(scores)
     if problems:
         return problems
+    if mode == "edit":
+        return []                      # 改卡：数是既成事实，只查范围
     if mode == "point_buy":
         return validate_point_buy(scores)
     if mode == "standard_array":
@@ -138,7 +145,14 @@ def check_scores(mode: str, scores: Mapping[str, int]) -> list[str]:
             return ["标准数组必须正好用完 %s" % "/".join(str(v) for v in STANDARD_ARRAY)]
         return []
     if mode == "roll":
-        return []                      # 掷骰只看范围（4d6 弃最低必在 3–18）
+        # 4d6 弃最低的实数范围是 3–18。只查 1–30 不够：手打一个 18 之后改成 20
+        # 也能过，而那种数字根本掷不出来。
+        bad = [(key, int(value)) for key, value in scores.items()
+               if not 3 <= int(value) <= 18]
+        if bad:
+            return ["掷骰结果必须在 3–18 之间：%s"
+                    % "、".join("%s %d" % (key.upper(), value) for key, value in bad)]
+        return []
     raise RuleError("未知的属性生成方式：%r" % (mode,))
 
 

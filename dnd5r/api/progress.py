@@ -168,9 +168,11 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
         "species": profile.species,
         "background": profile.background,
         "background_bonus": dict(profile.background_bonus),
-        # 属性是「重新生成」的：标准数组只是初值，玩家可以改成他当初填的那组数。
-        # 这里不需要知道当初用的是哪种方式 —— 校验只看数在这一级合不合法。
-        "score_mode": "standard_array",
+        # 属性是**既成事实**：标准数组只是建卡时的初值，角色身上那六个数可能
+        # 来自点买、4d6，也可能被专长抬过。所以这里写 `edit`（只查范围），
+        # **不能**写 `standard_array` —— 那会让改卡被「必须用完 15/14/13/12/10/8」
+        # 挡住（实测：升级后改卡直接失败）。
+        "score_mode": "edit",
         "scores": {key: int(value) for key, value in profile.base_scores.items()},
         "skills": sorted(keep),
         "masteries": sorted(profile.masteries),
@@ -204,7 +206,7 @@ def apply_draft(content: ContentBundle, actor: Actor, draft: Mapping[str, Any],
         raise RuleError("改卡不能换主职业（%s → %s）：要换职业请新建角色"
                         % (primary_id, wanted))
 
-    fresh = build_from_draft(content, draft, locale)
+    fresh = build_from_draft(content, draft, locale, editing=True)
     profile: Profile = fresh.profile
 
     # 1) 其他职业等级：草案只写主职业，兼职的其余几段照旧

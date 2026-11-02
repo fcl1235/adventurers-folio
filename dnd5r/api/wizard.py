@@ -23,14 +23,13 @@ from ..kernel.errors import DndError, RuleError
 from ..model.actor import Actor
 from ..model.levels import as_class_level
 from ..model.statblock import ABILITY_KEYS, SCORE_MIN
-from ..rules.abilities import (
-    CHARACTER_SCORE_MAX, background_bonus, score_range_ok, validate_point_buy,
-)
+from ..rules.abilities import CHARACTER_SCORE_MAX, background_bonus, score_range_ok
 from ..rules.spellcasting import check_spell_picks, spell_gaps
 from ..rules.starting import starting_options
 from .character import new_character
 from .origin import (
-    SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, species_catalog,
+    SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, check_scores,
+    species_catalog,
 )
 
 # 八个步骤。界面按这个顺序画导航，`draft_problems()` 用 `step` 字段指回这里。
@@ -205,7 +204,10 @@ def spell_choices(content: ContentBundle, class_id: str,
             continue
         row = {"id": spell.id, "name": spell.name.get(locale),
                "level": int(spell.level), "school": spell.school,
-               "concentration": bool(spell.concentration), "ritual": bool(spell.ritual)}
+               "concentration": bool(spell.concentration), "ritual": bool(spell.ritual),
+               # 完整说明一起带上来：建卡时最该看的就是「这个法术干什么」，
+               # 而列表里只能放名字。界面拿它做悬浮框（不再单独查一遍内容）。
+               "detail": spell.to_dict(locale)}
         if int(spell.level) == 0:
             cantrips.append(row)
         else:
@@ -282,13 +284,17 @@ def _background_skills(content: ContentBundle, background_id: str) -> set[str]:
 
 # --- 校验 -------------------------------------------------------------
 def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
-                   locale: str = "zh") -> list[dict]:
+                   locale: str = "zh", editing: bool = False) -> list[dict]:
     """把不合法的地方逐条列出来（空 = 可以建卡）。
 
     每条带 `step`（步骤 key）、`text`（人话）与 `level`：`error` 必须改，
     `warn` 只是提醒（例如重复选背景已给的技能 —— 2024 规则允许换一项，
     所以那不是错）。界面据此跳回那一步并标色，**不是**弹一个「有错误」
     然后让人自己找。
+
+    `editing=True` 是**改现有角色**：属性是已经存在的数（可能来自点买、
+    标准数组或 4d6，也可能被专长抬过），拿「生成方式的规矩」去卡它只会
+    把人挡在门外 —— 所以改卡只查范围。生成方式的规矩只对建新角色成立。
 
     只拦 `error` 是有意的：把可选项当错误拦下来，玩家会以为自己做错了。
     """
@@ -333,20 +339,28 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
 
     # --- 属性 ---
     scores = {str(key): value for key, value in (draft.get("scores") or {}).items()}
-    for text in score_range_ok(scores):
-        add("scores", text)
-    # `score_range_ok` 放的是 statblock 的 1–30（怪物也走它），角色卡还要夹到 20
+    # 范围与生成方式**只有一份权威校验**（`check_scores`）：点买 8–15、标准数组
+    # 必须正好用完六个值、掷骰 3–18。以前这里只对点买做校验，标准数组填六个 18
+    # 也能建卡 —— 而界面上那六个框当时也是 1–20 的死值，没人拦。
+    mode = str(draft.get("score_mode") or "")
+    if editing:
+        # 改卡：只查范围。生成方式的预算/排列规矩是「建新卡」时才成立的事
+        for text in score_range_ok(scores):
+            add("scores", text)
+    elif mode == "edit":
+        # `edit` 只对改卡有意义；有人拿它来建新角色等于绕开生成方式的规矩
+        add("scores", "「改卡」不是建卡用的属性生成方式，请选点数购买 / 标准数组 / 掷骰")
+    elif mode and mode not in SCORE_MODES:
+        add("scores", "不认识的属性生成方式：%s" % mode)
+    else:
+        for text in check_scores(mode or "standard_array", scores):
+            add("scores", text)
+    # `check_scores` 里的范围是 statblock 的 1–30（怪物也走它），角色卡还要夹到 20
     for key, value in scores.items():
         if isinstance(value, int) and not isinstance(value, bool) \
                 and value > CHARACTER_SCORE_MAX:
             add("scores", "%s 超过角色属性上限 %d：%d"
                 % (key.upper(), CHARACTER_SCORE_MAX, value))
-    mode = str(draft.get("score_mode") or "")
-    if mode == "point_buy":
-        for text in validate_point_buy(scores):
-            add("scores", text)
-    elif mode and mode not in SCORE_MODES:
-        add("scores", "不认识的属性生成方式：%s" % mode)
 
     bonus = dict(draft.get("background_bonus") or {})
     if bonus:
@@ -467,9 +481,16 @@ def _clean_draft(draft: Mapping[str, Any]) -> dict:
 
 
 def build_from_draft(content: ContentBundle, draft: Mapping[str, Any],
-                     locale: str = "zh") -> Actor:
-    """按草案建角色。**先校验再建** —— 校验通过才可能走到 `new_character`。"""
-    blocking = [item for item in draft_problems(content, draft, locale)
+                     locale: str = "zh", editing: bool = False) -> Actor:
+    """按草案建角色。**先校验再建** —— 校验通过才可能走到 `new_character`。
+
+    `editing=True` 给 `apply_draft` 用（改现有角色）：属性只查范围。改卡时
+    那六个数是角色身上**已经存在**的（点买/数组/4d6 都可能），拿生成方式的
+    排列规矩去卡它，会把所有非标准数组的角色挡在门外 —— 实测升级后一改卡
+    就报「标准数组必须正好用完 15/14/13/12/10/8」。
+    """
+    blocking = [item for item in draft_problems(content, draft, locale,
+                                                editing=editing)
                 if item.get("level") != "warn"]
     if blocking:
         raise RuleError("建卡失败：" + "；".join(item["text"] for item in blocking))
