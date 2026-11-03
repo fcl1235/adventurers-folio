@@ -26,10 +26,11 @@ from ..model.statblock import ABILITY_KEYS, SCORE_MIN
 from ..rules.abilities import CHARACTER_SCORE_MAX, background_bonus, score_range_ok
 from ..rules.spellcasting import check_spell_picks, spell_gaps
 from ..rules.starting import starting_options
+from ..rules.text import join_list, tr
 from .character import new_character
 from .origin import (
     SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, check_scores,
-    species_catalog,
+    score_mode_labels, species_catalog,
 )
 
 # 八个步骤。界面按这个顺序画导航，`draft_problems()` 用 `step` 字段指回这里。
@@ -45,6 +46,18 @@ WIZARD_STEPS: tuple[dict, ...] = (
 )
 
 STEP_INDEX = {step["key"]: index for index, step in enumerate(WIZARD_STEPS)}
+
+
+def wizard_steps(locale: str = "zh") -> tuple[dict, ...]:
+    """八步的标题与提示，按语言取。
+
+    `WIZARD_STEPS` 本身是**中文原文**（也是 `STEP_INDEX` 的依据，不能就地翻译：
+    模块级翻一次就永久冻在启动时的那个语言）。界面要显示哪一步，走这个函数。
+    """
+    return tuple({"key": item["key"],
+                  "title": tr(item["title"], locale),
+                  "hint": tr(item["hint"], locale)}
+                 for item in WIZARD_STEPS)
 
 
 # --- 索引小工具 -------------------------------------------------------
@@ -242,7 +255,10 @@ def step_options(content: ContentBundle, step: str, draft: Mapping[str, Any],
     if step == "species":
         return {"species": species_catalog(content, locale)}
     if step == "scores":
+        # `mode_zh` 是旧键，**永远是中文**（名字里就写着 zh）；界面读 `mode_labels`，
+        # 那份才按 locale 翻。留着旧键只是不打断既有调用方。
         return {"modes": list(SCORE_MODES), "mode_zh": dict(SCORE_MODE_ZH),
+                "mode_labels": score_mode_labels(locale),
                 # 上限用**角色**的 20，不是 statblock 的 30 —— 界面照这个画输入框
                 "keys": list(ABILITY_KEYS), "min": SCORE_MIN,
                 "max": CHARACTER_SCORE_MAX}
@@ -270,11 +286,11 @@ def step_options(content: ContentBundle, step: str, draft: Mapping[str, Any],
                     "cantrips": [], "levels": [], "slots": [0] * 9}
         return spell_choices(content, class_id, level, locale)
     if step == "summary":
-        return {"steps": [dict(item) for item in WIZARD_STEPS],
+        return {"steps": [dict(item) for item in wizard_steps(locale)],
                 # 起始装备的互斥选项（A 包 / 纯金币…）。没有内容的职业是空列表。
                 "starting": starting_options(content, class_id, locale)
                 if class_id else {"count": 0, "options": []}}
-    raise RuleError("不认识的建卡步骤：%r" % (step,))
+    raise RuleError(tr("不认识的建卡步骤：%r", locale) % (step,))
 
 
 def _background_skills(content: ContentBundle, background_id: str) -> set[str]:
@@ -306,36 +322,36 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
     class_id = str(draft.get("class_id") or "")
     class_def = content.classes.get(class_id) if class_id else None
     if class_def is None:
-        add("class", "还没选职业")
+        add("class", tr("还没选职业", locale))
         return problems                    # 没有职业，后面的检查全部无意义
 
     level = int(draft.get("class_level") or 0)
     if not 1 <= level <= 20:
-        add("class", "职业等级必须在 1–20 之间：%d" % level)
+        add("class", tr("职业等级必须在 1–20 之间：%d", locale) % level)
 
     subclass = str(draft.get("subclass") or "")
     if subclass:
         if subclass not in content.subclasses:
-            add("class", "没有这个子职：%s" % subclass)
+            add("class", tr("没有这个子职：%s", locale) % subclass)
         elif content.subclasses[subclass].class_id != class_id:
-            add("class", "子职 %s 不属于这个职业" % subclass)
+            add("class", tr("子职 %s 不属于这个职业", locale) % subclass)
         elif level < int(class_def.subclass_level):
-            add("class", "%d 级还选不了子职（%d 级解锁）"
+            add("class", tr("%d 级还选不了子职（%d 级解锁）", locale)
                 % (level, int(class_def.subclass_level)))
     elif level >= int(class_def.subclass_level):
         # 到解锁等级还没选：子职特性一条都不会有，卡是残的。这不是「可选项」——
         # 2024 的每个职业在解锁等级都必须选一个（解锁等级 1 的职业连 1 级就要）。
-        add("class", "%d 级必须选子职（%d 级解锁，这个职业有 %d 个可选）"
+        add("class", tr("%d 级必须选子职（%d 级解锁，这个职业有 %d 个可选）", locale)
             % (level, int(class_def.subclass_level),
                len(content.subclasses_for(class_id))))
 
     background_id = str(draft.get("background") or "")
     if background_id and background_id not in content.backgrounds:
-        add("background", "没有这个背景：%s" % background_id)
+        add("background", tr("没有这个背景：%s", locale) % background_id)
 
     species_id = str(draft.get("species") or "")
     if species_id and species_id not in content.species:
-        add("species", "没有这个物种：%s" % species_id)
+        add("species", tr("没有这个物种：%s", locale) % species_id)
 
     # --- 属性 ---
     scores = {str(key): value for key, value in (draft.get("scores") or {}).items()}
@@ -345,77 +361,77 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
     mode = str(draft.get("score_mode") or "")
     if editing:
         # 改卡：只查范围。生成方式的预算/排列规矩是「建新卡」时才成立的事
-        for text in score_range_ok(scores):
+        for text in score_range_ok(scores, locale):
             add("scores", text)
     elif mode == "edit":
         # `edit` 只对改卡有意义；有人拿它来建新角色等于绕开生成方式的规矩
-        add("scores", "「改卡」不是建卡用的属性生成方式，请选点数购买 / 标准数组 / 掷骰")
+        add("scores", tr("「改卡」不是建卡用的属性生成方式，请选点数购买 / 标准数组 / 掷骰", locale))
     elif mode and mode not in SCORE_MODES:
-        add("scores", "不认识的属性生成方式：%s" % mode)
+        add("scores", tr("不认识的属性生成方式：%s", locale) % mode)
     else:
-        for text in check_scores(mode or "standard_array", scores):
+        for text in check_scores(mode or "standard_array", scores, locale):
             add("scores", text)
     # `check_scores` 里的范围是 statblock 的 1–30（怪物也走它），角色卡还要夹到 20
     for key, value in scores.items():
         if isinstance(value, int) and not isinstance(value, bool) \
                 and value > CHARACTER_SCORE_MAX:
-            add("scores", "%s 超过角色属性上限 %d：%d"
+            add("scores", tr("%s 超过角色属性上限 %d：%d", locale)
                 % (key.upper(), CHARACTER_SCORE_MAX, value))
 
     bonus = dict(draft.get("background_bonus") or {})
     if bonus:
         if not background_id:
-            add("background", "有背景加值却没选背景")
+            add("background", tr("有背景加值却没选背景", locale))
         else:
             item = content.backgrounds[background_id]
             try:
-                background_bonus(item.abilities, bonus)
+                background_bonus(item.abilities, bonus, locale)
             except RuleError as exc:
                 add("scores", str(exc))
             else:
                 # 加完不能超上限：20 是硬顶，超了要在这里说，不能等建卡时夹掉
                 for key, value in bonus.items():
                     if key in scores and int(scores[key]) + int(value) > CHARACTER_SCORE_MAX:
-                        add("scores", "%s 加完超过上限 %d"
+                        add("scores", tr("%s 加完超过上限 %d", locale)
                             % (key.upper(), CHARACTER_SCORE_MAX))
 
     # --- 技能 ---
     skills = [str(item) for item in (draft.get("skills") or ())]
     provided = _background_skills(content, background_id)
     if len(set(skills)) != len(skills):
-        add("skills", "同一项技能选了两次")
+        add("skills", tr("同一项技能选了两次", locale))
     outside = [key for key in skills if key not in class_def.skill_list]
     if outside:
-        add("skills", "这些技能不在本职业的技能表里：%s"
-            % "、".join(_skill_name(content, key, locale) for key in outside))
+        add("skills", tr("这些技能不在本职业的技能表里：%s", locale)
+            % join_list((_skill_name(content, key, locale) for key in outside), locale))
     # 背景已经给的再选一次 = 白白浪费一个名额（2024 规则允许换一项，所以不拦，只提醒）
     wasted = [key for key in skills if key in provided]
     if wasted:
-        add("skills", "%s 已由背景提供，再选一次等于浪费名额（可以换成别的）"
-            % "、".join(_skill_name(content, key, locale) for key in wasted),
+        add("skills", tr("%s 已由背景提供，再选一次等于浪费名额（可以换成别的）", locale)
+            % join_list((_skill_name(content, key, locale) for key in wasted), locale),
             level="warn")
     need = int(class_def.skill_choices)
     if len(skills) != need and not outside:
-        add("skills", "要选 %d 项技能，现在选了 %d 项" % (need, len(skills)))
+        add("skills", tr("要选 %d 项技能，现在选了 %d 项", locale) % (need, len(skills)))
 
     # --- 武器精通 ---
     masteries = [str(item) for item in (draft.get("masteries") or ())]
     count = class_def.mastery_count_at(as_class_level(max(1, level)))
     if masteries and not count:
-        add("masteries", "这个职业没有武器精通")
+        add("masteries", tr("这个职业没有武器精通", locale))
     elif count:
         allowed = _weapon_categories(class_def)
         unknown = [item for item in masteries if item not in content.weapons]
         if unknown:
-            add("masteries", "没有这些武器：%s" % "、".join(unknown))
+            add("masteries", tr("没有这些武器：%s", locale) % join_list(unknown, locale))
         wrong = [content.weapons[item].name.get(locale) for item in masteries
                  if item in content.weapons and content.weapons[item].category not in allowed]
         if wrong:
-            add("masteries", "本职业不熟练这些武器：%s" % "、".join(wrong))
+            add("masteries", tr("本职业不熟练这些武器：%s", locale) % join_list(wrong, locale))
         if len(set(masteries)) != len(masteries):
-            add("masteries", "同一件武器选了两遍")
+            add("masteries", tr("同一件武器选了两遍", locale))
         elif len(masteries) != count and not unknown:
-            add("masteries", "%d 级能精通 %d 件武器，现在选了 %d 件"
+            add("masteries", tr("%d 级能精通 %d 件武器，现在选了 %d 件", locale)
                 % (level, count, len(masteries)))
 
     # --- 法术 ---
@@ -439,17 +455,17 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
         missing = spell_gaps(content, class_id,
                              as_class_level(max(1, min(level, 20))),
                              cantrips_map.get(class_id, ()),
-                             prepared_map.get(class_id, ()))
+                             prepared_map.get(class_id, ()), locale)
         if missing:
-            add("spells", "还没选满：%s（可以留空，稍后在法术页补）"
-                % "、".join(missing), level="warn")
+            add("spells", tr("还没选满：%s（可以留空，稍后在法术页补）", locale)
+                % join_list(missing, locale), level="warn")
 
     # --- 起始装备 ---
     # 空串是合法的（= 默认那一组），这里只拦「写了具体 id 却不是这个职业的」。
     pack_id = str(draft.get("starting_pack") or "")
     if pack_id:
         if not any(pack.id == pack_id for pack in content.starting_packs(class_id)):
-            add("summary", "没有这组起始装备：%s" % pack_id)
+            add("summary", tr("没有这组起始装备：%s", locale) % pack_id)
 
     return problems
 
@@ -493,7 +509,7 @@ def build_from_draft(content: ContentBundle, draft: Mapping[str, Any],
                                                 editing=editing)
                 if item.get("level") != "warn"]
     if blocking:
-        raise RuleError("建卡失败：" + "；".join(item["text"] for item in blocking))
+        raise RuleError(tr("建卡失败：", locale) + "；".join(item["text"] for item in blocking))
     params = _clean_draft(draft)
     class_id = str(draft.get("class_id") or "")
     try:
@@ -501,7 +517,7 @@ def build_from_draft(content: ContentBundle, draft: Mapping[str, Any],
     except DndError:
         raise                                  # 已经是 RuleError，别包第二层
     except (TypeError, ValueError) as exc:     # 兜底：界面传了脏数据
-        raise RuleError("建卡失败：%s" % exc)
+        raise RuleError(tr("建卡失败：%s", locale) % exc)
 
 
 def empty_draft() -> dict:

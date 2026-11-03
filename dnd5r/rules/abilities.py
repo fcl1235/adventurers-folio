@@ -15,6 +15,7 @@ from typing import Iterable, Mapping
 from ..kernel.errors import RuleError
 from ..kernel.rng import Rng
 from ..model.statblock import ABILITY_KEYS, SCORE_MAX, SCORE_MIN
+from .text import join_list, tr
 
 # 官方点买表：8 → 0 点，15 → 9 点
 POINT_BUY_COST = {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9}
@@ -32,32 +33,33 @@ BACKGROUND_PLUS_TWO = 2
 BACKGROUND_PLUS_ONE = 1
 
 
-def point_buy_cost(scores: Mapping[str, int]) -> int:
+def point_buy_cost(scores: Mapping[str, int], locale: str = "zh") -> int:
     """这套属性的总花费。超出 8–15 的点买范围直接报错，**不夹**。"""
     total = 0
     for key in ABILITY_KEYS:
         value = int(scores.get(key, POINT_BUY_MIN))
         if not POINT_BUY_MIN <= value <= POINT_BUY_MAX:
-            raise RuleError("%s 的点买值必须在 %d–%d 之间：%d"
+            raise RuleError(tr("%s 的点买值必须在 %d–%d 之间：%d", locale)
                             % (key.upper(), POINT_BUY_MIN, POINT_BUY_MAX, value))
         total += POINT_BUY_COST[value]
     return total
 
 
 def validate_point_buy(scores: Mapping[str, int],
-                       budget: int = POINT_BUY_BUDGET) -> list[str]:
+                       budget: int = POINT_BUY_BUDGET,
+                       locale: str = "zh") -> list[str]:
     """返回问题清单（空 = 合法）。给界面用：不抛异常才能边输边提示。"""
     problems: list[str] = []
     missing = [key for key in ABILITY_KEYS if key not in scores]
     if missing:
-        problems.append("缺属性：%s" % ", ".join(item.upper() for item in missing))
+        problems.append(tr("缺属性：%s", locale) % ", ".join(item.upper() for item in missing))
         return problems
     try:
-        spent = point_buy_cost(scores)
+        spent = point_buy_cost(scores, locale)
     except RuleError as exc:
         return [str(exc)]
     if spent > budget:
-        problems.append("点买超支：花 %d 点，上限 %d" % (spent, budget))
+        problems.append(tr("点买超支：花 %d 点，上限 %d", locale) % (spent, budget))
     return problems
 
 
@@ -75,7 +77,8 @@ def roll_scores(rng: Rng) -> dict[str, int]:
     return scores
 
 
-def background_bonus(abilities: Iterable[str], picks: Mapping[str, int]) -> dict[str, int]:
+def background_bonus(abilities: Iterable[str], picks: Mapping[str, int],
+                     locale: str = "zh") -> dict[str, int]:
     """把背景加值变成 `{属性: 加值}`。
 
     `abilities` 是背景给的三项属性，`picks` 是玩家的分配（属性 → +2/+1/+1）。
@@ -87,19 +90,19 @@ def background_bonus(abilities: Iterable[str], picks: Mapping[str, int]) -> dict
     """
     allowed = tuple(str(item).lower() for item in abilities)
     if not allowed:
-        raise RuleError("这个背景没有属性加值")
+        raise RuleError(tr("这个背景没有属性加值", locale))
     cleaned = {str(key).lower(): int(value) for key, value in picks.items()}
     if not cleaned:
         return {}
     unknown = [key for key in cleaned if key not in allowed]
     if unknown:
-        raise RuleError("背景只给 %s 的加值，不能加在 %s"
-                        % ("、".join(item.upper() for item in allowed),
-                           "、".join(item.upper() for item in unknown)))
+        raise RuleError(tr("背景只给 %s 的加值，不能加在 %s", locale)
+                        % (join_list((item.upper() for item in allowed), locale),
+                           join_list((item.upper() for item in unknown), locale)))
     bad = [value for value in cleaned.values()
            if value not in (BACKGROUND_PLUS_ONE, BACKGROUND_PLUS_TWO)]
     if bad:
-        raise RuleError("背景加值只能是 +1 或 +2：%r" % (bad,))
+        raise RuleError(tr("背景加值只能是 +1 或 +2：%r", locale) % (bad,))
     twos = sum(1 for value in cleaned.values() if value == BACKGROUND_PLUS_TWO)
     ones = sum(1 for value in cleaned.values() if value == BACKGROUND_PLUS_ONE)
     if (twos, ones) == (1, 1):
@@ -107,8 +110,8 @@ def background_bonus(abilities: Iterable[str], picks: Mapping[str, int]) -> dict
     elif (twos, ones) == (0, 3):
         pass                                   # 三项各 +1
     else:
-        raise RuleError("背景加值的两种合法形态：一项 +2 加一项 +1，或三项各 +1；"
-                        "现在是 %d 个 +2、%d 个 +1" % (twos, ones))
+        raise RuleError(tr("背景加值的两种合法形态：一项 +2 加一项 +1，或三项各 +1；"
+                        "现在是 %d 个 +2、%d 个 +1", locale) % (twos, ones))
     return cleaned
 
 
@@ -123,16 +126,16 @@ def apply_cap(scores: Mapping[str, int], bonuses: Mapping[str, int],
     return result
 
 
-def score_range_ok(scores: Mapping[str, int]) -> list[str]:
+def score_range_ok(scores: Mapping[str, int], locale: str = "zh") -> list[str]:
     """手工输入（骰点/自定义）时的范围检查。"""
     problems: list[str] = []
     for key in ABILITY_KEYS:
         if key not in scores:
-            problems.append("缺属性 %s" % key.upper())
+            problems.append(tr("缺属性 %s", locale) % key.upper())
             continue
         value = scores[key]
         if not isinstance(value, int) or isinstance(value, bool):
-            problems.append("%s 必须是整数：%r" % (key.upper(), value))
+            problems.append(tr("%s 必须是整数：%r", locale) % (key.upper(), value))
         elif not SCORE_MIN <= value <= SCORE_MAX:
-            problems.append("%s 超出 %d–%d：%d" % (key.upper(), SCORE_MIN, SCORE_MAX, value))
+            problems.append(tr("%s 超出 %d–%d：%d", locale) % (key.upper(), SCORE_MIN, SCORE_MAX, value))
     return problems

@@ -6,8 +6,10 @@
 """
 
 from __future__ import annotations
+from .i18n import Catalog, join
 
-# (id, 中文)。顺序按「桌上最常勾的靠前」，不是字母序。
+# (id, 显示名)。顺序按「桌上最常勾的靠前」，不是字母序。
+# 名字存中文原文，显示时走 `name_of()` → `T()` 取当前语言（`Catalog` 同机制）。
 CONDITIONS: tuple[tuple[str, str], ...] = (
     ("prone", "倒地"),
     ("grappled", "擒抱"),
@@ -27,7 +29,7 @@ CONDITIONS: tuple[tuple[str, str], ...] = (
 
 EXHAUSTION_ID = "exhaustion"
 
-_ZH = dict(CONDITIONS)
+_ZH = Catalog(dict(CONDITIONS))
 # 力竭也在这张表里：它没有勾选框（自己有关卡），但状态免疫里会出现「力竭」，
 # 名单对不上就会漏掉一条免疫。
 _ZH[EXHAUSTION_ID] = "力竭"
@@ -42,4 +44,4 @@ def name_of(condition_id: str) -> str:
 
 def label_list(ids) -> str:
     """把一组 id 变成一行「倒地、恐惧」；空集合给空串（由调用方决定写不写「无」）。"""
-    return "、".join(name_of(item) for item in ids)
+    return join(name_of(item) for item in ids)

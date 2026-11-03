@@ -17,6 +17,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
+from .i18n import T
 from . import theme
 from .state_panel import StatePanel
 
@@ -28,7 +29,7 @@ class StatusPage(ttk.Frame):
         super().__init__(master, padding=(6, 4))
         head = ttk.Frame(self)
         head.pack(fill="x")
-        ttk.Label(head, text="状态与濒死", style="H2.TLabel").pack(side="left")
+        ttk.Label(head, text=T("状态与濒死"), style="H2.TLabel").pack(side="left")
         # 当前 HP 放在这里：状态页回答的是「他还能不能打」，血在哪一页都该看得见
         self.hp_var = tk.StringVar()
         self.hp_label = ttk.Label(head, textvariable=self.hp_var)
@@ -44,7 +45,7 @@ class StatusPage(ttk.Frame):
         maximum = int(hp.get("maximum", 0) or 0)
         text = "HP %d / %d" % (current, maximum)
         if hp.get("temp"):
-            text += "（临时 %d）" % int(hp["temp"])
+            text += T("（临时 %d）") % int(hp["temp"])
         self.hp_var.set(text)
         self.hp_label.configure(foreground=theme.hp_color(current, maximum))
         self.state_panel.refresh(sheet)

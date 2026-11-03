@@ -30,6 +30,7 @@ from ..rules.abilities import (
 from ..rules.build import rebuild_actor
 from ..rules.effects import NoteEffect
 from ..rules.powers import Power
+from ..rules.text import join_list, tr
 
 # 属性生成方式
 SCORE_MODES = ("point_buy", "standard_array", "roll")
@@ -38,6 +39,11 @@ SCORE_MODE_ZH = {
     "standard_array": "标准数组（15/14/13/12/10/8）",
     "roll": "掷骰（4d6 弃最低）",
 }
+
+
+def score_mode_labels(locale: str = "zh") -> dict[str, str]:
+    """属性生成方式的显示名，按语言取（键是 mode，值是人话）。"""
+    return {key: tr(label, locale) for key, label in SCORE_MODE_ZH.items()}
 
 
 def _settled(power: Power) -> bool:
@@ -126,23 +132,24 @@ def score_presets() -> dict:
     }
 
 
-def check_scores(mode: str, scores: Mapping[str, int]) -> list[str]:
+def check_scores(mode: str, scores: Mapping[str, int],
+                 locale: str = "zh") -> list[str]:
     """属性是否可用。返回问题清单（空 = 通过），不抛异常 —— 界面要边输边提示。
 
     `"edit"` 是**改卡**用的伪方式（不是建卡三选一）：那六个数是角色身上已经
     存在的（点买/标准数组/4d6 都可能，专长还抬过），所以只查范围，不查
     「27 点预算」或「必须用完六个值」。建卡时用它会单独报错。
     """
-    problems = score_range_ok(scores)
+    problems = score_range_ok(scores, locale)
     if problems:
         return problems
     if mode == "edit":
         return []                      # 改卡：数是既成事实，只查范围
     if mode == "point_buy":
-        return validate_point_buy(scores)
+        return validate_point_buy(scores, locale=locale)
     if mode == "standard_array":
         if sorted(int(scores[key]) for key in scores) != sorted(STANDARD_ARRAY):
-            return ["标准数组必须正好用完 %s" % "/".join(str(v) for v in STANDARD_ARRAY)]
+            return [tr("标准数组必须正好用完 %s", locale) % "/".join(str(v) for v in STANDARD_ARRAY)]
         return []
     if mode == "roll":
         # 4d6 弃最低的实数范围是 3–18。只查 1–30 不够：手打一个 18 之后改成 20
@@ -150,14 +157,15 @@ def check_scores(mode: str, scores: Mapping[str, int]) -> list[str]:
         bad = [(key, int(value)) for key, value in scores.items()
                if not 3 <= int(value) <= 18]
         if bad:
-            return ["掷骰结果必须在 3–18 之间：%s"
-                    % "、".join("%s %d" % (key.upper(), value) for key, value in bad)]
+            return [tr("掷骰结果必须在 3–18 之间：%s", locale)
+                    % join_list(("%s %d" % (key.upper(), value) for key, value in bad),
+                                locale)]
         return []
-    raise RuleError("未知的属性生成方式：%r" % (mode,))
+    raise RuleError(tr("未知的属性生成方式：%r", locale) % (mode,))
 
 
-def score_cost(scores: Mapping[str, int]) -> int:
-    return point_buy_cost(scores)
+def score_cost(scores: Mapping[str, int], locale: str = "zh") -> int:
+    return point_buy_cost(scores, locale)
 
 
 def random_scores(rng: Rng) -> dict[str, int]:
@@ -171,6 +179,7 @@ def set_origin(
     species: str | None = None,
     background: str | None = None,
     bonus: Mapping[str, int] | None = None,
+    locale: str = "zh",
 ) -> Actor:
     """换物种 / 背景 / 加值分配，返回**新的** actor。
 
@@ -179,7 +188,7 @@ def set_origin(
     """
     profile = actor.profile
     if profile is None:
-        raise RuleError("角色没有职业档案，无法设出身")
+        raise RuleError(tr("角色没有职业档案，无法设出身", locale))
     new_species = profile.species if species is None else str(species)
     new_background = profile.background if background is None else str(background)
     if new_species:
@@ -194,9 +203,9 @@ def set_origin(
     if new_background:
         # 换了背景时旧分配必须重验：新背景可能不给那些属性
         item = content.background(new_background)
-        background_bonus(item.abilities, new_bonus)
+        background_bonus(item.abilities, new_bonus, locale)
     elif new_bonus:
-        raise RuleError("没有选背景就不能有背景加值")
+        raise RuleError(tr("没有选背景就不能有背景加值", locale))
 
     updated = profile.with_origin(new_species, new_background, new_bonus)
     if updated == profile:
@@ -204,11 +213,12 @@ def set_origin(
     return rebuild_actor(content, actor, updated)
 
 
-def set_masteries(actor: Actor, weapons: Iterable[str]) -> Actor:
+def set_masteries(actor: Actor, weapons: Iterable[str],
+                  locale: str = "zh") -> Actor:
     """记录武器精通（武器 id）。**不 rebuild**：它不参与任何派生值。"""
     profile = actor.profile
     if profile is None:
-        raise RuleError("角色没有职业档案，无法记录武器精通")
+        raise RuleError(tr("角色没有职业档案，无法记录武器精通", locale))
     updated = profile.with_masteries(weapons)
     if updated == profile:
         return actor

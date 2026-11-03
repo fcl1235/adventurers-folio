@@ -28,6 +28,7 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from .i18n import Catalog, T, join
 from . import theme
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, ListPane, ScrollText, section
 
@@ -41,8 +42,8 @@ MODES = (("place", "摆位（不花移动力）"), ("move", "移动（花移动�
          ("teleport", "传送（30 尺内）"))
 TELEPORT_FEET = 30
 
-KIND_ZH = {"pc": "玩家", "npc": "NPC", "monster": "怪物",
-           "form": "形态", "summon": "召唤物"}
+KIND_ZH = Catalog({"pc": "玩家", "npc": "NPC", "monster": "怪物",
+           "form": "形态", "summon": "召唤物"})
 
 
 class EncounterPage(ttk.Frame):
@@ -88,29 +89,29 @@ class EncounterPage(ttk.Frame):
         self._build_map(mid)
         self._build_attack(right)
 
-        self.status_var = tk.StringVar(value="先点左边把怪物加进来，再「掷先攻」。")
+        self.status_var = tk.StringVar(value=T("先点左边把怪物加进来，再「掷先攻」。"))
         self.status = ttk.Label(self, textvariable=self.status_var, anchor="w")
         self.status.grid(row=1, column=0, columnspan=3, sticky="ew", pady=(4, 0))
 
     def _build_roster(self, left) -> None:
-        box = section(left, "怪物名单")
+        box = section(left, T("怪物名单"))
         box.pack(fill="both", expand=True)
         self.roster_pane = ListPane(box, height=12, width=26)
         self.roster_pane.pack(fill="both", expand=True, pady=(2, 0))
 
         row = ttk.Frame(left)
         row.pack(fill="x", pady=(6, 0))
-        self.add_button = ttk.Button(row, text="加入战斗", command=self.add_monster)
+        self.add_button = ttk.Button(row, text=T("加入战斗"), command=self.add_monster)
         self.add_button.pack(side="left")
-        ttk.Button(row, text="清空", command=self.clear_all).pack(side="left", padx=(4, 0))
+        ttk.Button(row, text=T("清空"), command=self.clear_all).pack(side="left", padx=(4, 0))
 
         self.hint_var = tk.StringVar(
-            value="清单按 CR 排序。同一只加两次会是「狼」与「狼 2」，各有各的血条。")
+            value=T("清单按 CR 排序。同一只加两次会是「狼」与「狼 2」，各有各的血条。"))
         ttk.Label(left, textvariable=self.hint_var, foreground=theme.DIM,
                   wraplength=COL_LEFT - 20, justify="left").pack(anchor="w", pady=(6, 0))
 
     def _build_order(self, mid) -> None:
-        box = section(mid, "先攻条")
+        box = section(mid, T("先攻条"))
         box.pack(fill="x")
         self.order_pane = ListPane(box, height=6, width=50)
         self.order_pane.pack(fill="x", pady=(2, 0))
@@ -118,24 +119,25 @@ class EncounterPage(ttk.Frame):
 
         row = ttk.Frame(box)
         row.pack(fill="x", pady=(4, 0))
-        self.start_button = ttk.Button(row, text="掷先攻并开始", command=self.start)
+        self.start_button = ttk.Button(row, text=T("掷先攻并开始"), command=self.start)
         self.start_button.pack(side="left")
-        self.next_button = ttk.Button(row, text="下一回合", command=self.next_turn)
+        self.next_button = ttk.Button(row, text=T("下一回合"), command=self.next_turn)
         self.next_button.pack(side="left", padx=(4, 0))
         # 阵营是输入不是判断：程序不猜谁是狼的同伴，DM 说了算（G23）
-        self.side_button = ttk.Button(row, text="改阵营", command=self.toggle_side)
+        self.side_button = ttk.Button(row, text=T("改阵营"), command=self.toggle_side)
         self.side_button.pack(side="left", padx=(4, 0))
-        self.round_var = tk.StringVar(value="还没开战")
+        self.round_var = tk.StringVar(value=T("还没开战"))
         ttk.Label(row, textvariable=self.round_var).pack(side="left", padx=(10, 0))
 
     def _build_map(self, mid) -> None:
-        box = section(mid, "战场（一格 5 尺 · 10 × 8）",
-                      "点格子 = 把先攻条里选中的人移过去；绕柱子请分段点。")
+        box = section(mid, T("战场（一格 5 尺 · 10 × 8）"),
+                      T("点格子 = 把先攻条里选中的人移过去；绕柱子请分段点。"))
         box.pack(fill="both", expand=True, pady=(6, 0))
 
         modes = ttk.Frame(box)
         modes.pack(fill="x")
         for value, text in MODES:
+            text = T(text)
             ttk.Radiobutton(modes, text=text, value=value, variable=self._mode).pack(
                 side="left", padx=(0, 8))
 
@@ -146,18 +148,18 @@ class EncounterPage(ttk.Frame):
         self.canvas.bind("<Button-1>", self._on_canvas_click)
 
     def _build_attack(self, right) -> None:
-        box = section(right, "这一次出手")
+        box = section(right, T("这一次出手"))
         box.pack(fill="x")
-        self.attacker_var = tk.StringVar(value="出手的人：（先攻条里选）")
+        self.attacker_var = tk.StringVar(value=T("出手的人：（先攻条里选）"))
         ttk.Label(box, textvariable=self.attacker_var, wraplength=COL_RIGHT - 20,
                   foreground=theme.DIM).pack(anchor="w")
 
-        ttk.Label(box, text="目标：", foreground=theme.DIM).pack(anchor="w", pady=(4, 0))
+        ttk.Label(box, text=T("目标："), foreground=theme.DIM).pack(anchor="w", pady=(4, 0))
         self.target_pane = ListPane(box, height=4, width=30)
         self.target_pane.pack(fill="x")
         self.target_pane.list.bind("<<ListboxSelect>>", lambda _e: self._select_target())
 
-        ttk.Label(box, text="动作用哪一条：", foreground=theme.DIM).pack(anchor="w", pady=(4, 0))
+        ttk.Label(box, text=T("动作用哪一条："), foreground=theme.DIM).pack(anchor="w", pady=(4, 0))
         self.action_pane = ListPane(box, height=4, width=30)
         self.action_pane.pack(fill="x")
         self.action_pane.list.bind("<<ListboxSelect>>", lambda _e: self._select_action())
@@ -167,20 +169,20 @@ class EncounterPage(ttk.Frame):
         # 玩家武器攻击按角色自己的状态判定（选了也会提示没生效）。
         mode_row = ttk.Frame(box)
         mode_row.pack(fill="x", pady=(4, 0))
-        ttk.Label(mode_row, text="掷骰模式：", foreground=theme.DIM).pack(side="left")
-        self.mode_var = tk.StringVar(value="自动")
+        ttk.Label(mode_row, text=T("掷骰模式："), foreground=theme.DIM).pack(side="left")
+        self.mode_var = tk.StringVar(value=T("自动"))
         ttk.Combobox(mode_row, textvariable=self.mode_var, state="readonly",
-                     values=("自动", "优势", "劣势", "平掷"),
+                     values=(T("自动"), T("优势"), T("劣势"), T("平掷")),
                      width=6).pack(side="left")
 
         row = ttk.Frame(box)
         row.pack(fill="x", pady=(6, 0))
-        self.roll_button = ttk.Button(row, text="掷一次", command=lambda: self.roll(True))
+        self.roll_button = ttk.Button(row, text=T("掷一次"), command=lambda: self.roll(True))
         self.roll_button.pack(side="left")
-        ttk.Button(row, text="预览", command=lambda: self.roll(False)).pack(
+        ttk.Button(row, text=T("预览"), command=lambda: self.roll(False)).pack(
             side="left", padx=(4, 0))
 
-        log = section(right, "战斗记录")
+        log = section(right, T("战斗记录"))
         log.pack(fill="both", expand=True, pady=(6, 0))
         self.log = ScrollText(log, height=10, width=30)
         self.log.pack(fill="both", expand=True)
@@ -211,32 +213,32 @@ class EncounterPage(ttk.Frame):
         rows = []
         for row in (view.get("order") or []):
             mark = "▶" if row.get("active") else "　"
-            side = {"party": "我", "foes": "敌"}.get(row.get("side"), "？")
-            rows.append((row["id"], "%s [%s] %s　先攻 %d　HP %d/%d　(%d,%d)%s"
+            side = {"party": T("我"), "foes": T("敌")}.get(row.get("side"), "？")
+            rows.append((row["id"], T("%s [%s] %s　先攻 %d　HP %d/%d　(%d,%d)%s")
                          % (mark, side, row["label"], int(row["initiative"]),
                             int(row["hp"]["current"]), int(row["hp"]["maximum"]),
                             int(row["x"]), int(row["y"]),
-                            "　已倒地" if row.get("down") else "")))
+                            T("　已倒地") if row.get("down") else "")))
         self.order_pane.fill(rows)
         keep = self._attacker_id or view.get("current") or ""
         if keep:
             self.order_pane.select_id(keep)
         self._attacker_id = self.order_pane.selected_id()
-        self.round_var.set("第 %d 轮 · 轮到 %s" % (view.get("round") or 0,
+        self.round_var.set(T("第 %d 轮 · 轮到 %s") % (view.get("round") or 0,
                                                self._current_label(view))
-                           if view.get("started") else "还没开战")
+                           if view.get("started") else T("还没开战"))
         hint = view.get("distance_hint") or ""
         if hint:
             self.hint_var.set(hint)
-        elif self.hint_var.get().startswith("位置还没摆"):
-            self.hint_var.set("清单按 CR 排序。同一只加两次会是「狼」与「狼 2」，各有各的血条。")
+        elif self.hint_var.get().startswith(T("位置还没摆")):
+            self.hint_var.set(T("清单按 CR 排序。同一只加两次会是「狼」与「狼 2」，各有各的血条。"))
 
     @staticmethod
     def _current_label(view: dict) -> str:
         for row in view.get("order") or []:
             if row.get("active"):
                 return row["label"]
-        return "（无人）"
+        return T("（无人）")
 
     def _fill_targets(self) -> None:
         view = self._view()
@@ -282,12 +284,12 @@ class EncounterPage(ttk.Frame):
             self._action_key = rows[0]["key"] if rows else ""
         if self._action_key:
             self.action_pane.select_id(self._action_key)
-        label = combatant["label"] if combatant else "（先攻条里选）"
+        label = combatant["label"] if combatant else T("（先攻条里选）")
         if form.get("morphed"):
-            label = "%s（形态 %s · AC %d · HP %d）" % (
+            label = T("%s（形态 %s · AC %d · HP %d）") % (
                 label, form.get("name") or form.get("id"),
                 int(form.get("ac") or 0), int(form.get("hp") or 0))
-        self.attacker_var.set("出手的人：%s" % label)
+        self.attacker_var.set(T("出手的人：%s") % label)
 
     def _note_form(self, actor, form: dict) -> None:
         """换了个形态就说一句：这是它的卡，哪些特性算得出来、哪些只有文字。
@@ -300,16 +302,16 @@ class EncounterPage(ttk.Frame):
             return
         self._form_noted = key
         traits = list(form.get("traits") or ())
-        modeled = "、".join(row["name"] for row in traits if row.get("attack_mode"))
-        texts = "、".join(row["name"] for row in traits if not row.get("attack_mode"))
+        modeled = join(row["name"] for row in traits if row.get("attack_mode"))
+        texts = join(row["name"] for row in traits if not row.get("attack_mode"))
         bits = []
         if modeled:
-            bits.append("%s 按场上位置自动判定优势" % modeled)
+            bits.append(T("%s 按场上位置自动判定优势") % modeled)
         if texts:
-            bits.append("%s 只有文字（未建模）" % texts)
-        self._say("形态 %s：天然武器按卡上的数算%s"
+            bits.append(T("%s 只有文字（未建模）") % texts)
+        self._say(T("形态 %s：天然武器按卡上的数算%s")
                   % (form.get("name") or form.get("id"),
-                     "；" + "；".join(bits) if bits else "；这个形态没有特性"))
+                     "；" + "；".join(bits) if bits else T("；这个形态没有特性")))
 
     def _combatant(self, ident: str):
         if not self.encounter or not ident:
@@ -332,7 +334,7 @@ class EncounterPage(ttk.Frame):
     def add_monster(self, rng=None) -> bool:
         picked = self.roster_pane.selected_id()
         if not picked:
-            self._say("先在左边挑一只怪物。", error=True)
+            self._say(T("先在左边挑一只怪物。"), error=True)
             return False
         index = 1 + sum(1 for actor in self._attendees
                         if str(actor.id).split("#", 1)[0] == picked)
@@ -340,8 +342,8 @@ class EncounterPage(ttk.Frame):
         self._attendees.append(actor)
         if self.encounter is not None:
             api.join_encounter(self.encounter, self.app.bundle, actor, rng=rng)
-        self._append("%s 加入。" % actor.display_name)
-        self._say("已加入 %s。" % actor.display_name)
+        self._append(T("%s 加入。") % actor.display_name)
+        self._say(T("已加入 %s。") % actor.display_name)
         self.app.refresh()
         return True
 
@@ -355,33 +357,33 @@ class EncounterPage(ttk.Frame):
         self._form_noted = None
         self._log = []
         self.log.set_text("")
-        self._say("已清空。")
+        self._say(T("已清空。"))
         self.app.refresh()
 
     def start(self, rng=None) -> bool:
         if self.encounter is not None and self.encounter.round:
-            self._say("这一场已经开始了；要重开请先「清空」。", error=True)
+            self._say(T("这一场已经开始了；要重开请先「清空」。"), error=True)
             return False
         actors = [self.app.actor] + list(self._attendees)
         if len(actors) < 2:
-            self._say("至少要有一个人和一只怪物。", error=True)
+            self._say(T("至少要有一个人和一只怪物。"), error=True)
             return False
         self.encounter = api.new_encounter(actors, rng=rng)
         view = self._view()
-        self._append("=== 第 1 轮 ===")
-        self._say("先攻序：%s" % " → ".join(row["label"] for row in view["order"]))
+        self._append(T("=== 第 1 轮 ==="))
+        self._say(T("先攻序：%s") % " → ".join(row["label"] for row in view["order"]))
         self._attacker_id = view.get("current") or ""
         self.app.refresh()
         return True
 
     def next_turn(self) -> bool:
         if not self.encounter:
-            self._say("还没开战。", error=True)
+            self._say(T("还没开战。"), error=True)
             return False
         info = api.advance_turn(self.encounter)
-        self._append("=== 第 %d 轮 · 轮到 %s ===" % (info["round"], info["label"]))
+        self._append(T("=== 第 %d 轮 · 轮到 %s ===") % (info["round"], info["label"]))
         self._attacker_id = info["current"]
-        self._say("轮到 %s。" % info["label"])
+        self._say(T("轮到 %s。") % info["label"])
         self.app.refresh()
         return True
 
@@ -392,23 +394,23 @@ class EncounterPage(ttk.Frame):
         程序不猜，只记账。
         """
         if not self.encounter:
-            self._say("还没开战。", error=True)
+            self._say(T("还没开战。"), error=True)
             return False
         picked = self.order_pane.selected_id()
         if not picked:
-            self._say("先在先攻条里点一个人。", error=True)
+            self._say(T("先在先攻条里点一个人。"), error=True)
             return False
         row = next((item for item in (self._view().get("order") or [])
                     if item["id"] == picked), None)
         new_side = "foes" if row and row.get("side") == "party" else "party"
-        word = "我方" if new_side == "party" else "敌方"
+        word = T("我方") if new_side == "party" else T("敌方")
         try:
             info = api.set_combatant_side(self.encounter, picked, new_side)
         except api.DndError as exc:
             self._say(str(exc), error=True)
             return False
-        self._append("%s 改为%s。" % (info["label"], word))
-        self._say("%s 现在算%s。" % (info["label"], word))
+        self._append(T("%s 改为%s。") % (info["label"], word))
+        self._say(T("%s 现在算%s。") % (info["label"], word))
         self.app.refresh()
         return True
 
@@ -453,31 +455,31 @@ class EncounterPage(ttk.Frame):
             return
         picked = self.order_pane.selected_id()
         if not picked:
-            self._say("先在先攻条里点一个人，再点格子。", error=True)
+            self._say(T("先在先攻条里点一个人，再点格子。"), error=True)
             return
         mode = self._mode.get()
         try:
             if mode == "place":
                 info = api.place_combatant(self.encounter, picked, x, y)
-                self._append("%s 摆到 (%d,%d)。" % (info["label"], x, y))
+                self._append(T("%s 摆到 (%d,%d)。") % (info["label"], x, y))
             elif mode == "teleport":
                 info = api.teleport_combatant(self.encounter, picked, x, y,
                                               TELEPORT_FEET)
-                self._append("%s 传送到 (%d,%d)，%d 尺。"
+                self._append(T("%s 传送到 (%d,%d)，%d 尺。")
                              % (info["label"], x, y, info["feet"]))
             else:
                 info = api.move_combatant(self.encounter, picked, x, y)
-                self._append("%s 走到 (%d,%d)，花了 %d 尺，剩 %d 尺。"
+                self._append(T("%s 走到 (%d,%d)，花了 %d 尺，剩 %d 尺。")
                              % (info["label"], x, y, info["feet"], info["left"]))
                 for row in info.get("left_reach") or []:
-                    self._append("  ↳ %s 可以对他借机攻击%s"
+                    self._append(T("  ↳ %s 可以对他借机攻击%s")
                                  % (row["label"], "" if row["reaction"]
-                                    else "（但这一轮的反应已用掉）"))
+                                    else T("（但这一轮的反应已用掉）")))
         except api.DndError as exc:
             self._say(str(exc), error=True)
             return
-        self._say("已移动 %s。" % self._combatant(picked)["label"]
-                  if self._combatant(picked) else "已移动。")
+        self._say(T("已移动 %s。") % self._combatant(picked)["label"]
+                  if self._combatant(picked) else T("已移动。"))
         self.app.refresh()
 
     def _draw_map(self) -> None:
@@ -513,24 +515,26 @@ class EncounterPage(ttk.Frame):
         """掷一次。`apply=False` 是预览：掷骰、算数，但不改任何人的血与额度。"""
         if not (self.encounter and self._attacker_id and self._target_id
                 and self._action_key):
-            self._say("先把出手的人、目标、动作都选好。", error=True)
+            self._say(T("先把出手的人、目标、动作都选好。"), error=True)
             return False
         attacker = self._combatant(self._attacker_id)
         target = self._combatant(self._target_id)
         if attacker is None or target is None:
-            self._say("这两个人不在场上了。", error=True)
+            self._say(T("这两个人不在场上了。"), error=True)
             return False
         actor = attacker["actor"]
         kind = api.actor_view(actor, self.app.locale).get("kind")
         morphed = bool(api.form_view(actor, self.app.bundle,
                                      self.app.locale).get("morphed"))
-        manual = {"优势": "adv", "劣势": "dis", "平掷": "flat"}.get(
+        # 键是**显示文本**（下拉框里存的就是它），所以这里必须同样过 T()：
+        # 否则切成英文后下拉里写着 "Advantage"、查表用的是「优势」，永远命中不了。
+        manual = {T("优势"): "adv", T("劣势"): "dis", T("平掷"): "flat"}.get(
             self.mode_var.get(), "")
         try:
             if kind == "pc" and not morphed:
                 if manual:
-                    self._append("  · 玩家武器攻击暂不支持手动指定掷骰模式"
-                                 "（按角色自己的优势/劣势判定）")
+                    self._append(T("  · 玩家武器攻击暂不支持手动指定掷骰模式"
+                                 "（按角色自己的优势/劣势判定）"))
                 result = api.attack_roll(
                     actor, self.app.bundle, target["actor"],
                     weapon=self._action_key, apply=apply, rng=rng,
@@ -545,7 +549,7 @@ class EncounterPage(ttk.Frame):
             self._say(str(exc), error=True)
             return False
         self._append(_describe(result, attacker["label"], target["label"], apply))
-        self._say("预览：没有改任何人的血。" if not apply
+        self._say(T("预览：没有改任何人的血。") if not apply
                   else "%s → %s：%s" % (attacker["label"], target["label"],
                                         _outcome_zh(result)))
         self.app.refresh()
@@ -574,34 +578,34 @@ def _attack_rows(actions: list[dict]) -> list[dict]:
         if row.get("attack_bonus") is not None:
             label += " %+d" % int(row["attack_bonus"])
         if row.get("save"):
-            label += "（%s 豁免 DC %d）" % (row["save"].upper(), int(row["save_dc"]))
+            label += T("（%s 豁免 DC %d）") % (row["save"].upper(), int(row["save_dc"]))
         rows.append({"key": row["key"], "name": label, "kind": row.get("kind")})
     return rows
 
 
 def _outcome_zh(result: dict) -> str:
     if result.get("outcome") == "save_required":
-        return "要目标掷豁免（见记录）"
+        return T("要目标掷豁免（见记录）")
     if not result.get("rolled", True):
-        return "没有可掷的数值（见记录）"
+        return T("没有可掷的数值（见记录）")
     if result.get("outcome") == "critical":
-        return "重击，%d 点伤害" % result["damage"]["total"]
+        return T("重击，%d 点伤害") % result["damage"]["total"]
     if result.get("outcome") == "hit":
-        return "命中，%d 点伤害" % result["damage"]["total"]
-    return "未命中"
+        return T("命中，%d 点伤害") % result["damage"]["total"]
+    return T("未命中")
 
 
 def _describe(result: dict, attacker: str, target: str, apply: bool) -> str:
     """把报告摊成几行字。数字全部来自 api，这里只排版。"""
     lines = ["[%s] %s → %s（AC %d）"
-             % ("结算" if apply else "预览", attacker, target,
+             % (T("结算") if apply else T("预览"), attacker, target,
                 int(result["target"]["ac"]))]
     attack = result.get("attack")
     if attack:
-        mode = {"adv": "（优势）", "dis": "（劣势）"}.get(attack.get("mode"), "")
+        mode = {"adv": T("（优势）"), "dis": T("（劣势）")}.get(attack.get("mode"), "")
         sources = attack.get("mode_sources") or []
         if mode and sources:
-            mode = "%s · %s" % (mode.strip("（）"), "、".join(sources))
+            mode = "%s · %s" % (mode.strip("（）"), join(sources))
             mode = "（%s）" % mode
         lines.append("  d20 %d %+d = %d%s" % (int(attack["die"]), int(attack["bonus"]),
                                               int(attack["total"]), mode))
@@ -609,7 +613,7 @@ def _describe(result: dict, attacker: str, target: str, apply: bool) -> str:
         lines.append("  %s：%s = %d（%s）" % (row["label"], row["roll"],
                                             int(row["damage"]),
                                             row["damage_type_zh"] or "—"))
-    lines.append("  结果：%s" % _outcome_zh(result))
+    lines.append(T("  结果：%s") % _outcome_zh(result))
     for note in result.get("notes") or []:
         lines.append("  · %s" % note)
     return "\n".join(lines)

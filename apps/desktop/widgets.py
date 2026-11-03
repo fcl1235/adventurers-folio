@@ -14,6 +14,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from . import theme
+from .i18n import Catalog, T, ft, join
 
 # 布局铁律（吃过两次亏，见 README）：
 #   1. 底部栏必须先 pack(side="bottom")，再 pack 伸展的内容 —— 否则窄屏时整条消失
@@ -27,36 +28,39 @@ ROW_HEIGHT = 22
 # 共享的 COL_LEFT 不动 —— pages_encounter.py 用 COL_LEFT-20 算换行宽度。
 CARD_LEFT = 320
 
+# 下面四张表都是**显示用**：存中文原文，`Catalog` 在取值时按当前语言翻译。
+# 所以调用处照旧写 `ABILITY_ZH[key]`，切语言会立刻生效（模块加载时翻译就冻住了）。
+
 # 「感官」键的中文名。三个页面都要用，以前抄了两份（pages_powers / pages_spells），
 # 抄两份的下场是改一处漏一处。
-SENSE_ZH = {"darkvision": "黑暗视觉", "blindsight": "盲视",
-            "tremorsense": "震颤感知", "truesight": "真实视觉"}
+SENSE_ZH = Catalog({"darkvision": "黑暗视觉", "blindsight": "盲视",
+                    "tremorsense": "震颤感知", "truesight": "真实视觉"})
 
 # 六属性的中文名。技能表、属性卡、掷骰记录都用它。
-ABILITY_ZH = {"str": "力量", "dex": "敏捷", "con": "体质",
-              "int": "智力", "wis": "感知", "cha": "魅力"}
+ABILITY_ZH = Catalog({"str": "力量", "dex": "敏捷", "con": "体质",
+                      "int": "智力", "wis": "感知", "cha": "魅力"})
 
 # 武器精通的中文名（**只是显示用**：效果不在本程序里结算，所以只给桌上一眼能认的词）。
 # 装备页与建卡向导都要用 —— 以前向导直接把 `graze`/`topple` 这些内部值印在界面上。
-MASTERY_ZH = {
+MASTERY_ZH = Catalog({
     "cleave": "劈砍", "graze": "擦伤", "nick": "快手", "push": "推撞",
     "sap": "削弱", "slow": "迟缓", "topple": "击倒", "vex": "扰乱",
-}
+})
 
 # 伤害类型的中文名。法术页与装备页都要用 —— 以前只有法术页有一份，
 # 装备页再抄一份又是「改一处漏一处」。
-DAMAGE_ZH = {
+DAMAGE_ZH = Catalog({
     "acid": "强酸", "bludgeoning": "钝击", "cold": "冷冻", "fire": "火焰",
     "force": "力场", "lightning": "闪电", "necrotic": "黯蚀", "piercing": "穿刺",
     "poison": "毒素", "psychic": "心灵", "radiant": "光耀", "slashing": "挥砍",
     "thunder": "雷鸣",
-}
+})
 
 
 def sense_text(senses: dict) -> str:
     """`{darkvision: 60}` → 「黑暗视觉 60 尺」。带单位，别让人猜。"""
-    return "、".join("%s %d 尺" % (SENSE_ZH.get(key, key), value)
-                    for key, value in (senses or {}).items())
+    return join("%s %s" % (SENSE_ZH.get(key, key), ft(value))
+                for key, value in (senses or {}).items())
 
 
 def hit_dice_text(pools, classes) -> str:
@@ -73,7 +77,7 @@ def hit_dice_text(pools, classes) -> str:
         class_id = ident[len("hit_dice."):] if ident.startswith("hit_dice.") else ident
         label = names.get(class_id) or class_id.rsplit(".", 1)[-1]
         parts.append("%s %s/%s" % (label, pool.get("left"), pool.get("max")))
-    return "、".join(parts)
+    return join(parts)
 
 
 
@@ -149,8 +153,10 @@ class GridTable(ttk.Frame):
         self.columns = columns
         self.row_count = rows
         self._cells: list[list[ttk.Label]] = []
+        # 表头在**建的时候**过 T()：列定义是模块级常量，import 时就定死了，
+        # 在那里翻译会永远停在启动时的语言上。
         for index, (title, width) in enumerate(columns):
-            ttk.Label(self, text=title, width=width, anchor="w",
+            ttk.Label(self, text=T(title), width=width, anchor="w",
                       font=(theme.UI_FONT, 9, "bold")).grid(
                 row=0, column=index, sticky="w", padx=(0, 6))
         for row in range(rows):
@@ -194,8 +200,10 @@ class RollGrid(ttk.Frame):
         self._keys: list[str] = []
         self._buttons: list[ttk.Button] = []
         self._cells: list[list[ttk.Label]] = []
+        # 表头在**建的时候**过 T()：列定义是模块级常量，import 时就定死了，
+        # 在那里翻译会永远停在启动时的语言上。
         for index, (title, width) in enumerate(columns):
-            ttk.Label(self, text=title, width=width, anchor="w",
+            ttk.Label(self, text=T(title), width=width, anchor="w",
                       font=(theme.UI_FONT, 9, "bold")).grid(
                 row=0, column=index + 1, sticky="w", padx=(0, 6))
         for row in range(rows):

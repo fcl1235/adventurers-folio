@@ -27,6 +27,7 @@ from ..model.profile import Profile
 from ..rules.build import available_powers, rebuild_actor
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus
 from ..rules.spellcasting import spell_gaps
+from ..rules.text import join_list, tr
 
 
 def _power_rows(content: ContentBundle, actor: Actor, locale: str) -> dict[str, dict]:
@@ -46,14 +47,14 @@ def level_up_view(content: ContentBundle, actor: Actor, locale: str = "zh") -> d
     """
     profile = actor.profile
     if profile is None:
-        raise RuleError("角色没有职业档案，不能升级")
+        raise RuleError(tr("角色没有职业档案，不能升级", locale))
     primary = profile.classes[0]
     class_id = primary.class_id
     level = int(primary.class_level)
     if level >= 20:
-        raise RuleError("这个职业已经 20 级了")
+        raise RuleError(tr("这个职业已经 20 级了", locale))
     if int(profile.total) >= MAX_TOTAL_LEVEL:
-        raise RuleError("总等级已达上限 %d，不能再升" % MAX_TOTAL_LEVEL)
+        raise RuleError(tr("总等级已达上限 %d，不能再升", locale) % MAX_TOTAL_LEVEL)
 
     class_def = content.class_def(class_id)
     target = level + 1
@@ -69,16 +70,17 @@ def level_up_view(content: ContentBundle, actor: Actor, locale: str = "zh") -> d
     needs: list[dict] = []
     if target >= int(class_def.subclass_level) and not profile.subclasses:
         needs.append({"step": "class",
-                      "text": "%d 级解锁子职，还没选" % int(class_def.subclass_level)})
+                      "text": tr("%d 级解锁子职，还没选", locale) % int(class_def.subclass_level)})
     mastery_need = class_def.mastery_count_at(ClassLevel(target))
     if mastery_need and len(profile.masteries) < mastery_need:
         needs.append({"step": "masteries",
-                      "text": "%d 级可以精通 %d 件武器，现在记了 %d 件"
+                      "text": tr("%d 级可以精通 %d 件武器，现在记了 %d 件", locale)
                               % (target, mastery_need, len(profile.masteries))})
     gaps = spell_gaps(content, class_id, ClassLevel(target),
                       profile.cantrips_of(class_id), profile.spells_of(class_id))
     if gaps:
-        needs.append({"step": "spells", "text": "还没选满：" + "、".join(gaps)})
+        needs.append({"step": "spells",
+                      "text": tr("还没选满：", locale) + join_list(gaps, locale)})
 
     return {
         "class_id": class_id,
@@ -101,7 +103,7 @@ def level_up(content: ContentBundle, actor: Actor, locale: str = "zh") -> Actor:
     """升一级（主职业）。**保留当前 HP、资源、背包、状态** —— 见模块头注释。"""
     profile = actor.profile
     if profile is None:
-        raise RuleError("角色没有职业档案，不能升级")
+        raise RuleError(tr("角色没有职业档案，不能升级", locale))
     primary = profile.classes[0]
     view = level_up_view(content, actor, locale)      # 顺带把各种上限判掉
     return rebuild_actor(content, actor,
@@ -109,7 +111,8 @@ def level_up(content: ContentBundle, actor: Actor, locale: str = "zh") -> Actor:
 
 
 # --- 把现有角色变成一份「草案」，供向导编辑 ---------------------------------
-def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
+def draft_from_actor(content: ContentBundle, actor: Actor,
+                     locale: str = "zh") -> dict:
     """现有角色 → 建卡草案。用于「升级后发现还差选择」时把向导开到那一步。
 
     三处必须收窄，否则草案一进向导就报错或改坏角色：
@@ -128,7 +131,7 @@ def draft_from_actor(content: ContentBundle, actor: Actor) -> dict:
     """
     profile = actor.profile
     if profile is None:
-        raise RuleError("角色没有职业档案")
+        raise RuleError(tr("角色没有职业档案", locale))
     primary = profile.classes[0]
     class_id = primary.class_id
     name = actor.statblock.name
@@ -197,13 +200,13 @@ def apply_draft(content: ContentBundle, actor: Actor, draft: Mapping[str, Any],
 
     old = actor.profile
     if old is None:
-        raise RuleError("角色没有职业档案")
+        raise RuleError(tr("角色没有职业档案", locale))
     # 改卡不换主职业：换成另一个职业等于「重新建卡」，而草案里没有地方放
     # 旧职业的等级，硬换会让旧等级凭空消失。
     primary_id = old.classes[0].class_id
     wanted = str(draft.get("class_id") or "")
     if wanted and wanted != primary_id:
-        raise RuleError("改卡不能换主职业（%s → %s）：要换职业请新建角色"
+        raise RuleError(tr("改卡不能换主职业（%s → %s）：要换职业请新建角色", locale)
                         % (primary_id, wanted))
 
     fresh = build_from_draft(content, draft, locale, editing=True)

@@ -18,19 +18,22 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from .i18n import Catalog, T, join
 from . import theme
 from .widgets import (COL_LEFT, COL_MID, COL_RIGHT, DAMAGE_ZH, MASTERY_ZH, KeyValue,
                       ListPane, section)
 
-CATEGORY_ZH = {
+CATEGORY_ZH = Catalog({
     "light": "轻甲", "medium": "中甲", "heavy": "重甲", "shield": "盾牌",
     "simple": "简易", "martial": "军用",
-}
-PROPERTY_ZH = {
+})
+PROPERTY_ZH = Catalog({
     "light": "轻型", "finesse": "灵巧", "two_handed": "双手", "versatile": "两用",
     "thrown": "投掷", "heavy": "重型", "reach": "长武", "loading": "装填",
     "ranged": "远程",
-}
+})
+# (槽位键, 显示名)：**显示名不在这里翻译** —— 模块级常量在 import 时就定死了，
+# 必须在使用处过 T()（见 `_refresh_slots`）。
 SLOT_ROWS = (("armor", "护甲"), ("shield", "盾牌"),
              ("main_hand", "主手"), ("off_hand", "副手"))
 
@@ -63,12 +66,12 @@ class GearPage(ttk.Frame):
         self.left, self.mid, self.right = left, mid, right
 
         # --- 左：当前这一身 ------------------------------------------------
-        slots = section(left, "当前装备")
+        slots = section(left, T("当前装备"))
         slots.pack(fill="x")
         self.slots = KeyValue(slots, rows=4)
         self.slots.pack(fill="x")
 
-        armor = section(left, "护甲值")
+        armor = section(left, T("护甲值"))
         armor.pack(fill="x", pady=(8, 0))
         self.ac = KeyValue(armor, rows=1)
         self.ac.pack(fill="x")
@@ -79,7 +82,7 @@ class GearPage(ttk.Frame):
         # --- 左：背包（起始装备就落在这里）---------------------------------
         # 只读清单：这一页的「写事实」入口是装备槽，往背包里加减东西要等到
         # 有物品来源（购买/拾取）之后再做，先不摆点不动的按钮。
-        bag = section(left, "背包")
+        bag = section(left, T("背包"))
         bag.pack(fill="both", expand=True, pady=(8, 0))
         self.bag_note_var = tk.StringVar(value="")
         ttk.Label(bag, textvariable=self.bag_note_var, style="Dim.TLabel",
@@ -88,7 +91,7 @@ class GearPage(ttk.Frame):
         self.bag_list.pack(fill="both", expand=True)
 
         # --- 中：护甲表 ----------------------------------------------------
-        listed = section(mid, "护甲与盾", "双击也行：选中后点下面两个按钮")
+        listed = section(mid, T("护甲与盾"), T("双击也行：选中后点下面两个按钮"))
         listed.pack(fill="both", expand=True)
         self.armor_list = ListPane(listed, height=9, width=52)
         self.armor_list.pack(fill="both", expand=True)
@@ -96,14 +99,14 @@ class GearPage(ttk.Frame):
                                   lambda _e: self._show_armor_detail())
         row = ttk.Frame(listed)
         row.pack(fill="x", pady=(4, 0))
-        ttk.Button(row, text="装备", command=self.equip_armor).pack(side="left")
-        ttk.Button(row, text="卸下", command=self.unequip_armor).pack(side="left", padx=(4, 0))
+        ttk.Button(row, text=T("装备"), command=self.equip_armor).pack(side="left")
+        ttk.Button(row, text=T("卸下"), command=self.unequip_armor).pack(side="left", padx=(4, 0))
         self.armor_detail_var = tk.StringVar(value="")
         ttk.Label(listed, textvariable=self.armor_detail_var, style="Dim.TLabel",
                   wraplength=520, justify="left").pack(anchor="w", pady=(4, 0))
 
         # --- 右：武器表 ----------------------------------------------------
-        weapons = section(right, "武器", "精通已记录，效果未结算")
+        weapons = section(right, T("武器"), T("精通已记录，效果未结算"))
         weapons.pack(fill="both", expand=True)
         self.weapon_list = ListPane(weapons, height=9, width=34)
         self.weapon_list.pack(fill="both", expand=True)
@@ -111,11 +114,11 @@ class GearPage(ttk.Frame):
                                    lambda _e: self._show_weapon_detail())
         row = ttk.Frame(weapons)
         row.pack(fill="x", pady=(4, 0))
-        ttk.Button(row, text="主手", style="Mini.TButton", width=5,
+        ttk.Button(row, text=T("主手"), style="Mini.TButton", width=5,
                    command=lambda: self.equip_weapon("main_hand")).pack(side="left")
-        ttk.Button(row, text="副手", style="Mini.TButton", width=5,
+        ttk.Button(row, text=T("副手"), style="Mini.TButton", width=5,
                    command=lambda: self.equip_weapon("off_hand")).pack(side="left", padx=(4, 0))
-        ttk.Button(row, text="卸下", style="Mini.TButton", width=5,
+        ttk.Button(row, text=T("卸下"), style="Mini.TButton", width=5,
                    command=self.unequip_weapon).pack(side="left", padx=(4, 0))
         self.weapon_detail_var = tk.StringVar(value="")
         ttk.Label(weapons, textvariable=self.weapon_detail_var, style="Dim.TLabel",
@@ -141,7 +144,7 @@ class GearPage(ttk.Frame):
     def _fill_bag(self, sheet: dict) -> None:
         """背包清单。`●` 标「正穿在身上」，与两份武器/护甲表的记号一致。"""
         bag = sheet.get("inventory") or {}
-        self.bag_note_var.set("%d gp · %d 种" % (int(bag.get("coins_gp") or 0),
+        self.bag_note_var.set(T("%d gp · %d 种") % (int(bag.get("coins_gp") or 0),
                                                 int(bag.get("count") or 0)))
         rows = []
         for index, row in enumerate(bag.get("items") or ()):
@@ -185,12 +188,13 @@ class GearPage(ttk.Frame):
         equipped = sheet.get("equipped") or {}
         self.slots.clear()
         for index, (slot, label) in enumerate(SLOT_ROWS):
+            label = T(label)
             ident = equipped.get(slot) or ""
             self.slots.set_row(index, label, self._name_of(ident) or "—")
         self.ac.set_row(0, "AC", str((sheet.get("ac") or {}).get("total", 0)))
         self.ac_note_var.set(str((sheet.get("ac") or {}).get("detail") or ""))
         if not gear.get("armor") and not gear.get("shield"):
-            self.ac_note_var.set(self.ac_note_var.get() + "\n（无甲：10 + 敏捷）")
+            self.ac_note_var.set(self.ac_note_var.get() + "\n" + T("（无甲：10 + 敏捷）"))
 
     def _name_of(self, item_id: str) -> str:
         for row in self._armors + self._weapons:
@@ -222,13 +226,13 @@ class GearPage(ttk.Frame):
             return
         bits = ["%s · %s" % (row["name"], CATEGORY_ZH.get(row["category"], row["category"]))]
         if row["category"] != "shield":
-            cap = "无上限" if row["dex_cap"] is None else str(row["dex_cap"])
-            bits.append("AC %d（敏捷上限 %s）" % (row["ac_base"], cap))
+            cap = T("无上限") if row["dex_cap"] is None else str(row["dex_cap"])
+            bits.append(T("AC %d（敏捷上限 %s）") % (row["ac_base"], cap))
         else:
             bits.append("AC +%d" % row["bonus"])
         if row["str_req"]:
-            bits.append("力量需求 %d" % row["str_req"])
-        bits.append("隐匿劣势" if row["stealth"] else "无隐匿劣势")
+            bits.append(T("力量需求 %d") % row["str_req"])
+        bits.append(T("隐匿劣势") if row["stealth"] else T("无隐匿劣势"))
         self.armor_detail_var.set(" · ".join(bits))
 
     def _show_weapon_detail(self) -> None:
@@ -237,13 +241,13 @@ class GearPage(ttk.Frame):
             self.weapon_detail_var.set("")
             return
         bits = ["%s · %s" % (row["name"], CATEGORY_ZH.get(row["category"], row["category"])),
-                row["damage"] + ("（双手 %s）" % row["versatile"] if row["versatile"] else ""),
+                row["damage"] + (T("（双手 %s）") % row["versatile"] if row["versatile"] else ""),
                 DAMAGE_ZH.get(row["damage_type"], row["damage_type"])]
         props = [PROPERTY_ZH.get(item, item) for item in row["properties"]]
         if props:
-            bits.append("、".join(props))
+            bits.append(join(props))
         if row["mastery"]:
-            bits.append("精通：%s %s" % (MASTERY_ZH.get(row["mastery"], row["mastery"]),
+            bits.append(T("精通：%s %s") % (MASTERY_ZH.get(row["mastery"], row["mastery"]),
                                         row["mastery"]))
         self.weapon_detail_var.set(" · ".join(bits))
 
@@ -265,7 +269,7 @@ class GearPage(ttk.Frame):
     def equip_armor(self) -> bool:
         row = self._armor_by_id(self.armor_list.selected_id())
         if not row:
-            self._status("先在列表里选一件护甲或盾", error=True)
+            self._status(T("先在列表里选一件护甲或盾"), error=True)
             return False
         return self._equip(row["slot"], row["id"])
 
@@ -275,14 +279,14 @@ class GearPage(ttk.Frame):
         row = self._armor_by_id(self.armor_list.selected_id())
         target = row["slot"] if row else "armor"
         if not self._equipped.get(target):
-            self._status("%s本来就空着" % ("盾牌" if target == "shield" else "护甲"))
+            self._status(T("%s本来就空着") % (T("盾牌") if target == "shield" else T("护甲")))
             return False
         return self._equip(target, "")
 
     def equip_weapon(self, slot: str) -> bool:
         row = self._weapon_by_id(self.weapon_list.selected_id())
         if not row:
-            self._status("先在列表里选一件武器", error=True)
+            self._status(T("先在列表里选一件武器"), error=True)
             return False
         return self._equip(slot, row["id"])
 
@@ -295,5 +299,5 @@ class GearPage(ttk.Frame):
             if equipped.get(slot):
                 changed = self._equip(slot, "") or changed
         if not changed:
-            self._status("手上本来就没武器")
+            self._status(T("手上本来就没武器"))
         return changed

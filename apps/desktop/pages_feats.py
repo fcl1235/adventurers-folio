@@ -16,23 +16,25 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from .i18n import Catalog, T, join
 from . import theme
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, ListPane, ScrollText, section
 
-ABILITY_ZH = {"str": "力量", "dex": "敏捷", "con": "体质",
-              "int": "智力", "wis": "感知", "cha": "魅力"}
-KIND_ZH = {"origin": "起源", "general": "通用",
-           "fighting_style": "战斗风格", "epic_boon": "传奇恩惠"}
+# 显示用映射表：存中文原文，取值时按当前语言翻译（见 i18n.Catalog）
+ABILITY_ZH = Catalog({"str": "力量", "dex": "敏捷", "con": "体质",
+                      "int": "智力", "wis": "感知", "cha": "魅力"})
+KIND_ZH = Catalog({"origin": "起源", "general": "通用",
+                   "fighting_style": "战斗风格", "epic_boon": "传奇恩惠"})
 STATUS_MARK = {"counted": "✓", "dice": "◆", "active": "▶",
                "onhit": "◈", "manual": "△", "text": "□"}
-STATUS_TEXT = {
+STATUS_TEXT = Catalog({
     "counted": "已计入数值：这条专长的加值/熟练/抗性算在角色卡里了。",
     "dice": "已接入掷骰：这条专长改的是掷骰形状（优势/劣势），不加数值，掷骰时会多掷一颗取高/取低。",
     "active": "使用时结算：这条专长给的是可以用一次的主动能力，点按钮才会产生效果，角色卡上的常驻数字不含它。",
     "onhit": "命中时结算：这条专长在攻击命中时追加伤害或效果，不进常驻数值，也不是按钮 —— 攻击掷骰里会把它列出来可选。",
     "manual": "只登记了规则，尚未计入数值：这条专长还需要手动处理。",
     "text": "只登记了规则，尚未计入数值：本程序没有把它算进任何数字。",
-}
+})
 
 
 def _option_label(choice: dict, value: str, bundle) -> str:
@@ -80,22 +82,22 @@ class FeatPage(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         # --- 左：专长清单 -------------------------------------------------
-        listed = section(left, "专长")
+        listed = section(left, T("专长"))
         listed.pack(fill="both", expand=True)
-        ttk.Label(listed, text="✓ 已计入　◆ 改掷骰　▶ 用时算　△ 待手动　□ 仅文字",
+        ttk.Label(listed, text=T("✓ 已计入　◆ 改掷骰　▶ 用时算　△ 待手动　□ 仅文字"),
                   foreground=theme.DIM).pack(anchor="w")
         self.feats = ListPane(listed, height=20, width=28)
         self.feats.pack(fill="both", expand=True, pady=(2, 0))
         self.feats.list.bind("<<ListboxSelect>>", lambda _e: self._select_feat())
 
         # --- 中：说明 -----------------------------------------------------
-        intro = section(mid, "说明")
+        intro = section(mid, T("说明"))
         intro.pack(fill="both", expand=True)
         self.text = ScrollText(intro, height=12, width=52)
         self.text.pack(fill="both", expand=True)
 
         # --- 中下：选择项 -------------------------------------------------
-        self.choice_frame = section(mid, "选择项")
+        self.choice_frame = section(mid, T("选择项"))
         self.choice_frame.pack(fill="both", expand=True, pady=(6, 0))
         self.choice_box = ttk.Combobox(self.choice_frame, state="readonly", width=46)
         self.choice_box.pack(fill="x")
@@ -104,7 +106,7 @@ class FeatPage(ttk.Frame):
         self.options.pack(fill="both", expand=True, pady=(4, 0))
 
         # --- 右：操作 -----------------------------------------------------
-        actions = section(right, "当前选择")
+        actions = section(right, T("当前选择"))
         actions.pack(fill="x")
         self.summary_var = tk.StringVar(value="")
         ttk.Label(actions, textvariable=self.summary_var, wraplength=268,
@@ -112,11 +114,11 @@ class FeatPage(ttk.Frame):
 
         buttons = ttk.Frame(right)
         buttons.pack(fill="x", pady=(6, 0))
-        self.add_button = ttk.Button(buttons, text="加上", command=self.add_pick)
+        self.add_button = ttk.Button(buttons, text=T("加上"), command=self.add_pick)
         self.add_button.pack(side="left")
-        self.remove_button = ttk.Button(buttons, text="去掉一个", command=self.remove_pick)
+        self.remove_button = ttk.Button(buttons, text=T("去掉一个"), command=self.remove_pick)
         self.remove_button.pack(side="left", padx=(6, 0))
-        self.clear_button = ttk.Button(buttons, text="清空", command=self.clear_picks)
+        self.clear_button = ttk.Button(buttons, text=T("清空"), command=self.clear_picks)
         self.clear_button.pack(side="left", padx=(6, 0))
 
         self.honesty = ScrollText(right, height=8, width=30)
@@ -144,15 +146,15 @@ class FeatPage(ttk.Frame):
         rows = []
         for row in self._feats:
             mark = STATUS_MARK.get(row.get("status") or "text", "□")
-            tail = "　（待选）" if row.get("pending") else ""
+            tail = T("　（待选）") if row.get("pending") else ""
             rows.append((row["id"], "%s %s%s" % (mark, row["name"], tail)))
         self.feats.fill(rows)
         if self._feat_id:
             self.feats.select_id(self._feat_id)
         if not self._feats:
             # 别写成「用升级流程加」—— 升级（`level_up`）只做 rebuild，拿不了新专长。
-            self._status("这个角色还没有专长：背景的起始专长建卡时自动给；"
-                         "4 级起的属性提升 / 自选专长暂时没有入口（G35）。")
+            self._status(T("这个角色还没有专长：背景的起始专长建卡时自动给；"
+                         "4 级起的属性提升 / 自选专长暂时没有入口（G35）。"))
 
     def _feat(self) -> dict:
         for row in self._feats:
@@ -189,18 +191,18 @@ class FeatPage(ttk.Frame):
         spells = feat.get("spells") or []
         if spells:
             # 「始终准备」是这条专长给的东西里最容易被忘掉的一半：法术不在职业法术页里
-            body += "\n\n始终准备：\n" + "\n".join(
-                "　· %s（%s）" % (row["name"], "戏法" if not row.get("level")
-                                  else "%d 环" % int(row["level"]))
+            body += "\n\n" + T("始终准备：") + "\n" + "\n".join(
+                "　· %s（%s）" % (row["name"], T("戏法") if not row.get("level")
+                                  else T("%d 环") % int(row["level"]))
                 for row in spells)
         pools = feat.get("resources") or []
         if pools:
             # 按法术绑定的池（妖精触碰「两道法术各一次」）逐条列名，
             # 否则两行都是「免费施放次数」，玩家分不出哪行是迷踪步
             per_spell = all(row.get("spell") for row in pools)
-            body += "\n\n免费施放次数%s：\n" % ("（每道法术各一次）" if per_spell else "")
+            body += "\n\n" + T("免费施放次数%s：") + "\n" % (T("（每道法术各一次）") if per_spell else "")
             body += "\n".join(
-                "　· %s：%d/%d（长休恢复）"
+                T("　· %s：%d/%d（长休恢复）")
                 % (row["label"], int(row["capacity"]) - int(row["used"]), int(row["capacity"]))
                 for row in pools)
         self.text.set_text(body)
@@ -208,16 +210,16 @@ class FeatPage(ttk.Frame):
                                               STATUS_TEXT["text"]))
 
         choices = feat.get("choices") or []
-        labels = ["%s（还差 %d 项）" % (row["label"], row["remaining"])
+        labels = [T("%s（还差 %d 项）") % (row["label"], row["remaining"])
                   for row in choices]
         self.choice_box.configure(values=labels)
         ids = [row["id"] for row in choices]
         if not choices:
             self._choice_id = ""
-            self.choice_box.set("这条专长没有需要选择的部分")
+            self.choice_box.set(T("这条专长没有需要选择的部分"))
             self.choice_box.configure(state="disabled")
             self.options.fill([])
-            self.summary_var.set("已选专长：" + feat["name"])
+            self.summary_var.set(T("已选专长：") + feat["name"])
             self._enable(False)
             return
         self.choice_box.configure(state="readonly")
@@ -237,21 +239,21 @@ class FeatPage(ttk.Frame):
         for value in choice.get("options") or []:
             used = picked.count(value)
             label = _option_label(choice, str(value), self.app.bundle)
-            rows.append((str(value), "%s%s" % (label, "　（已选 %d）" % used if used else "")))
+            rows.append((str(value), "%s%s" % (label, T("　（已选 %d）") % used if used else "")))
         self.options.fill(rows)
         self._fill_summary(choice, picked)
 
     def _fill_summary(self, choice: dict, picked: list[str]) -> None:
         names = [_option_label(choice, item, self.app.bundle) for item in picked]
         if names:
-            text = "已选：" + "、".join(names)
+            text = T("已选：") + join(names)
         else:
-            text = "还没选。"
+            text = T("还没选。")
         remaining = int(choice.get("remaining") or 0)
         if remaining > 0:
-            text += "\n还差 %d 项。" % remaining
+            text += "\n" + T("还差 %d 项。") % remaining
         else:
-            text += "\n已选满。"
+            text += "\n" + T("已选满。")
         self.summary_var.set(text)
         # 选满了还能「去掉一个」，但「加上」会被服务端拒绝 —— 按钮先灰掉更诚实
         self.add_button.configure(
@@ -287,11 +289,11 @@ class FeatPage(ttk.Frame):
         feat = self._feat()
         choice = self._choice()
         if not feat or not choice:
-            self._status("先选一条带选择项的专长。", error=True)
+            self._status(T("先选一条带选择项的专长。"), error=True)
             return False
         value = self.options.selected_id()
         if action != "clear" and not value:
-            self._status("先在下面选一个候选项。", error=True)
+            self._status(T("先在下面选一个候选项。"), error=True)
             return False
 
         picked = list(choice.get("picked") or [])
@@ -314,7 +316,7 @@ class FeatPage(ttk.Frame):
         self._feat_id = feat["id"]
         self._choice_id = choice["id"]
         self._fill_detail()
-        self._status("%s：已选 %d 项" % (choice["label"], len(updated)))
+        self._status(T("%s：已选 %d 项") % (choice["label"], len(updated)))
         return True
 
 

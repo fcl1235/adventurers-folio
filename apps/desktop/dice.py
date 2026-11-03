@@ -9,6 +9,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
+from .i18n import T
 from . import theme
 from .widgets import ABILITY_ZH
 
@@ -26,12 +27,12 @@ def _label_of(result: dict) -> str:
     kind = result.get("kind")
     key = str(result.get("key") or "")
     if kind == "save":
-        return "%s豁免" % ABILITY_ZH.get(key, key.upper())
+        return T("%s豁免") % ABILITY_ZH.get(key, key.upper())
     if kind == "ability":
-        return "%s检定" % ABILITY_ZH.get(key, key.upper())
+        return T("%s检定") % ABILITY_ZH.get(key, key.upper())
     if kind == "initiative":
-        return "先攻"
-    return str(result.get("label") or "").strip() or key or kind or "检定"
+        return T("先攻")
+    return str(result.get("label") or "").strip() or key or kind or T("检定")
 
 
 def format_roll(result: dict) -> str:
@@ -44,9 +45,9 @@ def format_roll(result: dict) -> str:
     modifier = int(result.get("modifier", 0))
     marks = ""
     if result.get("advantage"):
-        marks = "　优势"
+        marks = T("　优势")
     elif result.get("disadvantage"):
-        marks = "　劣势"
+        marks = T("　劣势")
     return "%s：%d（d20 %s %+d）%s" % (_label_of(result), total, die, modifier, marks)
 
 

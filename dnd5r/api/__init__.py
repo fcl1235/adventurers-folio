@@ -55,12 +55,13 @@ from .loadout import (
 )
 from .origin import (
     SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, check_scores,
+    score_mode_labels,
     origin_view, random_scores, score_cost, score_presets, set_masteries,
     set_origin, species_catalog,
 )
 # 建卡向导（P7）：8 步的目录与最终组装。界面只拿数据，不自己查内容
 from .wizard import (
-    STEP_INDEX, WIZARD_STEPS, bonus_plans, build_from_draft, class_catalog,
+    STEP_INDEX, WIZARD_STEPS, bonus_plans, build_from_draft, class_catalog, wizard_steps,
     draft_problems, empty_draft, mastery_choices, skill_catalog, spell_choices,
     step_options, subclass_choices, tool_catalog,
 )
@@ -104,9 +105,10 @@ __all__ = [
     # 出身：物种 / 背景 / 武器精通 / 属性生成（P6）
     "species_catalog", "background_catalog", "origin_view", "set_origin",
     "set_masteries", "bonus_shapes", "score_presets", "check_scores",
-    "score_cost", "random_scores", "SCORE_MODES", "SCORE_MODE_ZH",
+    "score_cost", "random_scores", "SCORE_MODES", "SCORE_MODE_ZH", "score_mode_labels",
     # 建卡向导（P7）
-    "WIZARD_STEPS", "STEP_INDEX", "empty_draft", "class_catalog", "skill_catalog",
+    "WIZARD_STEPS", "wizard_steps", "STEP_INDEX", "empty_draft", "class_catalog",
+    "skill_catalog",
     "tool_catalog", "subclass_choices", "mastery_choices", "spell_choices",
     "step_options", "draft_problems", "build_from_draft", "bonus_plans",
     "level_up", "level_up_view", "draft_from_actor", "apply_draft",

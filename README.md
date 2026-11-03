@@ -1,186 +1,201 @@
-# adventurers-folio（冒险者手帖）— D&D **5R**（5.5e / 2024）角色卡
+# adventurers-folio — a D&D **5R** (5.5e / 2024) character sheet
 
-> 项目名 `adventurers-folio`，中文名**冒险者手帖**。`folio` 是装角色卡的那种夹子；
-> 这里说的 5R 就是 D&D 2024 修订版，国外社区也叫 **5.5e**（2014 版才叫 5e）。
-> 本项目**只做 5R**，不是 5e 的兼容实现。
+**English** · [简体中文](README.zh-CN.md)
 
-本仓库里有**两个程序**，同一份 5R 规则口径，两代实现：
+> The repo is `adventurers-folio` (Chinese name **冒险者手帖**, "adventurer's folio" —
+> the folder you keep character sheets in). "5R" means the D&D 2024 revision, which the
+> community also calls **5.5e** (2014 is plain 5e). This project targets **5R only**;
+> it is not a 5e-compatible implementation.
 
-| | 旧版（已完结） | **重制版（开发中，`re1` 分支）** |
+The repo contains **two programs** built on one and the same set of 5R rulings:
+
+| | Old version (finished) | **Rewrite (in progress, `re1` branch)** |
 |---|---|---|
-| 入口 | `python dnd55e_character_builder.py`（或 `启动人物卡.bat`） | `python -m apps.desktop.main` |
-| 架构 | `dnd55e/` 四层单体，数据在根目录 JSON | `dnd5r/` 插件化引擎（内核零内容）+ `apps/` 前端 + `plugins/` 内容包 |
-| 自检 | `运行自检.bat`（10 步） | `重构自检.bat`（5 步：单测 / 分层 / 插件 / 黄金对账 / 布局） |
-| 文档 | `dnd55e_rules_reference.md` | **`架构设计v3-插件化.md`**（设计 + 逐阶段实施记录） |
-| 角色 | 两者数值逐项对账（黄金矩阵 32560 项），旧版是新引擎的 oracle | |
+| Entry point | `python dnd55e_character_builder.py` (or `启动人物卡.bat`) | `python -m apps.desktop.main` |
+| Architecture | `dnd55e/` four-layer monolith, JSON data in the repo root | `dnd5r/` plugin-based engine (content-free kernel) + `apps/` front end + `plugins/` content packs |
+| Self-check | `运行自检.bat` (10 steps) | `重构自检.bat` (8 steps: unit tests / layering / plugins / golden diff / layout / layout-in-English / UI text / API text) |
+| Docs | `dnd55e_rules_reference.md` | **`架构设计v3-插件化.md`** (design + per-phase build log) |
+| Relationship | The two are diffed number by number (a 32,560-entry golden matrix); the old version is the oracle for the new engine | |
 
-重制版的核心理念：**内核不认识任何 D&D 专有名词**——职业、法术、怪物全部是
-可插拔的内容包；分层约束（C1–C8）与数值对账全部由脚本验收，不是靠自觉。
-下文先讲旧版（作为稳定可用的程序），重制版细节见架构文档。
+The idea behind the rewrite: **the kernel knows no D&D proper nouns** — classes, spells and
+monsters are all pluggable content. Layer constraints (C1–C8) and the numeric diff are
+enforced by scripts, not by good intentions. The sections below cover the old version first
+(it is the one you can simply run); the rewrite lives in the architecture document.
 
-## 快速开始（两个程序）
+## Quick start (both programs)
 
-需要 Python 3.10+（含 tkinter，Windows 官方安装包自带）。
+Python 3.10+ with tkinter (the official Windows installer includes it).
 
 ```
-rem —— 旧版（稳定） ——
+rem --- old version (stable) ---
 启动人物卡.bat
 python dnd55e_character_builder.py --selftest
 
-rem —— 重制版 ——
+rem --- rewrite ---
 python -m apps.desktop.main
-python tools/selfcheck.py        # 或双击 重构自检.bat
-python -m apps.cli.main play --level 2   # 无头剧本：建卡→用能力→休息
+python -m apps.desktop.main --lang en    # start directly in the English UI
+python tools/selfcheck.py        # or double-click 重构自检.bat
+python -m apps.cli.main play --level 2   # headless script: build -> use a power -> rest
 ```
 
-角色档存在 `characters/` 下（`_last.json` 记住上次打开的档）。
-注意：两个程序的存档格式不同（重制版存档由 `dnd5r.api` 读写，只存事实）。
+Characters are stored under `characters/` (`_last.json` remembers the last sheet you opened).
+Note that the two programs use different save formats (the rewrite goes through `dnd5r.api`
+and stores facts only).
 
-### 重制版界面（第一眼看到的东西）
+### The rewrite's UI (what you see first)
 
-主窗口是**一张人物卡**：左栏六张属性卡（分数 / 调整值 / 豁免），中栏标签页，
-右栏战斗数值、攻击表与掷骰记录。顶部一条身份栏放名字、职业等级、生命值与
-AC / 先攻 / 速度 / 熟练 / 察觉五个胶囊。
+The main window **is** a character sheet: six ability cards on the left (score / modifier /
+save), tabbed pages in the middle, combat numbers, the attack table and a dice log on the
+right. A hero strip on top holds name, class and level, hit points, and five pills for
+AC / initiative / speed / proficiency / passive Perception.
 
-| 页 | 内容 |
+| Page | Contents |
 |---|---|
-| 概览 | 属性卡、技能表、攻击表、护甲明细、战斗数值（AC / 先攻 / HP / 抗性 / 感官 / 暴击 / 生命骰 / 力竭） |
-| 装备 | 13 件护甲（轻/中/重/盾）+ 38 件武器，点一下换装，AC 与两用武器伤害立刻跟着变；左栏只读背包清单（含起始装备与金币） |
-| 法术 | 戏法与各环法术、法术位、准备/施放 |
-| 专长 | 67 条专长的选择项（属性 +1、技能、抗性…） |
-| 能力 | 职业与子职特性、物种特性、资源池 |
-| 战斗 | 先攻条、摆位、选目标攻击、战斗记录 |
-| 状态 | 14 条状态勾选 + 力竭 0–6 + 死亡豁免 + 专注 DC（两列排开，不用滚动） |
+| Overview | Ability cards, skill table, attack table, armour breakdown, combat numbers (AC / initiative / HP / resistances / senses / crit / Hit Dice / exhaustion) |
+| Gear | 13 armours (light/medium/heavy/shield) + 38 weapons; one click to swap, and AC plus versatile-weapon damage follow immediately; the left column is a read-only inventory (starting gear and coins included) |
+| Spells | Cantrips and spells by level, spell slots, prepare/cast |
+| Feats | Choice lists for 67 feats (ability +1, skills, resistances, …) |
+| Powers | Class and subclass features, species traits, resource pools |
+| Encounter | Initiative order, placing figures, target selection, combat log |
+| Status | 14 condition checkboxes + exhaustion 0–6 + death saves + concentration DC (two columns, no scrolling) |
 
-**建卡向导**在主窗口内切换（不开弹窗），8 步：职业 → 背景 → 物种 → 属性 →
-技能 → 武器精通 → 法术 → 汇总。属性支持点买 27 点 / 标准数组 / 掷 4d6 弃最低：
-输入框按方式**就地约束**（点买打不进 16、标准数组用下拉且选过的数字会与对方交换），
-点买旁一直显示「还剩 N 点」。法术那一步把鼠标停在名字上会弹出完整说明
-（施法 / 距离 / 成分 / 持续 / 正文）。背景加值从 7 种合法形态里选。汇总步选
-**起始装备**（2024 的 A/B 选项，例如战士
-「A 包：锁甲 + 巨剑 + 连枷 + 8 标枪 + 地城背包 + 4 gp」/「B 包：镶钉皮甲 + 弯刀 +
-短剑 + 长弓 + 20 箭 + 11 gp」/「纯 155 gp」），建出来的角色甲已穿上、武器已在
-攻击表里，不是一身 AC 10 的光板。顶部有「改卡」随时重开向导改这张卡（专长、兼职等级、
-专精会原样保住），「升级」按钮升一级并保住当前 HP、背包与装备，
-新解锁还需要补的选择会直接把向导开到那一步。
+The **build wizard** runs inside the main window (no dialogs), in 8 steps: class → background
+→ species → ability scores → skills → weapon mastery → spells → summary. Scores support
+point buy (27 points) / standard array / roll 4d6 drop lowest, and the inputs constrain
+themselves in place (point buy refuses 16; the standard array is a dropdown where picking a
+number already taken swaps the two). "Points left" is always visible next to point buy.
+Hovering a spell name in the spell step pops its full text (casting time / range /
+components / duration / body). Background bonuses are picked from the 7 legal shapes. The
+summary step picks **starting equipment** (the 2024 A/B options — e.g. fighter "A: chain mail
++ greatsword + flail + 8 javelins + dungeoneer's pack + 4 gp" / "B: studded leather + scimitar
++ shortsword + longbow + 20 arrows + 11 gp" / "155 gp only"), so the character comes out with
+armour worn and weapons already in the attack table instead of a bare AC 10. The
+"Edit sheet" button reopens the wizard on this character at any time (feats, multiclass levels
+and expertise survive untouched), and "Level up" gains one level while keeping current HP,
+inventory and equipment — newly unlocked choices push the wizard straight to that step.
 
-## 规则版本：只做 5R
+## Rules version: 5R only
 
-两个程序用的是同一份判定标准：**D&D 2024 修订版**，凡是 5R 与 5e 有出入的地方一律按 5R：
+Both programs use one standard: the **D&D 2024 revision**. Wherever 5R and 5e differ, 5R wins:
 
-| 领域 | 5e（2014） | **5R（本项目采用）** |
+| Area | 5e (2014) | **5R (what this project implements)** |
 |---|---|---|
-| 属性加值来源 | 种族 | **背景**（+2/+1 或 +1/+1/+1） |
-| 建卡顺序 | 种族 → 职业 | **职业 → 背景 → 种族** |
-| 战斗风格 | 职业特性 | **专长**（战士 1 级、圣武士/游侠 2 级） |
-| 力竭 | 分级惩罚（劣势 / 速度减半 / HP 上限减半…） | **每级统一 d20 −2、速度 −5 尺** |
-| 武器专精 | 无 | **Weapon Mastery**（每把武器带一个专精词条） |
-| 法术准备数 | 属性调整值 + 等级 | **按职业表**（戏法数、准备数、契约位都查表） |
-| 召唤法术 | 一条法术配一张怪物表 | **Summon 系列用独立 Stat Block，随环级缩放** |
-| 荒野变形 | CR 随等级/子职跳档 | **已知形态数 4/6/8、游泳 4 级与飞行 8 级解禁、月环 CR = 等级÷3** |
+| Source of ability bonuses | Species | **Background** (+2/+1 or +1/+1/+1) |
+| Build order | Species → class | **Class → background → species** |
+| Fighting styles | Class feature | **Feats** (fighter 1st, paladin/ranger 2nd) |
+| Exhaustion | Tiered penalties (disadvantage / half speed / half HP max…) | **Flat d20 −2 and speed −5 ft. per level** |
+| Weapon mastery | None | **Weapon Mastery** (each weapon carries one mastery property) |
+| Prepared spells | Ability modifier + level | **From the class table** (cantrips, prepared count, pact slots are all looked up) |
+| Summon spells | One spell plus one monster stat block | **The Summon line uses standalone stat blocks that scale with slot level** |
+| Wild Shape | CR jumps by level/subclass | **4/6/8 known forms, swim at 4th and fly at 8th, moon CR = level ÷ 3** |
 
-5R 与 2014 内容**向后兼容**，但本程序不带 2014 数据，也不提供版本切换开关。
-（代码里 `dnd55e`、`5.5e` 这类命名是历史遗留，指的都是同一个 5R。）
+5R content is **backwards compatible** with 2014, but this program ships no 2014 data and has
+no version switch. (Names like `dnd55e` and `5.5e` in the code are historical; they all mean 5R.)
 
-旧版程序的功能面（重制版逐阶段对齐中，进度见架构文档 §9）：
+Feature surface of the old version (the rewrite is catching up phase by phase — see §9 of the
+architecture document):
 
-- 12 个职业 × 1–20 级、48 个子职
-- 347 个法术（含 8 个 2024 Summon 系列的召唤物映射）
-- 140 件魔法物品、91 条野兽数据（88 只可变形 + 3 只游侠伙伴）、32 条召唤物 Stat Block
-- 67 条专长（43 通用 + 12 战斗风格 + 12 传奇恩惠）
-- 建卡向导 + 六标签页角色卡 + 升级/休息/掷骰
+- 12 classes × levels 1–20, 48 subclasses
+- 347 spells (including the 8 Summon spells from 2024 and their creatures)
+- 140 magic items, 91 beast stat blocks (88 wild-shape forms + 3 ranger companions), 32 summon stat blocks
+- 67 feats (43 general + 12 fighting style + 12 epic boon)
+- Build wizard + six-tab character sheet + level up / rest / dice
 
-## 界面导览
+## UI tour (old version)
 
-**顶部工具栏**：新建角色 · 保存 · 打开 · 导出 JSON ｜ 升级 · 长休 · 短休 ｜ 骰子工具
-**菜单**：`文件`（新建/保存/另存为/打开存档文件夹/载入/导出 JSON）、`角色`（升级/长休/短休）、`工具`（骰子工具）
-**快捷键**：`Ctrl+S` 保存、`Ctrl+O` 打开
+**Top toolbar**: new character · save · open · export JSON ｜ level up · long rest · short rest ｜ dice tools
+**Menus**: `File` (new / save / save as / open save folder / load / export JSON), `Character` (level up / long rest / short rest), `Tools` (dice)
+**Shortcuts**: `Ctrl+S` save, `Ctrl+O` open
 
-**六个标签页**
+**Six tabs**
 
-| 标签页 | 内容 |
+| Tab | Contents |
 |---|---|
-| 技能 | 18 项技能的调整值，熟练/专精可勾选；鼠标悬停看说明与当前加值 |
-| 法术 | 法术位、已学/已准备列表、法术详情（含召唤物段）、施放/专注/召唤物按钮、法师法术书 |
-| 装备·加成 | 武器/护甲/战斗风格/武器专精、魔法物品格、AC 与加值来源、抗性/免疫/真实视觉 |
-| 职业 | 资源池、生命骰、术法源泉、超魔法、传奇恩惠、阶职、荒野变形、野兽伙伴、子职、职业特性 |
-| 专长·特性 | 专长列表与说明、种族特性、背景、熟练项 |
-| 笔记 | 语言、装备清单、自由笔记 |
+| Skills | Modifiers for the 18 skills, with proficiency/expertise checkboxes; hover for the description and current bonus |
+| Spells | Spell slots, known/prepared lists, spell details (including the summon block), cast/concentration/summon buttons, wizard spellbook |
+| Gear & bonuses | Weapons / armour / fighting style / weapon mastery, magic item slots, AC and its sources, resistances/immunities/truesight |
+| Class | Resource pools, Hit Dice, sorcery points, metamagic, epic boons, subclass features, Wild Shape, beast companion, subclass, class features |
+| Feats & traits | Feat list and text, species traits, background, proficiencies |
+| Notes | Languages, equipment list, free-form notes |
 
-**常用交互**
+**Common interactions**
 
-- 法术页选中法术 → 详情显示召唤物段；有召唤物的法术会出现「召唤物」按钮，点开是完整 Stat Block 卡
-- 物品格**左键**装卸、**右键**打开完整效果卡（稀有度、同调、全文、已计入的数值、卡内一键装备）
-- 职业页的资源点「用 1 / 回 1」、生命骰「花 1 颗回血」、传奇恩惠的属性/抗性/专精选择都在原地面板里
-- 驯兽师 3 级起职业页有「原始伙伴」，可切三形态并掷「野兽打击」
+- Select a spell on the Spells tab → the details pane shows its summon block; spells that summon get a "Summon" button that opens the full stat block card
+- Item slots: **left click** to equip/unequip, **right click** for the full effect card (rarity, attunement, full text, numbers already applied, one-click equip from the card)
+- Class tab: "spend 1 / regain 1" on resource points, "spend 1 Hit Die to heal", and epic boon ability/resistance/expertise choices all happen in place
+- Beast Master from 3rd level gets a "primal companion" panel with three forms and a Beast Strike roll
 
-## 代码结构（四层）
+## Code structure (four layers)
 
 ```
 dnd55e/
-├── core/           领域内核：Character 本体（不 import 任何 UI）
-│   ├── base.py       状态字段 / 属性上限 / score()
-│   ├── derived.py    AC / HP / 速度 / 先攻
-│   ├── checks.py     豁免 / 技能 / 加值来源说明
-│   ├── combat/       武器攻击与双武器
-│   ├── features.py   专长 effects / 传奇恩惠 / 伙伴
-│   ├── resources.py  职业资源池
-│   └── serialize.py  存档读写
-├── classes/        职业模块：一职业一个文件
-│   ├── base.py       ClassModule 的 hook（默认全空实现）
-│   ├── registry.py   @register 注册表（未知职业回退空实现）
+├── core/            domain kernel: the Character itself (imports no UI)
+│   ├── base.py       state fields / ability caps / score()
+│   ├── derived.py    AC / HP / speed / initiative
+│   ├── checks.py     saves / skills / explaining where a bonus comes from
+│   ├── combat/       weapon attacks and two-weapon fighting
+│   ├── features.py   feat effects / epic boons / companions
+│   ├── resources.py  class resource pools
+│   └── serialize.py  save/load
+├── classes/         one file per class
+│   ├── base.py       ClassModule hooks (all no-ops by default)
+│   ├── registry.py   @register table (unknown classes fall back to the no-op module)
 │   └── barbarian.py … warlock.py
-├── spellcasting/   施法：按施法类型与环级分模块
+├── spellcasting/    casting, split by caster type and spell level
 │   ├── types.py      full / half / third / pact
-│   ├── slots.py      法术位
+│   ├── slots.py      spell slots
 │   └── levels/       cantrip + level1…level9
-├── ui/             表现层：tabs / panels / actions / refresh / classtab
-├── dialogs/        弹窗：升级、法术书、专长、变形、召唤物、物品卡、骰子
-├── wizard_steps/   建卡向导的七个步骤
-├── rules.py        规则表查询（只读 JSON）
-├── data.py         JSON 加载器（lru_cache）
-├── consts.py       懒加载常量 + 中文文案
-├── summoning.py    召唤物段渲染
-└── wildshape.py    野兽形态纯函数
+├── ui/              presentation: tabs / panels / actions / refresh / classtab
+├── dialogs/         dialogs: level up, spellbook, feats, wild shape, summon, item card, dice
+├── wizard_steps/    the seven build-wizard steps
+├── rules.py         rule-table lookups (read-only JSON)
+├── data.py          JSON loader (lru_cache)
+├── consts.py        lazily built constants + Chinese copy
+├── summoning.py     renders summon blocks
+└── wildshape.py     pure functions for beast forms
 ```
 
-职业规则不再散落在主程序里：`core/` 与 `spellcasting/` 中已无任何 `class_id == "..."` 分支，
-全部走 `classes.get(class_id)` 的 hook。**新增职业 = 在 `dnd55e/classes/` 加一个文件 + 类上一行
-`@register("class_id")`**，主程序零改动。
+Class rules are no longer scattered through the main program: neither `core/` nor
+`spellcasting/` contains a single `class_id == "..."` branch; everything goes through the
+`classes.get(class_id)` hooks. **Adding a class = one file in `dnd55e/classes/` plus one
+`@register("class_id")` line** — no change to the main program.
 
-## 数据文件
+## Data files
 
-| 文件 | 内容 |
+| File | Contents |
 |---|---|
-| `dnd55e_core_data.json` | 职业 / 种族 / 背景 / 技能 / 法术位表 |
-| `dnd55e_classes_detail.json` | 职业与子职特性、资源池 |
-| `dnd55e_spells.json` | 法术；带 `summon` 字段的法术会渲染召唤物段 |
-| `dnd55e/data/feats_general.json` | 67 条专长：43 通用 + 12 战斗风格 + 12 传奇恩惠 |
-| `dnd55e/data/monsters.json` | 91 条野兽数据（88 只可变形 + 3 只游侠伙伴） |
-| `dnd55e/data/summons.json` | 32 条召唤物 Stat Block（覆盖 12 个法术） |
-| `dnd55e/data/items.json` | 140 件魔法物品 |
-| `dnd55e/data/fixed_spells.json` | 「始终准备」法术（领域/结社/精通/招牌） |
-| `dnd55e/data/metamagic.json` | 超魔法选项 |
+| `dnd55e_core_data.json` | Classes / species / backgrounds / skills / slot tables |
+| `dnd55e_classes_detail.json` | Class and subclass features, resource pools |
+| `dnd55e_spells.json` | Spells; spells with a `summon` field render a summon block |
+| `dnd55e/data/feats_general.json` | 67 feats: 43 general + 12 fighting style + 12 epic boon |
+| `dnd55e/data/monsters.json` | 91 beast stat blocks (88 wild-shape forms + 3 ranger companions) |
+| `dnd55e/data/summons.json` | 32 summon stat blocks (covering 12 spells) |
+| `dnd55e/data/items.json` | 140 magic items |
+| `dnd55e/data/fixed_spells.json` | "Always prepared" spells (domain / circle / mastery / signature) |
+| `dnd55e/data/metamagic.json` | Metamagic options |
 
-数据来自 SRD 5.2（dnd5eapi.co 的 2024 端点）与 PHB 2024 的公开条目。
-原始抓取快照**不入库**（`data/raw/` 已在 `.gitignore` 排除），需要时运行 `tools/legacy/_fetch_srd.py` 自行生成。
+Data comes from SRD 5.2 (the 2024 endpoints of dnd5eapi.co) and public PHB 2024 entries. The
+raw scrape snapshots are **not committed** (`data/raw/` is in `.gitignore`); run
+`tools/legacy/_fetch_srd.py` if you need them.
 
-## 自检
+## Self-check
 
 ```
 运行自检.bat
 ```
 
-10 步：数据体检 → 应用自检 → 建卡流程 → 逐级数值对账（2218 项）→
-布局审计 → 中英文案 → 提示裁切 → 召唤物校验 → 模块依赖 → 祈唤/攻击选项。
-全绿时以 `ALL CHECKS PASSED` 结束。
+10 steps: data health → application self-test → build flow → per-level numeric diff (2,218
+items) → layout audit → Chinese/English copy → tooltip clipping → summon validation → module
+dependencies → invocation/attack options. It ends with `ALL CHECKS PASSED` when everything is green.
 
-> **首次 clone 后** `data/raw/` 是空的（该目录不入库，见 `NOTICE.md`）。此时第 0 步会提示缺数据、
-> 第 3 步打印 `SKIP` 跳过逐级对账，其余步骤照常运行。想跑全量对账就先执行
-> `python tools/legacy/_fetch_class_detail.py` 与 `python tools/legacy/_fetch_srd.py` 补齐上游快照。
-> **主程序本身不依赖 `data/raw/`**，建卡与存档完全正常。
+> **After the first clone** `data/raw/` is empty (the directory is not committed, see
+> `NOTICE.md`). Step 0 then reports missing data and step 3 prints `SKIP` for the per-level
+> diff; the other steps still run. If you want the full diff, run
+> `python tools/legacy/_fetch_class_detail.py` and `python tools/legacy/_fetch_srd.py` first to
+> fill in the upstream snapshots. **The program itself does not depend on `data/raw/`**;
+> building and saving characters works fine.
 
-改数据文件后还要单独跑对应校验器（它们不在批处理里）：
+After editing a data file, run the matching validator (they are not part of the batch file):
 
 ```
 python tools/legacy/_featcheck.py   # feats_general.json
@@ -189,48 +204,69 @@ python tools/legacy/_moncheck.py    # monsters.json
 python tools/legacy/_summoncheck.py # summons.json
 ```
 
-另有可选的深度验证脚本，在 `backup/` 下：
-`_p2_snapshot.py` + `_p2_diff.py`（12 职业 × 1–20 级 = 248 组数值快照比对，需
-`PYTHONHASHSEED=0`）、`_p5_tagcheck.py`（逐个 tag 检出到独立 worktree 跑全套自检）、
-`_p6a_probe.py` … `_p6f_uiprobe.py`（五项功能的界面与数值探针）。
+There are optional deep-verification scripts under `backup/`: `_p2_snapshot.py` +
+`_p2_diff.py` (248 numeric snapshots across 12 classes × levels 1–20, needs
+`PYTHONHASHSEED=0`), `_p5_tagcheck.py` (checks out every tag into its own worktree and runs
+the full self-check), and `_p6a_probe.py` … `_p6f_uiprobe.py` (UI and numeric probes for the
+five P6 features).
 
-## 已知取舍
+## Known trade-offs
 
-- **变形与召唤不替换角色本体的数值**：程序给出形态/伙伴的 Stat Block 与掷骰，
-  角色属性、HP 仍按本体记录，避免一次变形把存档写坏。
-- **4 级起的「属性提升 / 自选专长」还没有入口**：职业条目只登记了规则文字，
-  角色卡不会因此加值；除了建卡时由背景给出的起始专长，暂时无法新增专长
-  （缺口编号 G35，见 `架构设计v3-插件化.md` §15.2）。
-- **武器精通只记录、不结算**：卡上会写「精通：擦伤 graze」，但推撞、击倒这类
-  效果要在命中之后做战术选择，程序不替你算（G32）。
-- **语言没有建模**：卡面不列语言，物种语言（精灵语、矮人语等）也没有收录，
-  只有德鲁伊语、盗贼黑话这类写在职业原文里（G36）。
-- 63 件「无法机械计算」的魔法物品（如「寒冷伤害减免 2d8」）只展示完整文字效果，
-  不参与数值计算；它们的 `note_only: true` 表示「除已填数值外还有算不了的效果」。
-- 传奇恩惠里一部分效果（能量转移、复原池等）按说明记录，不自动结算。
-- 只有简体中文界面。
+- **Wild Shape and summons do not replace the character's own numbers**: the program gives you
+  the form's or companion's stat block and rolls, while ability scores and HP stay on the
+  character, so one transformation cannot corrupt a save file.
+- **No entry point yet for the 4th-level "Ability Score Improvement / feat of choice"**: the
+  class entry only records the rule text, so the sheet gains nothing from it. Apart from the
+  starting feat granted by a background, you cannot add feats yet (gap G35, see
+  `架构设计v3-插件化.md` §15.2).
+- **Weapon mastery is recorded, not resolved**: the sheet shows "Mastery: graze", but shove,
+  topple and similar effects are tactical choices made after a hit, so the program does not
+  resolve them (G32).
+- **Languages are not modelled**: the sheet does not list languages, and species languages
+  (Elvish, Dwarvish, …) are not included — only the ones written into class text such as
+  Druidic or Thieves' Cant (G36).
+- 63 magic items that "cannot be computed mechanically" (e.g. "cold damage reduction 2d8")
+  only show their full text and take no part in the numbers; their `note_only: true` means
+  "there are effects beyond the numbers already filled in".
+- Some epic boon effects (Energy Transfer, Recovery Pool, …) are recorded as text and not
+  resolved automatically.
+- **The UI is bilingual (Chinese / English)**: the `EN` / `中文` button in the top bar
+  switches language, the choice is stored in `saves/_settings.json` and reused on the
+  next start (the system locale only decides the first run).
+  Translation has two layers. Text the UI itself writes goes through
+  `apps/desktop/i18n.py` (the Chinese original is the key; a missing translation falls back to
+  Chinese and is recorded in `MISSING`). **Sentences the rules compute** ("要选 3 项技能，现在选了
+  2 项" / "Choose 3 skills; 2 selected") go through `dnd5r/rules/text.py` and must be translated
+  *before* formatting — by the time the UI receives them they are a finished sentence with the
+  numbers already filled in, so a whole-sentence lookup can never match. Both layers have a
+  static audit (`tools/i18n_audit.py` and `--api`), and the layout audit runs a second time in
+  English (`tools/uicheck.py --lang en`), because English is not a same-length stand-in for
+  Chinese.
+  Not translated yet: about 420 engine diagnostics in `dnd5r/rules/` (technical remarks such as
+  "why this action is not allowed") are still Chinese; the source marks them with `i18n-keep`
+  and states the reason. Content packs (class / spell / feat text) carry both languages and are
+  unaffected.
 
-## 许可与声明
+## License and notices
 
-本项目是**非官方、免费**的粉丝作品（unofficial fan content），与 Wizards of the Coast 无隶属关系。
+This is **unofficial, free** fan content and is not affiliated with Wizards of the Coast.
 
-- **程序代码**（`dnd55e/`、`dnd5r/`、`apps/`、`tools/` 等）：MIT License，见 `LICENSE`
-- **SRD 5.2 规则内容**：依 CC-BY-4.0 使用，已翻译并重构为中文 JSON
-- **非 SRD 的 2024 核心内容**：依 WotC [Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy) 使用
+- **Program code** (`dnd55e/`, `dnd5r/`, `apps/`, `tools/`, …): MIT License, see `LICENSE`
+- **SRD 5.2 rules content**: used under CC-BY-4.0, translated and restructured into Chinese JSON
+- **2024 core content outside the SRD**: used under WotC's [Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy)
 
-完整署名、修改说明与免责声明见 **[`NOTICE.md`](NOTICE.md)**。
+Full attribution, list of modifications and disclaimer: **[`NOTICE.md`](NOTICE.md)**.
 
-本仓库**不包含** `data/raw/` 上游原始快照（已在 `.gitignore` 排除），需要时自行运行
-`tools/legacy/_fetch_srd.py` 获取。
+This repository does **not** contain the raw upstream snapshots in `data/raw/` (excluded via
+`.gitignore`); fetch them yourself with `tools/legacy/_fetch_srd.py` if you want them.
 
-> 本作品部分材料版权归 Wizards of the Coast LLC 所有。
 > Portions of the materials used are property of Wizards of the Coast LLC. ©Wizards of the Coast LLC.
 > This is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards.
 
-## 文档
+## Documents
 
-- `dnd55e_rules_reference.md` — 规则基准与实现口径（2024 vs 2014 差异、逐条实现的判定）
-- `tools/legacy/_dataspec.md` — 旧版数据字段规范（给改数据的人看）
-- `架构设计v3-插件化.md` — **重制版的设计与逐阶段实施记录（先读这份）**
-- `重构方案.md` — 旧程序 P1–P5 模块化改造记录（已完成）
-- `P6方案.md` — P6 五项功能补齐与执行结果（已完成）
+- `dnd55e_rules_reference.md` — rule baseline and implementation notes (2024 vs 2014 differences, per-item rulings)
+- `tools/legacy/_dataspec.md` — field spec for the old version's data (for anyone editing data)
+- `架构设计v3-插件化.md` — **the rewrite's design and per-phase build log (read this first)**
+- `重构方案.md` — modularisation log for the old program, P1–P5 (done)
+- `P6方案.md` — the five P6 features and their results (done)

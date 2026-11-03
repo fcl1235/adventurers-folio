@@ -19,18 +19,19 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from .i18n import Catalog, T, join
 from . import theme, widgets
 from .widgets import COL_LEFT, COL_MID, COL_RIGHT, KeyValue, ListPane, ScrollText, section
 
-REFRESH_ZH = {"long_rest": "长休恢复", "short_rest": "短休恢复",
-              "initiative": "遭遇开始", "never": "不自动恢复", "turn": "每回合"}
+REFRESH_ZH = Catalog({"long_rest": "长休恢复", "short_rest": "短休恢复",
+              "initiative": "遭遇开始", "never": "不自动恢复", "turn": "每回合"})
 SENSE_ZH = widgets.SENSE_ZH     # 与法术页共用一份，见 widgets.py
 STATUS_MARK = {"counted": "✓", "dice": "◆", "active": "▶",
                "onhit": "◈", "manual": "△", "text": "□"}
-STATUS_ZH = {"counted": "已计入数值", "dice": "改掷骰", "active": "使用时结算",
-             "onhit": "命中时结算", "manual": "待手动处理", "text": "仅规则文字"}
-KIND_ZH = {"passive": "被动", "activated": "主动", "reaction": "反应",
-           "triggered": "触发"}
+STATUS_ZH = Catalog({"counted": "已计入数值", "dice": "改掷骰", "active": "使用时结算",
+             "onhit": "命中时结算", "manual": "待手动处理", "text": "仅规则文字"})
+KIND_ZH = Catalog({"passive": "被动", "activated": "主动", "reaction": "反应",
+           "triggered": "触发"})
 
 
 class PowersPage(ttk.Frame):
@@ -57,26 +58,26 @@ class PowersPage(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         # --- 左：资源池 ---------------------------------------------------
-        pools = section(left, "资源")
+        pools = section(left, T("资源"))
         pools.pack(fill="x")
         self.pools = KeyValue(pools, rows=9)
         self.pools.pack(fill="x")
 
-        defense = section(left, "防御")
+        defense = section(left, T("防御"))
         defense.pack(fill="x", pady=(8, 0))
         self.defense = KeyValue(defense, rows=6)
         self.defense.pack(fill="x")
 
         # --- 中：能力清单 + 说明 ------------------------------------------
-        listed = section(mid, "能力")
+        listed = section(mid, T("能力"))
         listed.pack(fill="both", expand=True)
-        ttk.Label(listed, text="✓ 已计入　◆ 改掷骰　▶ 用时算　△ 待手动　□ 仅文字",
+        ttk.Label(listed, text=T("✓ 已计入　◆ 改掷骰　▶ 用时算　△ 待手动　□ 仅文字"),
                   foreground=theme.DIM).pack(anchor="w")
         self.powers = ListPane(listed, height=10, width=52)
         self.powers.pack(fill="both", expand=True, pady=(2, 0))
         self.powers.list.bind("<<ListboxSelect>>", lambda _e: self._select_power())
 
-        detail = section(mid, "说明")
+        detail = section(mid, T("说明"))
         detail.pack(fill="both", expand=True, pady=(6, 0))
         self.text = ScrollText(detail, height=8, width=52)
         self.text.pack(fill="both", expand=True)
@@ -92,17 +93,17 @@ class PowersPage(ttk.Frame):
 
         use = ttk.Frame(right)
         use.pack(fill="x", pady=(4, 0))
-        self.use_button = ttk.Button(use, text="使用这项能力", command=self.use_selected)
+        self.use_button = ttk.Button(use, text=T("使用这项能力"), command=self.use_selected)
         self.use_button.pack(side="left")
         # 结束变形：只在变形中出现。**不能只在英雄条上提示** —— 玩家要结束变形时
         # 会本能地来这里找「荒野变形」那个按钮。
-        self.unmorph_button = ttk.Button(use, text="结束变形", style="Mini.TButton",
+        self.unmorph_button = ttk.Button(use, text=T("结束变形"), style="Mini.TButton",
                                          command=self.end_morph)
         self.blocked_var = tk.StringVar(value="")
         ttk.Label(use, textvariable=self.blocked_var, foreground="#a33",
                   wraplength=290, justify="left").pack(anchor="w", pady=(4, 0))
 
-        result = section(right, "使用结果")
+        result = section(right, T("使用结果"))
         result.pack(fill="both", expand=True, pady=(6, 0))
         self.report = ScrollText(result, height=16, width=30)
         self.report.pack(fill="both", expand=True)
@@ -144,13 +145,13 @@ class PowersPage(ttk.Frame):
             self._status(str(exc), error=True)
             return False
         self.app.apply_actor(actor)
-        self._status("已结束变形。")
+        self._status(T("已结束变形。"))
         return True
 
     def _fill_pools(self) -> None:
         self.pools.clear()
         if not self._pools:
-            self.pools.set_row(0, "资源", "无（这个等级还没解锁）")
+            self.pools.set_row(0, T("资源"), T("无（这个等级还没解锁）"))
             return
         for index, pool in enumerate(self._pools[:9]):
             self.pools.set_row(
@@ -160,15 +161,15 @@ class PowersPage(ttk.Frame):
     def _fill_defense(self, sheet: dict) -> None:
         self.defense.clear()
         senses = sheet.get("senses") or {}
-        sense_text = "、".join("%s %d 尺" % (SENSE_ZH.get(key, key), value)
+        sense_text = join(T("%s %d 尺") % (SENSE_ZH.get(key, key), value)
                               for key, value in sorted(senses.items())) or "—"
         self.defense.set_row(0, "AC", str((sheet.get("ac") or {}).get("total", 0)))
-        self.defense.set_row(1, "暴击", "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)))
-        self.defense.set_row(2, "感官", sense_text)
-        self.defense.set_row(3, "抗性", _join(sheet.get("resistances")))
-        self.defense.set_row(4, "免疫", _join(sheet.get("immunities")))
+        self.defense.set_row(1, T("暴击"), "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)))
+        self.defense.set_row(2, T("感官"), sense_text)
+        self.defense.set_row(3, T("抗性"), _join(sheet.get("resistances")))
+        self.defense.set_row(4, T("免疫"), _join(sheet.get("immunities")))
         conditions = sheet.get("conditions") or []
-        self.defense.set_row(5, "状态", "、".join(conditions) if conditions else "—")
+        self.defense.set_row(5, T("状态"), join(conditions) if conditions else "—")
 
     def _fill_powers(self) -> None:
         rows = []
@@ -177,13 +178,13 @@ class PowersPage(ttk.Frame):
             kind = KIND_ZH.get(row.get("kind") or "", row.get("kind") or "")
             tail = ""
             if row.get("button") and row.get("blocked"):
-                tail = "　（不可用）"
+                tail = T("　（不可用）")
             rows.append((row["id"], "%s %s　%s%s" % (mark, row["name"], kind, tail)))
         self.powers.fill(rows)
         if self._power_id:
             self.powers.select_id(self._power_id)
         if not self._powers:
-            self._status("这个角色还没有能力。")
+            self._status(T("这个角色还没有能力。"))
 
     def _selected(self) -> dict:
         for row in self._powers:
@@ -212,13 +213,13 @@ class PowersPage(ttk.Frame):
         self.text.set_text("\n".join(item for item in (head, path, "", body) if item))
 
         blocked = row.get("blocked") or []
-        self.blocked_var.set("现在不能用：" + "；".join(blocked) if blocked else "")
+        self.blocked_var.set(T("现在不能用：") + "；".join(blocked) if blocked else "")
         state = "normal" if row.get("button") and not blocked else "disabled"
         self.use_button.configure(state=state)
         if not row.get("button"):
-            self.use_button.configure(text="被动能力（无需使用）")
+            self.use_button.configure(text=T("被动能力（无需使用）"))
         else:
-            self.use_button.configure(text="使用这项能力")
+            self.use_button.configure(text=T("使用这项能力"))
         self._fill_choice(row)
 
     def _status(self, text: str, error: bool = False) -> None:
@@ -238,11 +239,11 @@ class PowersPage(ttk.Frame):
             return
         if "token" in channels:
             self._choice_kind = "target_id"
-            ttk.Label(self.choice_frame, text="给谁：",
+            ttk.Label(self.choice_frame, text=T("给谁："),
                       foreground=theme.DIM).pack(side="left")
             encounter = self.app.encounter
             if encounter is None:
-                ttk.Label(self.choice_frame, text="先去战斗页开战（要指认场上的人）",
+                ttk.Label(self.choice_frame, text=T("先去战斗页开战（要指认场上的人）"),
                           foreground="#a33").pack(side="left")
                 return
             me = self.app.actor.id
@@ -253,7 +254,7 @@ class PowersPage(ttk.Frame):
                 values.append("%s（%s）" % (item["label"], item["id"]))
                 self._choice_map[values[-1]] = item["id"]
             if not values:
-                ttk.Label(self.choice_frame, text="场上没有别人",
+                ttk.Label(self.choice_frame, text=T("场上没有别人"),
                           foreground="#a33").pack(side="left")
                 return
             box = ttk.Combobox(self.choice_frame, textvariable=self.choice_var,
@@ -262,9 +263,9 @@ class PowersPage(ttk.Frame):
             box.set(values[0])
         elif "exchange" in channels:
             self._choice_kind = "slot_level"
-            ttk.Label(self.choice_frame, text="环级：",
+            ttk.Label(self.choice_frame, text=T("环级："),
                       foreground=theme.DIM).pack(side="left")
-            values = ["%d 环" % level for level in range(1, 10)]
+            values = [T("%d 环") % level for level in range(1, 10)]
             box = ttk.Combobox(self.choice_frame, textvariable=self.choice_var,
                                state="readonly", width=8, values=values)
             box.pack(side="left")
@@ -276,12 +277,12 @@ class PowersPage(ttk.Frame):
         """变形形态选择行（荒野变形）。不可用的形态也列出来并写明原因 ——
         「为什么 8 级还不能变熊」比「列表里没有熊」有用得多。"""
         self._choice_kind = "form_id"
-        ttk.Label(self.choice_frame, text="形态：",
+        ttk.Label(self.choice_frame, text=T("形态："),
                   foreground=theme.DIM).pack(side="left")
         options = api.morph_forms(self.app.actor, self.app.bundle, self.app.locale)
         usable = options.get("usable") or []
         if not usable:
-            ttk.Label(self.choice_frame, text="当前等级还不能变形",
+            ttk.Label(self.choice_frame, text=T("当前等级还不能变形"),
                       foreground=theme.WARN).pack(side="left")
             self._choice_kind = ""
             return
@@ -316,25 +317,25 @@ class PowersPage(ttk.Frame):
             return False
         row = self._selected()
         if not row or not row.get("button"):
-            self._status("这是一项被动能力，不需要使用。", error=True)
+            self._status(T("这是一项被动能力，不需要使用。"), error=True)
             return False
         report = api.use_power(self.app.actor, self.app.bundle, row["id"],
                                locale=self.app.locale, choice=self._choice(),
                                encounter=self.app.encounter)
         if not report.get("ok"):
-            self.report.set_text(str(report.get("message") or "使用失败"))
-            self._status(str(report.get("message") or "使用失败"), error=True)
+            self.report.set_text(str(report.get("message") or T("使用失败")))
+            self._status(str(report.get("message") or T("使用失败")), error=True)
             self._fill_detail()
             return False
         self.report.set_text(_report_text(report))
-        self._status("已使用「%s」。" % row["name"])
+        self._status(T("已使用「%s」。") % row["name"])
         self.app.refresh()          # 资源与 HP 可能变了
         self._fill_detail()          # 刷新可用性（次数用掉后按钮该灰）
         return True
 
 
 def _join(values) -> str:
-    return "、".join(str(item) for item in values) if values else "—"
+    return join(str(item) for item in values) if values else "—"
 
 
 def _cr(value) -> str:
@@ -363,5 +364,5 @@ def _report_text(report: dict) -> str:
         if text:
             parts.append(str(text))
     if not parts:
-        parts.append("这次没有产生掷骰或状态变化。")
+        parts.append(T("这次没有产生掷骰或状态变化。"))
     return "\n".join(parts)

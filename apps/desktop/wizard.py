@@ -22,6 +22,7 @@ from tkinter import ttk
 
 import dnd5r.api as api
 
+from .i18n import Catalog, T, join
 from . import theme
 from .pages_spells import spell_text
 from .widgets import (ABILITY_ZH, MASTERY_ZH, KeyValue, ListPane, ScrollFrame,
@@ -38,13 +39,13 @@ SCORE_BOUNDS = {
 }
 
 # 属性框上那句说明。三种方式约束完全不同，不能共用一句话。
-SCORE_NOTES = {
+SCORE_NOTES = Catalog({
     "point_buy": "8–15 之间购买，16 以上只能由背景与专长提供；超支会当场标红。",
     "standard_array": "15/14/13/12/10/8 各用一次。选一个已经被别人拿走的数，"
                       "会和对方交换位置。",
     "roll": "4d6 弃最低，范围 3–18。想重掷就点「掷 4d6 弃最低」。",
     "edit": "范围 8–20。",
-}
+})
 
 
 def _clear(master) -> None:
@@ -63,7 +64,8 @@ class WizardView(ttk.Frame):
                  editing: bool = False, step: int = 0) -> None:
         super().__init__(master, padding=(6, 4))
         self.app = app
-        self.steps = api.WIZARD_STEPS
+        # 步骤标题是**接口层**给的文案（`wizard_steps` 按语言取），不是界面写死的
+        self.steps = api.wizard_steps(self.app.locale)
         self.index = max(0, min(len(self.steps) - 1, int(step)))
         self.editing = bool(editing)
         self.draft = api.empty_draft()
@@ -90,10 +92,10 @@ class WizardView(ttk.Frame):
         # 反过来写（取消 → 建卡 → 下一步 → 上一步）屏幕才是
         # 「← 上一步 | 下一步 → | 建卡 | 取消」。正着写会出现「下一步」在左、
         # 「上一步」在右 —— 手会按错。
-        for key, text, action in (("cancel", "取消", self.cancel),
-                                  ("finish", "建卡", self.finish),
-                                  ("next", "下一步 →", self.next_step),
-                                  ("back", "← 上一步", self.prev_step)):
+        for key, text, action in (("cancel", T("取消"), self.cancel),
+                                  ("finish", T("建卡"), self.finish),
+                                  ("next", T("下一步 →"), self.next_step),
+                                  ("back", T("← 上一步"), self.prev_step)):
             button = ttk.Button(nav, text=text, command=action, width=10)
             button.pack(side="right", padx=(6, 0))
             self.buttons[key] = button
@@ -150,7 +152,7 @@ class WizardView(ttk.Frame):
             first = blocking[0]
             target = api.STEP_INDEX.get(first["step"], 0)
             self.go(target)
-            self._set_status("还差这些：" + "；".join(item["text"] for item in blocking[:3]),
+            self._set_status(T("还差这些：") + "；".join(item["text"] for item in blocking[:3]),
                              warn=True)
             return
         try:
@@ -163,14 +165,14 @@ class WizardView(ttk.Frame):
                 actor = api.build_from_draft(self.app.bundle, self.draft,
                                              self.app.locale)
         except api.DndError as exc:
-            self._set_status("建卡失败：%s" % exc, warn=True)
+            self._set_status(T("建卡失败：%s") % exc, warn=True)
             return
         self.app.finish_wizard(actor, editing=self.editing)
 
     # --- 渲染 -------------------------------------------------------------
     def render(self) -> None:
         _clear(self.body)
-        self.progress_var.set("第 %d / %d 步 · %s"
+        self.progress_var.set(T("第 %d / %d 步 · %s")
                               % (self.index + 1, len(self.steps), self.current["title"]))
         for index, button in enumerate(self.step_buttons):
             # 用 style 而不是 state：灰掉当前步会让人以为「这步不能改」
@@ -178,7 +180,7 @@ class WizardView(ttk.Frame):
                              else "Mini.TButton")
         builder = getattr(self, "_step_%s" % self.current["key"], None)
         if builder is None:                       # 理论上不会发生，但不许静默白屏
-            ttk.Label(self.body, text="这一步还没做：%s" % self.current["key"]).pack()
+            ttk.Label(self.body, text=T("这一步还没做：%s") % self.current["key"]).pack()
         else:
             builder()
         self._refresh_nav()
@@ -212,7 +214,7 @@ class WizardView(ttk.Frame):
                                    self.app.locale)
         left = ttk.Frame(self.body)
         left.pack(side="left", fill="y", padx=(0, 8))
-        ttk.Label(left, text="职业").pack(anchor="w")
+        ttk.Label(left, text=T("职业")).pack(anchor="w")
         pane = ListPane(left, height=14, width=22)
         pane.pack(fill="both", expand=True)
         pane.fill([(row["id"], "%s（d%dd）" % (row["name"], row["hit_die"]))
@@ -221,7 +223,7 @@ class WizardView(ttk.Frame):
 
         right = ttk.Frame(self.body)
         right.pack(side="left", fill="both", expand=True)
-        detail = section(right, "职业详情")
+        detail = section(right, T("职业详情"))
         detail.pack(fill="x")
         self.class_detail = ttk.Label(detail, text="", style="Dim.TLabel",
                                       justify="left", wraplength=640)
@@ -229,13 +231,13 @@ class WizardView(ttk.Frame):
 
         row = ttk.Frame(right)
         row.pack(fill="x", pady=(8, 0))
-        ttk.Label(row, text="等级").pack(side="left")
+        ttk.Label(row, text=T("等级")).pack(side="left")
         self.level_var = tk.IntVar(value=int(self.draft.get("class_level") or 1))
         spin = ttk.Spinbox(row, from_=1, to=20, width=4, textvariable=self.level_var,
                            command=self._on_level)
         spin.pack(side="left", padx=(6, 16))
         self.level_var.trace_add("write", lambda *_: self._on_level())
-        ttk.Label(row, text="子职").pack(side="left")
+        ttk.Label(row, text=T("子职")).pack(side="left")
         self.subclass_var = tk.StringVar()
         # 下拉项对应的内容 id，**按位置对齐**（`_subclass_ids[i]` 是第 i+1 项）。
         # 先置空：没选职业时 `_fill_class_info` 会提前返回，此时的 `<<ComboboxSelected>>`
@@ -293,34 +295,34 @@ class WizardView(ttk.Frame):
         """刷新右侧详情、子职下拉、以及「等级变了 → 精通件数变了」的显示。"""
         class_id = str(self.draft.get("class_id") or "")
         if not class_id or class_id not in self.app.bundle.classes:
-            self.class_detail.configure(text="先选一个职业。")
+            self.class_detail.configure(text=T("先选一个职业。"))
             # 职业清空了，子职下拉也得跟着清 —— 留着上一个职业的子职，
             # 玩家会以为「这个职业也能选它」。
             self._subclass_ids = []
-            self.subclass_box.configure(values=["（暂无）"], state="disabled")
+            self.subclass_box.configure(values=[T("（暂无）")], state="disabled")
             self.subclass_box.current(0)
             return
         class_def = self.app.bundle.class_def(class_id)
         level = int(self.draft.get("class_level") or 1)
         marks = []
         if class_def.hit_die:
-            marks.append("生命骰 d%d" % class_def.hit_die)
+            marks.append(T("生命骰 d%d") % class_def.hit_die)
         if class_def.primary:
-            marks.append("主属性 " + "、".join(ABILITY_ZH.get(k, k.upper())
+            marks.append(T("主属性 ") + join(ABILITY_ZH.get(k, k.upper())
                                           for k in class_def.primary))
         if class_def.saves:
-            marks.append("豁免熟练 " + "、".join(ABILITY_ZH.get(k, k.upper())
+            marks.append(T("豁免熟练 ") + join(ABILITY_ZH.get(k, k.upper())
                                            for k in class_def.saves))
-        marks.append("技能 %d 项" % class_def.skill_choices)
+        marks.append(T("技能 %d 项") % class_def.skill_choices)
         if class_def.caster.value != "none":
-            marks.append("施法（%s）" % ABILITY_ZH.get(class_def.casting_ability, "?"))
+            marks.append(T("施法（%s）") % ABILITY_ZH.get(class_def.casting_ability, "?"))
         mastery = api.mastery_choices(self.app.bundle, class_id, level)
         if mastery["count"]:
-            marks.append("武器精通 %d 件" % mastery["count"])
+            marks.append(T("武器精通 %d 件") % mastery["count"])
         self.class_detail.configure(text="　·　".join(marks))
 
         info = api.subclass_choices(self.app.bundle, class_id, level, self.app.locale)
-        labels = ["（暂无）"] + [row["name"] for row in info["options"]]
+        labels = [T("（暂无）")] + [row["name"] for row in info["options"]]
         self._subclass_ids = [row["id"] for row in info["options"]]
         self.subclass_box.configure(values=labels, state="readonly")
         if not info["unlocked"]:
@@ -337,7 +339,7 @@ class WizardView(ttk.Frame):
                                    self.app.locale)
         left = ttk.Frame(self.body)
         left.pack(side="left", fill="y", padx=(0, 8))
-        ttk.Label(left, text="背景").pack(anchor="w")
+        ttk.Label(left, text=T("背景")).pack(anchor="w")
         pane = ListPane(left, height=16, width=22)
         pane.pack(fill="both", expand=True)
         pane.fill([(row["id"], row["name"]) for row in options["backgrounds"]])
@@ -387,19 +389,19 @@ class WizardView(ttk.Frame):
         ident = str(self.draft.get("background") or "")
         item = self.app.bundle.backgrounds.get(ident) if ident else None
         if item is None:
-            self.background_detail.configure(text="先选一个背景。")
+            self.background_detail.configure(text=T("先选一个背景。"))
             return
         rows = [item.summary.get(self.app.locale)]
-        rows.append("属性加值：" + "、".join(ABILITY_ZH.get(k, k.upper())
+        rows.append(T("属性加值：") + join(ABILITY_ZH.get(k, k.upper())
                                         for k in item.abilities))
         if item.origin_feat:
             feat = self.app.bundle.feats.get(item.origin_feat)
-            rows.append("起始专长：%s" % (feat.name.get(self.app.locale)
+            rows.append(T("起始专长：%s") % (feat.name.get(self.app.locale)
                                      if feat else item.origin_feat))
         if item.skills:
-            rows.append("技能熟练：" + "、".join(item.skills))
+            rows.append(T("技能熟练：") + join(item.skills))
         if item.tool_label is not None:
-            rows.append("工具：" + item.tool_label.get(self.app.locale))
+            rows.append(T("工具：") + item.tool_label.get(self.app.locale))
         self.background_detail.configure(text="\n".join(rows))
 
     # --- 第 3 步：物种 -----------------------------------------------------
@@ -408,7 +410,7 @@ class WizardView(ttk.Frame):
                                    self.app.locale)
         left = ttk.Frame(self.body)
         left.pack(side="left", fill="y", padx=(0, 8))
-        ttk.Label(left, text="物种").pack(anchor="w")
+        ttk.Label(left, text=T("物种")).pack(anchor="w")
         pane = ListPane(left, height=12, width=22)
         pane.pack(fill="both", expand=True)
         pane.fill([(row["id"], row["name"]) for row in options["species"]])
@@ -438,12 +440,12 @@ class WizardView(ttk.Frame):
         ident = str(self.draft.get("species") or "")
         item = self.app.bundle.species.get(ident) if ident else None
         if item is None:
-            self.species_detail.configure(text="先选一个物种。（2024 规则里物种不是必选）")
+            self.species_detail.configure(text=T("先选一个物种。（2024 规则里物种不是必选）"))
             return
-        size_zh = {"tiny": "微型", "small": "小型", "medium": "中型",
-                   "large": "大型"}
+        size_zh = {"tiny": T("微型"), "small": T("小型"), "medium": T("中型"),
+                   "large": T("大型")}
         rows = [item.summary.get(self.app.locale),
-                "体型 %s · 速度 %d 尺" % ("/".join(size_zh.get(s, s) for s in item.size),
+                T("体型 %s · 速度 %d 尺") % ("/".join(size_zh.get(s, s) for s in item.size),
                                      item.speed)]
         for power in item.powers:
             rows.append("\n【%s】%s" % (power.name.get(self.app.locale),
@@ -460,27 +462,29 @@ class WizardView(ttk.Frame):
         if self.editing:
             # 改卡：属性是已经存在的数（点买/数组/4d6 都可能，专长还抬过），
             # 再摆「生成方式」只会误导 —— 那三种方式算出来的值会覆盖他现在的卡。
-            box = section(top, "改的是卡上的原始属性",
-                          "这里填建卡时那一组数（不含专长与背景加值）。"
-                          "改完 HP 上限、熟练与攻击会重算，装备与当前 HP 不动。")
+            box = section(top, T("改的是卡上的原始属性"),
+                          T("这里填建卡时那一组数（不含专长与背景加值）。"
+                          "改完 HP 上限、熟练与攻击会重算，装备与当前 HP 不动。"))
             box.pack(fill="x")
             self.mode_var = tk.StringVar(value="edit")
         else:
-            box = section(top, "生成方式")
+            box = section(top, T("生成方式"))
             box.pack(side="left", fill="x")
             self.mode_var = tk.StringVar(value=str(self.draft.get("score_mode")
                                                    or "standard_array"))
+            # `mode_labels` 是**已按语言翻好**的那份；老接口只有 `mode_zh`（永远中文）
+            labels = options.get("mode_labels") or options["mode_zh"]
             for key in options["modes"]:
-                ttk.Radiobutton(box, text=options["mode_zh"].get(key, key),
+                ttk.Radiobutton(box, text=labels.get(key, key),
                                 value=key, variable=self.mode_var,
                                 command=self._on_mode).pack(anchor="w")
 
-            roll = section(top, "快捷")
+            roll = section(top, T("快捷"))
             roll.pack(side="left", fill="both", expand=True, padx=(8, 0))
-            ttk.Button(roll, text="标准数组", style="Mini.TButton",
+            ttk.Button(roll, text=T("标准数组"), style="Mini.TButton",
                        command=lambda: self._preset_scores("standard_array")
                        ).pack(anchor="w")
-            ttk.Button(roll, text="掷 4d6 弃最低", style="Mini.TButton",
+            ttk.Button(roll, text=T("掷 4d6 弃最低"), style="Mini.TButton",
                        command=lambda: self._preset_scores("roll")).pack(anchor="w")
         self.cost_var = tk.StringVar()
         if roll is not None:
@@ -489,7 +493,7 @@ class WizardView(ttk.Frame):
 
         # `section()` 内部已经 pack 了一个说明标签，直接往里 grid 会撞管理器。
         # 所以这里自己建区框，再把网格放进一个中间 Frame。
-        grid_box = ttk.LabelFrame(self.body, text="属性值", padding=(8, 4))
+        grid_box = ttk.LabelFrame(self.body, text=T("属性值"), padding=(8, 4))
         grid_box.pack(fill="x", pady=(8, 0))
         head = ttk.Frame(grid_box)
         head.pack(fill="x")
@@ -538,8 +542,8 @@ class WizardView(ttk.Frame):
             self.score_combos[key] = combo
         self._sync_score_widgets()
 
-        bonus = section(self.body, "背景加值",
-                        "从背景给的那几项属性里分：一项 +2 加一项 +1，或三项各 +1。")
+        bonus = section(self.body, T("背景加值"),
+                        T("从背景给的那几项属性里分：一项 +2 加一项 +1，或三项各 +1。"))
         bonus.pack(fill="x", pady=(8, 0))
         self.bonus_var = tk.StringVar()
         self.bonus_box = ttk.Combobox(bonus, textvariable=self.bonus_var,
@@ -594,9 +598,9 @@ class WizardView(ttk.Frame):
         self.draft["score_mode"] = mode
         scores = dict(self.draft.get("scores") or {})
         try:
-            problems = api.check_scores(mode, scores)
+            problems = api.check_scores(mode, scores, self.app.locale)
         except api.DndError:
-            problems = ["不认识的生成方式"]
+            problems = [T("不认识的生成方式")]
         if problems:
             # 当前这六个数在新方式下不合法（点买的 17 拿去当标准数组）。
             # **换一套合法的**，而不是留一堆非法值让人自己找 —— 换之前不会掉到
@@ -615,8 +619,9 @@ class WizardView(ttk.Frame):
         self._report()
         if problems:
             # 换数必须说出来：静默把 17 改成 12 会让玩家以为自己的输入丢了
-            self._set_status("「%s」下原来的属性不合法（%s），已换成一套合法的数值"
-                             % (api.SCORE_MODE_ZH.get(mode, mode), problems[0]),
+            self._set_status(T("「%s」下原来的属性不合法（%s），已换成一套合法的数值")
+                             % (api.score_mode_labels(self.app.locale).get(mode, mode),
+                                problems[0]),
                              warn=True)
 
     def _preset_for(self, mode: str) -> dict[str, int]:
@@ -761,7 +766,7 @@ class WizardView(ttk.Frame):
         self._bonus_labels = []
         for plan in plans:
             self._bonus_labels.append(
-                "、".join("%s %+d" % (ABILITY_ZH.get(k, k.upper()), v)
+                join("%s %+d" % (ABILITY_ZH.get(k, k.upper()), v)
                          for k, v in plan.items()))
         self.bonus_box.configure(values=self._bonus_labels)
         if not plans:
@@ -789,27 +794,27 @@ class WizardView(ttk.Frame):
         if mode == "point_buy":
             budget = api.score_presets()["budget"]
             try:
-                spent = api.score_cost(scores)
+                spent = api.score_cost(scores, self.app.locale)
             except api.DndError as exc:
                 self._set_points(str(exc), theme.WARN)
                 self.cost_var.set("")
                 return
             left = budget - spent
             if left > 0:
-                self._set_points("还剩 %d 点" % left, theme.GOLD2)
+                self._set_points(T("还剩 %d 点") % left, theme.GOLD2)
             elif left == 0:
-                self._set_points("刚好用完 %d 点" % budget, theme.OK)
+                self._set_points(T("刚好用完 %d 点") % budget, theme.OK)
             else:
-                self._set_points("超支 %d 点" % -left, theme.WARN)
-            self.cost_var.set("点买 %d 点：8–15 之间买，已花 %d" % (budget, spent))
+                self._set_points(T("超支 %d 点") % -left, theme.WARN)
+            self.cost_var.set(T("点买 %d 点：8–15 之间买，已花 %d") % (budget, spent))
             return
         if mode == "standard_array":
-            self._set_points("六项各一次", theme.DIM)
+            self._set_points(T("六项各一次"), theme.DIM)
         elif mode == "edit":
             # 备注里已经写了范围，这里不再重复一个「8–20」
             self._set_points("", theme.DIM)
         elif mode == "roll":
-            self._set_points("总和 %d" % sum(int(v) for v in scores.values()),
+            self._set_points(T("总和 %d") % sum(int(v) for v in scores.values()),
                              theme.DIM)
         final = dict(scores)
         for key, value in (self.draft.get("background_bonus") or {}).items():
@@ -817,7 +822,7 @@ class WizardView(ttk.Frame):
                 final[key] = min(20, final[key] + int(value))
         pairs = "　".join("%s %d" % (ABILITY_ZH.get(k, k.upper()), final.get(k, 0))
                           for k in scores)
-        self.cost_var.set("加值后：" + pairs if pairs else "")
+        self.cost_var.set(T("加值后：") + pairs if pairs else "")
 
     # --- 第 5 步：技能 -----------------------------------------------------
     def _step_skills(self) -> None:
@@ -825,7 +830,7 @@ class WizardView(ttk.Frame):
                                    self.app.locale)
         head = ttk.Frame(self.body)
         head.pack(fill="x")
-        ttk.Label(head, text="从本职业技能表里选 %d 项" % options["choices"],
+        ttk.Label(head, text=T("从本职业技能表里选 %d 项") % options["choices"],
                   font=(theme.UI_FONT, 11, "bold")).pack(side="left")
         self.skill_count_var = tk.StringVar()
         ttk.Label(head, textvariable=self.skill_count_var).pack(side="right")
@@ -838,7 +843,7 @@ class WizardView(ttk.Frame):
             var = tk.IntVar(value=1 if row["key"] in chosen else 0)
             text = "%s（%s）" % (row["name"], ABILITY_ZH.get(row["ability"], "?"))
             if row["provided"]:
-                text += "　— 背景已给"
+                text += T("　— 背景已给")
             check = ttk.Checkbutton(scroller.body, text=text, variable=var,
                                     command=self._on_skills)
             check.pack(anchor="w", pady=1)
@@ -860,7 +865,7 @@ class WizardView(ttk.Frame):
         class_id = str(self.draft.get("class_id") or "")
         if class_id in self.app.bundle.classes:
             need = int(self.app.bundle.class_def(class_id).skill_choices)
-        self.skill_count_var.set("已选 %d / %d" % (len(self.draft.get("skills") or []), need))
+        self.skill_count_var.set(T("已选 %d / %d") % (len(self.draft.get("skills") or []), need))
 
     # --- 第 6 步：武器精通 -------------------------------------------------
     def _step_masteries(self) -> None:
@@ -868,15 +873,15 @@ class WizardView(ttk.Frame):
                                    self.app.locale)
         head = ttk.Frame(self.body)
         head.pack(fill="x")
-        ttk.Label(head, text="选 %d 件武器的精通" % options["count"],
+        ttk.Label(head, text=T("选 %d 件武器的精通") % options["count"],
                   font=(theme.UI_FONT, 11, "bold")).pack(side="left")
-        ttk.Label(head, text="只记录、不结算：精通都要在命中后做选择",
+        ttk.Label(head, text=T("只记录、不结算：精通都要在命中后做选择"),
                   style="Dim.TLabel").pack(side="left", padx=(12, 0))
         self.mastery_count_var = tk.StringVar()
         ttk.Label(head, textvariable=self.mastery_count_var).pack(side="right")
 
         if not options["options"]:
-            ttk.Label(self.body, text="这个职业没有武器精通，这一步直接跳过。",
+            ttk.Label(self.body, text=T("这个职业没有武器精通，这一步直接跳过。"),
                       style="Dim.TLabel").pack(anchor="w", pady=12)
             self.mastery_count_var.set("")
             return
@@ -890,7 +895,7 @@ class WizardView(ttk.Frame):
             key = row["mastery"] or ""
             # 印中文名，别把 `graze`/`topple` 这种内部值直接摆给玩家
             mastery = MASTERY_ZH.get(key, key) if key else "—"
-            text = "%s　%s　精通:%s" % (row["name"], row["damage"], mastery)
+            text = T("%s　%s　精通:%s") % (row["name"], row["damage"], mastery)
             ttk.Checkbutton(scroller.body, text=text, variable=var,
                             command=self._on_masteries).pack(anchor="w", pady=1)
             var.trace_add("write", lambda *_: self._on_masteries(silent=True))
@@ -913,7 +918,7 @@ class WizardView(ttk.Frame):
             info = api.mastery_choices(self.app.bundle, class_id,
                                        int(self.draft.get("class_level") or 1))
             need = info["count"]
-        self.mastery_count_var.set("已选 %d / %d"
+        self.mastery_count_var.set(T("已选 %d / %d")
                                    % (len(self.draft.get("masteries") or []), need))
 
     # --- 第 7 步：法术 -----------------------------------------------------
@@ -923,19 +928,19 @@ class WizardView(ttk.Frame):
         class_id = str(self.draft.get("class_id") or "")
         self.spell_tips: list[Tooltip] = []      # 测试要能数；非施法职业就是空表
         if not options["caster"]:
-            ttk.Label(self.body, text="这个职业不施法，这一步直接跳过。",
+            ttk.Label(self.body, text=T("这个职业不施法，这一步直接跳过。"),
                       style="Dim.TLabel").pack(anchor="w", pady=12)
             return
 
         head = ttk.Frame(self.body)
         head.pack(fill="x")
-        ttk.Label(head, text="戏法 %d 个 · 准备法术 %d 个"
+        ttk.Label(head, text=T("戏法 %d 个 · 准备法术 %d 个")
                              % (options["cantrip_limit"], options["prepared_limit"]),
                   font=(theme.UI_FONT, 11, "bold")).pack(side="left")
         self.spell_count_var = tk.StringVar()
         ttk.Label(head, textvariable=self.spell_count_var).pack(side="right")
 
-        dim_hint = "把鼠标停在一个法术上，会弹出它的完整说明（施法/距离/成分/持续/正文）。"
+        dim_hint = T("把鼠标停在一个法术上，会弹出它的完整说明（施法/距离/成分/持续/正文）。")
         ttk.Label(self.body, text=dim_hint, style="Dim.TLabel").pack(anchor="w", pady=(2, 0))
         columns = ttk.Frame(self.body)
         columns.pack(fill="both", expand=True, pady=(6, 0))
@@ -949,7 +954,7 @@ class WizardView(ttk.Frame):
         chosen_cantrips = set((self.draft.get("cantrips") or {}).get(class_id) or ())
         chosen_prepared = set((self.draft.get("prepared") or {}).get(class_id) or ())
 
-        cantrip_box = section(left, "戏法")
+        cantrip_box = section(left, T("戏法"))
         cantrip_box.pack(fill="both", expand=True)
         scroller = ScrollFrame(cantrip_box, height=390)
         scroller.pack(fill="both", expand=True)
@@ -964,15 +969,15 @@ class WizardView(ttk.Frame):
             self.spell_tips.append(
                 Tooltip(check, lambda item=row: spell_text(item["detail"])))
 
-        prepared_box = section(right, "准备法术（按环）")
+        prepared_box = section(right, T("准备法术（按环）"))
         prepared_box.pack(fill="both", expand=True)
         scroller2 = ScrollFrame(prepared_box, height=390)
         scroller2.pack(fill="both", expand=True)
         for group in options["levels"]:
-            ttk.Label(scroller2.body, text="%d 环" % group["level"],
+            ttk.Label(scroller2.body, text=T("%d 环") % group["level"],
                       font=(theme.UI_FONT, 10, "bold")).pack(anchor="w", pady=(4, 0))
             for row in group["spells"]:
-                mark = "（专注）" if row["concentration"] else ""
+                mark = T("（专注）") if row["concentration"] else ""
                 var = tk.IntVar(value=1 if row["id"] in chosen_prepared else 0)
                 check = ttk.Checkbutton(scroller2.body, text=row["name"] + mark,
                                         variable=var, command=self._on_spells)
@@ -1000,20 +1005,36 @@ class WizardView(ttk.Frame):
             str(self.draft.get("class_id") or ""), ()))
         prepared = len((self.draft.get("prepared") or {}).get(
             str(self.draft.get("class_id") or ""), ()))
-        self.spell_count_var.set("戏法 %d · 法术 %d" % (cantrips, prepared))
+        self.spell_count_var.set(T("戏法 %d · 法术 %d") % (cantrips, prepared))
 
     # --- 第 8 步：汇总 -----------------------------------------------------
+    def _name_keys(self) -> tuple[str, str]:
+        """(主输入框写的键, 副输入框写的键)。主键 = 当前界面语言那个。"""
+        if self.app.locale == "en":
+            return "name_en", "name_zh"
+        return "name_zh", "name_en"
+
+    def _name_label(self, key: str) -> str:
+        if key == "name_en":
+            return T("英文名") if self.app.locale == "zh" else T("名字")
+        return T("名字") if self.app.locale == "zh" else T("中文名")
+
     def _step_summary(self) -> None:
         top = ttk.Frame(self.body)
         top.pack(fill="x")
-        name_box = section(top, "名字")
+        # 两个名字框各自写 `name_<语言>`。**主输入框跟着界面语言走**：英文界面
+        # 里把「Name」写进 name_zh，角色卡（按 en 取名字）会显示 "Unnamed
+        # Adventurer" —— 玩家填了名字，卡上却没有（实测踩到）。
+        primary, secondary = self._name_keys()
+        name_box = section(top, self._name_label(primary))
         name_box.pack(side="left", fill="x")
-        self.name_var = tk.StringVar(value=str(self.draft.get("name_zh") or ""))
+        self.name_var = tk.StringVar(value=str(self.draft.get(primary) or ""))
         ttk.Entry(name_box, textvariable=self.name_var, width=24).pack(side="left")
         self.name_var.trace_add("write", lambda *_: self._on_name())
-        en_box = section(top, "英文名", "只用于双语内容回退，可以留空。")
+        en_box = section(top, self._name_label(secondary),
+                         T("只用于双语内容回退，可以留空。"))
         en_box.pack(side="left", fill="x", padx=(8, 0))
-        self.name_en_var = tk.StringVar(value=str(self.draft.get("name_en") or ""))
+        self.name_en_var = tk.StringVar(value=str(self.draft.get(secondary) or ""))
         ttk.Entry(en_box, textvariable=self.name_en_var, width=24).pack(side="left")
         self.name_en_var.trace_add("write", lambda *_: self._on_name_en())
 
@@ -1022,7 +1043,7 @@ class WizardView(ttk.Frame):
         if not self.editing:
             self._build_starting()
 
-        table = section(self.body, "确认一下")
+        table = section(self.body, T("确认一下"))
         table.pack(fill="both", expand=True, pady=(8, 0))
         # 10 行正好是 `_fill_summary()` 铺的条数。多给几行只会多出 3 条空白，
         # 白占高度（这个窗口的高度预算是按像素算的）。
@@ -1046,8 +1067,8 @@ class WizardView(ttk.Frame):
         if current not in ids:
             current = ids[0]
         self.draft["starting_pack"] = current
-        box = section(self.body, "起始装备",
-                      "建卡时直接穿在身上、放进背包的那一组。之后可以在装备页改。")
+        box = section(self.body, T("起始装备"),
+                      T("建卡时直接穿在身上、放进背包的那一组。之后可以在装备页改。"))
         box.pack(fill="x", pady=(8, 0))
         self.starting_var = tk.StringVar(value=current)
         for row in options:
@@ -1069,7 +1090,7 @@ class WizardView(ttk.Frame):
         if row is None:
             return "—"
         # 只列前 3 件：这一栏是 label + value 两列，长了自己会把表格撑宽
-        names = "、".join(
+        names = join(
             "%s×%d" % (item["name"], item["count"]) if item["count"] > 1 else item["name"]
             for item in row["items"][:3])
         if len(row["items"]) > 3:
@@ -1082,10 +1103,10 @@ class WizardView(ttk.Frame):
         return text
 
     def _on_name(self) -> None:
-        self.draft["name_zh"] = self.name_var.get()
+        self.draft[self._name_keys()[0]] = self.name_var.get()
 
     def _on_name_en(self) -> None:
-        self.draft["name_en"] = self.name_en_var.get()
+        self.draft[self._name_keys()[1]] = self.name_en_var.get()
 
     def _fill_summary(self) -> None:
         bundle = self.app.bundle
@@ -1096,24 +1117,24 @@ class WizardView(ttk.Frame):
         species = bundle.species.get(str(draft.get("species") or ""))
         background = bundle.backgrounds.get(str(draft.get("background") or ""))
         rows = [
-            ("职业", "%s %d 级" % (class_def.name.get(locale) if class_def else "—",
+            (T("职业"), T("%s %d 级") % (class_def.name.get(locale) if class_def else "—",
                                   int(draft.get("class_level") or 0))),
-            ("子职", sub.name.get(locale) if sub else "—"),
-            ("物种", species.name.get(locale) if species else "—"),
-            ("背景", background.name.get(locale) if background else "—"),
+            (T("子职"), sub.name.get(locale) if sub else "—"),
+            (T("物种"), species.name.get(locale) if species else "—"),
+            (T("背景"), background.name.get(locale) if background else "—"),
         ]
         scores = draft.get("scores") or {}
         bonus = draft.get("background_bonus") or {}
         final = {key: int(value) + int(bonus.get(key, 0)) for key, value in scores.items()}
-        rows.append(("属性", "　".join("%s %d" % (ABILITY_ZH.get(k, k.upper()), v)
+        rows.append((T("属性"), "　".join("%s %d" % (ABILITY_ZH.get(k, k.upper()), v)
                                     for k, v in final.items())))
-        rows.append(("技能", "、".join(draft.get("skills") or ()) or "—"))
-        rows.append(("精通", "%d 件" % len(draft.get("masteries") or ())))
+        rows.append((T("技能"), join(draft.get("skills") or ()) or "—"))
+        rows.append((T("精通"), T("%d 件") % len(draft.get("masteries") or ())))
         class_id = str(draft.get("class_id") or "")
-        rows.append(("戏法", str(len((draft.get("cantrips") or {}).get(class_id, ())))))
-        rows.append(("法术", str(len((draft.get("prepared") or {}).get(class_id, ())))))
+        rows.append((T("戏法"), str(len((draft.get("cantrips") or {}).get(class_id, ())))))
+        rows.append((T("法术"), str(len((draft.get("prepared") or {}).get(class_id, ())))))
         if not self.editing:
-            rows.append(("起始装备", self._starting_text()))
+            rows.append((T("起始装备"), self._starting_text()))
         self.summary.clear()
         for index, (caption, value) in enumerate(rows):
             self.summary.set_row(index, caption, value)

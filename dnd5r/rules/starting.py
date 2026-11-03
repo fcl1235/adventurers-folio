@@ -22,11 +22,13 @@ from ..content import ContentBundle
 from ..content.packages import StartingPack
 from ..kernel.errors import PluginError, RuleError
 from ..model.inventory import EquipSlot, Inventory
+from .text import tr
 
 # 自动装备时「先看哪一类」的顺序，与返回里的展示顺序一致
 SLOT_ORDER = (EquipSlot.ARMOR, EquipSlot.SHIELD,
               EquipSlot.MAIN_HAND, EquipSlot.OFF_HAND)
 
+# i18n-keep: 与 `api/loadout.py` 的 SLOT_ZH 同一批，换装模块还没翻，两边一起改。
 SLOT_ZH = {
     EquipSlot.ARMOR: "护甲",
     EquipSlot.SHIELD: "盾牌",
@@ -101,7 +103,7 @@ def _pick_weapons(bundle: ContentBundle, item_ids) -> list[str]:
 
 
 def resolve_pack(bundle: ContentBundle, class_id: str,
-                 pack_id: str | None) -> StartingPack | None:
+                 pack_id: str | None, locale: str = "zh") -> StartingPack | None:
     """按 id 取包；`None`/空串表示「这职业的默认那一组」（A 包）。
 
     找不到就报错，**不退回默认** —— 存盘里写了一个不存在的包 id，静默换成 A 包
@@ -115,19 +117,19 @@ def resolve_pack(bundle: ContentBundle, class_id: str,
     for pack in packs:
         if pack.id == pack_id:
             if pack.class_id != class_id:
-                raise RuleError("%s 不是 %s 的起始装备" % (pack_id, class_id))
+                raise RuleError(tr("%s 不是 %s 的起始装备", locale) % (pack_id, class_id))
             return pack
-    raise RuleError("没有这组起始装备：%s（%s 有 %s）"
+    raise RuleError(tr("没有这组起始装备：%s（%s 有 %s）", locale)
                     % (pack_id, class_id, "、".join(pack.id for pack in packs)))
 
 
 def apply_starting_pack(bundle: ContentBundle, inventory: Inventory,
-                        pack: StartingPack) -> StartingResult:
+                        pack: StartingPack, locale: str = "zh") -> StartingResult:
     """把一组起始装备放进 `inventory`（就地修改），返回穿上了什么。"""
     known = set(bundle.weapons) | set(bundle.armors) | set(bundle.gears)
     for item_id, count in pack.items:
         if item_id not in known:
-            raise PluginError("%s 里的 %s 不是已知物品" % (pack.id, item_id))
+            raise PluginError(tr("%s 里的 %s 不是已知物品", locale) % (pack.id, item_id))
         inventory.add(item_id, count)
     inventory.coins_gp += int(pack.gold)
 

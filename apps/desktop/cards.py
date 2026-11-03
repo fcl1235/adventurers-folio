@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from tkinter import ttk
 
+from .i18n import T
 from . import theme
 
 
@@ -73,11 +74,11 @@ class AbilityCard(ttk.Frame):
         # 让按钮看起来能点却没反应是最差的体验。
         buttons = ttk.Frame(self, style="Card.TFrame")
         buttons.pack(fill="x", pady=(3, 0))
-        self.check_button = ttk.Button(buttons, text="检",
+        self.check_button = ttk.Button(buttons, text=T("检"),
                                        style="Mini.TButton", width=3,
                                        command=self._on_check, state="disabled")
         self.check_button.pack(side="left", expand=True, fill="x")
-        self.save_button = ttk.Button(buttons, text="豁",
+        self.save_button = ttk.Button(buttons, text=T("豁"),
                                       style="Mini.TButton", width=3,
                                       command=self._on_save, state="disabled")
         self.save_button.pack(side="left", expand=True, fill="x", padx=(3, 0))
@@ -104,9 +105,9 @@ class AbilityCard(ttk.Frame):
     def set_values(self, *, mod: int, score: int, save: int,
                    proficient: bool = False) -> None:
         self._mod.configure(text="%+d" % mod, foreground=theme.GOLD2)
-        self._score.configure(text="数值 %d" % score)
+        self._score.configure(text=T("数值 %d") % score)
         # 熟练豁免用紫色标出来 —— 与技能表的「熟练」同一套视觉语言
-        self._save.configure(text="豁免 %+d" % save,
+        self._save.configure(text=T("豁免 %+d") % save,
                              foreground=theme.PURPLE if proficient else theme.DIM)
 
     def mod_text(self) -> str:

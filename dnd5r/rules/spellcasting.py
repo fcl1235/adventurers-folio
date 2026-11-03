@@ -22,6 +22,7 @@ from ..model.actor import Actor
 from ..model.levels import ClassLevel
 from ..rules.resolver import Resolver
 from .summon import slot_curve
+from .text import join_list, tr
 
 if TYPE_CHECKING:               # 只在注解里用到，见下方说明
     from ..content import ClassDef, ContentBundle, SpellDef
@@ -38,10 +39,10 @@ if TYPE_CHECKING:               # 只在注解里用到，见下方说明
 SLOT_PREFIX = "engine.slot."
 
 
-def casting_ability(class_def: ClassDef) -> str:
+def casting_ability(class_def: ClassDef, locale: str = "zh") -> str:
     """这个职业用哪个属性施法。数据里没写就是内容错误，不猜 int。"""
     if not class_def.casting_ability:
-        raise RuleError("职业 %s 没有声明 casting_ability" % class_def.id)
+        raise RuleError(tr("职业 %s 没有声明 casting_ability", locale) % class_def.id)
     return class_def.casting_ability
 
 
@@ -82,6 +83,7 @@ def spell_gaps(
     class_level: ClassLevel,
     cantrips: Sequence[str] = (),
     prepared: Sequence[str] = (),
+    locale: str = "zh",
 ) -> list[str]:
     """**还差几个**：`["戏法 0/3", "法术 2/5"]`。选满或非施法职业返回空。
 
@@ -94,8 +96,8 @@ def spell_gaps(
         return []
     gaps = []
     for label, want, have in (
-        ("戏法", max_cantrips(class_def, class_level), len(set(cantrips))),
-        ("法术", max_prepared(class_def, class_level), len(set(prepared))),
+        (tr("戏法", locale), max_cantrips(class_def, class_level), len(set(cantrips))),
+        (tr("法术", locale), max_prepared(class_def, class_level), len(set(prepared))),
     ):
         if have < want:
             gaps.append("%s %d/%d" % (label, have, want))
@@ -215,11 +217,13 @@ def spend_slot(actor: Actor, slot_level: int, class_id: str = ""):
     # 第一个池空了直接报错会让人花不出去创造的位（P13 抓到）。
     same_level = [pool for level, pool in pools if level == index]
     if not same_level:
+        # i18n-keep: 深层规则拿不到 locale（调用链 combat/powers/exchange 都没有）
         raise IllegalAction("没有 %d 环法术位" % index)
     for pool in same_level:
         if pool.can_spend(1):
             pool.spend(1)
             return pool
+    # i18n-keep: 同上，见本函数开头那条
     raise IllegalAction("没有可用的 %d 环法术位（已用光）" % index)
 
 
@@ -253,52 +257,52 @@ def check_spell_picks(
     """
     problems: list[str] = []
     tables = (
-        ("戏法", cantrips or {}, True),
-        ("准备法术", prepared or {}, False),
+        (tr("戏法", locale), cantrips or {}, True),
+        (tr("准备法术", locale), prepared or {}, False),
     )
     for label, picks, is_cantrip in tables:
         for class_id, spell_ids in picks.items():
             class_level = classes.get(class_id)
             if class_level is None:
-                problems.append("%s 里的职业 %s 不在角色档案中" % (label, class_id))
+                problems.append(tr("%s 里的职业 %s 不在角色档案中", locale) % (label, class_id))
                 continue
             class_def = bundle.classes.get(class_id)
             if class_def is None:
-                problems.append("内容里没有职业 %s" % class_id)
+                problems.append(tr("内容里没有职业 %s", locale) % class_id)
                 continue
             if not class_def.casting_ability:
-                problems.append("%s（%s）不是施法职业，不该有%s"
+                problems.append(tr("%s（%s）不是施法职业，不该有%s", locale)
                                 % (class_def.name.get(locale), class_id, label))
                 continue
             items = list(spell_ids)
             if len(set(items)) != len(items):
                 duplicates = sorted({item for item in items if items.count(item) > 1})
-                problems.append("%s里有重复法术：%s" % (label, "、".join(duplicates)))
+                problems.append(tr("%s里有重复法术：%s", locale) % (label, join_list(duplicates, locale)))
                 continue
             quota = (max_cantrips(class_def, class_level) if is_cantrip
                      else max_prepared(class_def, class_level))
             if len(items) > quota:
-                problems.append("%s超出上限：选了 %d 个，上限 %d"
+                problems.append(tr("%s超出上限：选了 %d 个，上限 %d", locale)
                                 % (label, len(items), quota))
             allowed = set(bundle.spell_list(class_id))
             top = highest_slot_table(class_def, class_level)
             for spell_id in items:
                 spell = _spell_of(bundle, spell_id)
                 if spell is None:
-                    problems.append("%s里的 %s 不存在" % (label, spell_id))
+                    problems.append(tr("%s里的 %s 不存在", locale) % (label, spell_id))
                     continue
                 if spell.id not in allowed:
-                    problems.append("%s不在 %s 的法术表里" % (spell.name.get(locale),
+                    problems.append(tr("%s不在 %s 的法术表里", locale) % (spell.name.get(locale),
                                                          class_def.name.get(locale)))
                     continue
                 if is_cantrip and int(spell.level) != 0:
-                    problems.append("%s 不是戏法（%d 环），不能放进已知戏法"
+                    problems.append(tr("%s 不是戏法（%d 环），不能放进已知戏法", locale)
                                     % (spell.name.get(locale), int(spell.level)))
                 elif not is_cantrip:
                     if int(spell.level) == 0:
-                        problems.append("%s 是戏法，不能准备" % spell.name.get(locale))
+                        problems.append(tr("%s 是戏法，不能准备", locale) % spell.name.get(locale))
                     elif int(spell.level) > top:
-                        problems.append("%s 是 %d 环，当前最高只有 %d 环"
+                        problems.append(tr("%s 是 %d 环，当前最高只有 %d 环", locale)
                                         % (spell.name.get(locale), int(spell.level), top))
     return problems
 
@@ -313,7 +317,7 @@ def casting_summary(
 ) -> dict:
     """给界面用的一块数据：DC、攻击加值、法位、上限、可选法术、已选了什么。"""
     class_def = bundle.class_def(class_id)
-    ability = casting_ability(class_def)
+    ability = casting_ability(class_def, locale)
     dc = spell_dc(resolver, actor, ability)
     attack = spell_attack_bonus(resolver, actor, ability)
     spells = spell_options(bundle, actor, class_id, class_level)

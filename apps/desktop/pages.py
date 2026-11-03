@@ -10,6 +10,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
+from .i18n import T, join
 from . import theme
 from .cards import AbilityCard
 from .dice import DiceLog
@@ -31,9 +32,9 @@ def _mode_mark(row: dict) -> str:
     """优势/劣势的短标记。页面只负责显示，判断来自 sheet 的 `mode`。"""
     mode = row.get("mode")
     if mode == "adv":
-        return "（优势）"
+        return T("（优势）")
     if mode == "dis":
-        return "（劣势）"
+        return T("（劣势）")
     return ""
 
 
@@ -67,7 +68,7 @@ class OverviewPage(ttk.Frame):
         # 宽度靠 `grid columnconfigure(minsize=148, weight=1)` 撑 —— `ttk.Frame(width=)`
         # **不约束 reqsize**（实测概览常量合计 1176，页面 req 只有 793），
         # 写 width= 是撑不出 320 的。
-        box = section(left, "属性")
+        box = section(left, T("属性"))
         box.pack(fill="x")
         grid = ttk.Frame(box)
         grid.pack(fill="x")
@@ -92,7 +93,7 @@ class OverviewPage(ttk.Frame):
         # 收起时只占一行按钮。**改的是原始属性**（`Profile.base_scores`）：
         # 卡面上显示的分数里混着专长与子职加值，从来回倒推减不掉那些加值，
         # 所以界面必须把「建卡时填的那个数」原样拿来做输入框的初值。
-        self.edit_toggle = ttk.Button(box, text="编辑属性", style="Mini.TButton",
+        self.edit_toggle = ttk.Button(box, text=T("编辑属性"), style="Mini.TButton",
                                       width=8, command=self.toggle_edit)
         self.edit_toggle.pack(anchor="e", pady=(2, 0))
         self.edit_row = ttk.Frame(box)
@@ -107,10 +108,10 @@ class OverviewPage(ttk.Frame):
             self.score_vars[key] = var
         buttons = ttk.Frame(self.edit_row)
         buttons.grid(row=2, column=0, columnspan=3, sticky="e", pady=(2, 0))
-        self.apply_scores_button = ttk.Button(buttons, text="应用", style="Mini.TButton",
+        self.apply_scores_button = ttk.Button(buttons, text=T("应用"), style="Mini.TButton",
                                               width=5, command=self._apply_scores)
         self.apply_scores_button.pack(side="left")
-        ttk.Button(buttons, text="取消", style="Mini.TButton", width=5,
+        ttk.Button(buttons, text=T("取消"), style="Mini.TButton", width=5,
                    command=lambda: self.toggle_edit(False)).pack(side="left", padx=(4, 0))
         self.base_scores: dict[str, int] = {}
         self._build_error = ttk.Label(box, text="", style="Dim.TLabel",
@@ -122,7 +123,7 @@ class OverviewPage(ttk.Frame):
         # `api.roll_check(kind="tool")` 任意指定都行。一行文本还不会随熟练数长高。
         # 打包顺序：先把底部这块 `side="bottom"` 钉住，再让技能吃掉剩余空间。
         self.tools_var = tk.StringVar(value="")
-        tools = section(mid, "熟练与精通", "工具熟练 / 武器精通（精通效果未结算）")
+        tools = section(mid, T("熟练与精通"), T("工具熟练 / 武器精通（精通效果未结算）"))
         tools.pack(side="bottom", fill="x", pady=(6, 0))
         self.tools_label = ttk.Label(tools, textvariable=self.tools_var,
                                      wraplength=400, justify="left")
@@ -137,7 +138,7 @@ class OverviewPage(ttk.Frame):
                                        justify="left")
         self.mastery_label.pack(anchor="w", pady=(2, 0))
 
-        skills = section(mid, "技能", "熟练加熟练加值，专精再加一份；明细在右侧说明栏")
+        skills = section(mid, T("技能"), T("熟练加熟练加值，专精再加一份；明细在右侧说明栏"))
         skills.pack(fill="both", expand=True)
         self.skills = RollGrid(skills, SKILL_COLUMNS, rows=18,
                                on_roll=lambda key: self._roll("skill", key))
@@ -150,19 +151,19 @@ class OverviewPage(ttk.Frame):
         # 这里**不用 ScrollFrame**：以前右栏是 Canvas 里嵌一个 1121px 的 Frame
         # 塞进 402px 的视口，滚动时旧位置不擦，整块内容重影（「倒地」两遍）。
         # 状态面板搬去「状态」页之后，剩下的两块定高就够，不需要滚动。
-        dice = section(right, "掷骰记录")
+        dice = section(right, T("掷骰记录"))
         dice.pack(side="bottom", fill="x", pady=(4, 0))
         self.dice_log = DiceLog(dice, height=5, width=30)
         self.dice_log.pack(fill="both", expand=True)
 
         body = right
-        fight = section(body, "战斗")
+        fight = section(body, T("战斗"))
         fight.pack(fill="x")
         # 抗性/感官以前全仓库零显示点（§P6 方案里点名过的缺口），一并补在这里
         self.fight = KeyValue(fight, rows=10)
         self.fight.pack(fill="x", pady=(0, 6))
 
-        attacks = section(body, "攻击")
+        attacks = section(body, T("攻击"))
         attacks.pack(fill="x", pady=(6, 0))
         self.attacks = GridTable(attacks, ATTACK_COLUMNS, rows=8)
         self.attacks.pack(fill="x")
@@ -180,11 +181,11 @@ class OverviewPage(ttk.Frame):
             self._load_scores()
             if not expanded:
                 self.edit_row.pack(fill="x", pady=(4, 0))
-            self.edit_toggle.configure(text="收起")
+            self.edit_toggle.configure(text=T("收起"))
         else:
             if expanded:
                 self.edit_row.pack_forget()
-            self.edit_toggle.configure(text="编辑属性")
+            self.edit_toggle.configure(text=T("编辑属性"))
             self._set_edit_error("")
 
     def _load_scores(self) -> None:
@@ -202,7 +203,7 @@ class OverviewPage(ttk.Frame):
             try:
                 scores[key] = int(var.get())
             except (tk.TclError, ValueError):
-                self._set_edit_error("「%s」不是整数" % ABILITY_ZH[key])
+                self._set_edit_error(T("「%s」不是整数") % ABILITY_ZH[key])
                 return
         if self._on_action is None:
             return
@@ -251,7 +252,7 @@ class OverviewPage(ttk.Frame):
     def refresh_skills(self, sheet: dict) -> None:
         rows = []
         for row in sheet.get("skills") or []:
-            mark = "专精" if row.get("expertise") else ("熟练" if row.get("proficient") else "")
+            mark = T("专精") if row.get("expertise") else (T("熟练") if row.get("proficient") else "")
             tag = "expert" if row.get("expertise") else ("prof" if row.get("proficient") else "")
             rows.append(((row["name"], row["ability"].upper(),
                           _signed(row["total"]), mark, row["detail"]), tag,
@@ -262,10 +263,10 @@ class OverviewPage(ttk.Frame):
         """只列熟练的工具，一行折行文本 —— 不随熟练数长高，版面才稳。"""
         known = [row for row in (sheet.get("tools") or []) if row.get("proficient")]
         if not known:
-            self.tools_var.set("尚无工具熟练（%d 件工具仍可掷，指定属性即可）"
+            self.tools_var.set(T("尚无工具熟练（%d 件工具仍可掷，指定属性即可）")
                                % len(sheet.get("tools") or ()))
             return
-        self.tools_var.set("、".join("%s %s" % (row["name"], _signed(row["total"]))
+        self.tools_var.set(join("%s %s" % (row["name"], _signed(row["total"]))
                                      for row in known))
 
     def refresh_masteries(self, sheet: dict) -> None:
@@ -279,8 +280,8 @@ class OverviewPage(ttk.Frame):
         if not rows:
             self.mastery_var.set("")
             return
-        self.mastery_var.set("武器精通：%s（效果未结算）"
-                             % "、".join(row["name"] for row in rows))
+        self.mastery_var.set(T("武器精通：%s（效果未结算）")
+                             % join(row["name"] for row in rows))
 
     def refresh_fight(self, sheet: dict) -> None:
         """0–7 行的**语义冻结**（测试按索引读，别挪）：AC/先攻/HP/速度/熟练/抗性/感官/暴击。
@@ -293,26 +294,26 @@ class OverviewPage(ttk.Frame):
         init = sheet.get("initiative") or {}
         self.fight.clear()
         self.fight.set_row(0, "AC", str((sheet.get("ac") or {}).get("total", 0)))
-        self.fight.set_row(1, "先攻", _signed(init.get("total", 0)) + _mode_mark(init))
+        self.fight.set_row(1, T("先攻"), _signed(init.get("total", 0)) + _mode_mark(init))
         self.fight.set_row(2, "HP", "%s/%s" % (hp.get("current", 0), hp.get("maximum", 0)))
-        self.fight.set_row(3, "速度", "%d 尺" % speed)
-        self.fight.set_row(4, "熟练", _signed(sheet.get("proficiency_bonus", 0)))
+        self.fight.set_row(3, T("速度"), T("%d 尺") % speed)
+        self.fight.set_row(4, T("熟练"), _signed(sheet.get("proficiency_bonus", 0)))
         resist = sheet.get("resistances") or []
-        self.fight.set_row(5, "抗性", "、".join(resist) if resist else "—")
-        self.fight.set_row(6, "感官", sense_text(sheet.get("senses") or {}) or "—")
-        self.fight.set_row(7, "暴击", "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)))
+        self.fight.set_row(5, T("抗性"), join(resist) if resist else "—")
+        self.fight.set_row(6, T("感官"), sense_text(sheet.get("senses") or {}) or "—")
+        self.fight.set_row(7, T("暴击"), "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)))
         dice = hit_dice_text(hp.get("hit_dice"), sheet.get("classes")) or "—"
-        self.fight.set_row(8, "生命骰", "%s · 攻击 %s"
+        self.fight.set_row(8, T("生命骰"), T("%s · 攻击 %s")
                            % (dice, sheet.get("attacks_per_action", "—")))
         # 9 = 力竭。**这里必须写清它是真扣了的**，与状态页「只记录」相反。
         exh = sheet.get("exhaustion") or {}
         level = int(exh.get("level", 0))
         if level:
-            self.fight.set_row(9, "力竭", "%d 级（d20 %+d · 速度 %+d 尺）"
+            self.fight.set_row(9, T("力竭"), T("%d 级（d20 %+d · 速度 %+d 尺）")
                                % (level, int(exh.get("penalty", 0)),
                                   int(exh.get("speed", 0))))
         else:
-            self.fight.set_row(9, "力竭", "无")
+            self.fight.set_row(9, T("力竭"), T("无"))
 
     def refresh_attacks(self, sheet: dict) -> None:
         rows = []

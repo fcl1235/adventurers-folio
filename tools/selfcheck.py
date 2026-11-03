@@ -6,6 +6,9 @@
   3. 插件与内容校验（清单、id、双语 C7、术语）
   4. 黄金对账（新旧内核 AC/HP/攻击/豁免）
   5. 桌面布局（reqsize 口径，窗口全程不显示）
+  6. 布局 · 英文（同样的检查跑一遍英文界面）
+  7. 界面文案（中文有没有全接进 T()）
+  8. 接口层文案（规则算出来的句子有没有接进 tr()）
 """
 
 from __future__ import annotations
@@ -23,6 +26,11 @@ STEPS = [
     ("插件内容", [PY, "-m", "tools.plugins_cli", "check", "--root", "plugins", "--terms"]),
     ("黄金对账", [PY, "tools/golden.py"]),
     ("桌面布局", [PY, "tools/uicheck.py"]),
+    # 英文不是中文的等长替身：同一套检查要在英文界面再跑一遍，
+    # 否则「中文塞得下」会被当成「布局没问题」。
+    ("布局·英文", [PY, "tools/uicheck.py", "--lang", "en"]),
+    ("界面文案", [PY, "tools/i18n_audit.py"]),
+    ("接口层文案", [PY, "tools/i18n_audit.py", "--api"]),
 ]
 
 

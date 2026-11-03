@@ -25,6 +25,7 @@ from . import theme
 from .cards import Chip
 from .conditions import name_of
 from .dice import format_roll
+from .i18n import LOCALE_SHORT, T, get_locale, join, set_locale, system_locale
 from .pages import OverviewPage
 from .pages_encounter import EncounterPage
 from .pages_feats import FeatPage
@@ -48,18 +49,34 @@ SAVE_DIR = Path("saves")
 # （内容一变按钮就消失），要么得复制一套 _fit 逻辑。
 MODE_SHEET = "sheet"
 MODE_WIZARD = "wizard"
+# 界面偏好（目前只有语言）。和角色档放一起，跟着存档目录走。
+SETTINGS_NAME = "_settings.json"
+
+
+def _read_settings(save_dir: Path) -> dict:
+    try:
+        return json.loads((Path(save_dir) / SETTINGS_NAME).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
 
 
 class DesktopApp(tk.Tk):
-    def __init__(self, bundle, actor, *, locale: str = "zh", selftest: bool = False,
+    def __init__(self, bundle, actor, *, locale: str | None = None, selftest: bool = False,
                  save_dir=None) -> None:
         super().__init__()
         self.bundle = bundle
         self.actor = actor
-        self.locale = locale
         self.selftest = selftest
         self.sheet: dict = {}
         self.save_dir = Path(save_dir) if save_dir else SAVE_DIR
+        # 语言优先级：显式传参 → 上次选过的 → 系统界面语言。
+        # **selftest 一律中文**：探针不许因为「这台机器上次点过 English」而变绿变红。
+        if locale is None:
+            if not selftest:
+                locale = _read_settings(self.save_dir).get("locale")
+            locale = locale or ("zh" if selftest else system_locale())
+        set_locale(locale)
+        self.locale = get_locale()
         self.current_path: Path | None = None
         # 遭遇战是 app 级状态（P15）：战斗页创建/销毁它，能力页（授予目标）
         # 与法术页（召唤入場）都要读同一份 —— 挂在页私有属性上别的页够不着。
@@ -68,7 +85,7 @@ class DesktopApp(tk.Tk):
         self.mode = MODE_SHEET
         self.wizard = None
 
-        self.title("冒险者手帖 · 5R 角色卡")
+        self.title(T("冒险者手帖 · 5R 角色卡"))
         # 主题必须在建控件**之前**套上：ttk 样式是「建的时候就查」的，
         # 先建再改样式，已经建好的控件有一部分不会跟着变（Text/Listbox 更不会）。
         theme.apply_theme(self)
@@ -110,21 +127,21 @@ class DesktopApp(tk.Tk):
 
         self.overview = OverviewPage(self.book, on_roll=self.roll_check,
                                      on_action=self.on_state_action)
-        self.book.add(self.overview, text="概览")
+        self.book.add(self.overview, text=T("概览"))
         self.gear = GearPage(self.book, self)
-        self.book.add(self.gear, text="装备")
+        self.book.add(self.gear, text=T("装备"))
         self.spells = SpellPage(self.book, self)
-        self.book.add(self.spells, text="法术")
+        self.book.add(self.spells, text=T("法术"))
         self.feats = FeatPage(self.book, self)
-        self.book.add(self.feats, text="专长")
+        self.book.add(self.feats, text=T("专长"))
         self.powers_page = PowersPage(self.book, self)
-        self.book.add(self.powers_page, text="能力")
+        self.book.add(self.powers_page, text=T("能力"))
         self.encounter_page = EncounterPage(self.book, self)
-        self.book.add(self.encounter_page, text="战斗")
+        self.book.add(self.encounter_page, text=T("战斗"))
         # 状态（条件 / 力竭 / 濒死 / 专注）单独一页：塞在概览右栏那个 300×400
         # 的滚动区里时，死亡豁免默认在视野外，滚动还会重影（见 pages_status 说明）。
         self.status_page = StatusPage(self.book, on_action=self.on_state_action)
-        self.book.add(self.status_page, text="状态")
+        self.book.add(self.status_page, text=T("状态"))
         self.pages = [self.overview, self.gear, self.spells, self.feats,
                       self.powers_page, self.encounter_page, self.status_page]
 
@@ -153,7 +170,7 @@ class DesktopApp(tk.Tk):
         hp_box.pack(side="left", anchor="n", padx=(28, 0))
         hp_head = ttk.Frame(hp_box, style="Panel.TFrame")
         hp_head.pack(anchor="w")
-        ttk.Label(hp_head, text="❤ 生命值", style="DimPanel.TLabel").pack(side="left")
+        ttk.Label(hp_head, text=T("❤ 生命值"), style="DimPanel.TLabel").pack(side="left")
         self.hp_var = tk.StringVar()
         self.hp_value = ttk.Label(hp_head, textvariable=self.hp_var, style="Panel.TLabel",
                                   font=(theme.UI_FONT, 20, "bold"))
@@ -168,8 +185,8 @@ class DesktopApp(tk.Tk):
         chips = ttk.Frame(hero, style="Panel.TFrame")
         chips.pack(side="right", anchor="n")
         self.chips: dict[str, Chip] = {}
-        for key, title in (("ac", "护甲 AC"), ("initiative", "先攻"),
-                           ("speed", "速度"), ("prof", "熟练"), ("perception", "察觉")):
+        for key, title in (("ac", T("护甲 AC")), ("initiative", T("先攻")),
+                           ("speed", T("速度")), ("prof", T("熟练")), ("perception", T("察觉"))):
             chip = Chip(chips, title)
             chip.pack(side="left", padx=(6, 0))
             self.chips[key] = chip
@@ -180,16 +197,74 @@ class DesktopApp(tk.Tk):
         files = ttk.Frame(hero, style="Panel.TFrame")
         files.pack(side="right", anchor="n", padx=(0, 10))
         self.file_buttons: dict[str, ttk.Button] = {}
-        for key, text, action in (("new", "新建", self.new_character),
-                                  ("open", "打开", self.open_dialog),
-                                  ("save", "保存", self.save_dialog),
-                                  ("edit", "改卡", self.edit_character),
-                                  ("level", "升级", self.level_up)):
+        for key, text, action in (("new", T("新建"), self.new_character),
+                                  ("open", T("打开"), self.open_dialog),
+                                  ("save", T("保存"), self.save_dialog),
+                                  ("edit", T("改卡"), self.edit_character),
+                                  ("level", T("升级"), self.level_up)):
             button = ttk.Button(files, text=text, style="Mini.TButton",
                                 command=action, width=5)
             button.pack(side="left", padx=(0, 4))
             self.file_buttons[key] = button
+
+        # 语言：按钮上写**要切过去的那个语言**（中文界面显示 "EN"），
+        # 比写当前语言直观 —— 点它就是要变成它。
+        self.lang_button = ttk.Button(
+            files, text=self._other_locale_label(), style="Mini.TButton",
+            command=self.toggle_locale, width=4)
+        self.lang_button.pack(side="left", padx=(0, 4))
         return hero
+
+    # --- 语言 -------------------------------------------------------------
+    def _other_locale_label(self) -> str:
+        return LOCALE_SHORT["en" if self.locale == "zh" else "zh"]
+
+    def toggle_locale(self) -> None:
+        self.switch_locale("en" if self.locale == "zh" else "zh")
+
+    def switch_locale(self, code: str) -> None:
+        """切语言 = **整窗重建**。
+
+        控件是在创建时取文案的（`text=T("...")` 当场求值），改不了已经建好的
+        几百个标签。重建比逐个改便宜，也不会漏掉哪一处。
+        代价：正在建的卡（向导里那半张）会丢 —— 所以建卡中不让切。
+        """
+        if code == self.locale:
+            return
+        if self.mode == MODE_WIZARD:
+            self.status.configure(text=T("建卡过程中不能切换语言，先建完或点「取消」"),
+                                  foreground=theme.WARN)
+            return
+        set_locale(code)
+        self.locale = code
+        self._write_settings()
+        index = 0
+        try:
+            index = self.book.index(self.book.select())
+        except tk.TclError:
+            pass
+        for child in self.winfo_children():
+            child.destroy()
+        self.mode = MODE_SHEET
+        self.wizard = None
+        self.title(T("冒险者手帖 · 5R 角色卡"))
+        self._build()
+        self.refresh()
+        try:
+            self.book.select(index)
+        except (tk.TclError, IndexError):
+            pass
+
+    def _write_settings(self) -> None:
+        """记住语言。写不进去不影响使用（下次退回系统语言），所以失败就忽略。"""
+        try:
+            self.save_dir.mkdir(parents=True, exist_ok=True)
+            data = _read_settings(self.save_dir)
+            data["locale"] = self.locale
+            (self.save_dir / SETTINGS_NAME).write_text(
+                json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+        except OSError:
+            pass
 
     # --- 刷新 -------------------------------------------------------------
     def refresh(self) -> None:
@@ -217,14 +292,14 @@ class DesktopApp(tk.Tk):
         try:
             result = api.roll_check(self.actor, self.bundle, kind, key, rng=rng)
         except api.DndError as exc:
-            self.status.configure(text="掷骰失败：%s" % exc,
+            self.status.configure(text=T("掷骰失败：%s") % exc,
                                   foreground=theme.WARN)
             return None
         line = format_roll(result)
         if note:
             line = "%s → %s" % (line, note)
         self.overview.dice_log.add(line)
-        self.status.configure(text="掷骰　" + line, foreground=theme.TEXT)
+        self.status.configure(text=T("掷骰　") + line, foreground=theme.TEXT)
         return result
 
     # --- 状态：条件 / 力竭 / 濒死 / 专注 -----------------------------------
@@ -238,20 +313,20 @@ class DesktopApp(tk.Tk):
             if name == "condition":
                 ident, on = value
                 changed = api.set_condition(self.actor, ident, on)
-                note = "已记上" if on else "已取下"
+                note = T("已记上") if on else T("已取下")
                 if not changed:
-                    note = "本来就是" + ("记上的" if on else "取下的")
-                self.status.configure(text="状态　%s %s（已记录，未计入数值）"
+                    note = T("本来就是") + (T("记上的") if on else T("取下的"))
+                self.status.configure(text=T("状态　%s %s（已记录，未计入数值）")
                                             % (name_of(ident), note),
                                       foreground=theme.TEXT)
             elif name == "exhaustion":
                 level = api.set_exhaustion(self.actor, int(value))
-                self.status.configure(text="力竭 %d 级（已计入：全部 d20 %+d）"
+                self.status.configure(text=T("力竭 %d 级（已计入：全部 d20 %+d）")
                                             % (level, -2 * level),
                                       foreground=theme.TEXT)
             elif name == "death_save":
                 result = api.roll_death_save(self.actor, rng)
-                line = "死亡豁免：%d → %s（成功 %d/%d · 失败 %d/%d）" % (
+                line = T("死亡豁免：%d → %s（成功 %d/%d · 失败 %d/%d）") % (
                     result["roll"], result["label"], result["succeeded"],
                     result["succeeded_of"], result["failed"], result["failed_of"])
                 self.overview.dice_log.add(line)
@@ -260,33 +335,33 @@ class DesktopApp(tk.Tk):
                 return result
             elif name == "death_reset":
                 api.reset_death_saves(self.actor)
-                self.status.configure(text="死亡豁免已重置", foreground=theme.TEXT)
+                self.status.configure(text=T("死亡豁免已重置"), foreground=theme.TEXT)
             elif name == "scores":
                 actor = api.set_base_scores(self.actor, self.bundle, dict(value))
                 # 换的是整只 actor：属性牵动 HP 上限/熟练/攻击/豁免一整套派生值
                 self.apply_actor(actor)
-                self.status.configure(text="属性已更新（HP 上限、熟练与攻击已重算）",
+                self.status.configure(text=T("属性已更新（HP 上限、熟练与攻击已重算）"),
                                       foreground=theme.TEXT)
                 return actor
             elif name == "concentration":
                 dc = api.concentration_dc(int(value))
                 roll = self.roll_check(
                     "save", "con", rng=rng,
-                    note="DC %d 专注" % dc)
+                    note=T("DC %d 专注") % dc)
                 if roll is None:
                     return None
                 ok = roll["total"] >= dc
                 self.status_page.state_panel.set_concentration_dc(
-                    dc, "成功" if ok else "失败")
+                    dc, T("成功") if ok else T("失败"))
                 self.status.configure(
-                    text="专注检定　DC %d → %d，%s" % (dc, roll["total"],
-                                                    "保持专注" if ok else "专注中断"),
+                    text=T("专注检定　DC %d → %d，%s") % (dc, roll["total"],
+                                                    T("保持专注") if ok else T("专注中断")),
                     foreground=theme.TEXT if ok else theme.WARN)
                 return roll
             else:
-                raise api.RuleError("不认识的状态操作：%r" % (name,))
+                raise api.RuleError(T("不认识的状态操作：%r") % (name,))
         except api.DndError as exc:
-            self.status.configure(text="状态操作失败：%s" % exc,
+            self.status.configure(text=T("状态操作失败：%s") % exc,
                                   foreground=theme.WARN)
             if name == "scores":
                 self.overview.set_edit_error(str(exc))
@@ -308,11 +383,11 @@ class DesktopApp(tk.Tk):
             target.write_text(json.dumps(payload, ensure_ascii=False, indent=1),
                               encoding="utf-8")
         except (OSError, api.DndError) as exc:
-            self.status.configure(text="存档失败：%s" % exc, foreground=theme.WARN)
+            self.status.configure(text=T("存档失败：%s") % exc, foreground=theme.WARN)
             return None
         self._remember(target)
         self.current_path = target
-        self.status.configure(text="已保存：%s" % target.name, foreground=theme.TEXT)
+        self.status.configure(text=T("已保存：%s") % target.name, foreground=theme.TEXT)
         return str(target)
 
     def load_from(self, path) -> bool:
@@ -321,14 +396,14 @@ class DesktopApp(tk.Tk):
             payload = json.loads(target.read_text(encoding="utf-8"))
             actor = api.load_character(self.bundle, payload)
         except (OSError, ValueError, api.DndError) as exc:
-            self.status.configure(text="读档失败：%s" % exc, foreground=theme.WARN)
+            self.status.configure(text=T("读档失败：%s") % exc, foreground=theme.WARN)
             return False
         self.apply_actor(actor)
         self._remember(target)
         self.current_path = target
         # 换了角色，上一个人的掷骰记录留着只会误导
         self.overview.dice_log.clear()
-        self.status.configure(text="已读取：%s" % target.name, foreground=theme.TEXT)
+        self.status.configure(text=T("已读取：%s") % target.name, foreground=theme.TEXT)
         return True
 
     def new_character(self) -> None:
@@ -353,7 +428,7 @@ class DesktopApp(tk.Tk):
         self.wizard = WizardView(self, self, draft=draft, editing=editing, step=step)
         self.wizard.pack(side="top", fill="both", expand=True, padx=8, pady=(6, 0))
         self.status.configure(
-            text="%s · 第 %d 步：%s" % ("改卡中" if editing else "建卡中",
+            text=T("%s · 第 %d 步：%s") % (T("改卡中") if editing else T("建卡中"),
                                       self.wizard.index + 1,
                                       self.wizard.current["title"]),
             foreground=theme.DIM)
@@ -383,13 +458,13 @@ class DesktopApp(tk.Tk):
         self.close_wizard()
         self.apply_actor(actor)
         if editing:
-            self.status.configure(text="已改卡：%s" % (self.sheet.get("name") or ""),
+            self.status.configure(text=T("已改卡：%s") % (self.sheet.get("name") or ""),
                                   foreground=theme.TEXT)
             return
         self.current_path = None
         self.overview.dice_log.clear()
-        self.status.configure(text="已建卡：%s（还没保存，Ctrl+S 或点「保存」）"
-                                    % (self.sheet.get("name") or "无名冒险者"),
+        self.status.configure(text=T("已建卡：%s（还没保存，Ctrl+S 或点「保存」）")
+                                    % (self.sheet.get("name") or T("无名冒险者")),
                               foreground=theme.TEXT)
 
     # --- 升级 -------------------------------------------------------------
@@ -403,7 +478,7 @@ class DesktopApp(tk.Tk):
         try:
             draft = api.draft_from_actor(self.bundle, self.actor)
         except api.DndError as exc:
-            self.status.configure(text="这张卡改不了：%s" % exc, foreground=theme.WARN)
+            self.status.configure(text=T("这张卡改不了：%s") % exc, foreground=theme.WARN)
             return
         self.open_wizard(draft=draft, editing=True)
 
@@ -417,18 +492,18 @@ class DesktopApp(tk.Tk):
             view = api.level_up_view(self.bundle, self.actor, self.locale)
             actor = api.level_up(self.bundle, self.actor, self.locale)
         except api.DndError as exc:
-            self.status.configure(text="升不了级：%s" % exc, foreground=theme.WARN)
+            self.status.configure(text=T("升不了级：%s") % exc, foreground=theme.WARN)
             return
         self.apply_actor(actor)
-        parts = ["升到 %d 级 %s（生命上限 %d → %d）"
+        parts = [T("升到 %d 级 %s（生命上限 %d → %d）")
                  % (view["to_level"], view["class_name"],
                     view["hp_before"], view["hp_after"])]
         if view["prof_before"] != view["prof_after"]:
-            parts.append("熟练加值 +%d" % (view["prof_after"] - view["prof_before"]))
+            parts.append(T("熟练加值 +%d") % (view["prof_after"] - view["prof_before"]))
         if view["unlocks"]:
-            parts.append("新解锁：" + "、".join(row["name"] for row in view["unlocks"]))
+            parts.append(T("新解锁：") + join(row["name"] for row in view["unlocks"]))
         if view["needs"]:
-            parts.append("还差：" + "；".join(row["text"] for row in view["needs"]))
+            parts.append(T("还差：") + "；".join(row["text"] for row in view["needs"]))
             # 把向导直接开到第一个「要补选择」的那一步，玩家不用自己找。
             # **状态行要在 open_wizard 之后再写**：它会先把自己的「第 N 步」写进去。
             message = " · ".join(parts)
@@ -444,7 +519,7 @@ class DesktopApp(tk.Tk):
         if self.mode == MODE_WIZARD:
             # 建卡中「保存」会存下**上一个**角色的卡，然后界面说「已保存」。
             # 那是最坏的一种谎话：玩家以为存了新角色。
-            self.status.configure(text="建卡过程中不能保存，先把卡建完（或点「取消」）",
+            self.status.configure(text=T("建卡过程中不能保存，先把卡建完（或点「取消」）"),
                                   foreground=theme.WARN)
             return None
         if self.selftest:
@@ -452,15 +527,15 @@ class DesktopApp(tk.Tk):
         from tkinter import filedialog
         initial = self.current_path or self.default_save_path()
         path = filedialog.asksaveasfilename(
-            parent=self, title="保存角色", initialdir=str(self.save_dir),
+            parent=self, title=T("保存角色"), initialdir=str(self.save_dir),
             initialfile=initial.name, defaultextension=".json",
-            filetypes=[("冒险者手帖 角色档", "*.json"), ("所有文件", "*.*")])
+            filetypes=[(T("冒险者手帖 角色档"), "*.json"), (T("所有文件"), "*.*")])
         return self.save_to(path) if path else None
 
     def open_dialog(self):
         if self.mode == MODE_WIZARD:
             # 同理：读进来会换掉角色，而界面上还停在第 N 步的草案里
-            self.status.configure(text="建卡过程中不能打开别的角色，先建完或点「取消」",
+            self.status.configure(text=T("建卡过程中不能打开别的角色，先建完或点「取消」"),
                                   foreground=theme.WARN)
             return False
         if self.selftest:
@@ -468,8 +543,8 @@ class DesktopApp(tk.Tk):
         from tkinter import filedialog
         self.save_dir.mkdir(parents=True, exist_ok=True)
         path = filedialog.askopenfilename(
-            parent=self, title="打开角色", initialdir=str(self.save_dir),
-            filetypes=[("冒险者手帖 角色档", "*.json"), ("所有文件", "*.*")])
+            parent=self, title=T("打开角色"), initialdir=str(self.save_dir),
+            filetypes=[(T("冒险者手帖 角色档"), "*.json"), (T("所有文件"), "*.*")])
         return self.load_from(path) if path else False
 
     def _remember(self, target: Path) -> None:
@@ -485,9 +560,9 @@ class DesktopApp(tk.Tk):
     def _refresh_header(self) -> None:
         sheet = self.sheet
         self.name_var.set(sheet.get("name", ""))
-        classes = "、".join("%s %d" % (row["name"], row["class_level"])
+        classes = join("%s %d" % (row["name"], row["class_level"])
                             for row in sheet.get("classes", []))
-        subs = "、".join(row["name"] for row in sheet.get("subclasses", []) if row.get("unlocked"))
+        subs = join(row["name"] for row in sheet.get("subclasses", []) if row.get("unlocked"))
         # **出身也是身份**：物种与背景以前只在建卡向导里出现过，建完卡在界面上
         # 彻底消失 —— 「我是矮人/士兵」是人物卡的一等信息，不能只体现在派生数值里。
         origin = sheet.get("origin") or {}
@@ -496,17 +571,17 @@ class DesktopApp(tk.Tk):
         born = " · ".join(item for item in (species, background) if item)
         total = sheet.get("total_level", 0)
         self.sub_var.set(" · ".join(item for item in
-                                    [classes, subs, born, "总等级 %d" % total] if item))
+                                    [classes, subs, born, T("总等级 %d") % total] if item))
         marks = []
         if sheet.get("morphed"):
-            marks.append("变形中")
+            marks.append(T("变形中"))
         if sheet.get("conditions"):
-            marks.append("状态：" + "、".join(sheet["conditions"]))
+            marks.append(T("状态：") + join(sheet["conditions"]))
         self.state_var.set("  ".join(marks))
         self._refresh_hp(sheet)
         self._refresh_chips(sheet)
         self.status.configure(
-            text="内容：%d 职业 / %d 子职 / %d 法术 / %d 专长 · 错误 %d"
+            text=T("内容：%d 职业 / %d 子职 / %d 法术 / %d 专长 · 错误 %d")
                  % (len(self.bundle.classes), len(self.bundle.subclasses),
                     len(self.bundle.spells), len(self.bundle.feats),
                     len(self.bundle.errors)))
@@ -519,10 +594,10 @@ class DesktopApp(tk.Tk):
         self.hp_bar.configure(maximum=max(1, maximum), value=current)
         extras = []
         if hp.get("temp"):
-            extras.append("临时 %d" % hp["temp"])
+            extras.append(T("临时 %d") % hp["temp"])
         dice = hit_dice_text(hp.get("hit_dice"), sheet.get("classes"))
         if dice:
-            extras.append("生命骰 " + dice)
+            extras.append(T("生命骰 ") + dice)
         self.hp_detail.configure(text=" · ".join(extras))
 
     def _refresh_chips(self, sheet: dict) -> None:

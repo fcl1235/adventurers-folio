@@ -21,6 +21,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
+from .i18n import T, join
 from . import theme
 from .conditions import CONDITIONS, name_of
 from .widgets import section
@@ -54,11 +55,11 @@ class StatePanel(ttk.Frame):
         self.columnconfigure(1, weight=1)
 
         # 力竭
-        box = section(left, "力竭", "每级全部 d20 −2、速度 −5 尺（已计入数值）")
+        box = section(left, T("力竭"), T("每级全部 d20 −2、速度 −5 尺（已计入数值）"))
         box.pack(fill="x")
         row = ttk.Frame(box)
         row.pack(fill="x", pady=(2, 0))
-        ttk.Label(row, text="等级", style="Dim.TLabel").pack(side="left")
+        ttk.Label(row, text=T("等级"), style="Dim.TLabel").pack(side="left")
         self.exhaustion_var = tk.IntVar(value=0)
         self.exhaustion_spin = ttk.Spinbox(
             row, from_=0, to=6, width=4, textvariable=self.exhaustion_var,
@@ -66,18 +67,21 @@ class StatePanel(ttk.Frame):
         self.exhaustion_spin.pack(side="left", padx=(6, 6))
         self.exhaustion_spin.bind("<Return>", lambda _e: self._apply_exhaustion())
         self.exhaustion_spin.bind("<FocusOut>", lambda _e: self._apply_exhaustion())
-        self.exhaustion_note = ttk.Label(row, text="无", style="Dim.TLabel")
+        self.exhaustion_note = ttk.Label(row, text=T("无"), style="Dim.TLabel")
         self.exhaustion_note.pack(side="left")
 
         # 条件
-        box = section(right, "状态", "已记录，未计入数值")
+        box = section(right, T("状态"), T("已记录，未计入数值"))
         box.pack(fill="both", expand=True)
         self.condition_vars: dict[str, tk.BooleanVar] = {}
         grid = ttk.Frame(box)
         grid.pack(fill="x")
-        for index, (ident, label) in enumerate(CONDITIONS):
+        for index, (ident, _label) in enumerate(CONDITIONS):
             var = tk.BooleanVar(value=False)
-            box_ = ttk.Checkbutton(grid, text=label, variable=var,
+            # 名字走 `name_of`（= `Catalog` 取值时翻译），**不能直接用元组里的
+            # 中文** —— 那样切到英文这 14 个勾选框还是中文，而 `T()` 根本没被调用，
+            # `i18n.MISSING` 也发现不了（探针扫控件树才抓到）。
+            box_ = ttk.Checkbutton(grid, text=name_of(ident), variable=var,
                                    command=lambda i=ident: self._apply_condition(i))
             box_.grid(row=index // CONDITION_COLUMNS, column=index % CONDITION_COLUMNS,
                       sticky="w", padx=(0, 10))
@@ -89,30 +93,30 @@ class StatePanel(ttk.Frame):
         ttk.Label(box, textvariable=self.extra_var, style="Dim.TLabel",
                   wraplength=560, justify="left").pack(anchor="w", pady=(2, 0))
         # 这一栏最容易误会成「勾了就自动扣数值」。写明它是什么、不是什么。
-        ttk.Label(box, text="勾只代表「记上了」。具体后果（麻痹=近战必中、束缚=速度 0）"
-                            "取决于当时的情形，本程序没有目标模型，所以不替你算。",
-                  style="Dim.TLabel", wraplength=560, justify="left").pack(
-            anchor="w", pady=(6, 0))
+        note = T("勾只代表「记上了」。具体后果（麻痹 = 近战必中、束缚 = 速度 0）"
+                 "取决于当时的情形，本程序没有目标模型，所以不替你算。")
+        ttk.Label(box, text=note, style="Dim.TLabel", wraplength=560,
+                  justify="left").pack(anchor="w", pady=(6, 0))
 
         # 死亡豁免
-        box = section(left, "死亡豁免", "HP 为 0 时掷：10 以上成功，三次成功稳定")
+        box = section(left, T("死亡豁免"), T("HP 为 0 时掷：10 以上成功，三次成功稳定"))
         box.pack(fill="x", pady=(6, 0))
         row = ttk.Frame(box)
         row.pack(fill="x")
         self.success_var = tk.StringVar(value=_dot(0, 3))
         self.failed_var = tk.StringVar(value=_dot(0, 3))
-        ttk.Label(row, text="成功", style="Dim.TLabel").pack(side="left")
+        ttk.Label(row, text=T("成功"), style="Dim.TLabel").pack(side="left")
         ttk.Label(row, textvariable=self.success_var,
                   foreground=theme.OK).pack(side="left", padx=(4, 10))
-        ttk.Label(row, text="失败", style="Dim.TLabel").pack(side="left")
+        ttk.Label(row, text=T("失败"), style="Dim.TLabel").pack(side="left")
         ttk.Label(row, textvariable=self.failed_var,
                   foreground=theme.WARN).pack(side="left", padx=(4, 0))
         row = ttk.Frame(box)
         row.pack(fill="x", pady=(4, 0))
-        self.death_button = ttk.Button(row, text="掷死亡豁免", style="Mini.TButton",
+        self.death_button = ttk.Button(row, text=T("掷死亡豁免"), style="Mini.TButton",
                                        command=lambda: self._fire("death_save", None))
         self.death_button.pack(side="left")
-        self.death_reset = ttk.Button(row, text="重置", style="Mini.TButton", width=5,
+        self.death_reset = ttk.Button(row, text=T("重置"), style="Mini.TButton", width=5,
                                       command=lambda: self._fire("death_reset", None))
         self.death_reset.pack(side="left", padx=(4, 0))
         self.death_note_var = tk.StringVar(value="")
@@ -120,17 +124,17 @@ class StatePanel(ttk.Frame):
                   style="Dim.TLabel").pack(anchor="w", pady=(2, 0))
 
         # 专注
-        box = section(left, "专注", "受伤时掷体质豁免，DC = max(10, 伤害 ÷ 2)")
+        box = section(left, T("专注"), T("受伤时掷体质豁免，DC = max(10, 伤害 ÷ 2)"))
         box.pack(fill="x", pady=(6, 0))
         row = ttk.Frame(box)
         row.pack(fill="x")
-        ttk.Label(row, text="伤害", style="Dim.TLabel").pack(side="left")
+        ttk.Label(row, text=T("伤害"), style="Dim.TLabel").pack(side="left")
         self.damage_var = tk.IntVar(value=0)
         self.damage_spin = ttk.Spinbox(row, from_=0, to=999, width=5,
                                        textvariable=self.damage_var, justify="center")
         self.damage_spin.pack(side="left", padx=(6, 8))
         self.concentration_button = ttk.Button(
-            row, text="专注检定", style="Mini.TButton",
+            row, text=T("专注检定"), style="Mini.TButton",
             command=lambda: self._fire("concentration", self._damage()))
         self.concentration_button.pack(side="left")
         self.dc_var = tk.StringVar(value="")
@@ -177,10 +181,10 @@ class StatePanel(ttk.Frame):
         level = int(info.get("level", 0))
         self.exhaustion_var.set(level)
         if not level:
-            self.exhaustion_note.configure(text="无", foreground=theme.DIM)
+            self.exhaustion_note.configure(text=T("无"), foreground=theme.DIM)
             return
         self.exhaustion_note.configure(
-            text="全部 d20 %+d · 速度 %+d 尺" % (int(info.get("penalty", 0)),
+            text=T("全部 d20 %+d · 速度 %+d 尺") % (int(info.get("penalty", 0)),
                                             int(info.get("speed", 0))),
             foreground=theme.WARN if level >= 4 else theme.TEXT)
 
@@ -192,7 +196,7 @@ class StatePanel(ttk.Frame):
         for ident in recorded:
             if ident not in self.condition_vars:
                 extra.append(ident)
-        self.extra_var.set(("另有（来自能力）：" + "、".join(name_of(i) for i in sorted(extra)))
+        self.extra_var.set((T("另有（来自能力）：") + join(name_of(i) for i in sorted(extra)))
                            if extra else "")
 
     def _refresh_death(self, info: dict, hp: dict) -> None:
@@ -201,13 +205,13 @@ class StatePanel(ttk.Frame):
         self.success_var.set(_dot(success, int(info.get("succeeded_of", 3))))
         self.failed_var.set(_dot(failed, int(info.get("failed_of", 3))))
         if info.get("dead"):
-            note = "已死亡"
+            note = T("已死亡")
         elif info.get("stable"):
-            note = "已稳定（停止掷骰）"
+            note = T("已稳定（停止掷骰）")
         elif int(hp.get("current", 1) or 0) > 0:
-            note = "HP 尚未到 0，不需要掷"
+            note = T("HP 尚未到 0，不需要掷")
         else:
-            note = "还在濒死：掷到 10 以上成功"
+            note = T("还在濒死：掷到 10 以上成功")
         self.death_note_var.set(note)
         state = "disabled" if (info.get("dead") or info.get("stable")
                                or int(hp.get("current", 1) or 0) > 0) else "normal"

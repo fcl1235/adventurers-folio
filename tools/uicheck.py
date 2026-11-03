@@ -10,10 +10,15 @@
 审计三件事：每页需求不超过可用区；单元格宽度不超出所在栏预算；
 **页面上显示的数字与 `character_sheet()` 一致**（界面不许自己算第二遍）。
 最后一项比尺寸重要：布局塞得下但数字错了，比塞不下更糟。
+
+`--lang en` 用同一套检查跑英文界面。**英文不是中文的等长替身**：
+"Point buy (27 points, 8–15)" 比「点数购买（27 点，8–15）」长得多，
+表头、按钮、状态行都会跟着变长 —— 中文能塞进预算不代表英文能。
 """
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
@@ -25,6 +30,7 @@ if str(ROOT) not in sys.path:
 import dnd5r.api as api                      # noqa: E402
 from apps.desktop import theme                    # noqa: E402
 from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
+from apps.desktop.i18n import T, join               # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
 from apps.desktop.pages_encounter import EncounterPage  # noqa: E402
 from apps.desktop.pages_feats import FeatPage  # noqa: E402
@@ -34,6 +40,10 @@ from apps.desktop.pages_spells import SpellPage, _chosen_ids  # noqa: E402
 from apps.desktop.widgets import COL_MID, COL_RIGHT  # noqa: E402
 from dnd5r.kernel.rng import ScriptedRng            # noqa: E402
 from dnd5r.model.inventory import EquipSlot         # noqa: E402
+
+# 界面语言。`--lang en` 改它；`DesktopApp` 的这个参数**优先于 selftest 的强制中文**
+# （selftest 只是「别显示窗口」，语言由调用方决定，探针要能指定）。
+LOCALE = "zh"
 
 SCORES = {"str": 16, "dex": 14, "con": 14, "int": 10, "wis": 12, "cha": 8}
 INT_SCORES = {"str": 8, "dex": 14, "con": 14, "int": 17, "wis": 12, "cha": 10}
@@ -155,11 +165,13 @@ def _check_overview_defense(label: str, page: OverviewPage, sheet: dict) -> list
     """概览页的抗性/感官/暴击行必须与 sheet 一致（这几行以前根本没显示过）。"""
     problems = []
     rows = {page.fight.label_at(index): page.fight.value_at(index) for index in range(8)}
-    want_resist = "、".join(sheet.get("resistances") or []) or "—"
-    if rows.get("抗性") != want_resist:
-        problems.append("%s：概览抗性 %r，sheet 是 %r" % (label, rows.get("抗性"), want_resist))
-    if rows.get("暴击") != "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)):
-        problems.append("%s：概览暴击 %r 与 sheet 不一致" % (label, rows.get("暴击")))
+    want_resist = join(sheet.get("resistances") or ()) or "—"
+    if rows.get(T("抗性")) != want_resist:
+        problems.append("%s：概览抗性 %r，sheet 是 %r"
+                        % (label, rows.get(T("抗性")), want_resist))
+    if rows.get(T("暴击")) != "≥ %d" % int((sheet.get("crit") or {}).get("min", 20)):
+        problems.append("%s：概览暴击 %r 与 sheet 不一致"
+                        % (label, rows.get(T("暴击"))))
     return problems
 
 
@@ -186,12 +198,12 @@ def _check_appearance(label: str, app, page: OverviewPage, sheet: dict) -> list[
         if card.mod_text() != want_mod:
             problems.append("%s：%s 调整值显示 %r，应为 %r"
                             % (label, key, card.mod_text(), want_mod))
-        want_score = "数值 %d" % int(row.get("score", 0))
+        want_score = T("数值 %d") % int(row.get("score", 0))
         if card.score_text() != want_score:
             problems.append("%s：%s 分数显示 %r，应为 %r"
                             % (label, key, card.score_text(), want_score))
         save = saves.get(key) or {}
-        if card.save_text() != "豁免 %+d" % int(save.get("total", 0)):
+        if card.save_text() != T("豁免 %+d") % int(save.get("total", 0)):
             problems.append("%s：%s 豁免显示 %r 与 sheet 不一致"
                             % (label, key, card.save_text()))
         if card.save_proficient() != bool(save.get("proficient")):
@@ -499,7 +511,9 @@ def _check_encounter(label: str, page: EncounterPage, stats: dict) -> list[str]:
     stats["attacks"] = stats.get("attacks", 0) + 1
     after = hp_of(target_id)
     reported = page.log.text.get("1.0", "end")
-    said = re.findall(r"结果：.*?(\d+) 点伤害", reported)
+    # 「结果：」这一段是界面文案（跟着语言变），所以前缀从译文表里取，不写死
+    result_word = T("  结果：%s").split("%s")[0].strip()
+    said = re.findall(re.escape(result_word) + r".*?(\d+)", reported)
     if not said:
         problems.append("%s：结算后没有把「结果」写进战斗记录" % label)
     else:
@@ -546,7 +560,7 @@ def _check_live_wiring(bundle) -> list[str]:
         bundle, "dnd2024.class.bard", 2,
         {"str": 10, "dex": 12, "con": 14, "int": 10, "wis": 10, "cha": 14},
         name_zh="诗人", name_en="Bard", actor_id="pc.bard")
-    app = DesktopApp(bundle, bard, selftest=True)
+    app = DesktopApp(bundle, bard, selftest=True, locale=LOCALE)
     try:
         wolf = api.spawn_monster(bundle, "dnd2024.monster.wolf")
         app.encounter = api.new_encounter([bard, wolf], rng=ScriptedRng([10, 15]))
@@ -575,7 +589,7 @@ def _check_live_wiring(bundle) -> list[str]:
         bundle, "dnd2024.class.druid", 9,
         {"str": 10, "dex": 12, "con": 14, "int": 10, "wis": 18, "cha": 8},
         name_zh="德鲁伊", name_en="Druid")
-    app = DesktopApp(bundle, druid, selftest=True)
+    app = DesktopApp(bundle, druid, selftest=True, locale=LOCALE)
     try:
         api.plan_spells(druid, bundle, "dnd2024.class.druid",
                         prepared=["dnd2024.spell.giant_insect"])
@@ -615,7 +629,7 @@ def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
     S = {"str": 15, "dex": 14, "con": 13, "int": 12, "wis": 10, "cha": 8}
     seed = api.new_character(bundle, "dnd2024.class.fighter", 1, S,
                              name_zh="占位", name_en="Placeholder")
-    app = DesktopApp(bundle, seed, selftest=True)
+    app = DesktopApp(bundle, seed, selftest=True, locale=LOCALE)
     try:
         app.open_wizard()
         wizard = app.wizard
@@ -660,7 +674,9 @@ def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
         weapons = [row["id"] for row in
                    api.mastery_choices(bundle, "dnd2024.class.fighter", 5)["options"]][:4]
         wizard.draft["masteries"] = weapons
-        wizard.draft["name_zh"] = "铁砧"
+        # 主输入框写的是**当前语言**那个名字（英文界面写 name_en）
+        wanted_name = "铁砧" if LOCALE == "zh" else "Anvil"
+        wizard.draft["name_%s" % LOCALE] = wanted_name
         wizard.go(len(api.WIZARD_STEPS) - 1)
         app.update_idletasks()
         wizard.finish()
@@ -668,10 +684,12 @@ def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
         if app.mode != "sheet":
             problems.append("向导：建卡后没有回到角色卡（mode=%r）" % (app.mode,))
         sheet = app.sheet
-        if sheet.get("name") != "铁砧":
-            problems.append("向导：建卡后的角色名是 %r" % (sheet.get("name"),))
+        if sheet.get("name") != wanted_name:
+            problems.append("向导：建卡后的角色名是 %r，应为 %r"
+                            % (sheet.get("name"), wanted_name))
         origin = sheet.get("origin") or {}
-        if (origin.get("species") or {}).get("name") != "矮人":
+        want_species = "矮人" if LOCALE == "zh" else "Dwarf"
+        if (origin.get("species") or {}).get("name") != want_species:
             problems.append("向导：物种没有落进卡里（%r）"
                             % ((origin.get("species") or {}).get("name"),))
         if len(origin.get("masteries") or ()) != len(weapons):
@@ -682,7 +700,13 @@ def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
     return problems
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    global LOCALE
+    parser = argparse.ArgumentParser(description="桌面布局审计（reqsize，不显示窗口）")
+    parser.add_argument("--lang", choices=("zh", "en"), default="zh",
+                        help="界面语言（默认 zh；en 会把同一套检查跑一遍英文界面）")
+    args = parser.parse_args(argv)
+    LOCALE = args.lang
     bundle = api.load_content(ROOT / "plugins")
     if bundle.errors:
         for issue in bundle.errors:
@@ -699,7 +723,7 @@ def main() -> int:
     for label, class_id, level, subclass, scores, feats in CASES:
         actor = api.new_character(bundle, class_id, level, scores,
                                   subclass=subclass, feats=feats)
-        app = DesktopApp(bundle, actor, selftest=True)   # withdrawn，永不显示
+        app = DesktopApp(bundle, actor, selftest=True, locale=LOCALE)   # withdrawn
         try:
             page_count = len(app.pages)
             report = app.layout_report()
