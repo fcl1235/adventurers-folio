@@ -67,6 +67,8 @@ class FeatPage(ttk.Frame):
         self._feats: list[dict] = []
         self._feat_id = ""
         self._choice_id = ""
+        self._slots: dict = {}
+        self._pick_ids: list[str] = []
         self._busy = False
         self._build()
 
@@ -89,6 +91,20 @@ class FeatPage(ttk.Frame):
         self.feats = ListPane(listed, height=20, width=28)
         self.feats.pack(fill="both", expand=True, pady=(2, 0))
         self.feats.list.bind("<<ListboxSelect>>", lambda _e: self._select_feat())
+
+        # --- 左下：属性提升（4 级起，战士/盗贼多几次） ---------------------
+        # 这一块就是 G35 的入口：以前只有 `new_character(feats=...)` 能登记专长，
+        # 升到 4 级什么也不会发生。名额由 `sheet["feat_slots"]` 给（界面不算规则）。
+        slot = section(left, T("属性提升"))
+        slot.pack(fill="x", pady=(6, 0))
+        self.slot_var = tk.StringVar(value="")
+        ttk.Label(slot, textvariable=self.slot_var, wraplength=228,
+                  justify="left").pack(anchor="w")
+        self.pick_box = ttk.Combobox(slot, state="readonly", width=28)
+        self.pick_box.pack(fill="x", pady=(2, 0))
+        self.add_feat_button = ttk.Button(slot, text=T("加这条专长"),
+                                          command=self.add_feat)
+        self.add_feat_button.pack(anchor="w", pady=(4, 0))
 
         # --- 中：说明 -----------------------------------------------------
         intro = section(mid, T("说明"))
@@ -133,30 +149,78 @@ class FeatPage(ttk.Frame):
         self._busy = True
         try:
             self._feats = list(sheet.get("feats") or [])
-            if not self._feat_id and self._feats:
-                self._feat_id = self._feats[0]["id"]
-            if self._feat_id not in {row["id"] for row in self._feats}:
-                self._feat_id = self._feats[0]["id"] if self._feats else ""
+            self._slots = dict(sheet.get("feat_slots") or {})
+            # 选中项按 `id#序号` 记。只有纯 id 的老调用（测试直接塞 id）才退回第一行。
+            uids = {_uid(row) for row in self._feats}
+            plain = {row["id"] for row in self._feats}
+            if not self._feat_id:
+                self._feat_id = _uid(self._feats[0]) if self._feats else ""
+            elif self._feat_id not in uids and self._feat_id not in plain:
+                self._feat_id = _uid(self._feats[0]) if self._feats else ""
+            self._fill_slots()
             self._fill_list()
             self._fill_detail()
         finally:
             self._busy = False
+
+    def _fill_slots(self) -> None:
+        """左下那块：还剩几次、能加哪些。名单来自 `api.feat_options`（前提已判过）。"""
+        slots = self._slots
+        pending = int(slots.get("pending") or 0)
+        levels = slots.get("levels") or "—"
+        if int(slots.get("over") or 0) > 0:
+            self.slot_var.set(T("属性提升：%s 级各一次；已用 %d 次，超出名额 %d 次")
+                              % (levels, int(slots.get("used") or 0),
+                                 int(slots.get("over") or 0)))
+        elif pending > 0:
+            self.slot_var.set(T("属性提升：%s 级各一次，还能加 %d 次")
+                              % (levels, pending))
+        else:
+            self.slot_var.set(T("属性提升：%s 级各一次，都用完了") % levels)
+
+        self._pick_ids: list[str] = []
+        labels: list[str] = []
+        if pending > 0:
+            options = api.feat_options(self.app.bundle, self.app.actor,
+                                       locale=self.app.locale)
+            for row in options.get("feats") or []:
+                # 只有「属性提升能选的」那几类才进这张名单：起源专长来自背景、
+                # 战斗风格来自职业特性，从这里加会造出规则外的角色。
+                if row["kind"] not in ("general", "epic_boon") or not row["selectable"]:
+                    continue
+                self._pick_ids.append(row["id"])
+                labels.append(row["name"])
+        self.pick_box.configure(values=labels)
+        if labels:
+            if self.pick_box.get() not in labels:
+                self.pick_box.current(0)
+            self.add_feat_button.configure(state="normal")
+        else:
+            self.pick_box.set("")
+            self.add_feat_button.configure(state="disabled")
 
     def _fill_list(self) -> None:
         rows = []
         for row in self._feats:
             mark = STATUS_MARK.get(row.get("status") or "text", "□")
             tail = T("　（待选）") if row.get("pending") else ""
-            rows.append((row["id"], "%s %s%s" % (mark, row["name"], tail)))
+            # 清单行用 `id#序号` 当键：属性提升登记两次时，两行的 id 是一样的，
+            # 用 id 当键会让「选第二行」永远落到第一行（改第二次的选择其实改了第一次）。
+            rows.append((_uid(row), "%s %s%s" % (mark, row["name"], tail)))
         self.feats.fill(rows)
         if self._feat_id:
             self.feats.select_id(self._feat_id)
         if not self._feats:
-            # 别写成「用升级流程加」—— 升级（`level_up`）只做 rebuild，拿不了新专长。
-            self._status(T("这个角色还没有专长：背景的起始专长建卡时自动给；"
-                         "4 级起的属性提升 / 自选专长暂时没有入口（G35）。"))
+            # 属性提升的入口在左下那块（4 级起才有名额），这里说清楚「为什么是空的」。
+            self._status(T("这个角色还没有专长：背景的起始专长建卡时自动给，"
+                         "4 级起的属性提升用左下的「加这条专长」。"))
 
     def _feat(self) -> dict:
+        """当前选中的那一行。先按 `id#序号` 精确找，找不到再退回按 id 找第一行
+        （测试与旧代码都直接给纯 id，不认序号）。"""
+        for row in self._feats:
+            if _uid(row) == self._feat_id:
+                return row
         for row in self._feats:
             if row["id"] == self._feat_id:
                 return row
@@ -269,6 +333,45 @@ class FeatPage(ttk.Frame):
         self.status.configure(foreground=theme.WARN if error else theme.DIM)
 
     # --- 写数据 -----------------------------------------------------------
+    def add_feat(self) -> bool:
+        """用一次属性提升名额加一条专长。
+
+        **不带选择项**：属性提升的「+2 还是两项 +1」在下面「选择项」那块里选，
+        加进来以后它是「还差 2 项」的状态。一次性把选择也带走当然更好，
+        但那要求这里再实现一遍「选两项、可重复」的界面 —— 现成的选择项区域
+        已经能做这件事，再写一套只会两处不一致。
+        """
+        if self._busy:
+            return False
+        label = self.pick_box.get()
+        ids = getattr(self, "_pick_ids", [])
+        values = list(self.pick_box.cget("values") or ())
+        if not label or label not in values:
+            self._status(T("先在左边选一条要加的专长。"), error=True)
+            return False
+        feat_id = ids[values.index(label)]
+        try:
+            actor = api.add_feat(self.app.actor, self.app.bundle, feat_id,
+                                 locale=self.app.locale)
+        except api.DndError as error:
+            self._status(str(error), error=True)
+            return False
+        self._status("")
+        self._choice_id = ""
+        self.app.apply_actor(actor)        # 这一步会 refresh，`_feats` 已经换成新的
+        mine = [row for row in self._feats if row["id"] == feat_id]
+        self._feat_id = _uid(mine[-1]) if mine else feat_id
+        self.feats.select_id(self._feat_id)
+        self._fill_detail()
+        row = self._feat()
+        needs = row.get("pending")
+        if needs:
+            self._status(T("已加「%s」：在下面把选择项选完（属性才会计入）")
+                         % row.get("name", label))
+        else:
+            self._status(T("已加「%s」") % row.get("name", label))
+        return True
+
     def add_pick(self) -> bool:
         return self._apply("add")
 
@@ -306,6 +409,7 @@ class FeatPage(ttk.Frame):
         try:
             actor = api.set_feat_choice(self.app.actor, self.app.bundle,
                                         feat["id"], choice["id"], updated,
+                                        index=int(feat.get("index") or 0),
                                         locale=self.app.locale)
         except api.DndError as error:
             self._status(str(error), error=True)
@@ -313,7 +417,10 @@ class FeatPage(ttk.Frame):
 
         self._status("")
         self.app.apply_actor(actor)
-        self._feat_id = feat["id"]
+        # 这里必须写回 `id#序号`，不能写纯 id：属性提升登记两次时两行同 id，
+        # 写纯 id 会让下一次「加上」落到**第一行**上 —— 表现是「第二次怎么选都
+        # 超过 2 项」，而第一次的选择被悄悄改掉。
+        self._feat_id = _uid(feat)
         self._choice_id = choice["id"]
         self._fill_detail()
         self._status(T("%s：已选 %d 项") % (choice["label"], len(updated)))
@@ -326,3 +433,9 @@ def _remove_once(picked: list[str], value: str) -> list[str]:
     if value in out:
         out.remove(value)
     return out
+
+
+def _uid(row: dict) -> str:
+    """清单行的键：`<专长 id>#<第几次>`。序号在同一专长只出现一次时也照写，
+    免得「只有一条时用 id、有两条时用 id#序号」这种两套规则。"""
+    return "%s#%d" % (row["id"], int(row.get("index") or 0))

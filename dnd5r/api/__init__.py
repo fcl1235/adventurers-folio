@@ -29,8 +29,9 @@ from .catalog import (
 )
 from .persistence import SAVE_VERSION, load_character, save_character
 from .character import (
-    create_actor, feat_options, find_power, free_casts, new_character,
-    plan_spells, set_feat_choice, spell_plan, subclass_options, use_power,
+    add_feat, create_actor, feat_options, find_power, free_casts, new_character,
+    plan_spells, remove_feat, set_feat_choice, spell_plan, subclass_options,
+    use_power,
 )
 from .sheet import (
     _feat_status, actor_view, character_sheet, form_options, form_view,
@@ -79,6 +80,7 @@ from ..rules.combat import (
     RESOLUTION_KINDS, Casting, Target, casting_for, target_from_actor,
 )
 from ..rules.encounter import FOOT, Combatant, Encounter
+from ..rules.feats import feat_ledger
 from ..session import (
     LongRest, NewTurn, Regain, Session, ShortRest, TakeDamage, UsePower,
 )
@@ -87,7 +89,8 @@ __all__ = [
     "VERSION", "load_content", "content_summary",
     "create_actor", "new_character", "resolver_for", "build_from_profile",
     "available_powers", "feat_picks", "rebuild_actor",
-    "set_feat_choice", "save_character", "load_character", "SAVE_VERSION",
+    "set_feat_choice", "add_feat", "remove_feat", "feat_ledger",
+    "save_character", "load_character", "SAVE_VERSION",
     "character_sheet", "actor_view", "roll_check", "CHECK_KINDS",
     "roll_spell", "Target", "Casting", "target_from_actor", "casting_for",
     "RESOLUTION_KINDS", "free_casts",

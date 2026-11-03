@@ -33,7 +33,7 @@ from apps.desktop.app import DesktopApp, WINDOW_MIN   # noqa: E402
 from apps.desktop.i18n import T, join               # noqa: E402
 from apps.desktop.pages import OverviewPage  # noqa: E402
 from apps.desktop.pages_encounter import EncounterPage  # noqa: E402
-from apps.desktop.pages_feats import FeatPage  # noqa: E402
+from apps.desktop.pages_feats import FeatPage, _uid  # noqa: E402
 from apps.desktop.pages_gear import GearPage  # noqa: E402
 from apps.desktop.pages_powers import PowersPage  # noqa: E402
 from apps.desktop.pages_spells import SpellPage, _chosen_ids  # noqa: E402
@@ -125,7 +125,8 @@ def _check_feats(label: str, page: FeatPage, stats: dict) -> list[str]:
         problems.append("%s：专长清单 %d 行，sheet 是 %d 条"
                         % (label, page.feats.row_count, len(feats)))
     for row in feats:
-        index = page.feats.index_of(row["id"])
+        # 行的键是 `id#序号`：属性提升登记两次时两行同 id
+        index = page.feats.index_of(_uid(row))
         if index < 0:
             problems.append("%s：清单里找不到专长 %s" % (label, row["id"]))
             continue

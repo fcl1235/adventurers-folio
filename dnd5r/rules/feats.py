@@ -15,12 +15,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Mapping
+from typing import TYPE_CHECKING, Iterable, Mapping
 
 from ..content import SPELL_LIST_ANY, ContentBundle, FeatChoice, FeatDef
 from ..kernel.errors import RuleError
 from ..kernel.text import Text
 from .scores import ScoreBonus
+
+if TYPE_CHECKING:                     # 只为了类型标注，别把模型层拉进运行期依赖
+    from ..model.profile import Profile
 
 # 候选**来自内容**而不是 `CHOICE_UNIVERSE` 的选择项：判不了在 `picks_for` 里
 # （那时还没有 bundle），只能在 build 时用 `check_feat_choices` 校验。
@@ -81,6 +84,69 @@ def pick_key(feat_id: str, choice_id: str, index: int = 0) -> str:
     """
     return ("%s#%d.%s" % (feat_id, index, choice_id) if index
             else "%s.%s" % (feat_id, choice_id))
+
+
+# 消耗「属性提升」名额的专长种类。起源专长来自背景、战斗风格来自职业特性，
+# 都不占名额 —— 把它们算进来，1 级角色一建出来就显示「已超额」，
+# 真正的问题（4 级该给的那一次没给）反而被淹掉。
+ASI_KINDS = ("general", "epic_boon")
+
+
+def asi_slots(content: ContentBundle, profile: "Profile | None") -> int:
+    """这个角色一共拿到几次属性提升。各职业按**自己的**等级分别算，再加总。
+
+    兼职称谓不影响：战士 4 级兼法师 4 级 = 两次（各职业 4 级各一次），
+    不是「按总等级 8 级查表」—— 那样会少给一半。
+    """
+    if profile is None:
+        return 0
+    total = 0
+    for entry in profile.classes:
+        class_def = content.classes.get(entry.class_id)
+        if class_def is not None:
+            total += class_def.asi_slots_at(entry.class_level)
+    return total
+
+
+def asi_used(content: ContentBundle, profile: "Profile | None") -> int:
+    """已经用掉几次。按**登记条数**算，不按去重后的专长种类数：
+    属性提升可以重复选取，登记两次就是用了两次。"""
+    if profile is None:
+        return 0
+    used = 0
+    for feat_id in profile.feats:
+        feat = content.feats.get(feat_id)
+        if feat is not None and feat.kind in ASI_KINDS:
+            used += 1
+    return used
+
+
+def asi_level_text(content: ContentBundle, profile: "Profile | None") -> str:
+    """「4/8/12/16」这种等级清单（各职业取并集，升序）。报错与界面共用。"""
+    levels: set[int] = set()
+    if profile is not None:
+        for entry in profile.classes:
+            class_def = content.classes.get(entry.class_id)
+            if class_def is not None:
+                levels.update(int(item) for item in class_def.asi_levels)
+    return "/".join(str(item) for item in sorted(levels)) or "—"
+
+
+def feat_ledger(content: ContentBundle, profile: "Profile | None") -> dict:
+    """属性提升的名额账：给了几次、用了几次、还剩几次、在哪些等级给。
+
+    `over` 不是「错误」而是「事实」：旧档、手工指定的专长、或换了职业之后
+    都可能已用多于已给。界面照实说，别自作主张删专长。
+    """
+    granted = asi_slots(content, profile)
+    used = asi_used(content, profile)
+    return {
+        "granted": granted,
+        "used": used,
+        "pending": max(0, granted - used),
+        "over": max(0, used - granted),
+        "levels": asi_level_text(content, profile),
+    }
 
 
 def picks_for(

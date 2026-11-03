@@ -19,10 +19,11 @@ from ..rules.build import (
     available_powers, build_actor, eligible_forms_for, rebuild_actor,
 )
 from ..rules.encounter import Encounter
-from ..rules.feats import pick_key, prereq_report
+from ..rules.feats import ASI_KINDS, feat_ledger, pick_key, prereq_report
 from ..rules.powers import Power, use_power as _use_power
 from ..rules.progression import MAX_TOTAL_LEVEL, validate_total
 from ..rules.spellcasting import casting_summary, check_spell_picks
+from ..rules.text import join_list, tr
 from ._support import ABILITY_KEYS, FEAT_KIND_ORDER, _context, resolver_for
 from .sheet import character_sheet
 
@@ -112,8 +113,110 @@ def set_feat_choice(
     return rebuild_actor(content, actor, profile=updated)
 
 
-# --- 存档 -------------------------------------------------------------
+def add_feat(
+    actor: Actor,
+    content: ContentBundle,
+    feat_id: str,
+    picks: Mapping[str, Sequence[str]] | None = None,
+    locale: str = "zh",
+) -> Actor:
+    """用一次**属性提升名额**加一条专长，返回重建后的角色。
 
+    为什么需要这个入口：以前只有 `new_character(feats=...)` 能登记专长，
+    于是 4 级以后再也拿不到「+2 或换一个专长」—— 职业 YAML 里那条特性
+    只是规则文字，升到 4 级什么也不会发生。
+
+    三件事都在这里判，界面一条都不用抄：
+
+      * 名额够不够（`feat_ledger`，各职业按自己的等级算）；
+      * 这条专长**本身**能不能选（`feat_options` 的 `selectable`，前提已判过）；
+      * 选择项（属性提升的 `boost`）**能在同一步一起写进去** —— 给了 `picks`
+        就是一次到位；不给则留下「待选」，由专长页的选择项区域补完。
+        分两步去凑的实现最怕半路存档，那种角色看起来像坏了。
+
+    `picks` 的键是**选择项 id**（不是完整键）：`{"boost": ["dex", "dex"]}`。
+    重复选取时序号由函数自己算（第几次登记就用第几格），调用方别自己拼 `#1`。
+    """
+    profile = actor.profile
+    if profile is None:
+        raise RuleError(tr("角色没有职业档案，加不了专长", locale))
+    feat = content.feats.get(feat_id)
+    if feat is None:
+        raise RuleError(tr("没有这个专长：%s", locale) % feat_id)
+    if feat.kind not in ASI_KINDS:
+        # 起源专长由背景给、战斗风格由职业特性给。允许在这里加，
+        # 就会养出「1 级角色手上有三个起源专长」这种查不出来的错。
+        raise RuleError(tr("「%s」不是属性提升可以选的专长（%s 类由背景或职业特性给）",
+                           locale) % (feat.name.get(locale), feat.kind))
+    row = next((item for item in feat_options(content, actor, locale=locale)["feats"]
+                if item["id"] == feat_id), None)
+    if row is None:
+        raise RuleError(tr("没有这个专长：%s", locale) % feat_id)
+    if not row["selectable"]:
+        raise RuleError(tr("现在不能选「%s」：%s", locale)
+                        % (feat.name.get(locale), join_list(row["blocked"], locale)))
+
+    ledger = feat_ledger(content, profile)
+    if ledger["pending"] <= 0:
+        raise RuleError(tr("还没有可用的属性提升名额（%s 级各一次；已用 %d / 共 %d）",
+                           locale) % (ledger["levels"],
+                                      ledger["used"], ledger["granted"]))
+
+    index = profile.feats.count(feat_id)          # 第几次登记（属性提升会重复选）
+    updated = profile.with_feats(profile.feats + (feat_id,))
+    if picks:
+        by_choice = {str(key): tuple(str(item) for item in value)
+                     for key, value in picks.items()}
+        unknown = set(by_choice) - {item.id for item in feat.choices}
+        if unknown:
+            raise RuleError(tr("「%s」没有这些选择项：%s", locale)
+                            % (feat.name.get(locale), join_list(sorted(unknown), locale)))
+        merged = dict(profile.choices)
+        for choice in feat.choices:
+            if choice.id in by_choice:
+                merged[pick_key(feat_id, choice.id, index)] = by_choice[choice.id]
+        updated = updated.with_choices(merged)
+    return rebuild_actor(content, actor, profile=updated)
+
+
+def remove_feat(
+    actor: Actor,
+    content: ContentBundle,
+    feat_id: str,
+    locale: str = "zh",
+) -> Actor:
+    """去掉一条**属性提升**专长（登记了两次就去掉最后那次）。
+
+    只去最后一条：前面的序号不动，`#1`、`#2` 这些选择项键才不会集体错位。
+    选择项一起清掉 —— 留着的话下次加同一条专长会直接吃上旧选择，
+    界面上表现为「刚加的专长属性已经加过了」。
+    """
+    profile = actor.profile
+    if profile is None:
+        raise RuleError(tr("角色没有职业档案，去不了专长", locale))
+    feat = content.feats.get(feat_id)
+    if feat is None:
+        raise RuleError(tr("没有这个专长：%s", locale) % feat_id)
+    if feat_id not in profile.feats:
+        raise RuleError(tr("角色没有这个专长：%s", locale) % feat.name.get(locale))
+    if feat.kind not in ASI_KINDS:
+        raise RuleError(tr("「%s」由背景或职业特性给，不能在这里去掉", locale)
+                        % feat.name.get(locale))
+    index = profile.feats.count(feat_id) - 1
+    kept = profile.feats[:index] + profile.feats[index + 1:]
+    choices = {key: value for key, value in profile.choices.items()
+               if key not in {pick_key(feat_id, choice.id, index)
+                              for choice in feat.choices}}
+    if index == 0:
+        # 第一次的键还有 `#0` 这种写法（`picks_for` 认它），一并清掉
+        choices = {key: value for key, value in choices.items()
+                   if key not in {"%s#0.%s" % (feat_id, choice.id)
+                                  for choice in feat.choices}}
+    updated = profile.with_feats(kept).with_choices(choices)
+    return rebuild_actor(content, actor, profile=updated)
+
+
+# --- 存档 -------------------------------------------------------------
 
 def subclass_options(
     bundle: ContentBundle,

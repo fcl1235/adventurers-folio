@@ -504,12 +504,18 @@ class DesktopApp(tk.Tk):
             parts.append(T("新解锁：") + join(row["name"] for row in view["unlocks"]))
         if view["needs"]:
             parts.append(T("还差：") + "；".join(row["text"] for row in view["needs"]))
-            # 把向导直接开到第一个「要补选择」的那一步，玩家不用自己找。
-            # **状态行要在 open_wizard 之后再写**：它会先把自己的「第 N 步」写进去。
             message = " · ".join(parts)
-            self.open_wizard(draft=api.draft_from_actor(self.bundle, self.actor),
-                             editing=True,
-                             step=api.STEP_INDEX.get(view["needs"][0]["step"], 0))
+            # 有向导步骤的才开向导。「属性提升」不是向导里的一步（`STEP_INDEX` 里
+            # 没有 "feats"），硬开向导会落到第 0 步（职业），把建卡流程重来一遍 ——
+            # 玩家会以为角色被重置了。这一类改成切到「专长」页，那一页有添加按钮。
+            guided = [row for row in view["needs"] if row["step"] in api.STEP_INDEX]
+            if guided:
+                # **状态行要在 open_wizard 之后再写**：它会先把自己的「第 N 步」写进去。
+                self.open_wizard(draft=api.draft_from_actor(self.bundle, self.actor,
+                                                            self.locale),
+                                 editing=True, step=api.STEP_INDEX[guided[0]["step"]])
+            else:
+                self.book.select(self.feats)
             self.status.configure(text=message, foreground=theme.WARN)
             return
         self.status.configure(text=" · ".join(parts), foreground=theme.TEXT)

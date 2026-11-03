@@ -215,10 +215,12 @@ five P6 features).
 - **Wild Shape and summons do not replace the character's own numbers**: the program gives you
   the form's or companion's stat block and rolls, while ability scores and HP stay on the
   character, so one transformation cannot corrupt a save file.
-- **No entry point yet for the 4th-level "Ability Score Improvement / feat of choice"**: the
-  class entry only records the rule text, so the sheet gains nothing from it. Apart from the
-  starting feat granted by a background, you cannot add feats yet (gap G35, see
-  `架构设计v3-插件化.md` §15.2).
+- **Ability Score Improvements are added on the Feats page**: from level 4 on (Fighter
+  4/6/8/12/14/16, Rogue 4/8/10/12/16, everyone else 4/8/12/16) each of those levels grants
+  one allowance; the bottom-left corner of that page says how many are left, and adding one
+  takes the +2/+1 in the same step. Levelling into those levels says so in the status line.
+  Origin feats still come from a background and Fighting Style from a class feature — those
+  cannot be added here, because that would produce a character the rules don't allow.
 - **Weapon mastery is recorded, not resolved**: the sheet shows "Mastery: graze", but shove,
   topple and similar effects are tactical choices made after a hit, so the program does not
   resolve them (G32).

@@ -14,6 +14,10 @@ proficiencies:
 caster: full
 casting_ability: cha
 subclass_level: 3
+# 属性提升（ASI）的等级：每条给一次「一项 +2 / 两项 +1 / 换一个专长」的名额。
+# 依据 data/raw/class-levels-2024.json 里 features 含 ability-score-improvement 的等级行；
+# 战士多 6 级与 14 级、盗贼多 10 级 —— 别照抄别的职业。名额怎么用见 api.add_feat。
+asi_levels: [4, 8, 12, 16]
 skill_choices: 3
 skill_list:
   - acrobatics

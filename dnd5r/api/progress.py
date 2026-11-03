@@ -25,6 +25,7 @@ from ..model.actor import Actor
 from ..model.levels import ClassLevel, TotalLevel
 from ..model.profile import Profile
 from ..rules.build import available_powers, rebuild_actor
+from ..rules.feats import feat_ledger
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus
 from ..rules.spellcasting import spell_gaps
 from ..rules.text import join_list, tr
@@ -77,10 +78,21 @@ def level_up_view(content: ContentBundle, actor: Actor, locale: str = "zh") -> d
                       "text": tr("%d 级可以精通 %d 件武器，现在记了 %d 件", locale)
                               % (target, mastery_need, len(profile.masteries))})
     gaps = spell_gaps(content, class_id, ClassLevel(target),
-                      profile.cantrips_of(class_id), profile.spells_of(class_id))
+                      profile.cantrips_of(class_id), profile.spells_of(class_id),
+                      locale)
     if gaps:
         needs.append({"step": "spells",
                       "text": tr("还没选满：", locale) + join_list(gaps, locale)})
+
+    # 属性提升：**不是**向导里的一步（`STEP_INDEX` 里没有 "feats"），
+    # 界面要跳的是「专长」页。所以这里多给一个 step，由调用方分流 ——
+    # 硬塞进向导会让 `STEP_INDEX.get(..., 0)` 把玩家扔回第 0 步（职业），
+    # 建卡流程重来一遍。
+    ledger = feat_ledger(content, upgraded)
+    if ledger["pending"] > 0:
+        needs.append({"step": "feats",
+                      "text": tr("还有 %d 次属性提升没用（到「专长」页加）", locale)
+                              % ledger["pending"]})
 
     return {
         "class_id": class_id,

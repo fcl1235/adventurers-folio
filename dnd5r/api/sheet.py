@@ -21,7 +21,9 @@ from ..rules.contributions import (
     modifiers_for, passive_defenses, passive_modifiers, passive_proficiencies,
     power_channels, power_status, save_modifiers, skill_modifiers,
 )
-from ..rules.feats import choice_prompt, proficiency_pool, spell_pool
+from ..rules.feats import (
+    choice_prompt, feat_ledger, pick_key, proficiency_pool, spell_pool,
+)
 from ..rules.morph import form_id, reasons_for
 from ..rules.powers import can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus
@@ -69,11 +71,17 @@ def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list
     tokens = set(profile.proficiencies if profile else ())
     tokens |= passive_proficiencies(content, actor)
     rows: list[dict] = []
+    # 同一个专长可能登记多次（属性提升 4 级一次、8 级一次）。选择项按**第几次**
+    # 分格存（`#1`），所以这里必须带序号 —— 不带的话两行共用一格，
+    # 在界面上改第二次的选择会静默改掉第一次的。
+    counts: dict[str, int] = {}
     for feat in feat_defs(content, profile):
+        index = counts.get(feat.id, 0)
+        counts[feat.id] = index + 1
         choices = []
         granted: list[str] = list(feat.spells)
         for choice in feat.choices:
-            key = "%s.%s" % (feat.id, choice.id)
+            key = pick_key(feat.id, choice.id, index)
             picked = list(profile.choices.get(key, ())) if profile else []
             options = list(choice.options)
             if choice.kind == "expertise":
@@ -101,6 +109,7 @@ def _feat_rows(content: ContentBundle, actor: Actor, locale: str = "zh") -> list
             })
         rows.append({
             "id": feat.id,
+            "index": index,
             "name": feat.name.get(locale),
             "kind": feat.kind,
             "level": int(feat.level),
@@ -379,6 +388,10 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
                                            entry.class_level, resolver, locale))
         sheet["spellcasting"] = casting
         sheet["feats"] = _feat_rows(content, actor, locale)
+        # 属性提升的名额账（给了几次 / 用了几次 / 还剩几次）。界面照它决定
+        # 「加专长」那一条能不能点 —— 别在界面里重算一遍：算错就是
+        # 「看得见按钮、点下去报错」。
+        sheet["feat_slots"] = feat_ledger(content, profile)
         sheet["choices_needed"] = list(feat_picks(content, profile).pending)
         sheet["classes"] = [
             {"id": entry.class_id, "class_level": int(entry.class_level),

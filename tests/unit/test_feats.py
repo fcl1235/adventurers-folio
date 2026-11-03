@@ -443,5 +443,186 @@ class HonestyMarkTest(unittest.TestCase):
             self.assertIn(power["status"], self.STATUSES)
 
 
+class AbilityScoreImprovementTest(unittest.TestCase):
+    """G35：4 级起的属性提升 / 自选专长必须真的拿得到。
+
+    修之前：只有 `new_character(feats=...)` 能登记专长，升到 4 级什么也不会发生，
+    职业 YAML 里那条特性只是规则文字。这一组盯五件事：
+
+      1. 「几级给名额」是**数据**（`asi_levels`），战士 6/14、盗贼 10 不能少；
+      2. 名额账：给了几次 / 用了几次 / 还剩几次；
+      3. `add_feat` 一步把专长和选择项都写进去（不留「有名额但没加属性」的中间态）；
+      4. 重复选取分格（第二次的 +2 不覆盖第一次）；改第二次不动第一次；
+      5. 去掉一条能真的退回去（选择项一起清掉，不然下次加同一条会吃上旧选择）。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = api.load_content(PLUGINS)
+
+    def _fighter(self, level):
+        return api.new_character(self.bundle, "dnd2024.class.fighter", level, dict(SCORES))
+
+    # --- 1. 数据 -------------------------------------------------------
+    def test_asi_levels_are_data(self):
+        expected = {
+            "barbarian": [4, 8, 12, 16], "bard": [4, 8, 12, 16],
+            "cleric": [4, 8, 12, 16], "druid": [4, 8, 12, 16],
+            "fighter": [4, 6, 8, 12, 14, 16], "monk": [4, 8, 12, 16],
+            "paladin": [4, 8, 12, 16], "ranger": [4, 8, 12, 16],
+            "rogue": [4, 8, 10, 12, 16], "sorcerer": [4, 8, 12, 16],
+            "warlock": [4, 8, 12, 16], "wizard": [4, 8, 12, 16],
+        }
+        for slug, levels in expected.items():
+            class_def = self.bundle.classes["dnd2024.class.%s" % slug]
+            self.assertEqual([int(item) for item in class_def.asi_levels], levels, slug)
+
+    def test_asi_levels_must_be_strictly_increasing(self):
+        """乱序或重复只会在某个随机等级多给/少给一次，界面上看不出来 —— 加载期就炸。"""
+        from dnd5r.content.classes import _parse_asi_levels
+        with self.assertRaises(PluginError):
+            _parse_asi_levels([8, 4], "test")
+        with self.assertRaises(PluginError):
+            _parse_asi_levels([4, 4], "test")
+        with self.assertRaises(PluginError):
+            _parse_asi_levels([0], "test")
+
+    # --- 2. 名额账 -----------------------------------------------------
+    def test_ledger_counts_by_class_level(self):
+        cases = [(1, 0), (3, 0), (4, 1), (5, 1), (6, 2), (8, 3), (16, 6)]
+        for level, granted in cases:
+            ledger = api.feat_ledger(self.bundle, self._fighter(level).profile)
+            self.assertEqual(ledger["granted"], granted, level)
+            self.assertEqual(ledger["pending"], granted, level)
+
+    def test_ledger_is_per_class_not_total_level(self):
+        """战士 4 兼法师 4 = 两次，不是按总等级 8 级算出的三次。"""
+        actor = api.new_character(
+            self.bundle, "dnd2024.class.fighter", 4,
+            {"str": 13, "dex": 14, "con": 14, "int": 14, "wis": 10, "cha": 8},
+            extra_classes=(("dnd2024.class.wizard", 4),))
+        self.assertEqual(api.feat_ledger(self.bundle, actor.profile)["granted"], 2)
+
+    def test_ledger_counts_repeats_and_origin_feat_separately(self):
+        """起源专长来自背景，不占名额；属性提升登记两次就用了两次。"""
+        actor = api.new_character(
+            self.bundle, "dnd2024.class.fighter", 8, dict(SCORES),
+            feats=[ASI, ASI], choices={ASI + ".boost": ("str", "str"),
+                                      ASI + "#1.boost": ("con", "con")},
+            background="dnd2024.background.soldier")
+        ledger = api.feat_ledger(self.bundle, actor.profile)
+        self.assertEqual(ledger["used"], 2)
+        self.assertEqual(ledger["pending"], 1)
+        self.assertEqual(ledger["over"], 0)
+
+    def test_sheet_carries_feat_slots(self):
+        sheet = api.character_sheet(self._fighter(4), self.bundle)
+        self.assertEqual(sheet["feat_slots"]["pending"], 1)
+        self.assertEqual(sheet["feat_slots"]["levels"], "4/6/8/12/14/16")
+
+    # --- 3. 加专长 -----------------------------------------------------
+    def test_add_feat_applies_bonus_in_one_step(self):
+        actor = self._fighter(4)
+        before = actor.statblock.abilities.score("str")
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("str", "str")})
+        self.assertEqual(actor.statblock.abilities.score("str"), before + 2)
+        self.assertEqual(api.feat_ledger(self.bundle, actor.profile)["pending"], 0)
+
+    def test_add_feat_requires_a_spare_slot(self):
+        """4 级只有一次：用掉以后再加就该拒绝，而且话说清楚是「没名额」而不是「等级不够」。"""
+        actor = api.add_feat(self._fighter(4), self.bundle, ASI,
+                             picks={"boost": ("str", "str")})
+        with self.assertRaises(RuleError) as caught:
+            api.add_feat(actor, self.bundle, ASI, picks={"boost": ("dex", "dex")})
+        self.assertIn("属性提升名额", str(caught.exception))
+
+    def test_add_feat_below_level_four_is_refused_by_prereq(self):
+        with self.assertRaises(RuleError) as caught:
+            api.add_feat(self._fighter(3), self.bundle, ASI,
+                         picks={"boost": ("str", "str")})
+        self.assertIn("4 级", str(caught.exception))
+
+    def test_add_feat_rejects_origin_feats(self):
+        """起源专长由背景给。从这里加会造出「1 级手上有三个起源专长」。"""
+        with self.assertRaises(RuleError) as caught:
+            api.add_feat(self._fighter(8), self.bundle, ALERT)
+        self.assertIn("背景或职业特性", str(caught.exception))
+
+    def test_add_feat_keeps_runtime_state(self):
+        """加专长要重建，但当前 HP / 状态不能跟着回满。"""
+        actor = self._fighter(4)
+        actor.hp.current = 3
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("con", "con")})
+        self.assertEqual(actor.hp.current, 3)
+
+    def test_add_feat_without_picks_leaves_it_pending(self):
+        """先加专长、稍后再选也可以 —— 「还没选」不是错误，但要能在界面里看见。"""
+        actor = api.add_feat(self._fighter(4), self.bundle, ASI)
+        sheet = api.character_sheet(actor, self.bundle)
+        self.assertTrue(sheet["feats"][-1]["pending"])
+        self.assertEqual(sheet["choices_needed"], [ASI + ".boost"])
+
+    # --- 4. 重复选取 ---------------------------------------------------
+    def test_second_instance_gets_its_own_slot(self):
+        actor = self._fighter(8)
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("str", "str")})
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("con", "con")})
+        self.assertEqual(actor.profile.feats.count(ASI), 2)
+        self.assertEqual(actor.statblock.abilities.score("str"), SCORES["str"] + 2)
+        self.assertEqual(actor.statblock.abilities.score("con"), SCORES["con"] + 2)
+
+    def test_sheet_rows_carry_index(self):
+        actor = self._fighter(8)
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("str", "str")})
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("con", "con")})
+        rows = [row for row in api.character_sheet(actor, self.bundle)["feats"]
+                if row["id"] == ASI]
+        self.assertEqual([row["index"] for row in rows], [0, 1])
+        self.assertEqual(rows[1]["choices"][0]["key"], ASI + "#1.boost")
+
+    def test_editing_second_instance_leaves_first_alone(self):
+        actor = self._fighter(8)
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("str", "str")})
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("con", "con")})
+        actor = api.set_feat_choice(actor, self.bundle, ASI, "boost", ("wis", "wis"),
+                                    index=1)
+        self.assertEqual(actor.statblock.abilities.score("str"), SCORES["str"] + 2)
+        self.assertEqual(actor.statblock.abilities.score("con"), SCORES["con"])
+        self.assertEqual(actor.statblock.abilities.score("wis"), SCORES["wis"] + 2)
+
+    # --- 5. 去掉 -------------------------------------------------------
+    def test_remove_feat_reverts_and_clears_choices(self):
+        actor = self._fighter(4)
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("str", "str")})
+        actor = api.remove_feat(actor, self.bundle, ASI)
+        self.assertEqual(actor.statblock.abilities.score("str"), SCORES["str"])
+        self.assertNotIn(ASI + ".boost", actor.profile.choices)
+        self.assertEqual(api.feat_ledger(self.bundle, actor.profile)["pending"], 1)
+
+    def test_remove_feat_drops_the_last_instance(self):
+        actor = self._fighter(8)
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("str", "str")})
+        actor = api.add_feat(actor, self.bundle, ASI, picks={"boost": ("con", "con")})
+        actor = api.remove_feat(actor, self.bundle, ASI)
+        self.assertEqual(actor.profile.feats.count(ASI), 1)
+        self.assertEqual(actor.statblock.abilities.score("str"), SCORES["str"] + 2)
+        self.assertEqual(actor.statblock.abilities.score("con"), SCORES["con"])
+        self.assertNotIn(ASI + "#1.boost", actor.profile.choices)
+
+    def test_remove_feat_refuses_class_granted_feats(self):
+        actor = api.new_character(self.bundle, "dnd2024.class.fighter", 4, dict(SCORES),
+                                  background="dnd2024.background.soldier")
+        with self.assertRaises(RuleError):
+            api.remove_feat(actor, self.bundle, "dnd2024.feat.savage_attacker")
+
+    # --- 6. 升级视图 ---------------------------------------------------
+    def test_level_up_view_mentions_the_new_slot(self):
+        """升到 4 级就该提示「还有一次属性提升没用」，否则玩家永远不知道这事。"""
+        from dnd5r.api.progress import level_up_view
+        view = level_up_view(self.bundle, self._fighter(3))
+        steps = [row["step"] for row in view["needs"]]
+        self.assertIn("feats", steps)
+
+
 if __name__ == "__main__":
     unittest.main()

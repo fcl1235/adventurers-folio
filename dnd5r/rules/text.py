@@ -162,6 +162,26 @@ EN: dict[str, str] = {
     "%d 级可以精通 %d 件武器，现在记了 %d 件":
         "Level %d allows %d mastered weapons; %d recorded",
     "还没选满：": "Not filled yet: ",
+
+    # --- 属性提升 / 专长（api/character、api/progress）-------------------
+    "还有 %d 次属性提升没用（到「专长」页加）":
+        "%d Ability Score Improvement not spent yet (add it on the Feats page)",
+    "角色没有职业档案，加不了专长":
+        "The character has no class levels, so no feat can be added",
+    "角色没有职业档案，去不了专长":
+        "The character has no class levels, so no feat can be removed",
+    "没有这个专长：%s": "No such feat: %s",
+    "角色没有这个专长：%s": "The character does not have this feat: %s",
+    "「%s」不是属性提升可以选的专长（%s 类由背景或职业特性给）":
+        "\"%s\" cannot be taken with an Ability Score Improvement "
+        "(%s feats come from a background or a class feature)",
+    "现在不能选「%s」：%s": "Cannot take \"%s\" now: %s",
+    "还没有可用的属性提升名额（%s 级各一次；已用 %d / 共 %d）":
+        "No Ability Score Improvement left (one at each of levels %s; "
+        "%d used of %d)",
+    "「%s」没有这些选择项：%s": "\"%s\" has no such choices: %s",
+    "「%s」由背景或职业特性给，不能在这里去掉":
+        "\"%s\" comes from a background or a class feature and cannot be removed here",
 }
 
 

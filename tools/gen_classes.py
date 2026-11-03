@@ -231,6 +231,12 @@ def render(class_id: str, meta: dict, levels: list[dict], feats: dict, detail: d
     choices, skills = skill_choices(meta)
     zh = CLASS_ZH[class_id]
     en = meta["name"]
+    # 属性提升的等级：原文数据里 features 含 ability-score-improvement 的那些等级行。
+    # 必须由生成器写出来 —— 它是**机制**（`api.add_feat` 按它算名额），
+    # 只手改 YAML 的话，下一次重跑生成器就把它抹掉，4 级又拿不到 +2 了。
+    asi = [int(row["level"]) for row in levels
+           if any(str(item.get("index", "")).endswith("ability-score-improvement")
+                  for item in (row.get("features") or ()))]
     out = [
         "# 由 tools/gen_classes.py 从 data/raw/* + dnd55e_classes_detail.json 生成。",
         "# 重跑生成器会覆盖本文件；要长期改动请改数据源，或改完这里再把它从生成列表里去掉。",
@@ -244,6 +250,14 @@ def render(class_id: str, meta: dict, levels: list[dict], feats: dict, detail: d
         "saves: [%s]" % ", ".join(item["index"] for item in meta.get("saving_throws") or []),
         "caster: %s" % CASTER[class_id],
         "subclass_level: 3",
+    ]
+    if asi:
+        out += [
+            "# 属性提升（ASI）的等级：每条给一次「一项 +2 / 两项 +1 / 换一个专长」的名额。",
+            "# 战士多 6/14 级、盗贼多 10 级 —— 原文怎么写就怎么写，别套别的职业。",
+            "asi_levels: [%s]" % ", ".join(str(level) for level in asi),
+        ]
+    out += [
         "skill_choices: %d" % choices,
         "skill_list:",
     ]

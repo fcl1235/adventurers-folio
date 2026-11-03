@@ -14,6 +14,10 @@ proficiencies:
 caster: half
 casting_ability: cha
 subclass_level: 3
+# 属性提升（ASI）的等级：每条给一次「一项 +2 / 两项 +1 / 换一个专长」的名额。
+# 依据 data/raw/class-levels-2024.json 里 features 含 ability-score-improvement 的等级行；
+# 战士多 6 级与 14 级、盗贼多 10 级 —— 别照抄别的职业。名额怎么用见 api.add_feat。
+asi_levels: [4, 8, 12, 16]
 # 武器精通件数（2024）：等级 → 可精通的武器种类数。只写变化点，其余沿用上一级。
 # 依据 data/raw/class-levels-2024.json 的 class_specific.weapon_mastery；
 # 圣武士/游侠/盗贼的原文只写「两种武器」且未提升级增量，故只登记 1 级。

@@ -292,6 +292,65 @@ class FeatPageTest(unittest.TestCase):
         page.remove_pick()
         self.assertEqual(page._choice()["picked"], ["str"])
 
+    # --- G35：4 级起的属性提升要有入口 ---------------------------------
+    def test_add_feat_button_takes_one_slot(self):
+        """4 级、还没有专长：左下那块能加一条，加完名额就用掉了。"""
+        app, page = self._page([], level=4)
+        self.assertEqual(str(page.add_feat_button.cget("state")), "normal")
+        self.assertIn("还能加 1 次", page.slot_var.get())
+        self.assertTrue(page.add_feat(), page.status_var.get())
+        self.assertEqual(list(page.pick_box.cget("values") or ()), [],
+                         "名额用完了还列着候选")
+        self.assertEqual(str(page.add_feat_button.cget("state")), "disabled")
+        self.assertIn("都用完了", page.slot_var.get())
+        self.assertEqual([row["name"] for row in app.sheet["feats"]], ["属性值提升"])
+
+    def test_added_feat_counts_only_after_picks(self):
+        """加进来是「还差 2 项」的状态：属性要选完才计入，界面不能假装已经加了。"""
+        app, page = self._page([], level=4)
+        before = app.actor.top().statblock.abilities.score("str")
+        page.add_feat()
+        self.assertEqual(app.actor.top().statblock.abilities.score("str"), before)
+        self.assertTrue(page._feat()["pending"])
+        page.options.select_id("str")
+        page.add_pick()
+        page.add_pick()
+        self.assertEqual(app.actor.top().statblock.abilities.score("str"), before + 2)
+
+    def test_add_feat_disabled_below_level_four(self):
+        """3 级一个名额都没有：按钮该是灰的，而不是点了才报错。"""
+        _, page = self._page([], level=3)
+        self.assertEqual(str(page.add_feat_button.cget("state")), "disabled")
+        self.assertIn("都用完了", page.slot_var.get())
+
+    def test_two_instances_are_selected_separately(self):
+        """两条属性提升的 id 一样，靠 `id#序号` 区分 —— 不改键的话
+        「选第二行」永远落到第一行，改第二次的选择会静默改掉第一次的。"""
+        app, page = self._page([], level=8)
+        page.add_feat()
+        page.options.select_id("str")
+        page.add_pick()
+        page.add_pick()
+        page.add_feat()
+        page.options.select_id("con")
+        page.add_pick()
+        page.add_pick()
+        rows = [row for row in page._feats if row["id"] == ASI]
+        self.assertEqual([row["index"] for row in rows], [0, 1])
+        # 点第二行再改：先清空它自己的选择，再选「感知」。第一次的力量 +2 不能被改掉。
+        page.feats.select_id("%s#1" % ASI)
+        page._select_feat()
+        self.assertEqual(page._feat()["index"], 1, "选中第二行却拿到第一行")
+        self.assertTrue(page.clear_picks(), page.status_var.get())
+        page.options.select_id("wis")
+        page.add_pick()
+        page.options.select_id("wis")
+        page.add_pick()
+        score = app.actor.top().statblock.abilities.score
+        self.assertEqual(score("str"), SCORES["str"] + 2)
+        self.assertEqual(score("con"), SCORES["con"])
+        self.assertEqual(score("wis"), SCORES["wis"] + 2)
+
     def test_honesty_says_text_only_feat_is_not_counted(self):
         """警觉（Alert）在本程序里只有规则文字 —— 界面必须说出来。"""
         _, page = self._page([ALERT])
@@ -1201,6 +1260,22 @@ class LevelUpUiTest(unittest.TestCase):
         self.assertIn("还差", app.status.cget("text"))
         # 状态行说的是升级结果，不是向导自己的「第 N 步」
         self.assertIn("生命上限", app.status.cget("text"))
+
+    def test_level_up_with_only_the_asi_left_opens_the_feats_page(self):
+        """属性提升不是向导里的一步：不能把玩家扔回第 0 步（职业），要切到「专长」页。"""
+        actor = api.new_character(self.bundle, FIGHTER, 3, SCORES,
+                                  subclass="dnd2024.subclass.fighter.champion")
+        actor = api.set_masteries(actor, ["dnd2024.item.weapon.longsword",
+                                          "dnd2024.item.weapon.greatsword",
+                                          "dnd2024.item.weapon.longbow",
+                                          "dnd2024.item.weapon.shortbow"])
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        app.level_up()
+        app.update_idletasks()
+        self.assertEqual(app.mode, "sheet", "属性提升把玩家丢进建卡向导了")
+        self.assertEqual(app.book.tab(app.book.select(), "text"), "专长")
+        self.assertIn("属性提升", app.status.cget("text"))
 
     def test_level_up_at_cap_warns_without_raising(self):
         app = self._app(level=20)

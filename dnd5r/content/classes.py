@@ -65,6 +65,10 @@ class ClassDef:
     # （2024 只有野蛮人/战士/圣武士/游侠/盗贼有）。0 与「没有」是两件事：
     # 空表 = 完全不给这项特性；写了表但某级缺 = 沿用最近的下界。
     mastery_counts: Mapping[int, int] = field(default_factory=dict)
+    # 属性提升（ASI）的等级。**必须写进数据**：这条以前只写在特性的正文里，
+    # 结果「4 级该给一次 +2」只有人知道、程序不知道 —— 升级到 4 级什么也不会发生。
+    # 战士 6/14、盗贼 10 级比别人多，照抄会少给名额。
+    asi_levels: tuple[ClassLevel, ...] = ()
     slot_refresh: Refresh = Refresh.LONG_REST   # 邪术师契约位是短休恢复
     source: str = ""
 
@@ -132,6 +136,14 @@ class ClassDef:
         if not usable:
             return 0
         return max(0, int(self.mastery_counts[max(usable)]))
+
+    def asi_slots_at(self, class_level: ClassLevel) -> int:
+        """这个职业到这一级为止一共给了几次属性提升。
+
+        累计数而不是「是不是刚升到」，因为界面问的是「还剩几次没用」——
+        答「刚升到 4 级才有」的话，掉一级再升回去就再也拿不到了。
+        """
+        return sum(1 for level in self.asi_levels if int(level) <= int(class_level))
 
     def to_dict(self) -> dict:
         return {
@@ -273,6 +285,29 @@ def _parse_mastery_counts(data: Any, ident: str) -> dict[int, int]:
     return table
 
 
+def _parse_asi_levels(data: Any, ident: str) -> tuple[ClassLevel, ...]:
+    """属性提升的等级清单。空 = 这个职业不给（2024 没有这样的职业，但模型要能表达）。
+
+    写成升序列表，重复或乱序直接报错：名额是按「到这一级给了几次」累计的，
+    数据里出现 `[8, 4]` 或 `[4, 4]` 只会在升级到某个随机等级时多给/少给一次，
+    界面上看不出任何异常 —— 这正是必须在加载期炸掉的那类错。
+    """
+    if not data:
+        return ()
+    if not isinstance(data, (list, tuple)):
+        raise PluginError("%s 的 asi_levels 必须是等级列表" % ident)
+    try:
+        levels = [int(item) for item in data]
+    except (TypeError, ValueError):
+        raise PluginError("%s 的 asi_levels 必须是整数：%r" % (ident, data))
+    for level in levels:
+        if not 1 <= level <= 20:
+            raise PluginError("%s 的 asi_levels 等级越界：%r" % (ident, level))
+    if levels != sorted(set(levels)):
+        raise PluginError("%s 的 asi_levels 必须严格升序且不重复：%r" % (ident, data))
+    return tuple(ClassLevel(level) for level in levels)
+
+
 def parse_slots(data: Any) -> dict[int, tuple[int, ...]]:
     """法术位表：`{5: [4,3,2,0,0,0,0,0,0]}`。多写或写错环数都要当场报错。"""
     if not data:
@@ -363,6 +398,7 @@ def parse_class(data: Any, source: str = "") -> ClassDef:
         cantrips=_parse_level_table(data.get("cantrips"), "%s cantrips" % ident),
         prepared=_parse_level_table(data.get("prepared"), "%s prepared" % ident),
         mastery_counts=_parse_mastery_counts(data.get("mastery_counts"), ident),
+        asi_levels=_parse_asi_levels(data.get("asi_levels"), ident),
         slot_refresh=_parse_refresh(data.get("slot_refresh"), ident),
         source=source,
     )

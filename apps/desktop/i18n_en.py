@@ -274,6 +274,23 @@ EN: dict[str, str] = {
         "Form %s: natural weapons use the card's numbers%s",
 
     # --- 专长 pages_feats.py ----------------------------------------------
+    "属性提升": "Ability Score Improvement",
+    "加这条专长": "Add this feat",
+    "属性提升：%s 级各一次，还能加 %d 次":
+        "Ability Score Improvement at levels %s; %d left",
+    "属性提升：%s 级各一次，都用完了":
+        "Ability Score Improvement at levels %s; all used",
+    "属性提升：%s 级各一次；已用 %d 次，超出名额 %d 次":
+        "Ability Score Improvement at levels %s; %d used, %d over the allowance",
+    "先在左边选一条要加的专长。": "Pick a feat to add on the left first.",
+    "已加「%s」": "Added \"%s\"",
+    "已加「%s」：在下面把选择项选完（属性才会计入）":
+        "Added \"%s\" — finish the choices below for it to count",
+    "这个角色还没有专长：背景的起始专长建卡时自动给，"
+    "4 级起的属性提升用左下的「加这条专长」。":
+        "No feats yet. The background's Origin feat is granted during character "
+        "creation; use \"Add this feat\" at the bottom left for Ability Score "
+        "Improvements from level 4 on.",
     "起源": "Origin",
     "通用": "General",
     "战斗风格": "Fighting Style",

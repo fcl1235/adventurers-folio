@@ -11,6 +11,10 @@ proficiencies:
 caster: full
 casting_ability: wis
 subclass_level: 3
+# 属性提升（ASI）的等级：每条给一次「一项 +2 / 两项 +1 / 换一个专长」的名额。
+# 依据 data/raw/class-levels-2024.json 里 features 含 ability-score-improvement 的等级行；
+# 战士多 6 级与 14 级、盗贼多 10 级 —— 别照抄别的职业。名额怎么用见 api.add_feat。
+asi_levels: [4, 8, 12, 16]
 skill_choices: 2
 skill_list:
   - animal_handling
@@ -220,9 +224,9 @@ powers:
     effects:
       - note:
           zh: |-
-            属性加值与专长选择还没有入口：这条只登记规则原文。
+            4 级起每次属性提升都会在「专长」页出现一次名额；+2/+1 与换专长都在那里选。
           en: |-
-            No entry point for the bonus or the feat yet; the rule text is registered here.
+            From level 4 on, each Ability Score Improvement shows up as an allowance on the Feats page; the +2/+1 or a feat swap is chosen there.
 
   - id: dnd2024.class.druid.wild_resurgence
     name: { zh: 荒野复生, en: Wild Resurgence }

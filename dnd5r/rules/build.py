@@ -282,9 +282,12 @@ def build_actor(
         all_powers += tuple(power for power in species_def.powers
                             if int(power.level) <= int(total) and power not in all_powers)
     if origin_def is not None and origin_def.origin_feat:
-        # 起始专长与玩家自选走同一张清单。去重不是洁癖：`repeats` 按登记次数算，
-        # 同一个专长记两次会被当成「可重复选取」而多给一轮选择。
-        chosen_feats = tuple(dict.fromkeys((origin_def.origin_feat,) + chosen_feats))
+        # 起始专长与玩家自选走同一张清单。这里**只能**补背景那一条，不能对整张
+        # 清单去重：`dict.fromkeys` 会把「属性提升登记两次」压成一次，
+        # 于是有背景的角色（= 所有正常角色）拿两次属性提升只加了 2 点，
+        # 而且 `repeats` 也算成一次 —— 查起来毫无线索。
+        if origin_def.origin_feat not in chosen_feats:
+            chosen_feats = (origin_def.origin_feat,) + chosen_feats
     feat_defs_ = _check_feats(bundle, chosen_feats, total, class_ids, scores)
     feat_powers = tuple(p for feat in feat_defs_ for p in feat.powers)
     all_powers = all_powers + tuple(p for p in feat_powers if p not in all_powers)
