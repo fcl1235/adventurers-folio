@@ -350,6 +350,27 @@ def _check_gear(label: str, app, page: GearPage) -> list[str]:
         problems.append("%s：卸不下来 %s" % (label, armor["name"]))
     elif app.sheet["equipped"].get("armor"):
         problems.append("%s：卸完以后 sheet 里还留着护甲" % label)
+
+    # --- 武器详情里的精通（G32）------------------------------------------
+    # 三条都要查，因为它们来自三个不同的地方：名字/效果来自 `api.weapon_catalog`，
+    # 「你有没有这件」来自 `profile.masteries`。任一处断了，界面上都会静默少一段。
+    picked = {row["id"] for row in
+              ((app.sheet.get("origin") or {}).get("masteries") or ())}
+    if page._masteries != picked:
+        problems.append("%s：页面的精通集合 %r，sheet 是 %r"
+                        % (label, sorted(page._masteries), sorted(picked)))
+    weapon = next((row for row in page._weapons if row["mastery"]), None)
+    if weapon is not None:
+        page.weapon_list.select_id(weapon["id"])
+        page._show_weapon_detail()
+        detail = page.weapon_detail_var.get()
+        if weapon["mastery_name"] not in detail:
+            problems.append("%s：武器详情没印精通名 %s（%r）"
+                            % (label, weapon["mastery_name"], detail))
+        if weapon["mastery_summary"] and weapon["mastery_summary"] not in detail:
+            problems.append("%s：武器详情没印精通效果（%r）" % (label, detail))
+        if "未结算" in detail:
+            problems.append("%s：武器详情还在说「未结算」（%r）" % (label, detail))
     return problems
 
 

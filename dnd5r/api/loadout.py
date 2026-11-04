@@ -91,7 +91,9 @@ def armor_catalog(bundle: ContentBundle, locale: str = "zh") -> dict:
 
 
 def weapon_catalog(bundle: ContentBundle, locale: str = "zh") -> dict:
-    """武器清单（38 件）。`mastery` 只记名字，**效果不结算**（见 rules/attack.py）。"""
+    """武器清单（38 件）。`mastery` 是数据上的精通属性，效果见 `rules/mastery`。"""
+    from ..rules.mastery import mastery_name, mastery_summary
+
     rows = sorted(bundle.weapons.values(), key=lambda item: (item.category, item.id))
     return {
         "count": len(rows),
@@ -99,7 +101,9 @@ def weapon_catalog(bundle: ContentBundle, locale: str = "zh") -> dict:
             {"id": item.id, "name": item.name.get(locale), "category": item.category,
              "damage": item.damage, "damage_type": item.damage_type,
              "versatile": item.versatile,
-             "properties": list(item.properties), "mastery": item.mastery}
+             "properties": list(item.properties), "mastery": item.mastery,
+             "mastery_name": mastery_name(item.mastery, locale),
+             "mastery_summary": mastery_summary(item.mastery, locale)}
             for item in rows
         ],
     }

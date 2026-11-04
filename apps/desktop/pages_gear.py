@@ -5,8 +5,9 @@
 AC、攻击表、`gear` 三处都是每次取卡现读装备槽的，所以换完立刻变，**不需要重建**。
 
 两条要在界面上说清的事：
-  * 武器精通**只记录、不结算**（`rules/attack.py` 里只存名字），所以详情里
-    写的是「精通：削弱 sap」而不是假装它已经生效。
+  * 武器精通**已经结算**（`rules/mastery.py` + `rules/attack.py`）：擦伤/击倒/
+    扰乱/削弱在攻击掷骰里真算，劈砍/快手/推撞/迟缓给参数。所以详情里写的是
+    效果原文，并且标出「这件是不是你的精通武器」—— 名字对得上不等于你选过它。
   * 力量需求与隐匿劣势是展示信息 —— 2024 的力量需求影响速度，那套还没接，
     写成「力 13」不写「不满足会……」。
 """
@@ -20,7 +21,7 @@ import dnd5r.api as api
 
 from .i18n import Catalog, T, join
 from . import theme
-from .widgets import (COL_LEFT, COL_MID, COL_RIGHT, DAMAGE_ZH, MASTERY_ZH, KeyValue,
+from .widgets import (COL_LEFT, COL_MID, COL_RIGHT, DAMAGE_ZH, KeyValue,
                       ListPane, section)
 
 CATEGORY_ZH = Catalog({
@@ -50,6 +51,9 @@ class GearPage(ttk.Frame):
         self.app = app
         self._armors: list[dict] = []
         self._weapons: list[dict] = []
+        # 玩家**选过精通**的武器 id。名字对得上不等于他有这件武器的精通：
+        # 法师拿巨剑时数据上仍是「击倒」，但打出来不该有任何效果。
+        self._masteries: set[str] = set()
         self._loaded = False
         self._build()
 
@@ -106,7 +110,7 @@ class GearPage(ttk.Frame):
                   wraplength=520, justify="left").pack(anchor="w", pady=(4, 0))
 
         # --- 右：武器表 ----------------------------------------------------
-        weapons = section(right, T("武器"), T("精通已记录，效果未结算"))
+        weapons = section(right, T("武器"), T("精通效果在命中时结算"))
         weapons.pack(fill="both", expand=True)
         self.weapon_list = ListPane(weapons, height=9, width=34)
         self.weapon_list.pack(fill="both", expand=True)
@@ -135,6 +139,8 @@ class GearPage(ttk.Frame):
             self._weapons = api.weapon_catalog(self.app.bundle, self.app.locale)["weapons"]
             self._loaded = True
         self._equipped = dict(sheet.get("equipped") or {})
+        self._masteries = {row["id"] for row in
+                           ((sheet.get("origin") or {}).get("masteries") or ())}
         self._fill_lists(self._equipped)
         self._fill_slots(sheet)
         self._fill_bag(sheet)
@@ -246,10 +252,16 @@ class GearPage(ttk.Frame):
         props = [PROPERTY_ZH.get(item, item) for item in row["properties"]]
         if props:
             bits.append(join(props))
-        if row["mastery"]:
-            bits.append(T("精通：%s %s") % (MASTERY_ZH.get(row["mastery"], row["mastery"]),
-                                        row["mastery"]))
-        self.weapon_detail_var.set(" · ".join(bits))
+        if not row["mastery"]:
+            self.weapon_detail_var.set(" · ".join(bits))
+            return
+        # 名字与效果都取自 `api.weapon_catalog`（已按当前语言），界面不再存一张表：
+        # 以前 `MASTERY_ZH` 与 `rules/mastery` 各有一份中文名，改一处漏一处。
+        head = T("精通「%s」") % row["mastery_name"]
+        head += (T("（你有这件武器的精通）") if row["id"] in self._masteries
+                 else T("（你没选这件武器的精通，效果不会触发）"))
+        self.weapon_detail_var.set("%s\n%s %s" % (" · ".join(bits), head,
+                                                  row["mastery_summary"]))
 
     # --- 操作 -------------------------------------------------------------
     def _status(self, text: str, error: bool = False) -> None:

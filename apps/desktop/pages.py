@@ -123,7 +123,7 @@ class OverviewPage(ttk.Frame):
         # `api.roll_check(kind="tool")` 任意指定都行。一行文本还不会随熟练数长高。
         # 打包顺序：先把底部这块 `side="bottom"` 钉住，再让技能吃掉剩余空间。
         self.tools_var = tk.StringVar(value="")
-        tools = section(mid, T("熟练与精通"), T("工具熟练 / 武器精通（精通效果未结算）"))
+        tools = section(mid, T("熟练与精通"), T("工具熟练 / 武器精通（命中后结算）"))
         tools.pack(side="bottom", fill="x", pady=(6, 0))
         self.tools_label = ttk.Label(tools, textvariable=self.tools_var,
                                      wraplength=400, justify="left")
@@ -274,13 +274,14 @@ class OverviewPage(ttk.Frame):
 
         这里刻意不带效果（「擦伤」「击倒」）：带上之后一行装不下、折成两行时
         整页高度会顶到 636/646，6 件武器名字再长一点就越过预算。卡面要回答的是
-        「我精通哪几件」，效果本来也没结算。
+        「我精通哪几件」；每种精通的算法在装备页与遭遇战记录里，而**攻击掷骰时
+        是真的会带上效果** —— 别在这行写「未结算」，那是旧实现的说法。
         """
         rows = (sheet.get("origin") or {}).get("masteries") or []
         if not rows:
             self.mastery_var.set("")
             return
-        self.mastery_var.set(T("武器精通：%s（效果未结算）")
+        self.mastery_var.set(T("武器精通：%s")
                              % join(row["name"] for row in rows))
 
     def refresh_fight(self, sheet: dict) -> None:

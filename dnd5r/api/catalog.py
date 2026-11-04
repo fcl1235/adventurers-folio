@@ -23,6 +23,26 @@ def content_summary(bundle: ContentBundle, locale: str = "zh") -> dict:
     return stats
 
 
+def mastery_catalog(locale: str = "zh") -> dict:
+    """八种武器精通的目录：名字、效果、以及本程序结算到哪一步。
+
+    `resolved=True` 的是真算的（擦伤 / 击倒 / 扰乱 / 削弱）；`needs` 说明
+    另外四种缺什么。界面照这个写提示，不要自己列一份。
+    """
+    from ..rules.mastery import MASTERY_DEFS
+
+    return {
+        "count": len(MASTERY_DEFS),
+        "masteries": [
+            {"key": item.key, "name": item.name.get(locale),
+             "summary": item.summary.get(locale), "kind": item.kind,
+             "resolved": item.resolved,
+             "needs": item.needs.get(locale) if item.needs is not None else ""}
+            for item in MASTERY_DEFS.values()
+        ],
+    }
+
+
 def spell_catalog(
     bundle: ContentBundle,
     class_id: str | None = None,

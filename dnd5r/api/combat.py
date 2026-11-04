@@ -291,6 +291,7 @@ def attack_roll(
     apply: bool = False,
     extras: Any = (),
     encounter: "Encounter | None" = None,
+    mastery: Any = "auto",
 ) -> dict:
     """掷一次武器攻击：命中 → 伤害 → 额外伤害 → 抗性 →（可选）落到 HP。
 
@@ -302,6 +303,10 @@ def attack_roll(
     `extras` 是这次要不要加额外伤害（月华形态的「每回合一次 +2d10」这类）。
     默认**不加**，只把可用项列在 `extras.available` 里：原文写的是
     "you can deal an extra 2d10"，加不加是玩家的选择。
+
+    `mastery` 是这次要不要用**武器精通**（默认 `"auto"` = 用，`False` 关掉）。
+    擦伤、击倒、扰乱、削弱这四项真结算；劈砍/快手/推撞/迟缓只把参数算好，
+    见报告里的 `mastery` 块与 `rules/mastery.py` 开头的说明。
 
     传了 `encounter` 就**必须用它的动作额度**：自己回合、还有动作（副手用附赠）。
     不传 = 不记账（老调用方与单测都还在用这条路），报告里 `economy.preview=True`。
@@ -322,7 +327,8 @@ def attack_roll(
             raise IllegalAction("%s 没有可用的%s" % (combatant.label, kind.value))
     result = resolve_attack(
         content, attacker, prepared, weapon, off_hand,
-        rng or SeededRng(seed), apply=apply, locale=locale, extras=extras)
+        rng or SeededRng(seed), apply=apply, locale=locale, extras=extras,
+        mastery=mastery)
     if combatant is not None:
         if apply:
             combatant.economy.pay(kind, combatant.label)
@@ -486,6 +492,8 @@ def marks_of(actor: Actor) -> list[dict]:
     """身上还没用掉的一次性标记（本回合的下一次攻击优势这类）。"""
     labels = {
         "turn": "本回合结束前", "round": "本轮结束前", "never": "直到被移除",
+        # 武器精通的扰乱/削弱挂这一档：到你的下回合结束（见 model/marks.py）
+        "next": "到下回合结束", "rest": "撑不过一次休息",
     }
     rows: list[dict] = []
     for mark in actor.root().marks.active():

@@ -47,8 +47,12 @@ from .contributions import (
 )
 from .derived import resolver_for
 from .effects.onhit import ExtraDamage
+from .mastery import effect_plan, save_name
 from .resolver import CRIT_ON_20
-from .weapons import AttackProfile, damage_name, is_ranged, profiles_for
+from .text import tr
+from .weapons import (
+    AttackProfile, damage_name, is_ranged, masteries_of, profiles_for,
+)
 
 __all__ = [
     "attack_profile", "extra_damage_options", "resolve_attack",
@@ -193,11 +197,16 @@ def resolve_attack(
     apply: bool = False,
     locale: str = "zh",
     extras: "str | Iterable[str]" = (),
+    mastery: Any = "auto",
 ) -> dict[str, Any]:
     """掷一次武器攻击。
 
     `apply=True` 才扣目标 HP、消耗优势标记、记「每回合一次」的账。
     `extras` 见模块注释（默认不加额外伤害，只列出可用项）。
+
+    `mastery` 是这次要不要用**武器精通**（八种属性见 `rules/mastery.py`）：
+    默认 `"auto"` = 用；传 `False` / `"off"` 关掉。它只对「建卡时选过这件武器」
+    的攻击生效 —— 没选过就在报告里说明，不静默忽略。
     """
     profile = attack_profile(bundle, attacker, weapon_id, off_hand, locale)
     resolver = resolver_for(attacker, bundle.armors)
@@ -230,8 +239,37 @@ def resolve_attack(
     picked = _chosen_extras(options, extras) if outcome != "miss" else []
     hit = outcome != "miss"
 
+    # --- 武器精通 -------------------------------------------------------
+    # 先算「计划书」（有没有资格、DC 多少、第二击怎么掷），再按命中与否落地。
+    plan = effect_plan(
+        bundle.weapons.get(profile.weapon_id), masteries_of(attacker),
+        prof_bonus=resolver.ctx.prof_bonus,
+        ability_mod=top.statblock.abilities.mod(profile.ability),
+        attack_bonus=profile.attack,
+        damage_dice=str(profile.damage),
+        damage_type=profile.damage_type,
+        locale=locale,
+    )
+    mastery_on = _mastery_wanted(mastery) and bool(plan.get("usable"))
+    block: dict[str, Any] = {}
+    mastery_notes: list[str] = []
+    if plan:
+        block = {
+            "key": plan["key"], "name": plan["name"], "kind": plan["kind"],
+            "usable": bool(plan["usable"]), "resolved": bool(plan["resolved"]),
+            "reason": plan.get("reason", ""), "applied": False,
+        }
+        if not plan["usable"]:
+            mastery_notes.append(plan.get("reason", ""))
+        elif not mastery_on:
+            mastery_notes.append(tr("这次没有使用精通「%s」的效果", locale)
+                                 % plan["name"])
+        elif not plan["resolved"]:
+            mastery_notes.append(tr("精通「%s」还没结算：需要%s", locale)
+                                 % (plan["name"], plan.get("needs", "")))
+
     segments: list[dict] = []
-    total_damage = 0
+    pending_mark = None
     if hit:
         multiplier = 2 if outcome == "critical" else 1
         segments.append(_segment(
@@ -246,7 +284,25 @@ def resolve_attack(
                 damage_type=row["damage_type"], multiplier=multiplier,
                 target=target, rng=roller, locale=locale,
             ))
-        total_damage = sum(int(item["damage"]) for item in segments)
+        if mastery_on:
+            pending_mark = _mastery_on_hit(block, plan, attacker, target, apply,
+                                           roller, locale, mastery_notes)
+    elif mastery_on and plan["kind"] == "miss_damage":
+        # 擦伤：唯一一条「没命中也有伤害」的规则。定值、不掷骰、照常吃抗性。
+        graze = int(plan.get("damage") or 0)
+        block["damage"] = graze
+        block["applied"] = True
+        if graze > 0:
+            segments.append(_segment(
+                label="%s（%s）" % (plan["name"], tr("武器精通", locale)),
+                dice=Dice(), bonus=graze, damage_type=profile.damage_type,
+                multiplier=1, target=target, rng=roller, locale=locale,
+            ))
+        mastery_notes.append(tr("精通「%s」：攻击未命中，仍造成 %d 点%s伤害（擦伤）",
+                                locale)
+                             % (plan["name"], graze,
+                                damage_name(profile.damage_type, locale)))
+    total_damage = sum(int(item["damage"]) for item in segments)
 
     marks_spent: list[Mark] = []
     if apply:
@@ -256,6 +312,13 @@ def resolve_attack(
         for row in picked:
             if row["limit"] == "turn":
                 attacker.root().marks.spend(row["key"])
+        # 精通挂的标记**必须**在消费之后再挂：扰乱给的正是「下一次攻击优势」，
+        # 先挂就会被这次攻击自己吃掉（实测踩过）。
+        if pending_mark is not None:
+            host, mark = pending_mark
+            host.marks.add(mark)
+            block["mark"] = mark.to_dict()
+            block["applied"] = True
 
     hp_before = hp_after = applied = None
     if apply and target.actor is not None and total_damage:
@@ -265,7 +328,8 @@ def resolve_attack(
         hp_after = pool.current + pool.temp
         applied = hp_before - hp_after
 
-    notes = _notes(outcome, profile, segments, picked, options, apply)
+    notes = _notes(outcome, profile, segments, picked, options, apply, locale) \
+        + mastery_notes
     return {
         "attacker": {"id": attacker.id,
                      "name": top.statblock.name.get(locale),
@@ -275,7 +339,8 @@ def resolve_attack(
                    "ability": profile.ability,
                    "proficient": profile.proficient,
                    "off_hand": profile.off_hand,
-                   "mastery": profile.mastery},
+                   "mastery": profile.mastery,
+                   "mastery_usable": profile.mastery_usable},
         "target": {"label": target.label or "目标", "ac": int(target.ac)},
         "attack": {
             "bonus": int(profile.attack),
@@ -301,6 +366,7 @@ def resolve_attack(
             "chosen": [row["key"] for row in picked],
             "available": options,
         },
+        "mastery": block,
         "marks": {"spent": [item.to_dict() for item in marks_spent],
                   "preview": not apply},
         "hp": {"before": hp_before, "after": hp_after, "applied": applied},
@@ -311,6 +377,123 @@ def resolve_attack(
 def _is_ranged(profile: AttackProfile, bundle: ContentBundle) -> bool:
     weapon = bundle.weapons.get(profile.weapon_id)
     return is_ranged(weapon) if weapon is not None else False
+
+
+def _mastery_wanted(flag: Any) -> bool:
+    """`mastery` 参数的写法：默认 `"auto"` = 用；`False` / `"off"` / `"none"` 关掉。
+
+    其余任何真值都算「用」—— 调用方传 `True` 是常态，不该因为没写 "auto" 就不生效。
+    """
+    if isinstance(flag, str):
+        return flag.strip().lower() not in ("off", "none", "false", "no")
+    return bool(flag)
+
+
+def _mastery_on_hit(block: dict, plan: dict, attacker: Actor, target: Target,
+                    apply: bool, roller: Rng, locale: str,
+                    notes: list[str]):
+    """命中时落地精通效果。返回**待挂的标记** `(host, Mark)`，由调用方在
+    「吃掉本次攻击的一次性标记」**之后**再挂上。
+
+    顺序很要紧：扰乱挂给的是「下一次攻击优势」，而本次攻击刚好在同一个函数里
+    消耗标记 —— 先挂就会被当次吃掉，玩家永远用不到。这条是实测出来的，
+    不是想出来的。
+
+    分三档，**按「有没有足够的信息」分，不按「好不好做」分**：
+
+      * 掷目标的豁免（击倒）—— DC 与目标豁免加值都在手上，可以真掷
+      * 挂一次性标记（扰乱 / 削弱）—— 引擎的标记本来就管这个，可以真挂
+      * 只给参数（劈砍 / 快手 / 推撞 / 迟缓）—— 缺第二个生物、持握方式或位置，
+        算不了就不算，把能确定的数字（第二击加值、10 尺）交给玩家
+    """
+    kind = plan["kind"]
+    name = plan["name"]
+
+    if kind == "save_prone":
+        dc = int(plan["dc"])
+        save = str(plan["save"])
+        bonus = int(target.save_bonus(save))
+        roll = roll_d20(roller, "flat")
+        total = roll.total + bonus
+        saved = total >= dc
+        block.update({
+            "dc": dc, "save": save, "save_name": save_name(save, locale),
+            "save_roll": {"die": roll.total, "bonus": bonus,
+                          "total": int(total), "saved": saved},
+        })
+        word = tr("成功，不倒地", locale) if saved else tr("失败，倒地", locale)
+        notes.append(tr("精通「%s」：目标做%s豁免 DC %d —— 掷 %d %+d = %d，%s",
+                        locale)
+                     % (name, save_name(save, locale), dc, roll.total, bonus,
+                        total, word))
+        if saved:
+            return None
+        if target.actor is None:
+            # 手填的「AC 15 的木桩」没有角色卡，倒地没有地方记 —— 说出来，
+            # 别让报告里那句「失败，倒地」被读成「已经倒下了」。
+            notes.append(tr("（目标没有角色卡，倒地只能你自己在桌上记）", locale))
+            return None
+        if apply:
+            target.actor.conditions.add("prone")
+            block["condition"] = "prone"
+            block["applied"] = True
+        else:
+            notes.append(tr("（预览：没有真的给目标挂上倒地）", locale))
+        return None
+
+    if kind in ("attack_advantage", "attack_disadvantage"):
+        # 扰乱挂在自己身上（我看那个目标有优势），削弱挂在目标身上（它的攻击劣势）
+        advantage = kind == "attack_advantage"
+        host = attacker.root() if advantage else (
+            target.actor.root() if target.actor is not None else None)
+        block["expires"] = plan.get("expires", "turn")
+        block["targeted"] = True
+        sentence = (tr("精通「%s」：你对该目标的下一次攻击获得优势（直到下回合结束）",
+                       locale) if advantage
+                    else tr("精通「%s」：目标的下一次攻击有劣势（直到你的下回合开始）",
+                            locale)) % name
+        notes.append(sentence)
+        if host is None:
+            notes.append(tr("（目标没有角色卡，这条标记没地方挂）", locale))
+            return None
+        if not apply:
+            notes.append(tr("（预览：标记没有真的挂上）", locale))
+            return None
+        mark = Mark(id="mastery.%s" % plan["key"], kind="advantage",
+                    target="attack.all", mode="adv" if advantage else "dis",
+                    source=name, label=name,
+                    expires=str(plan.get("expires") or "turn"))
+        return host, mark
+
+    if kind == "extra_attack":
+        block.update({"attack": int(plan.get("attack") or 0),
+                      "damage_dice": plan.get("damage_dice", "")})
+        if plan["key"] == "nick":
+            # 快手不是「多打一次」，是「轻型武器那次额外攻击不占附赠动作」。
+            # 写成「再做一次攻击」会让玩家以为动作经济里凭空多了一击。
+            notes.append(tr("精通「%s」：轻型武器的额外攻击并入攻击动作，"
+                            "不占附赠动作（伤害 %s，不加属性调整值）", locale)
+                         % (name, plan.get("damage_dice") or "—"))
+            return None
+        notes.append(tr("精通「%s」可以再做一次攻击：加值 %+d，命中造成 %s 点伤害"
+                        "（不加属性调整值）", locale)
+                     % (name, int(plan.get("attack") or 0),
+                        plan.get("damage_dice") or "—"))
+        return None
+
+    if kind == "forced_move":
+        block["distance"] = 10
+        notes.append(tr("精通「%s」：推离 10 尺", locale) % name)
+        return None
+
+    if kind == "speed_penalty":
+        block["speed"] = 10
+        notes.append(tr("精通「%s」：速度减 10 尺", locale) % name)
+        return None
+
+    notes.append(tr("精通「%s」已记录（名字对得上，但这本程序还没有它的结算代码）",
+                    locale) % name)
+    return None
 
 
 def _attack_detail(profile: AttackProfile) -> str:
@@ -372,17 +555,17 @@ def _defense(damage_type: str, target: Target) -> str:
 
 
 def _notes(outcome: str, profile: AttackProfile, segments: list[dict],
-           picked: list[dict], options: list[dict], apply: bool) -> list[str]:
+           picked: list[dict], options: list[dict], apply: bool,
+           locale: str = "zh") -> list[str]:
     notes: list[str] = []
     if outcome == "miss":
-        notes.append("未命中，不掷伤害")
+        # 擦伤是唯一一条「未命中也有伤害」的规则，所以这里不能一律写「不掷伤害」
+        notes.append(tr("未命中，不掷伤害", locale) if not segments
+                     else tr("未命中：常规伤害不掷，只结算精通效果", locale))
     if outcome == "critical":
         notes.append("重击：所有伤害骰翻倍，定值不翻")
     if profile.disadvantage:
         notes.append("重型武器属性不足 13，本次攻击有劣势")
-    if profile.mastery:
-        notes.append("武器专精「%s」的实际效果（推、削、拖）要按位置结算，"
-                     "这里只记名字" % profile.mastery)
     if profile.weapon_id == "unarmed":
         notes.append("按徒手（1 + 属性调整值）算 —— 怪物与野兽形态的天然武器还没建模，"
                      "兽形的真实攻击骰要按形态数据手填")

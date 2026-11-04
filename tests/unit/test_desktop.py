@@ -91,14 +91,18 @@ class DesktopAppTest(unittest.TestCase):
         self.assertNotIn(" ·  · ", plain.sub_var.get())
 
     def test_mastery_line_lists_picked_weapons(self):
-        """武器精通以前建完卡就看不见了：卡面上要能读出「我精通哪几件」。"""
+        """武器精通以前建完卡就看不见了：卡面上要能读出「我精通哪几件」。
+
+        G32 之后这一行**不再**写「效果未结算」—— 精通已经在 `rules/attack` 里
+        真结算了。断言反过来查：别把旧说法又写回卡面。
+        """
         app = self._app(masteries=["dnd2024.item.weapon.longsword",
                                    "dnd2024.item.weapon.greatsword",
                                    "dnd2024.item.weapon.longbow"])
         text = app.overview.mastery_var.get()
         self.assertIn("长剑", text)
         self.assertIn("巨剑", text)
-        self.assertIn("未结算", text)
+        self.assertNotIn("未结算", text)
         self.assertEqual(self._app().overview.mastery_var.get(), "",
                          "没记精通时不该画一行假文字")
 

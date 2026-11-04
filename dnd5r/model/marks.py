@@ -10,11 +10,17 @@
 
 所以单独一层，只回答三件事：**还有几条、什么时候过期、用掉了没有**。
 
-三种作用域（`expires`）：
+四种作用域（`expires`）：
 
   turn   自己的回合结束时清（默认 —— 原文绝大多数写「本回合结束前」）
   round  一轮结束时清（在别人的回合里被挂上的，如队友给的援护）
   never  只能显式移除
+  next   **到你的下回合结束**：自己的回合末不清，撑过一个回合再清
+
+`next` 是为武器精通的「扰乱 / 削弱」加的：原文写「直到你的下回合结束」，
+`turn` 会在挂上的那一刻（就是你自己的回合末）立刻清掉，等于没挂；
+`round` 又取决于你在这一轮里排第几。所以加一档「降级」语义 ——
+第一次回合结束时从 `next` 降成 `turn`，第二次才真的清掉。
 
 **不进存档**：与 `Encounter` / `ActionEconomy` 同一条理由 —— 关掉程序就不该
 记得「上一轮那个优势还没用」。`Actor.to_dict()` 里也没有它。
@@ -30,7 +36,7 @@ from ..kernel.errors import RuleError
 # 标记种类。「待消费的优势/劣势」「待消费的额外伤害」，以及「别人交给你的一颗骰」
 # （诗人灵感）：三者都是「掷骰/命中那一刻才决定要不要用」—— 这正是标记存在的理由。
 MARK_KINDS = ("advantage", "extra_damage", "token")
-SCOPES = ("turn", "round", "never", "rest")
+SCOPES = ("turn", "round", "never", "rest", "next")
 
 
 @dataclass
@@ -131,8 +137,16 @@ class MarkSet:
 
     # --- 过期 ---------------------------------------------------------
     def end_turn(self) -> list[Mark]:
-        """自己回合结束：清 `turn` 标记与全部用量记账。返回被清掉的标记。"""
-        return self._purge(("turn",), clear_spent=True)
+        """自己回合结束：清 `turn` 标记与全部用量记账。返回被清掉的标记。
+
+        `next` 作用域的标记**先降级成 `turn`**（撑过这一个回合末，
+        到你的下回合结束才清）—— 先清再降级，顺序反了会把它当场清掉。
+        """
+        gone = self._purge(("turn",), clear_spent=True)
+        for item in self.items:
+            if item.expires == "next":
+                item.expires = "turn"
+        return gone
 
     def purge_rest(self) -> list[Mark]:
         """任何一次休息结束：清 `rest` 作用域（诗人灵感这类「一小时内的好处」，

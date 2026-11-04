@@ -9,7 +9,8 @@
   2. 背景的属性加值**跟着背景走**（2024 口径），而且必须赶在算 HP 之前：
      加在体质上的那一点要抬高 HP 上限。
   3. 加值的三种形态（+2/+1、+1/+1/+1、乱写）只有前两种能过。
-  4. 武器精通只记录、不结算 —— 断言 `origin_view` 明说 `masteries_settled=False`。
+  4. 武器精通**已经接入攻击结算**（G32）：断言 `origin_view` 说
+     `masteries_settled=True`，而逐项结算程度由 `api.mastery_catalog()` 说明。
 """
 
 import json
@@ -243,11 +244,12 @@ class MasteryTest(unittest.TestCase):
         self.assertEqual(actor.profile.masteries, frozenset({LONGSWORD}))
         self.assertEqual(actor.hp.current, 7)          # 运行时状态没动
 
-    def test_origin_view_says_not_settled(self):
+    def test_origin_view_reports_settled(self):
         actor = api.new_character(self.bundle, FIGHTER, 3, SCORES,
                                   masteries=[LONGSWORD])
         view = api.origin_view(actor, self.bundle)
-        self.assertFalse(view["masteries_settled"])
+        # G32 之后精通在 `rules/attack` 里真结算，这个旗标不该再是 False
+        self.assertTrue(view["masteries_settled"])
         self.assertEqual(view["masteries"][0]["name"], "长剑")
         self.assertEqual(view["masteries"][0]["mastery"], "sap")
 

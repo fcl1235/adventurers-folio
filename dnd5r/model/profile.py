@@ -68,8 +68,9 @@ class Profile:
     # 单独存而不是塞进 `choices`：它没有「选择项 id」，塞进去必然要拆字符串。
     background_bonus: Mapping[str, int] = field(default_factory=dict)
     # **武器精通**（2024 规则）：存武器的**内容 id**（"dnd2024.item.weapon.longsword"），
-    # 与专长、子职同一个口径。精通效果本身**不结算** —— 它依赖命中后的战术选择，
-    # 没有目标模型就算不出来。这里只记录玩家选了哪几件，界面标注「已记录，未结算」。
+    # 与专长、子职同一个口径。这里只记「你选了哪几件」，因为**资格**是档案事实；
+    # 效果怎么算属于规则层（`rules/mastery.py` + `rules/attack.py`），
+    # 而且只有这集合里的武器才算得出效果 —— 数据上的 `mastery: topple` 人人都有。
     masteries: frozenset[str] = frozenset()
 
     def __post_init__(self) -> None:

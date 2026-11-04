@@ -25,6 +25,7 @@ from ..rules.feats import (
     choice_prompt, feat_ledger, pick_key, proficiency_pool, spell_pool,
 )
 from ..rules.morph import form_id, reasons_for
+from ..rules.mastery import mastery_name, mastery_summary
 from ..rules.powers import can_use
 from ..rules.progression import MAX_TOTAL_LEVEL, proficiency_bonus
 from ..rules.resolver import crit_text, exhaustion_penalty, exhaustion_speed_penalty
@@ -268,7 +269,14 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
                                    resolver.ctx.prof_bonus, tokens,
                                    ranged_bonus=ranged_bonus,
                                    shielded=loadout.shielded)
-    attacks = [item.to_dict(locale) for item in attack_profiles]
+    attacks = []
+    for item in attack_profiles:
+        row = item.to_dict(locale)
+        # 精通的名字与效果**在这里补**：`rules/weapons` 只管算式，
+        # 精通表在 `rules/mastery`，让 weapons 反向 import 会绕成环。
+        row["mastery_name"] = mastery_name(row["mastery"], locale)
+        row["mastery_summary"] = mastery_summary(row["mastery"], locale)
+        attacks.append(row)
     crit = resolver.crit_range(top, modifiers_for(mods, "attack.crit_min"))
     senses = {}
     for mode in ("darkvision", "blindsight", "tremorsense", "truesight"):

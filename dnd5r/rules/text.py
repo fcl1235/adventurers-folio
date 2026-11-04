@@ -47,9 +47,9 @@ EN: dict[str, str] = {
         "Pick from your class list; skills your background already grants need not be "
         "picked again.",
     "武器精通": "Weapon Mastery",
-    "从本职业熟练的武器里选。精通效果**只记录、不结算** —— 都要在命中后做选择。":
-        "Choose from weapons your class is proficient with. Mastery effects are "
-        "**recorded, not resolved** — each one is a choice made after a hit.",
+    "从本职业熟练的武器里选。只有选过的武器能用出精通效果，效果在命中时结算。":
+        "Choose from weapons your class is proficient with. Only the weapons you "
+        "pick here can use their mastery property, and it resolves on a hit.",
     "法术": "Spells",
     "施法职业才需要；非施法职业这一步自动跳过。":
         "Only for spellcasting classes; skipped automatically for the rest.",
@@ -182,6 +182,51 @@ EN: dict[str, str] = {
     "「%s」没有这些选择项：%s": "\"%s\" has no such choices: %s",
     "「%s」由背景或职业特性给，不能在这里去掉":
         "\"%s\" comes from a background or a class feature and cannot be removed here",
+
+    # --- 武器精通（rules/mastery）---------------------------------------
+    # 名称与效果说明走 `Text`（`MASTERY_DEFS`），这里只有算出来的报告句。
+    "这本程序不认识这个精通属性：%s（只支持 %s）":
+        "This program does not know the mastery property %s (supported: %s)",
+    "你没有这件武器的精通 —— 精通效果只在建卡（或升级）时选过的武器上生效":
+        "You do not have mastery with this weapon — mastery properties only apply "
+        "to weapons chosen when the character was built (or levelled up)",
+    "精通「%s」：攻击未命中，仍造成 %d 点%s伤害（擦伤）":
+        "Mastery \"%s\": the attack missed, but still deals %d %s damage (Graze)",
+    "精通「%s」：目标做%s豁免 DC %d —— 掷 %d %+d = %d，%s":
+        "Mastery \"%s\": %s save DC %d — rolled %d %+d = %d, %s",
+    "成功，不倒地": "success, not Prone",
+    "失败，倒地": "failure, Prone",
+    "精通「%s」：你对该目标的下一次攻击获得优势（直到下回合结束）":
+        "Mastery \"%s\": Advantage on your next attack against that creature "
+        "(until the end of your next turn)",
+    "精通「%s」：目标的下一次攻击有劣势（直到你的下回合开始）":
+        "Mastery \"%s\": the target has Disadvantage on its next attack roll "
+        "(until the start of your next turn)",
+    "精通「%s」可以再做一次攻击：加值 %+d，命中造成 %s 点伤害（不加属性调整值）":
+        "Mastery \"%s\" allows one more attack: %+d to hit, %s damage on a hit "
+        "(no ability modifier)",
+    "精通「%s」：轻型武器的额外攻击并入攻击动作，不占附赠动作（伤害 %s，不加属性调整值）":
+        "Mastery \"%s\": the Light-property extra attack becomes part of the Attack "
+        "action instead of a Bonus Action (%s damage, no ability modifier)",
+    "精通「%s」：推离 10 尺": "Mastery \"%s\": push 10 feet",
+    "精通「%s」：速度减 10 尺": "Mastery \"%s\": Speed reduced by 10 feet",
+    "精通「%s」还没结算：需要%s":
+        "Mastery \"%s\" is not resolved yet: it needs %s",
+    "精通「%s」已记录（名字对得上，但这本程序还没有它的结算代码）":
+        "Mastery \"%s\" is recorded, but this program has no resolution for it yet",
+    "这次没有使用精通「%s」的效果":
+        "Mastery \"%s\" was not used this time",
+    "（预览：标记没有真的挂上）":
+        "(preview: the mark was not actually applied)",
+    "（预览：没有真的给目标挂上倒地）":
+        "(preview: Prone was not actually applied to the target)",
+    "未命中，不掷伤害": "Miss: no damage is rolled",
+    "未命中：常规伤害不掷，只结算精通效果":
+        "Miss: normal damage is not rolled; only the mastery effect is resolved",
+    "（目标没有角色卡，倒地只能你自己在桌上记）":
+        "(the target has no character sheet, so Prone has to be tracked by hand)",
+    "（目标没有角色卡，这条标记没地方挂）":
+        "(the target has no character sheet, so this mark has nowhere to live)",
 }
 
 

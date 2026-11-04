@@ -9,9 +9,11 @@
   * 属性生成（点买 / 标准数组 / 4d6）→ 只算数值，不建角色；建卡向导最后
     一次性把 scores 交给 `create_actor` / `set_base_scores`。
 
-「武器精通效果不结算」是**写明的取舍**，不是漏做：精通都要命中后的战术选择
-（推 10 尺、换伤害骰、附赠动作再打一次），内核没有目标与回合对象就算不出来。
-界面照实标「已记录，未结算」，不假装算过了。
+「武器精通效果不结算」曾经是**写明的取舍**：当时内核没有目标与回合对象，
+推 10 尺、换伤害骰、附赠动作再打一次都算不出来。G32 之后这条不再成立 ——
+八种精通全在 `rules/mastery.py` 里有定义，四种真结算（擦伤补伤害、击倒掷
+体质豁免、扰乱/削弱挂一次性标记），另外四种缺战场信息但会算好参数交给人。
+真结算发生在 `rules/attack.resolve_attack`，这一层只负责把武器 id 记进档案。
 """
 
 from __future__ import annotations
@@ -270,6 +272,8 @@ def origin_view(actor: Actor, content: ContentBundle, locale: str = "zh") -> dic
         "background": background_row,
         "bonus": {key: int(value) for key, value in profile.background_bonus.items()},
         "masteries": masteries,
-        # 精通效果没结算这件事要在数据里说清楚，界面别自己编一句话
-        "masteries_settled": False,
+        # 精通**已经接进攻击结算**（G32）：擦伤 / 击倒 / 扰乱 / 削弱四种真算，
+        # 另外四种（劈砍 / 快手 / 推撞 / 迟缓）缺战场信息，只给可执行参数。
+        # 逐项的结算程度看 `api.mastery_catalog()` 的 `resolved`，别用这一个布尔值概括。
+        "masteries_settled": True,
     }

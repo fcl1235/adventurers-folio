@@ -159,13 +159,13 @@ EN: dict[str, str] = {
     "明细": "Details",
     "专精": "Expertise",
     "熟练与精通": "Proficiencies & Mastery",
-    "工具熟练 / 武器精通（精通效果未结算）":
-        "Tools / Weapon Mastery (effects not applied)",
+    "工具熟练 / 武器精通（命中后结算）":
+        "Tools / Weapon Mastery (resolved on a hit)",
     "熟练加熟练加值，专精再加一份；明细在右侧说明栏":
         "Proficiency adds your bonus once, expertise twice. Details on the right.",
     "尚无工具熟练（%d 件工具仍可掷，指定属性即可）":
         "No tool proficiency (%d tools can still be rolled with an ability)",
-    "武器精通：%s（效果未结算）": "Mastery: %s (effects not applied)",
+    "武器精通：%s": "Mastery: %s",
     "掷骰记录": "Roll Log",
     "攻击": "Attacks",
     "武器": "Weapon",
@@ -353,8 +353,11 @@ EN: dict[str, str] = {
     "AC %d（敏捷上限 %s）": "AC %d (Dex cap %s)",
     "力量需求 %d": "Str %d required",
     "（双手 %s）": "(two-handed %s)",
-    "精通：%s %s": "Mastery: %s %s",
-    "精通已记录，效果未结算": "Mastery recorded, effect not applied",
+    "精通「%s」": "Mastery \"%s\"",
+    "（你有这件武器的精通）": "(you have mastery with this weapon)",
+    "（你没选这件武器的精通，效果不会触发）":
+        "(you did not pick this weapon's mastery, so its effect will not trigger)",
+    "精通效果在命中时结算": "Mastery resolves when you hit",
     "护甲与盾": "Armor & Shields",
     "护甲值": "Armor",
     "无上限": "No cap",
@@ -551,8 +554,8 @@ EN: dict[str, str] = {
     # 精通 / 法术 / 汇总
     "选 %d 件武器的精通": "Choose mastery for %d weapons",
     "武器精通 %d 件": "%d weapon masteries",
-    "只记录、不结算：精通都要在命中后做选择":
-        "Recorded only: mastery effects are chosen after a hit",
+    "只有选过的武器才能用出精通效果":
+        "Only the weapons you pick here can use their mastery property",
     "准备法术（按环）": "Prepared spells (by level)",
     "戏法 %d · 法术 %d": "Cantrips %d · Spells %d",
     "戏法 %d 个 · 准备法术 %d 个": "%d cantrips · %d prepared spells",

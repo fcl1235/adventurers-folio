@@ -221,9 +221,14 @@ five P6 features).
   takes the +2/+1 in the same step. Levelling into those levels says so in the status line.
   Origin feats still come from a background and Fighting Style from a class feature — those
   cannot be added here, because that would produce a character the rules don't allow.
-- **Weapon mastery is recorded, not resolved**: the sheet shows "Mastery: graze", but shove,
-  topple and similar effects are tactical choices made after a hit, so the program does not
-  resolve them (G32).
+- **Weapon mastery is resolved**: all eight properties live in `dnd5r/rules/mastery.py`.
+  Graze (a miss still deals your ability modifier, resistances apply), Topple (target's
+  Constitution save, DC 8 + proficiency + ability, Prone on a failure), Vex and Sap (real
+  one-shot advantage / disadvantage marks) are computed on the hit. Cleave, Nick, Push and
+  Slow need a second creature, how the weapons are held, or battlefield positions, so the
+  program hands you the numbers (second-attack bonus, 10 feet) and says what is missing.
+  Only weapons picked when the character was built trigger at all — a `topple` in the item
+  data does not mean *you* have it, and the Gear page marks each weapon accordingly.
 - **Languages are not modelled**: the sheet does not list languages, and species languages
   (Elvish, Dwarvish, …) are not included — only the ones written into class text such as
   Druidic or Thieves' Cant (G36).

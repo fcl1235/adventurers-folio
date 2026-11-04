@@ -23,9 +23,9 @@ name / text）；界面骨架文案一律中文。`locale="en"` 出现中文按�
 
 from ._support import ABILITY_KEYS, FEAT_KIND_ORDER, VERSION, resolver_for
 from .catalog import (
-    content_summary, load_content, monster_actions, monster_catalog,
-    monster_sheet, plugin_summary, spell_catalog, spell_info, spawn_monster,
-    summon_info,
+    content_summary, load_content, mastery_catalog, monster_actions,
+    monster_catalog, monster_sheet, plugin_summary, spell_catalog, spell_info,
+    spawn_monster, summon_info,
 )
 from .persistence import SAVE_VERSION, load_character, save_character
 from .character import (
@@ -96,6 +96,7 @@ __all__ = [
     "RESOLUTION_KINDS", "free_casts",
     "find_power", "use_power", "plugin_summary",
     "spell_info", "summon_info", "monster_catalog", "monster_sheet",
+    "mastery_catalog",
     "monster_actions", "spawn_monster",
     # 运行时状态：状态勾选 / 力竭 / 濒死 / 专注 DC（P4）
     "set_condition", "clear_conditions", "set_exhaustion",

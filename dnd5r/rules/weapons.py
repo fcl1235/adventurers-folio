@@ -146,6 +146,10 @@ class AttackProfile:
     damage_bonus: int
     damage_type: str
     mastery: str
+    # 这件武器上的精通属性，**你真的能用出来**吗（建卡时选过它）。
+    # 只写 `mastery` 会把「法师拿巨剑」也报成「武器专精：击倒」——
+    # 数据里的属性和玩家的资格是两件事，以前只有前者的字段。
+    mastery_usable: bool = False
     off_hand: bool = False
     disadvantage: bool = False
     # 来自能力的额外攻击加值（箭术 +2）。单列一项，攻击总值里已经加过，
@@ -170,6 +174,7 @@ class AttackProfile:
             "damage_bonus": self.damage_bonus,
             "damage_type": damage_name(self.damage_type, locale),
             "mastery": self.mastery,
+            "mastery_usable": self.mastery_usable,
             "off_hand": self.off_hand,
             "disadvantage": self.disadvantage,
             "misc": self.misc,
@@ -187,8 +192,13 @@ def profile(
     off_hand: bool = False,
     two_handed: bool = False,
     misc: int = 0,
+    masteries: Iterable[str] = (),
 ) -> AttackProfile:
-    """把武器 + 属性 + 熟练（+ 能力给的额外加值）算成一次攻击。"""
+    """把武器 + 属性 + 熟练（+ 能力给的额外加值）算成一次攻击。
+
+    `masteries` 是玩家**选过**的武器 id（`Profile.masteries`）。它决定
+    `mastery_usable`，不决定 `mastery` —— 后者是武器数据上的属性，一直都在。
+    """
     tokens = tuple(tokens)
     attack_extra = int(misc)
     ability = attack_ability(weapon, abilities) if weapon is not None else "str"
@@ -202,6 +212,8 @@ def profile(
         damage_bonus=damage_modifier(weapon, abilities, off_hand=off_hand),
         damage_type=damage_type(weapon),
         mastery=weapon.mastery if weapon is not None else "",
+        mastery_usable=bool(weapon is not None and weapon.mastery
+                            and weapon.id in set(masteries or ())),
         off_hand=off_hand,
         disadvantage=heavy_penalty(weapon, abilities),
         misc=attack_extra,
@@ -219,6 +231,13 @@ def equipped_weapons(
     main = weapons.get(gear.get(EquipSlot.MAIN_HAND, ""))
     off = weapons.get(gear.get(EquipSlot.OFF_HAND, ""))
     return (main, off)
+
+
+def masteries_of(actor) -> tuple[str, ...]:
+    """玩家建卡时选过的精通武器 id。挂在**本体**上（变形层没有自己的建卡选择）。"""
+    root = actor.root() if hasattr(actor, "root") else actor
+    found = getattr(root, "profile", None)
+    return tuple(getattr(found, "masteries", ()) or ())
 
 
 def profiles_for(
@@ -240,6 +259,7 @@ def profiles_for(
     """
     main, off = equipped_weapons(actor, weapons)
     tokens = tuple(tokens)
+    masteries = masteries_of(actor)
 
     def bonus_for(weapon: WeaponLike | None) -> int:
         """远程加值只给远程武器，近战加值只给近战（徒手算近战）。"""
@@ -254,10 +274,10 @@ def profiles_for(
                   and off is None and not shielded)
     if main is not None:
         found.append(profile(main, abilities, prof_bonus, tokens, two_handed=two_handed,
-                             misc=bonus_for(main)))
+                             misc=bonus_for(main), masteries=masteries))
     if off is not None:
         found.append(profile(off, abilities, prof_bonus, tokens, off_hand=True,
-                             misc=bonus_for(off)))
+                             misc=bonus_for(off), masteries=masteries))
     return tuple(found)
 
 
@@ -265,5 +285,5 @@ __all__ = [
     "WeaponLike", "AttackProfile", "UNARMED_NAME",
     "attack_ability", "attack_modifier", "damage_dice", "damage_modifier",
     "damage_type", "proficient", "heavy_penalty", "has_property", "is_ranged",
-    "profile", "profiles_for", "equipped_weapons", "HEAVY_MIN_SCORE",
+    "profile", "profiles_for", "equipped_weapons", "masteries_of", "HEAVY_MIN_SCORE",
 ]

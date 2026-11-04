@@ -875,7 +875,7 @@ class WizardView(ttk.Frame):
         head.pack(fill="x")
         ttk.Label(head, text=T("选 %d 件武器的精通") % options["count"],
                   font=(theme.UI_FONT, 11, "bold")).pack(side="left")
-        ttk.Label(head, text=T("只记录、不结算：精通都要在命中后做选择"),
+        ttk.Label(head, text=T("只有选过的武器才能用出精通效果"),
                   style="Dim.TLabel").pack(side="left", padx=(12, 0))
         self.mastery_count_var = tk.StringVar()
         ttk.Label(head, textvariable=self.mastery_count_var).pack(side="right")
