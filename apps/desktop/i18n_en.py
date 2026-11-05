@@ -701,4 +701,19 @@ EN: dict[str, str] = {
     "球形": "Sphere",
     "立方": "Cube",
     "柱形": "Cylinder",
+
+    # --- 状态页：休息 -----------------------------------------------------
+    "休息": "Rests",
+    "短休：花生命骰回血、回短休资源；长休：回满 HP 与全部资源":
+        "Short rest: spend Hit Dice to heal and regain short-rest resources. "
+        "Long rest: restore all HP and resources.",
+    "花": "Spend",
+    "颗": "dice",
+    "短休": "Short Rest",
+    "长休": "Long Rest",
+    "长休会：回 %d 点生命、回 %d 颗生命骰、回满 %d 个资源池":
+        "Long rest will: heal %d HP, restore %d Hit Dice, refill %d resource pools",
+    "长休不会改变任何数值（已经满状态）":
+        "A long rest would not change anything — already fully rested",
+    "休息失败：%s": "Rest failed: %s",
 }

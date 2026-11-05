@@ -722,6 +722,65 @@ def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
     return problems
 
 
+def _check_rest(bundle) -> list[str]:
+    """G37 活接线：状态页的「短休 / 长休」真的改了角色。
+
+    在 P17 之前桌面端**一次都休息不了** —— `rules/rest.py` 只被 CLI 壳调着，
+    `dnd5r/api/` 里零引用。而法术位、职业资源池、生命骰、`rest` 作用域标记
+    全都靠休息刷新，于是打完一场遭遇战就永远停在 0 位上。
+
+    这里走真实按钮（`invoke()`），只验三件事：
+      1. 卡片上报的生命骰余量 == 引擎里的池；
+      2. 点短休 → HP 上去、骰子下去；
+      3. 点长休 → HP 与法术位回满。
+    """
+    problems: list[str] = []
+    wizard = api.new_character(
+        bundle, "dnd2024.class.wizard", 5,
+        {"str": 8, "dex": 14, "con": 14, "int": 16, "wis": 12, "cha": 10},
+        name_zh="法师", name_en="Wizard", actor_id="pc.rest")
+    app = DesktopApp(bundle, wizard, selftest=True, locale=LOCALE)
+    try:
+        page = app.status_page
+        if app.sheet["rest"]["dice_left"] != 5:
+            problems.append("休息：卡片上生命骰 %r，应为 5"
+                            % (app.sheet["rest"]["dice_left"],))
+        app.actor.hp.current = 5
+        slot = next((pool for pool in app.actor.resources.pools.values()
+                     if pool.id.startswith("engine.slot.") and pool.capacity), None)
+        if slot is None:
+            problems.append("休息：法师没有法术位池（长休回满就无从验起）")
+        else:
+            slot.spend(1)
+        app.refresh()
+
+        page.spend_var.set(1)
+        page.short_button.invoke()
+        if app.actor.hp.current <= 5:
+            problems.append("休息：点了短休 HP 没动（还是 %d）" % app.actor.hp.current)
+        if app.sheet["rest"]["dice_left"] != 4:
+            problems.append("休息：短休后骰子应为 4，实际 %r"
+                            % (app.sheet["rest"]["dice_left"],))
+        if not page.rest_var.get():
+            problems.append("休息：短休之后没有结果文字")
+
+        page.long_button.invoke()
+        if app.actor.hp.current != app.sheet["hp"]["maximum"]:
+            problems.append("休息：长休后 HP 没回满（%d / %d）"
+                            % (app.actor.hp.current, app.sheet["hp"]["maximum"]))
+        if slot is not None and slot.available != slot.capacity:
+            problems.append("休息：长休后法术位没回满（%d / %d）"
+                            % (slot.available, slot.capacity))
+        if app.sheet["rest"]["dice_left"] != 5:
+            problems.append("休息：长休后生命骰没全回（%r）"
+                            % (app.sheet["rest"]["dice_left"],))
+        if app.winfo_ismapped():
+            problems.append("休息：窗口被映射了（零弹窗铁律）")
+    finally:
+        app.destroy()
+    return problems
+
+
 def main(argv: list[str] | None = None) -> int:
     global LOCALE
     parser = argparse.ArgumentParser(description="桌面布局审计（reqsize，不显示窗口）")
@@ -795,7 +854,8 @@ def main(argv: list[str] | None = None) -> int:
 
     problems.extend(_check_wizard(bundle, avail_w, avail_h))
     problems.extend(_check_live_wiring(bundle))
-    print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 —— %s"
+    problems.extend(_check_rest(bundle))
+    print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 / 休息 —— %s"
           % ("OK" if not problems else "见上"))
 
     if problems:

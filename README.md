@@ -57,7 +57,7 @@ AC / initiative / speed / proficiency / passive Perception.
 | Feats | Choice lists for 67 feats (ability +1, skills, resistances, …) |
 | Powers | Class and subclass features, species traits, resource pools |
 | Encounter | Initiative order, placing figures, target selection, combat log |
-| Status | 14 condition checkboxes + exhaustion 0–6 + death saves + concentration DC (two columns, no scrolling) |
+| Status | 14 condition checkboxes + exhaustion 0–6 + death saves + concentration DC (two columns, no scrolling); **short / long rest** at the bottom (spend Hit Dice to heal, refill resources and spell slots) |
 
 The **build wizard** runs inside the main window (no dialogs), in 8 steps: class → background
 → species → ability scores → skills → weapon mastery → spells → summary. Scores support

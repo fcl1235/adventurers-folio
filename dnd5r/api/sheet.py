@@ -40,6 +40,7 @@ from .origin import origin_view
 # 背包投影：`loadout` 在函数级反向 import 本模块（`morph_forms` → `form_options`），
 # 顶部单向引用不会成环。
 from .loadout import inventory_view
+from .rest import rest_options
 
 def _ability_rows(actor: Actor, content: ContentBundle, morphed: bool = False) -> dict:
     """属性行：值 / 调整值 / 「白给了多少」。
@@ -422,6 +423,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         sheet["proficiency_bonus"] = proficiency_bonus(profile.total)
         sheet["multiclass"] = profile.is_multiclass
         sheet["max_total_level"] = MAX_TOTAL_LEVEL
+        # 休息：生命骰余量与「长休会发生什么」。之前这里没有这一块，界面也就
+        # 无从知道能不能休息 —— 结果是桌面端一次都恢复不了（见 api/rest.py）。
+        sheet["rest"] = rest_options(actor, content, locale)
     return sheet
 
 

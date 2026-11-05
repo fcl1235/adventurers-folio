@@ -19,6 +19,26 @@ from ..kernel.rng import Rng
 from ..model.actor import Actor
 from ..model.effect_instance import ActiveEffect
 from .health import hit_dice_average
+from .text import join_list, tr
+
+# 分句分隔符：中文全角分号，英文分号加空格。用「；」而不是 `join_list` 的「、」——
+# 这里串起来的是**句子**（「回复 8 点生命；生命骰全回」），不是并列名词。
+def _join_lines(lines: list[str], locale: str) -> str:
+    sep = "；" if str(locale or "zh").lower().startswith("zh") else "; "
+    return sep.join(lines)
+
+
+def _display(key: str, names: Mapping[str, str] | None) -> str:
+    """职业 / 资源池的显示名。
+
+    规则层**不查内容**（C1 的同一口径：内核不认职业名，也就认不出「战士」），
+    所以名字由上层用 `names` 传进来（`api/rest.py` 从 `ClassDef.name` 与
+    `Pool.label` 取）。拿不到就退回 id 尾段 —— 宁可显示 `second_wind`，
+    也不要显示一个编出来的中文名。
+    """
+    if names and key in names:
+        return names[key]
+    return str(key).split(".")[-1]
 
 
 @dataclass
@@ -31,10 +51,13 @@ class RestResult:
     pools: tuple[str, ...] = ()
     expired: tuple[str, ...] = ()
     lines: list[str] = field(default_factory=list)
+    # 句子在 `lines` 里已经按语言拼好了，`summary` 只需要知道用什么分隔符
+    locale: str = "zh"
 
     @property
     def summary(self) -> str:
-        return "；".join(self.lines) if self.lines else "休息结束"
+        return (_join_lines(self.lines, self.locale) if self.lines
+                else tr("休息结束", self.locale))
 
 
 def _hit_die_pool(actor: Actor, class_id: str):
@@ -60,15 +83,18 @@ def short_rest(
     hit_dies: Mapping[str, int],
     spend: int = 0,
     rng: Rng | None = None,
+    locale: str = "zh",
+    names: Mapping[str, str] | None = None,
 ) -> RestResult:
     """短休。
 
     hit_dies：class_id → 生命骰面。兼职角色按各自骰面算。
     spend   ：总共花几颗生命骰；按职业顺序扣，扣完为止。
     rng     ：给了就逐颗掷骰，没给就取固定值（桌面常用）。
+    names   ：class_id / 资源池 id → 显示名（见 `_display`）。
     """
     if spend < 0:
-        raise RuleError("花掉的生命骰不能为负")
+        raise RuleError(tr("花掉的生命骰不能为负", locale))
     root = actor.root()
     before = actor.hp.current
     lines: list[str] = []
@@ -95,29 +121,31 @@ def short_rest(
             healed_here += max(1, roll + con_mod)
         healed_total += actor.hp.heal(healed_here)
         remaining -= usable
-        lines.append("%s 生命骰 ×%d" % (class_id.split(".")[-1], usable))
+        lines.append(tr("%s 生命骰 ×%d", locale) % (_display(class_id, names), usable))
 
     recovered = root.resources.short_rest_recover()
     if recovered:
-        lines.append("恢复资源：" + "、".join(
-            "%s +%d" % (pool.id.split(".")[-1], delta) for pool, delta in recovered))
+        lines.append(tr("恢复资源：%s", locale) % join_list(
+            ["%s +%d" % (_display(pool.id, names), delta) for pool, delta in recovered],
+            locale))
     expired = _expire(actor, "short_rest")
     if expired:
-        lines.append("结束效果 %d 个" % len(expired))
+        lines.append(tr("结束效果 %d 个", locale) % len(expired))
     if healed_total:
-        lines.append("回复 %d 点生命" % healed_total)
+        lines.append(tr("回复 %d 点生命", locale) % healed_total)
     if not lines:
-        lines.append("短休结束，没有可恢复的内容")
+        lines.append(tr("短休结束，没有可恢复的内容", locale))
 
     return RestResult(
         kind="short_rest", hp_before=before, hp_after=actor.hp.current,
         dice_spent=spent_total, healed=healed_total,
         pools=tuple(pool.id for pool, _ in recovered), expired=tuple(expired),
-        lines=lines,
+        lines=lines, locale=locale,
     )
 
 
-def long_rest(actor: Actor) -> RestResult:
+def long_rest(actor: Actor, locale: str = "zh",
+              names: Mapping[str, str] | None = None) -> RestResult:
     """长休：HP 与临时 HP 归位、生命骰全回、所有非 NONE 资源池回满。"""
     root = actor.root()
     before = actor.hp.current
@@ -131,7 +159,7 @@ def long_rest(actor: Actor) -> RestResult:
     regained_dice = []
     for pool in root.resources.pools.values():
         if pool.id.startswith("hit_dice.") and pool.used:
-            regained_dice.append(pool.id.split(".")[-1])
+            regained_dice.append(pool.id)
             pool.refill()
 
     recovered = root.resources.refill_all()
@@ -145,21 +173,23 @@ def long_rest(actor: Actor) -> RestResult:
     expired = _expire(actor, "long_rest")
 
     if healed:
-        lines.append("回复 %d 点生命" % healed)
+        lines.append(tr("回复 %d 点生命", locale) % healed)
     if regained_dice:
-        lines.append("生命骰全回：%s" % "、".join(regained_dice))
+        lines.append(tr("生命骰全回：%s", locale)
+                     % join_list([_display(item, names) for item in regained_dice], locale))
     if recovered:
-        lines.append("资源回满：%s" % "、".join(
-            "%s +%d" % (pool.id.split(".")[-1], delta) for pool, delta in recovered))
+        lines.append(tr("资源回满：%s", locale) % join_list(
+            ["%s +%d" % (_display(pool.id, names), delta) for pool, delta in recovered],
+            locale))
     if expired:
-        lines.append("结束效果 %d 个" % len(expired))
+        lines.append(tr("结束效果 %d 个", locale) % len(expired))
     if not lines:
-        lines.append("长休结束，没有需要恢复的内容")
+        lines.append(tr("长休结束，没有需要恢复的内容", locale))
 
     return RestResult(
         kind="long_rest", hp_before=before, hp_after=pool_hp.current,
         pools=tuple(pool.id for pool, _ in recovered), expired=tuple(expired),
-        lines=lines,
+        lines=lines, locale=locale,
     )
 
 

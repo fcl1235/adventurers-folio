@@ -140,7 +140,8 @@ class DesktopApp(tk.Tk):
         self.book.add(self.encounter_page, text=T("战斗"))
         # 状态（条件 / 力竭 / 濒死 / 专注）单独一页：塞在概览右栏那个 300×400
         # 的滚动区里时，死亡豁免默认在视野外，滚动还会重影（见 pages_status 说明）。
-        self.status_page = StatusPage(self.book, on_action=self.on_state_action)
+        self.status_page = StatusPage(self.book, on_action=self.on_state_action,
+                                      on_rest=self.on_rest)
         self.book.add(self.status_page, text=T("状态"))
         self.pages = [self.overview, self.gear, self.spells, self.feats,
                       self.powers_page, self.encounter_page, self.status_page]
@@ -303,6 +304,32 @@ class DesktopApp(tk.Tk):
         return result
 
     # --- 状态：条件 / 力竭 / 濒死 / 专注 -----------------------------------
+    def on_rest(self, kind: str, spend: int = 0, rng=None) -> dict | None:
+        """短休 / 长休。
+
+        这两颗按钮是**唯一**让法术位、职业资源池、生命骰、`rest` 作用域标记
+        回来的入口 —— 在 P17 之前桌面端一次都休息不了，打完一场遭遇战就停在
+        0 位上（`rules/rest.py` 只被 CLI 壳调着）。所以这里不做任何规则判断：
+        花几颗、能回什么，全由 `api.take_short_rest` / `api.take_long_rest` 决定。
+
+        `rng` 只为测试注入（短休的生命骰要掷）。失败只改状态行。
+        """
+        try:
+            if kind == "long":
+                report = api.take_long_rest(self.actor, self.bundle, self.locale)
+            else:
+                report = api.take_short_rest(self.actor, self.bundle,
+                                             spend=int(spend), rng=rng,
+                                             locale=self.locale)
+        except api.DndError as exc:
+            self.status.configure(text=T("休息失败：%s") % exc, foreground=theme.WARN)
+            return None
+        # 整页重画：休息改的是 HP / 资源池 / 生命骰 / 标记，四处投影全都变了
+        self.refresh()
+        self.status.configure(text="%s　%s" % (report["kind_name"], report["summary"]),
+                              foreground=theme.TEXT)
+        return report
+
     def on_state_action(self, name: str, value=None, rng=None) -> dict | None:
         """把状态面板的四种操作落成事实，然后整页重画。
 

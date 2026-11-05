@@ -227,6 +227,20 @@ EN: dict[str, str] = {
         "(the target has no character sheet, so Prone has to be tracked by hand)",
     "（目标没有角色卡，这条标记没地方挂）":
         "(the target has no character sheet, so this mark has nowhere to live)",
+
+    # --- 休息（`rules/rest.py`）-----------------------------------------
+    "休息结束": "Rest complete",
+    "短休": "Short Rest",
+    "长休": "Long Rest",
+    "花掉的生命骰不能为负": "Hit Dice spent cannot be negative",
+    "%s 生命骰 ×%d": "%s Hit Dice ×%d",
+    "恢复资源：%s": "Recovered resources: %s",
+    "结束效果 %d 个": "%d effects ended",
+    "回复 %d 点生命": "Regained %d hit points",
+    "短休结束，没有可恢复的内容": "Short rest over — nothing to recover",
+    "长休结束，没有需要恢复的内容": "Long rest over — nothing needed recovering",
+    "生命骰全回：%s": "All Hit Dice regained: %s",
+    "资源回满：%s": "Resources fully restored: %s",
 }
 
 
