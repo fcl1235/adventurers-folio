@@ -716,4 +716,14 @@ EN: dict[str, str] = {
     "长休不会改变任何数值（已经满状态）":
         "A long rest would not change anything — already fully rested",
     "休息失败：%s": "Rest failed: %s",
+
+    # --- 状态页 / 法术页：专注 --------------------------------------------
+    "当前没有在专注任何法术": "Not concentrating on any spell",
+    "结束专注": "End",
+    "专注：施放后开始专注（同一时刻只能有一条）。":
+        "Concentration: casting starts concentration (only one at a time).",
+    "专注：你正在专注这道法术；再次施放会重新开始。":
+        "Concentration: you are concentrating on this spell; casting it again restarts it.",
+    "专注：施放会打断你正在专注的 %s。":
+        "Concentration: casting this breaks your current %s.",
 }

@@ -40,6 +40,7 @@ from .origin import origin_view
 # 背包投影：`loadout` 在函数级反向 import 本模块（`morph_forms` → `form_options`），
 # 顶部单向引用不会成环。
 from .loadout import inventory_view
+from .concentration import concentration_view
 from .rest import rest_options
 
 def _ability_rows(actor: Actor, content: ContentBundle, morphed: bool = False) -> dict:
@@ -365,6 +366,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
             "succeeded_of": STABLE_AT, "failed_of": DEAD_AT,
             "dead": root.death_saves.dead, "stable": root.death_saves.stable,
         },
+        # 此刻在专注什么。单独一段、不塞进 `conditions` —— 那是一组无身份的
+        # 状态 id，而专注要说出「哪一道、几环」，界面还要给一个「结束专注」按钮。
+        "concentration": concentration_view(actor, locale),
         "morphed": actor.top().layer is not None,
         # 形态的整张卡（含它自己的攻击）：变形后界面要照着它出手，
         # 不然熊只会用徒手 1 + 力量调整值 —— 内容里的 1d8+3 等于没写。

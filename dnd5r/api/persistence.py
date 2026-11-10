@@ -7,6 +7,7 @@ from typing import Any, Mapping
 from ..content import ContentBundle
 from ..kernel.errors import RuleError
 from ..model.actor import MAX_EXHAUSTION, Actor
+from ..model.concentration import Concentration
 from ..model.death import DeathSaves
 from ..model.inventory import Inventory
 from ..model.profile import Profile
@@ -16,9 +17,10 @@ from ..rules.spellcasting import SLOT_PREFIX
 # 2：加了 conditions / exhaustion / death_saves 三段。
 # 3：加了 species / background / background_bonus / masteries 四项（P6 出身）。
 # 4：背包加了 coins_gp（起始装备会给一小笔金币）。
+# 5：加了 concentration（在专注哪一道法术、几环放的）。
 # **读旧档不迁移**——缺的段一律取默认（没有状态、不力竭、没开始掷死亡豁免、
-# 没选物种、没有背景加值、没记武器精通、没有金币），v1–v3 的档照旧能打开。
-SAVE_VERSION = 4
+# 没选物种、没有背景加值、没记武器精通、没有金币、没在专注），v1–v4 的档照旧能打开。
+SAVE_VERSION = 5
 
 # 旧档的位池 id 前缀（F36 之前位池挂在插件命名空间下）。存档按池 id 记余量，
 # 前缀变了不迁移，读档时旧 id 匹配不上池，已用位会静默丢 —— 所以在这里改写。
@@ -58,6 +60,10 @@ def save_character(actor: Actor, locale: str = "zh") -> dict:
         "conditions": list(actor.conditions.ids()),
         "exhaustion": int(root.exhaustion),
         "death_saves": root.death_saves.to_dict(),
+        # v5：在专注哪一道。不存的话「关掉程序回来，祝福还在生效，卡上却看不出
+        # 你在专注」—— 与 v2 漏存 conditions 同一类错，只是更隐蔽。
+        "concentration": (root.concentration.to_dict()
+                          if root.concentration is not None else None),
         # 背包与装备槽。**v1 漏了这个** —— 穿上锁甲存盘、读回来变回 10 AC，
         # 而且没有任何报错：派生值是现算的，所以「装备没了」只表现为数字变小。
         "inventory": root.inventory.to_dict(),
@@ -109,6 +115,9 @@ def load_character(
         level = 0
     actor.exhaustion = max(0, min(level, MAX_EXHAUSTION))
     actor.death_saves = DeathSaves.from_dict(data.get("death_saves"))
+    # v5 段：坏数据退成「没在专注」（见 Concentration.from_dict）——
+    # 一条专注记录不值得让整个角色打不开。
+    actor.concentration = Concentration.from_dict(data.get("concentration"))
     # v1 存档没有 inventory：读成空背包（那时候也存不下装备，没有可丢的东西）
     raw_gear = data.get("inventory")
     if isinstance(raw_gear, dict):

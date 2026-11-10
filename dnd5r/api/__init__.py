@@ -50,6 +50,9 @@ from .state import (
     roll_death_save, set_condition, set_exhaustion,
 )
 from .rest import rest_options, take_long_rest, take_short_rest
+from .concentration import (
+    concentration_label, concentration_save, concentration_view, end_concentration,
+)
 from .loadout import (
     ALL_SLOT_ZH, SLOT_ZH, SUPPORTED_SLOTS, armor_catalog, current_form, equip_item,
     equipped_map, inventory_view, leave_form_now, morph_forms, parse_slot,
@@ -104,6 +107,9 @@ __all__ = [
     "roll_death_save", "reset_death_saves", "death_save_view", "concentration_dc",
     # 休息：短休 / 长休（P17）
     "rest_options", "take_short_rest", "take_long_rest",
+    # 专注：在专注哪一道 / 受伤豁免 / 主动结束（P18）
+    "concentration_view", "concentration_save", "end_concentration",
+    "concentration_label",
     # 换装与属性编辑（P5）
     "armor_catalog", "weapon_catalog", "equip_item", "equipped_map",
     "SLOT_ZH", "SUPPORTED_SLOTS", "parse_slot", "set_base_scores",

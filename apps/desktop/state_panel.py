@@ -126,8 +126,20 @@ class StatePanel(ttk.Frame):
         # 专注
         box = section(left, T("专注"), T("受伤时掷体质豁免，DC = max(10, 伤害 ÷ 2)"))
         box.pack(fill="x", pady=(6, 0))
+        # 第一行先说事实：现在在专注哪一道。以前这一栏只有「伤害 → DC」，
+        # 谁也没记自己在专注什么，于是放第二道专注法术不会顶掉第一道。
+        focus_row = ttk.Frame(box)
+        focus_row.pack(fill="x")
+        self.focus_var = tk.StringVar(value=T("当前没有在专注任何法术"))
+        self.focus_label = ttk.Label(focus_row, textvariable=self.focus_var,
+                                     style="Dim.TLabel")
+        self.focus_label.pack(side="left")
+        self.end_focus_button = ttk.Button(
+            focus_row, text=T("结束专注"), style="Mini.TButton", width=8,
+            command=lambda: self._fire("concentration_end", None))
+        self.end_focus_button.pack(side="right")
         row = ttk.Frame(box)
-        row.pack(fill="x")
+        row.pack(fill="x", pady=(4, 0))
         ttk.Label(row, text=T("伤害"), style="Dim.TLabel").pack(side="left")
         self.damage_var = tk.IntVar(value=0)
         self.damage_spin = ttk.Spinbox(row, from_=0, to=999, width=5,
@@ -174,8 +186,19 @@ class StatePanel(ttk.Frame):
             self._refresh_exhaustion(sheet.get("exhaustion") or {})
             self._refresh_conditions(sheet.get("conditions") or [])
             self._refresh_death(sheet.get("death_saves") or {}, sheet.get("hp") or {})
+            self._refresh_concentration(sheet.get("concentration") or {})
         finally:
             self._building = False
+
+    def _refresh_concentration(self, info: dict) -> None:
+        """「正在专注：《云雾术》（1 环）」—— 事实从 sheet 来，界面不自己拼名字。
+
+        没在专注时按钮要真的 disabled：留着可点，玩家点了会以为撤掉了什么。
+        """
+        active = bool(info.get("active"))
+        self.focus_var.set(str(info.get("text") or T("当前没有在专注任何法术")))
+        self.focus_label.configure(foreground=theme.TEXT if active else theme.DIM)
+        self.end_focus_button.configure(state="normal" if active else "disabled")
 
     def _refresh_exhaustion(self, info: dict) -> None:
         level = int(info.get("level", 0))

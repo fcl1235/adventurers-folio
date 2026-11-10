@@ -781,6 +781,59 @@ def _check_rest(bundle) -> list[str]:
     return problems
 
 
+def _check_concentration(bundle) -> list[str]:
+    """G38 活接线：状态页真的知道「在专注什么」，失败真的会断。
+
+    这一条只能走真实控件验证 —— 静态检查看得见 `concentration_dc()`，
+    看不出「放了法术之后没有任何地方记下它」。三件事：
+      1. 放一道专注法术 → 状态页写出法术名、结束按钮可点；
+      2. 点「专注检定」（DC 30 必失败）→ 专注清空、按钮回到 disabled；
+      3. 再放一道 → 点「结束专注」→ 清空。
+    """
+    problems: list[str] = []
+    wizard = api.new_character(
+        bundle, "dnd2024.class.wizard", 5,
+        {"str": 8, "dex": 14, "con": 14, "int": 16, "wis": 12, "cha": 10},
+        name_zh="法师", name_en="Wizard", actor_id="pc.focus")
+    app = DesktopApp(bundle, wizard, selftest=True, locale=LOCALE)
+    try:
+        panel = app.status_page.state_panel
+        if str(panel.end_focus_button.cget("state")) != "disabled":
+            problems.append("专注：没在专注时「结束专注」应是 disabled")
+
+        def _cast() -> None:
+            api.roll_spell(app.actor, bundle, "dnd2024.spell.fog_cloud", slot=1,
+                           class_id="dnd2024.class.wizard", apply=True)
+            app.refresh()
+
+        _cast()
+        label = app.sheet["concentration"]["label"]
+        if not label or label not in panel.focus_var.get():
+            problems.append("专注：放了云雾术，状态页却没写出 %r（实际 %r）"
+                            % (label, panel.focus_var.get()))
+        if str(panel.end_focus_button.cget("state")) != "normal":
+            problems.append("专注：在专注时「结束专注」应是 normal")
+
+        # 伤害 60 → DC 30，法师体质豁免 +2，d20 最高 20 也过不了
+        panel.damage_var.set(60)
+        panel.concentration_button.invoke()
+        if app.actor.concentration is not None:
+            problems.append("专注：DC 30 掷完还留着专注（失败没断）")
+        if str(panel.end_focus_button.cget("state")) != "disabled":
+            problems.append("专注：中断之后按钮没回到 disabled")
+
+        _cast()
+        panel.end_focus_button.invoke()
+        if app.actor.concentration is not None:
+            problems.append("专注：点了「结束专注」还留着专注")
+
+        if app.winfo_ismapped():
+            problems.append("专注：窗口被映射了（零弹窗铁律）")
+    finally:
+        app.destroy()
+    return problems
+
+
 def main(argv: list[str] | None = None) -> int:
     global LOCALE
     parser = argparse.ArgumentParser(description="桌面布局审计（reqsize，不显示窗口）")
@@ -855,7 +908,8 @@ def main(argv: list[str] | None = None) -> int:
     problems.extend(_check_wizard(bundle, avail_w, avail_h))
     problems.extend(_check_live_wiring(bundle))
     problems.extend(_check_rest(bundle))
-    print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 / 休息 —— %s"
+    problems.extend(_check_concentration(bundle))
+    print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 / 休息 / 专注 —— %s"
           % ("OK" if not problems else "见上"))
 
     if problems:

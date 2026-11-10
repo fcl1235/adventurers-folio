@@ -18,6 +18,7 @@ from ..kernel.errors import RuleError
 from ..kernel.rng import Rng
 from ..model.actor import Actor
 from ..model.effect_instance import ActiveEffect
+from .concentration import end as end_concentration
 from .health import hit_dice_average
 from .text import join_list, tr
 
@@ -171,6 +172,9 @@ def long_rest(actor: Actor, locale: str = "zh",
     for pool_id in vanished:
         del root.resources.pools[pool_id]
     expired = _expire(actor, "long_rest")
+    # 长休一定打断专注（原文：专注最多持续到一次长休结束）。**短休不断** ——
+    # 这两件事以前都「不存在」，所以谁也没想过要分开。
+    focus = end_concentration(actor)
 
     if healed:
         lines.append(tr("回复 %d 点生命", locale) % healed)
@@ -183,6 +187,8 @@ def long_rest(actor: Actor, locale: str = "zh",
             locale))
     if expired:
         lines.append(tr("结束效果 %d 个", locale) % len(expired))
+    if focus is not None:
+        lines.append(tr("长休结束专注《%s》", locale) % focus.name(locale))
     if not lines:
         lines.append(tr("长休结束，没有需要恢复的内容", locale))
 

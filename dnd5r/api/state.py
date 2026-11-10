@@ -12,10 +12,11 @@ from ..kernel.errors import RuleError
 from ..kernel.rng import Rng
 from ..model.actor import MAX_EXHAUSTION, Actor
 from ..model.death import DeathSaves
+from ..rules import concentration as concentration_rules
 from ..rules import death as death_rules
 
 # 专注豁免：受伤害就掷，DC = max(10, 伤害 // 2)
-CONCENTRATION_MIN_DC = 10
+CONCENTRATION_MIN_DC = concentration_rules.CONCENTRATION_MIN_DC
 
 
 def _saves_of(actor: Actor) -> DeathSaves:
@@ -100,11 +101,10 @@ def death_save_view(actor: Actor) -> dict:
 
 
 def concentration_dc(damage: int) -> int:
-    """专注豁免 DC = max(10, 伤害 // 2)。伤害 0 或负数按 10 算（下限就是 10）。"""
-    try:
-        amount = int(damage)
-    except (TypeError, ValueError):
-        raise RuleError("伤害必须是整数：%r" % (damage,))
-    if amount < 0:
-        raise RuleError("伤害不能为负：%r" % (amount,))
-    return max(CONCENTRATION_MIN_DC, amount // 2)
+    """专注豁免 DC = max(10, 伤害 // 2)。伤害 0 或负数按 10 算（下限就是 10）。
+
+    公式在 `rules/concentration.dc_for`：受伤掷骰（`api/concentration_save`）与
+    界面单独算 DC 走的必须是同一条，否则「提示 DC 12、掷的时候按 10 判」这类
+    错会一直藏着。
+    """
+    return concentration_rules.dc_for(damage)

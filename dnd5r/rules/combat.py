@@ -31,11 +31,16 @@ from ..kernel.dice import Dice, parse as parse_dice, roll_d20
 from ..kernel.errors import RuleError
 from ..kernel.rng import Rng, SeededRng
 from ..model.actor import Actor
+from ..model.concentration import Concentration
 from ..model.statblock import ABILITY_KEYS
 from .contributions import passive_advantage_modes, passive_defenses, passive_proficiencies
 from .build import feat_spell_grants
+from .concentration import (
+    begin, current, label as focus_label, reminder as focus_reminder,
+)
 from .derived import resolver_for
 from .resolver import CRIT_ON_20
+from .text import tr
 from .spellcasting import (
     casting_ability, free_cast_pool, slot_pools, spend_slot,
 )
@@ -362,15 +367,26 @@ def resolve_spell(
     slot_block = _slot_block(caster, spell, slot, class_id, casting, apply, free)
 
     rows: list[dict[str, Any]] = []
+    focus_reminders: list[dict[str, Any]] = []
     for target in picked:
+        first = len(rows)
         for shot in range(shots):
             rows.append(_one_row(bundle, caster, spell, target, casting, dice, kind,
                                  shot, shots, roller, apply, locale))
+        # 打中一个正在专注的人：算它要掷的 DC，不替它掷（那是它的骰子）。
+        reminder = focus_reminder(
+            target.actor, sum(int(row.get("damage") or 0) for row in rows[first:]),
+            locale)
+        if reminder is not None:
+            focus_reminders.append(reminder)
 
     notes = _notes(spell, kind, dice is not None, shots)
+    for reminder in focus_reminders:
+        notes.append(reminder["line"])
     free_block = _free_block(spell, pool, apply)
     if free_block is not None and not free_block["spent"]:
         notes.append("预览：这次免费施放还没记账（确认后才会扣除次数）")
+    focus = _concentration_block(caster, spell, slot, apply, locale, notes)
     return {
         "spell": {"id": spell.id,
                   "name": spell.name.get(locale),
@@ -388,7 +404,13 @@ def resolve_spell(
         "save": spell.save,
         "save_effect": spell.save_effect,
         "attack_kind": spell.attack,
-        "concentration": bool(spell.concentration),
+        # 专注：`concentrates` 只说「这是不是一道专注法术」，`concentration`
+        # 才是「现在在专注什么」。两个都要有 —— 前者决定界面上要不要提醒
+        # 「这次施放会打断你正在专注的法术」，后者是事实。
+        "concentrates": bool(spell.concentration),
+        "concentration": focus,
+        # 被这次施法打到的目标里，谁正在专注、该掷多少 DC（空列表 = 没有）
+        "target_concentration": focus_reminders,
         "shots": shots,
         # 不消耗法术位的那一次：池 id、这次有没有真的扣、还剩几次
         "free": free_block,
@@ -397,6 +419,47 @@ def resolve_spell(
         "rows": rows,
         "total_damage": sum(int(row["damage"] or 0) for row in rows),
         "notes": notes,
+    }
+
+
+def _concentration_block(
+    caster: Actor,
+    spell: SpellDef,
+    slot: int,
+    apply: bool,
+    locale: str,
+    notes: list[str],
+) -> dict[str, Any] | None:
+    """专注法术：真的记下「在专注哪一道」，并说出被顶掉的是哪一道。
+
+    非专注法术返回 None 且**不碰专注** —— 原文里施放别的法术不会打断专注，
+    会打断的只有「开始另一条专注」与「受伤豁免失败」。
+
+    `apply=False` 只预告会顶掉谁，不改状态（与伤害、法术位同一条规矩）。
+    """
+    if not spell.concentration:
+        return None
+    entry = Concentration(
+        spell_id=spell.id,
+        name_zh=spell.name.zh, name_en=spell.name.en,
+        level=int(spell.level), slot=int(slot),
+    )
+    previous = current(caster)
+    replaced = begin(caster, entry) if apply else previous
+    label = focus_label(entry, locale)
+    if replaced is not None:
+        notes.append(tr("开始专注《%s》，打断了原来的《%s》", locale)
+                     % (entry.name(locale), replaced.name(locale)))
+    else:
+        notes.append(tr("开始专注《%s》", locale) % entry.name(locale))
+    if not apply:
+        notes.append(tr("（预览：专注没有真的切换）", locale))
+    return {
+        "spell": entry.to_dict(),
+        "label": label,
+        "started": bool(apply),
+        "replaced": replaced.to_dict() if replaced is not None else None,
+        "replaced_label": focus_label(replaced, locale) if replaced is not None else "",
     }
 
 

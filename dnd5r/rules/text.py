@@ -241,6 +241,26 @@ EN: dict[str, str] = {
     "长休结束，没有需要恢复的内容": "Long rest over — nothing needed recovering",
     "生命骰全回：%s": "All Hit Dice regained: %s",
     "资源回满：%s": "Resources fully restored: %s",
+
+    # --- 专注（`rules/combat.py` 施放、`api/concentration.py` 受伤检定）---
+    "开始专注《%s》": "Concentrating on \"%s\"",
+    "开始专注《%s》，打断了原来的《%s》":
+        "Concentrating on \"%s\" — the previous \"%s\" is broken",
+    "（预览：专注没有真的切换）":
+        "(preview: concentration was not actually switched)",
+    "结束专注《%s》": "Concentration on \"%s\" ended",
+    "当前没有在专注任何法术": "Not concentrating on any spell",
+    "专注检定 DC %d → %d，保持专注": "Concentration check DC %d → %d, kept",
+    "专注检定 DC %d → %d，专注打断（《%s》）":
+        "Concentration check DC %d → %d, concentration broken (\"%s\")",
+    "没有在专注任何法术（这次只掷体质豁免，不会中断任何东西）":
+        "Not concentrating on any spell (this is just a Constitution save; "
+        "nothing gets broken)",
+    "《%s》（%d 环）": "\"%s\" (level %d)",
+    "《%s》（戏法）": "\"%s\" (cantrip)",
+    "长休结束专注《%s》": "Long rest ends concentration on \"%s\"",
+    "目标正在专注%s：它要掷 DC %d 的体质豁免":
+        "The target is concentrating on %s — it must make a DC %d Constitution save",
 }
 
 

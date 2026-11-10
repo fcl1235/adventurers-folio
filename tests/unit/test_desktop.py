@@ -980,6 +980,60 @@ class StatePanelTest(unittest.TestCase):
         self.assertIn(expected, app.status_page.state_panel.dc_var.get())
         self.assertIn("专注", app.overview.dice_log.lines()[0])
 
+    # --- G38：专注要说出「在专注什么」，失败要真的断 -----------------------
+    def _wizard_app(self):
+        actor = api.new_character(self.bundle, "dnd2024.class.wizard", 5, SCORES)
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        return app
+
+    def _start_focus(self, app, spell="dnd2024.spell.fog_cloud", slot=1):
+        api.roll_spell(app.actor, self.bundle, spell, slot=slot,
+                       class_id="dnd2024.class.wizard", apply=True)
+        app.refresh()
+
+    def test_status_page_shows_current_focus(self):
+        app = self._wizard_app()
+        panel = app.status_page.state_panel
+        self.assertEqual(panel.focus_var.get(), "当前没有在专注任何法术")
+        self.assertEqual(str(panel.end_focus_button.cget("state")), "disabled")
+        self._start_focus(app)
+        self.assertIn("云雾术", panel.focus_var.get())
+        self.assertIn("1 环", panel.focus_var.get())
+        self.assertEqual(str(panel.end_focus_button.cget("state")), "normal")
+
+    def test_failed_save_breaks_focus_in_ui(self):
+        app = self._wizard_app()
+        panel = app.status_page.state_panel
+        self._start_focus(app)
+        report = app.on_state_action("concentration", 30, rng=ScriptedRng([1]))
+        self.assertIn("专注打断", report["line"])
+        self.assertEqual(panel.focus_var.get(), "当前没有在专注任何法术")
+        self.assertEqual(str(panel.end_focus_button.cget("state")), "disabled")
+        # 先重画再写状态行：`_refresh_header()` 会重置状态行，顺序错了提示就没了
+        self.assertIn("专注打断", app.status.cget("text"))
+
+    def test_end_focus_button_clears_it(self):
+        app = self._wizard_app()
+        self._start_focus(app)
+        report = app.on_state_action("concentration_end")
+        self.assertIn("结束专注", report["line"])
+        self.assertIsNone(app.actor.concentration)
+        self.assertEqual(app.status_page.state_panel.focus_var.get(),
+                         "当前没有在专注任何法术")
+
+    def test_spell_page_warns_before_breaking_focus(self):
+        """选中一道专注法术时就该说「会打断」，不能等结算完才在记录里冒出来。"""
+        app = self._wizard_app()
+        self._start_focus(app)
+        page = app.spells
+        note = page._focus_note({"concentration": True}, "dnd2024.spell.blur")
+        self.assertIn("打断", note)
+        self.assertIn("云雾术", note)
+        self.assertEqual(page._focus_note({"concentration": False}, "x"), "")
+        same = page._focus_note({"concentration": True}, "dnd2024.spell.fog_cloud")
+        self.assertIn("重新开始", same)
+
 
 class WizardTest(unittest.TestCase):
     """建卡向导（P7）：主窗口内换形态，8 步走完真的建出角色。

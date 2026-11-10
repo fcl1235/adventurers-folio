@@ -41,6 +41,7 @@ from .armor import loadout_for
 from .advantage import consume_marks, merge
 from .build import available_powers
 from .combat import Target
+from .concentration import reminder as focus_reminder
 from .contributions import (
     facts_for, modifiers_for, passive_advantage_modes, passive_modifiers,
     passive_proficiencies,
@@ -330,6 +331,10 @@ def resolve_attack(
 
     notes = _notes(outcome, profile, segments, picked, options, apply, locale) \
         + mastery_notes
+    # 打中一个正在专注的人，DM 需要知道它该掷多少 —— 引擎不替它掷，只算 DC。
+    focus = focus_reminder(target.actor, int(total_damage), locale)
+    if focus is not None:
+        notes.append(focus["line"])
     return {
         "attacker": {"id": attacker.id,
                      "name": top.statblock.name.get(locale),
@@ -342,6 +347,8 @@ def resolve_attack(
                    "mastery": profile.mastery,
                    "mastery_usable": profile.mastery_usable},
         "target": {"label": target.label or "目标", "ac": int(target.ac)},
+        # 目标在专注且这次真吃到伤害时，附上它该掷的 DC；否则 None。
+        "target_concentration": focus,
         "attack": {
             "bonus": int(profile.attack),
             "detail": _attack_detail(profile),

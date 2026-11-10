@@ -572,7 +572,25 @@ class SpellPage(ttk.Frame):
         # 「当前等级对应哪一档」是规则，问 api；页面只负责把答案排成文本
         info = api.spell_info(self.app.bundle, spell_id,
                               character_level=int((self.app.sheet or {}).get("total_level") or 0))
-        self.detail.set_text(spell_text(row, info))
+        text = spell_text(row, info)
+        # 「这道法术会打断你正在专注的那一条」—— 选中的时候就该说，不能等
+        # 结算完才在 notes 里冒出来：那时法术位已经花了。
+        note = self._focus_note(row, spell_id)
+        if note:
+            text = "%s\n\n%s" % (text, note)
+        self.detail.set_text(text)
+
+    def _focus_note(self, row: dict, spell_id: str) -> str:
+        """专注法术的选择提示。非专注法术返回空串（不占地方）。"""
+        if not row.get("concentration"):
+            return ""
+        focus = (self.app.sheet or {}).get("concentration") or {}
+        if not focus.get("active"):
+            return T("专注：施放后开始专注（同一时刻只能有一条）。")
+        current = (focus.get("spell") or {}).get("spell_id")
+        if current == spell_id:
+            return T("专注：你正在专注这道法术；再次施放会重新开始。")
+        return T("专注：施放会打断你正在专注的 %s。") % str(focus.get("label") or "")
 
     def show(self, kind: str, spell_id: str) -> str:
         """自检入口：选中某个法术并返回右栏文字（不依赖真实点击）。"""

@@ -371,20 +371,26 @@ class DesktopApp(tk.Tk):
                                       foreground=theme.TEXT)
                 return actor
             elif name == "concentration":
-                dc = api.concentration_dc(int(value))
-                roll = self.roll_check(
-                    "save", "con", rng=rng,
-                    note=T("DC %d 专注") % dc)
-                if roll is None:
-                    return None
-                ok = roll["total"] >= dc
+                # 以前这里只是「算个 DC、掷个体质豁免」—— 掷完什么也没变，
+                # 第二条专注法术也不会顶掉第一条。现在失败真的会中断，
+                # 断掉的是哪一道写进状态行与掷骰记录。
+                report = api.concentration_save(
+                    self.actor, self.bundle, int(value), rng=rng, locale=self.locale)
+                self.overview.dice_log.add(
+                    "%s → %s" % (format_roll(report["roll"]), report["line"]))
                 self.status_page.state_panel.set_concentration_dc(
-                    dc, T("成功") if ok else T("失败"))
+                    report["dc"], T("成功") if report["kept"] else T("失败"))
+                # 先重画再写状态行：`_refresh_header()` 会把状态行重置成内容摘要。
+                self.refresh()
                 self.status.configure(
-                    text=T("专注检定　DC %d → %d，%s") % (dc, roll["total"],
-                                                    T("保持专注") if ok else T("专注中断")),
-                    foreground=theme.TEXT if ok else theme.WARN)
-                return roll
+                    text=report["line"],
+                    foreground=theme.TEXT if report["kept"] else theme.WARN)
+                return report
+            elif name == "concentration_end":
+                report = api.end_concentration(self.actor, self.locale)
+                self.refresh()
+                self.status.configure(text=report["line"], foreground=theme.TEXT)
+                return report
             else:
                 raise api.RuleError(T("不认识的状态操作：%r") % (name,))
         except api.DndError as exc:

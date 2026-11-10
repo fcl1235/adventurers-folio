@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from ..kernel.errors import RuleError
+from .concentration import Concentration
 from .conditions import ConditionSet
 from .death import DeathSaves
 from .inventory import Inventory
@@ -105,6 +106,10 @@ class Actor:
     exhaustion: int = 0
     # 濒死记分（0 HP 之后掷死亡豁免）。稳定/死亡之后由 `reset()` 清零。
     death_saves: DeathSaves = field(default_factory=DeathSaves)
+    # 此刻正在专注的法术（`None` = 没在专注）。这是**运行时事实**，不是派生值：
+    # 同一道祝福放在谁身上、顶掉了什么，只有玩家知道。建模在 `model/concentration.py`
+    # —— 它要带「哪一道」「几环」，不是一条匿名标记。
+    concentration: Concentration | None = None
 
     def __post_init__(self) -> None:
         if not self.id:
