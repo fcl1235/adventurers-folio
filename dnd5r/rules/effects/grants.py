@@ -248,20 +248,16 @@ class GrantProficiency(Effect):
             return
         languages = {token.split(".", 1)[1] for token in self.tokens if token.startswith("language.")}
         others = tuple(token for token in self.tokens if not token.startswith("language."))
+        # `with_proficiencies` 自己会把 `language.*` 分流到 `languages`（G36），
+        # 这里分两路只是为了 note 里能分项报；落库仍走同一个入口。
         ctx.subject.profile = profile.with_proficiencies(add=others)
         if languages:
-            ctx.subject.profile = _with_languages(ctx.subject.profile, languages)
+            ctx.subject.profile = ctx.subject.profile.with_languages(add=languages)
         ctx.note(Text.of("获得熟练：%s" % "、".join(self.tokens),
                          "Gained proficiencies: %s" % ", ".join(self.tokens)), self.op)
 
     def to_dict(self) -> dict:
         return {"op": self.op, "tokens": list(self.tokens)}
-
-
-def _with_languages(profile, extra):
-    from dataclasses import replace
-
-    return replace(profile, languages=frozenset(set(profile.languages) | set(extra)))
 
 
 @dataclass(frozen=True, slots=True)

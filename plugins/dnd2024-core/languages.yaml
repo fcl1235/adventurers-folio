@@ -1,0 +1,77 @@
+# 2024 语言表：标准 10 项（含必会的通用语）+ 稀有 9 项。
+# 来源：SRD 5.2「Character Creation → Choose Languages」的两张表。
+#
+# id 用 `dnd2024.language.<key>`，`Profile.languages` 存 **key**（与
+# `skill.perception` 同一口径）。两处必须对得上：`grant_proficiency:
+# language.elvish` 里的 token 就是 key，写错了就等于「会这门语言但查不到名字」。
+#
+# 语言**不是物种给的**（2024 改了这条）：建卡时通用语自动 + 2 门标准自选，
+# 另有职业/特性给的（德鲁伊语、盗贼黑话、游侠的 2 门）。所以本表只有名称与
+# 稀有分类，没有物种字段。
+#
+# 语种名走官方中文译名；`en` 是 SRD 原文（不含商标符号）。
+- id: dnd2024.language.common
+  name: {zh: 通用语, en: Common}
+  rare: false
+  # 每个角色都会通用语（SRD 原文：Every player character knows Common.）。
+  # 规则层不认 key，所以这条只能由内容标记。
+  common: true
+- id: dnd2024.language.common_sign_language
+  name: {zh: 通用手语, en: Common Sign Language}
+  rare: false
+- id: dnd2024.language.draconic
+  name: {zh: 龙语, en: Draconic}
+  rare: false
+- id: dnd2024.language.dwarvish
+  name: {zh: 矮人语, en: Dwarvish}
+  rare: false
+- id: dnd2024.language.elvish
+  name: {zh: 精灵语, en: Elvish}
+  rare: false
+- id: dnd2024.language.giant
+  name: {zh: 巨人语, en: Giant}
+  rare: false
+- id: dnd2024.language.gnomish
+  name: {zh: 侏儒语, en: Gnomish}
+  rare: false
+- id: dnd2024.language.goblin
+  name: {zh: 地精语, en: Goblin}
+  rare: false
+- id: dnd2024.language.halfling
+  name: {zh: 半身人语, en: Halfling}
+  rare: false
+- id: dnd2024.language.orc
+  name: {zh: 兽人语, en: Orc}
+  rare: false
+- id: dnd2024.language.abyssal
+  name: {zh: 深渊语, en: Abyssal}
+  rare: true
+- id: dnd2024.language.celestial
+  name: {zh: 天界语, en: Celestial}
+  rare: true
+- id: dnd2024.language.deep_speech
+  name: {zh: 深潜语, en: Deep Speech}
+  rare: true
+- id: dnd2024.language.druidic
+  name: {zh: 德鲁伊语, en: Druidic}
+  rare: true
+- id: dnd2024.language.infernal
+  name: {zh: 炼狱语, en: Infernal}
+  rare: true
+- id: dnd2024.language.primordial
+  name: {zh: 原初语, en: Primordial}
+  rare: true
+  note:
+    zh: |-
+      原初语包含水族语、风族语、火族语与土族语四种方言。懂其中一种方言的生物，能与懂另一种方言的生物交谈。
+    en: |-
+      Primordial includes the Aquan, Auran, Ignan, and Terran dialects. Creatures that know one of these dialects can communicate with those that know a different one.
+- id: dnd2024.language.sylvan
+  name: {zh: 森语, en: Sylvan}
+  rare: true
+- id: dnd2024.language.thieves_cant
+  name: {zh: 盗贼黑话, en: Thieves' Cant}
+  rare: true
+- id: dnd2024.language.undercommon
+  name: {zh: 地底通用语, en: Undercommon}
+  rare: true

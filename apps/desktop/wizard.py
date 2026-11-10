@@ -452,7 +452,80 @@ class WizardView(ttk.Frame):
                                        power.text.get(self.app.locale)))
         self.species_detail.configure(text="\n".join(rows))
 
-    # --- 第 4 步：属性 -----------------------------------------------------
+    # --- 第 4 步：语言 -----------------------------------------------------
+    def _step_languages(self) -> None:
+        """2024 的语言：通用语自动 + 2 门标准自选 + 职业给的门数。
+
+        语言**不是**物种给的（2014 才是），所以这一步在物种之后、属性之前：
+        出身选完了，语言才有「职业额外给几门」可算。
+        """
+        options = api.step_options(self.app.bundle, "languages", self.draft,
+                                   self.app.locale)
+        self.language_need = int(options["need"])
+        self.language_tips: list[Tooltip] = []   # 测试要能数
+        head = ttk.Frame(self.body)
+        head.pack(fill="x")
+        ttk.Label(head, text=T("选 %d 门语言") % self.language_need,
+                  font=(theme.UI_FONT, 11, "bold")).pack(side="left")
+        self.language_count_var = tk.StringVar()
+        ttk.Label(head, textvariable=self.language_count_var).pack(side="right")
+        ttk.Label(self.body, text=options["hint"], style="Dim.TLabel").pack(
+            anchor="w", pady=(2, 0))
+
+        scroller = ScrollFrame(self.body, height=420)
+        scroller.pack(fill="both", expand=True, pady=(6, 0))
+        # 自动会的与职业白给的先列出来：玩家看到手上已经有「通用语」「盗贼黑话」，
+        # 才不会以为自己漏选了一门。
+        if options["common"]:
+            ttk.Label(scroller.body,
+                      text=T("%s　— 自动会") % options["common"]["name"],
+                      style="Dim.TLabel").pack(anchor="w")
+        for row in options["fixed"]:
+            ttk.Label(scroller.body, text=T("%s　— 职业已给") % row["name"],
+                      style="Dim.TLabel").pack(anchor="w")
+
+        self.language_vars: dict[str, tk.IntVar] = {}
+        chosen = set(options["picked"])
+        if options["standard"]:
+            ttk.Label(scroller.body, text=T("标准语言"),
+                      font=(theme.UI_FONT, 10, "bold")).pack(anchor="w", pady=(8, 2))
+            for row in options["standard"]:
+                self._language_check(scroller.body, row, chosen)
+        if options["rare"]:
+            ttk.Label(scroller.body, text=T("稀有语言"),
+                      font=(theme.UI_FONT, 10, "bold")).pack(anchor="w", pady=(8, 2))
+            for row in options["rare"]:
+                self._language_check(scroller.body, row, chosen)
+        self._refresh_language_count()
+
+    def _language_check(self, master, row: dict, chosen: set) -> None:
+        var = tk.IntVar(value=1 if row["key"] in chosen else 0)
+        check = ttk.Checkbutton(master, text=row["name"], variable=var,
+                               command=self._on_languages)
+        check.pack(anchor="w", pady=1)
+        # 原初语的「含四种方言」这类补充说明走气泡：写在勾选项后面会把
+        # 那一行拉得比中栏还宽，而这个弹窗的宽度是按最小内容撑的。
+        if row.get("note"):
+            self.language_tips.append(Tooltip(check, row["note"]))
+        var.trace_add("write", lambda *_: self._on_languages(silent=True))
+        self.language_vars[row["key"]] = var
+
+    def _on_languages(self, silent: bool = False) -> None:
+        if not hasattr(self, "language_vars"):
+            return
+        self.draft["languages"] = [key for key, var in self.language_vars.items()
+                                   if _checked(var)]
+        self._refresh_language_count()
+        if not silent:
+            self._report()
+
+    def _refresh_language_count(self) -> None:
+        picked = [key for key, var in getattr(self, "language_vars", {}).items()
+                  if _checked(var)]
+        self.language_count_var.set(T("已选 %d / %d")
+                                    % (len(picked), getattr(self, "language_need", 0)))
+
+    # --- 第 5 步：属性 -----------------------------------------------------
     def _step_scores(self) -> None:
         options = api.step_options(self.app.bundle, "scores", self.draft,
                                    self.app.locale)
@@ -824,7 +897,7 @@ class WizardView(ttk.Frame):
                           for k in scores)
         self.cost_var.set(T("加值后：") + pairs if pairs else "")
 
-    # --- 第 5 步：技能 -----------------------------------------------------
+    # --- 第 6 步：技能 -----------------------------------------------------
     def _step_skills(self) -> None:
         options = api.step_options(self.app.bundle, "skills", self.draft,
                                    self.app.locale)
@@ -867,7 +940,7 @@ class WizardView(ttk.Frame):
             need = int(self.app.bundle.class_def(class_id).skill_choices)
         self.skill_count_var.set(T("已选 %d / %d") % (len(self.draft.get("skills") or []), need))
 
-    # --- 第 6 步：武器精通 -------------------------------------------------
+    # --- 第 7 步：武器精通 -------------------------------------------------
     def _step_masteries(self) -> None:
         options = api.step_options(self.app.bundle, "masteries", self.draft,
                                    self.app.locale)
@@ -921,7 +994,7 @@ class WizardView(ttk.Frame):
         self.mastery_count_var.set(T("已选 %d / %d")
                                    % (len(self.draft.get("masteries") or []), need))
 
-    # --- 第 7 步：法术 -----------------------------------------------------
+    # --- 第 8 步：法术 -----------------------------------------------------
     def _step_spells(self) -> None:
         options = api.step_options(self.app.bundle, "spells", self.draft,
                                    self.app.locale)
@@ -1007,7 +1080,7 @@ class WizardView(ttk.Frame):
             str(self.draft.get("class_id") or ""), ()))
         self.spell_count_var.set(T("戏法 %d · 法术 %d") % (cantrips, prepared))
 
-    # --- 第 8 步：汇总 -----------------------------------------------------
+    # --- 第 9 步：汇总 -----------------------------------------------------
     def _name_keys(self) -> tuple[str, str]:
         """(主输入框写的键, 副输入框写的键)。主键 = 当前界面语言那个。"""
         if self.app.locale == "en":

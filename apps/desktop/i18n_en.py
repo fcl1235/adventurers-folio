@@ -159,8 +159,9 @@ EN: dict[str, str] = {
     "明细": "Details",
     "专精": "Expertise",
     "熟练与精通": "Proficiencies & Mastery",
-    "工具熟练 / 武器精通（命中后结算）":
-        "Tools / Weapon Mastery (resolved on a hit)",
+    "工具熟练 / 武器精通（命中后结算） / 语言":
+        "Tools / Weapon Mastery (resolved on a hit) / Languages",
+    "语言：%s": "Languages: %s",
     "熟练加熟练加值，专精再加一份；明细在右侧说明栏":
         "Proficiency adds your bonus once, expertise twice. Details on the right.",
     "尚无工具熟练（%d 件工具仍可掷，指定属性即可）":
@@ -563,6 +564,11 @@ EN: dict[str, str] = {
         "Hover a spell to see its full text (casting time, range, components, duration, "
         "description).",
     "已选 %d / %d": "%d / %d picked",
+    "选 %d 门语言": "Pick %d languages",
+    "标准语言": "Standard Languages",
+    "稀有语言": "Rare Languages",
+    "%s　— 自动会": "%s — automatic",
+    "%s　— 职业已给": "%s — granted by class",
     "（专注）": " (conc.)",
     "（暂无）": "(none)",
     "还差这些：": "Still needed:",

@@ -182,11 +182,51 @@ class Profile:
         return subclass_id in self.subclasses
 
     def with_proficiencies(self, add: Iterable[str] = (), remove: Iterable[str] = ()) -> "Profile":
-        new = (set(self.proficiencies) | set(add)) - set(remove)
+        """加/减熟练。**`language.*` token 会被分流到 `languages`。**
+
+        熟练与语言是两个集合：把 `language.elvish` 塞进 `proficiencies`，它就永远
+        查不到 —— 卡上既不显示语言，也不会被「已会就换一门」的校验识别。以前
+        `grant_proficiency` 自己拆了一遍，但任何直接用 `with_proficiencies` 的
+        调用方（建卡、读档、改卡）都会漏；所以拆在唯一的入口上。
+        """
+        incoming = set(add)
+        dropped = set(remove)
+        languages = {token.split(".", 1)[1] for token in incoming
+                     if token.startswith("language.") and "." in token}
+        lost = {token.split(".", 1)[1] for token in dropped
+                if token.startswith("language.") and "." in token}
+        other = {token for token in incoming if not token.startswith("language.")}
+        new = (set(self.proficiencies) | other) - dropped
         return replace(
             self,
             proficiencies=frozenset(new),
-            expertise=frozenset(set(self.expertise) - set(remove)),
+            expertise=frozenset(set(self.expertise) - dropped),
+            languages=(self.languages | frozenset(languages)) - frozenset(lost),
+        )
+
+    def with_languages(self, add: Iterable[str] = (), remove: Iterable[str] = ()) -> "Profile":
+        """加/减已知语言。值一律是语言的 **key**（`elvish`），不是内容 id。"""
+        new = (set(self.languages) | set(add)) - set(remove)
+        if new == set(self.languages):
+            return self
+        return replace(self, languages=frozenset(new))
+
+    def normalized(self) -> "Profile":
+        """把混进 `proficiencies` 的 `language.*` token 挪回 `languages`。
+
+        存档 v5 之前的档案、以及任何绕过 `with_proficiencies` 直接构造的档案
+        都可能带着这种 token。它们留在熟练集合里既查不到名字，也会让
+        `rebuild_actor` 的差值收敛永远差一项（补进去又被分流回语言）。
+        """
+        stray = {token for token in self.proficiencies
+                 if token.startswith("language.") and "." in token}
+        if not stray:
+            return self
+        return replace(
+            self,
+            proficiencies=frozenset(set(self.proficiencies) - stray),
+            languages=self.languages | frozenset(
+                token.split(".", 1)[1] for token in stray),
         )
 
     def with_feats(self, feats: Iterable[str]) -> "Profile":

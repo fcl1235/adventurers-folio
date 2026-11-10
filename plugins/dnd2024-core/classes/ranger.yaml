@@ -22,6 +22,9 @@ asi_levels: [4, 8, 12, 16]
 # 依据 data/raw/class-levels-2024.json 的 class_specific.weapon_mastery；
 # 圣武士/游侠/盗贼的原文只写「两种武器」且未提升级增量，故只登记 1 级。
 mastery_counts: { 1: 2 }
+# 职业自选语言（2024）：游侠 2 级「灵巧探索者」给 2 门自选语言（Deft Explorer）。
+# 1 级不给 —— 写成 {1: 2} 会让 1 级游侠多出两门语言。
+language_choices: { 2: 2 }
 skill_choices: 3
 skill_list:
   - animal-handling
@@ -171,11 +174,13 @@ powers:
       en: |-
         Thanks to your travels, you gain the following benefits. Expertise. Choose one of your skill proficiencies with which you lack Expertise. You gain Expertise in that skill. Languages. You know two languages of your choice from the language tables in "Character Creation."
     effects:
+      # 两门语言自选：写在职业顶层的 language_choices: {2: 2}。
+      # 技能专精是玩家从已熟练项里挑一项，走专精的 choices 管道。
       - note:
           zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
+            两门语言在建卡「语言」一步里选；那一项技能专精到专精页里选。
           en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+            The two languages are picked in the Languages step; the Expertise pick is made on the Expertise page.
 
   - id: dnd2024.class.ranger.fighting_style
     name: {zh: 战斗风格, en: Fighting Style}

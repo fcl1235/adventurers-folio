@@ -123,7 +123,7 @@ class OverviewPage(ttk.Frame):
         # `api.roll_check(kind="tool")` 任意指定都行。一行文本还不会随熟练数长高。
         # 打包顺序：先把底部这块 `side="bottom"` 钉住，再让技能吃掉剩余空间。
         self.tools_var = tk.StringVar(value="")
-        tools = section(mid, T("熟练与精通"), T("工具熟练 / 武器精通（命中后结算）"))
+        tools = section(mid, T("熟练与精通"), T("工具熟练 / 武器精通（命中后结算） / 语言"))
         tools.pack(side="bottom", fill="x", pady=(6, 0))
         self.tools_label = ttk.Label(tools, textvariable=self.tools_var,
                                      wraplength=400, justify="left")
@@ -137,6 +137,13 @@ class OverviewPage(ttk.Frame):
                                        style="Dim.TLabel", wraplength=400,
                                        justify="left")
         self.mastery_label.pack(anchor="w", pady=(2, 0))
+        # 语言（G36）：一行折行文本，位置与武器精通同一块。卡上要能回答
+        # 「我会说哪些话」—— 之前档案里有这个集合，但界面上一条都没有。
+        self.language_var = tk.StringVar(value="")
+        self.language_label = ttk.Label(tools, textvariable=self.language_var,
+                                        style="Dim.TLabel", wraplength=400,
+                                        justify="left")
+        self.language_label.pack(anchor="w", pady=(2, 0))
 
         skills = section(mid, T("技能"), T("熟练加熟练加值，专精再加一份；明细在右侧说明栏"))
         skills.pack(fill="both", expand=True)
@@ -246,6 +253,7 @@ class OverviewPage(ttk.Frame):
         self.refresh_skills(sheet)
         self.refresh_tools(sheet)
         self.refresh_masteries(sheet)
+        self.refresh_languages(sheet)
         self.refresh_fight(sheet)
         self.refresh_attacks(sheet)
 
@@ -283,6 +291,15 @@ class OverviewPage(ttk.Frame):
             return
         self.mastery_var.set(T("武器精通：%s")
                              % join(row["name"] for row in rows))
+
+    def refresh_languages(self, sheet: dict) -> None:
+        """已知语言一行。来源（自动/职业/自选）不在这里标 —— 卡上只需要
+        「我会说什么」，哪来的在「语言」一步里看。"""
+        rows = sheet.get("languages") or []
+        if not rows:
+            self.language_var.set("")
+            return
+        self.language_var.set(T("语言：%s") % join(row["name"] for row in rows))
 
     def refresh_fight(self, sheet: dict) -> None:
         """0–7 行的**语义冻结**（测试按索引读，别挪）：AC/先攻/HP/速度/熟练/抗性/感官/暴击。

@@ -28,6 +28,8 @@ from ..rules.spellcasting import check_spell_picks, spell_gaps
 from ..rules.starting import starting_options
 from ..rules.text import join_list, tr
 from .character import new_character
+from .languages import check_draft as check_language_picks
+from .languages import common_key, language_options
 from .origin import (
     SCORE_MODES, SCORE_MODE_ZH, background_catalog, bonus_shapes, check_scores,
     score_mode_labels, species_catalog,
@@ -38,6 +40,7 @@ WIZARD_STEPS: tuple[dict, ...] = (
     {"key": "class", "title": "职业", "hint": "先定职业与等级 —— 生命骰、豁免熟练、资源池都由它决定。"},
     {"key": "background", "title": "背景", "hint": "背景给三项属性各一点加值（或一项 +2 一项 +1）、两项技能、一件工具和一个起始专长。"},
     {"key": "species", "title": "物种", "hint": "物种只给特性（黑暗视觉、抗性、速度、每级生命），**不**给属性加值。"},
+    {"key": "languages", "title": "语言", "hint": "通用语自动会；再从标准语言里选 2 门。职业还会额外给（德鲁伊语、盗贼黑话、游侠 2 门）。"},
     {"key": "scores", "title": "属性", "hint": "点买 27 点、标准数组、或掷 4d6 弃最低。上限 15 是购买上限，16 以上只能靠背景与专长。"},
     {"key": "skills", "title": "技能", "hint": "从本职业技能表里选；背景已经给的那几项不用重复选。"},
     {"key": "masteries", "title": "武器精通", "hint": "从本职业熟练的武器里选。只有选过的武器能用出精通效果，效果在命中时结算。"},
@@ -254,6 +257,8 @@ def step_options(content: ContentBundle, step: str, draft: Mapping[str, Any],
         return {"backgrounds": background_catalog(content, locale)}
     if step == "species":
         return {"species": species_catalog(content, locale)}
+    if step == "languages":
+        return language_options(content, draft, locale)
     if step == "scores":
         # `mode_zh` 是旧键，**永远是中文**（名字里就写着 zh）；界面读 `mode_labels`，
         # 那份才按 locale 翻。留着旧键只是不打断既有调用方。
@@ -414,6 +419,12 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
     if len(skills) != need and not outside:
         add("skills", tr("要选 %d 项技能，现在选了 %d 项", locale) % (need, len(skills)))
 
+    # --- 语言 ---
+    # 通用语自动，2 门标准自选，另有职业给的门数。校验在 `api/languages` 里
+    # —— 那里同时知道「哪门是通用语」「哪门稀有」，这里不重复一遍。
+    for text in check_language_picks(content, draft, locale, editing=editing):
+        add("languages", text)
+
     # --- 武器精通 ---
     masteries = [str(item) for item in (draft.get("masteries") or ())]
     count = class_def.mastery_count_at(as_class_level(max(1, level)))
@@ -470,8 +481,15 @@ def draft_problems(content: ContentBundle, draft: Mapping[str, Any],
     return problems
 
 
-def _clean_draft(draft: Mapping[str, Any]) -> dict:
-    """草案 → `new_character` 的参数。**只搬运，不补默认值**。"""
+def _clean_draft(draft: Mapping[str, Any], content: ContentBundle | None = None) -> dict:
+    """草案 → `new_character` 的参数。**只搬运，不补默认值**（通用语是唯一例外）。"""
+    languages = [str(item) for item in (draft.get("languages") or ())]
+    if content is not None:
+        # 通用语不写进草案（玩家没「选」它），但必须写进档案 —— 这是规则
+        # 「每个角色都会通用语」，不是可选项。哪个 key 是通用语由内容标记。
+        common = common_key(content)
+        if common and common not in languages:
+            languages.insert(0, common)
     return {
         "name_zh": str(draft.get("name_zh") or "").strip() or "无名冒险者",
         "name_en": str(draft.get("name_en") or "").strip() or "Unnamed Adventurer",
@@ -485,6 +503,8 @@ def _clean_draft(draft: Mapping[str, Any]) -> dict:
         "masteries": [str(item) for item in (draft.get("masteries") or ())],
         # 技能选择走熟练 token：`skill.stealth`，与背景给的是同一套
         "extra_proficiencies": ["skill.%s" % key for key in (draft.get("skills") or ())],
+        # 语言按 key 传；通用语在这里补（见上）
+        "extra_languages": languages,
         # 空的法术表要**丢掉整个键**，不能留 `{class_id: []}` —— 非施法职业
         # 带着空表进 `new_character` 会被判成「战士不该有戏法」。
         "cantrips": {str(key): [str(item) for item in value]
@@ -510,7 +530,7 @@ def build_from_draft(content: ContentBundle, draft: Mapping[str, Any],
                 if item.get("level") != "warn"]
     if blocking:
         raise RuleError(tr("建卡失败：", locale) + "；".join(item["text"] for item in blocking))
-    params = _clean_draft(draft)
+    params = _clean_draft(draft, content)
     class_id = str(draft.get("class_id") or "")
     try:
         return new_character(content, class_id=class_id, **params)
@@ -538,6 +558,8 @@ def empty_draft() -> dict:
         "score_mode": "standard_array",
         "scores": {"str": 15, "dex": 14, "con": 13, "int": 12, "wis": 10, "cha": 8},
         "skills": [],
+        # 语言：通用语不在这里（自动会），这里只放玩家选的那几门
+        "languages": [],
         "masteries": [],
         "cantrips": {},
         "prepared": {},

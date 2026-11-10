@@ -134,8 +134,9 @@ powers:
       zh: 你懂得德鲁伊语这门秘密语言，并能用动物交谈（Beast Speech）与野兽沟通。
       en: You know Druidic, the secret language of druids, and you can use Beast Speech to converse with beasts.
     effects:
+      - grant_proficiency: language.druidic
       - note:
-          zh: 语言熟练写进 Profile；动物交谈属于叙事能力，不做数值结算。
+          zh: 动物交谈属于叙事能力，不做数值结算；德鲁伊语已写入角色档案的已知语言。
           en: The language goes into Profile; Beast Speech is narrative.
 
   - id: dnd2024.class.druid.primal_order

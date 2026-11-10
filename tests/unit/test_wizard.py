@@ -59,11 +59,13 @@ class WizardCatalogTest(unittest.TestCase):
         keys = [row["key"] for row in api.skill_catalog(self.bundle)]
         self.assertIn("sleight_of_hand", keys)
 
-    def test_eight_steps(self):
+    def test_nine_steps(self):
+        """语言是第 4 步（物种之后、属性之前）：出身选完才知道职业另给几门。"""
         self.assertEqual([step["key"] for step in api.WIZARD_STEPS],
-                         ["class", "background", "species", "scores",
+                         ["class", "background", "species", "languages", "scores",
                           "skills", "masteries", "spells", "summary"])
-        self.assertEqual(api.STEP_INDEX["summary"], 7)
+        self.assertEqual(api.STEP_INDEX["summary"], 8)
+        self.assertEqual(api.STEP_INDEX["languages"], 3)
 
     def test_step_options_never_blows_up(self):
         """每一步都要能拿到数据 —— 空草案（战士 1 级、啥都没选）也不许抛。"""
@@ -151,6 +153,8 @@ class DraftCheckTest(unittest.TestCase):
             species=DWARF, background=SOLDIER,
             background_bonus={"str": 2, "con": 1}, scores=dict(SCORES),
             skills=["athletics", "perception"],
+            # 语言是建卡的一步（G36）：不填这条会被「要选 2 门语言」挡住
+            languages=["elvish", "dwarvish"],
             masteries=["dnd2024.item.weapon.longsword",
                        "dnd2024.item.weapon.greataxe",
                        "dnd2024.item.weapon.longbow",
@@ -158,10 +162,10 @@ class DraftCheckTest(unittest.TestCase):
         )
         return draft
 
-    def test_empty_draft_asks_for_skills_and_masteries(self):
+    def test_empty_draft_asks_for_skills_languages_and_masteries(self):
         problems = _errors(api.draft_problems(self.bundle, api.empty_draft()))
         steps = {item["step"] for item in problems}
-        self.assertEqual(steps, {"skills", "masteries"})
+        self.assertEqual(steps, {"skills", "languages", "masteries"})
 
     def test_complete_draft_has_no_errors(self):
         self.assertEqual(_errors(api.draft_problems(self.bundle, self.fighter())), [])
@@ -262,6 +266,7 @@ class DraftCheckTest(unittest.TestCase):
         draft.update(class_id=WIZARD, class_level=3, background=SAGE,
                      species=ELF, background_bonus={"int": 2, "con": 1},
                      scores=dict(SCORES), skills=["arcana", "investigation"],
+                     languages=["elvish", "dwarvish"],
                      masteries=["dnd2024.item.weapon.longsword"])
         self.assertTrue(any("没有武器精通" in text
                             for text in _messages(api.draft_problems(self.bundle, draft))))
@@ -300,6 +305,7 @@ class BuildDraftTest(unittest.TestCase):
                        "dnd2024.item.weapon.greataxe",
                        "dnd2024.item.weapon.longbow",
                        "dnd2024.item.weapon.warhammer"],
+            languages=["elvish", "dwarvish"],
             name_zh="铁砧", name_en="Anvil",
         )
         actor = api.build_from_draft(self.bundle, draft)
@@ -324,7 +330,8 @@ class BuildDraftTest(unittest.TestCase):
                      background_bonus={"int": 2, "con": 1},
                      scores={"str": 8, "dex": 14, "con": 13,
                              "int": 15, "wis": 12, "cha": 10},
-                     skills=["arcana", "investigation"])
+                     skills=["arcana", "investigation"],
+                     languages=["elvish", "dwarvish"])
         info = api.spell_choices(self.bundle, WIZARD, 3)
         draft["cantrips"] = {WIZARD: [row["id"] for row in info["cantrips"][:3]]}
         draft["prepared"] = {WIZARD: [row["id"] for row in info["levels"][0]["spells"][:6]]}
@@ -348,7 +355,8 @@ class BuildDraftTest(unittest.TestCase):
                      scores=dict(SCORES), skills=["perception", "insight"],
                      masteries=["dnd2024.item.weapon.longsword",
                                 "dnd2024.item.weapon.greataxe",
-                                "dnd2024.item.weapon.longbow"])
+                                "dnd2024.item.weapon.longbow"],
+                     languages=["elvish", "dwarvish"])
         actor = api.build_from_draft(self.bundle, draft)
         payload = api.save_character(actor)
         again = api.load_character(self.bundle, payload)

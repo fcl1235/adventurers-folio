@@ -36,6 +36,7 @@ from ._support import (
     ABILITY_KEYS, _class_defs, _context, _dice_mode, _proficiency_sets,
     resolver_for,
 )
+from .languages import sheet_languages
 from .origin import origin_view
 # 背包投影：`loadout` 在函数级反向 import 本模块（`morph_forms` → `form_options`），
 # 顶部单向引用不会成环。
@@ -430,6 +431,9 @@ def character_sheet(actor: Actor, content: ContentBundle, locale: str = "zh") ->
         # 休息：生命骰余量与「长休会发生什么」。之前这里没有这一块，界面也就
         # 无从知道能不能休息 —— 结果是桌面端一次都恢复不了（见 api/rest.py）。
         sheet["rest"] = rest_options(actor, content, locale)
+        # 语言：通用语 / 职业固定给的 / 玩家选的，带来源。查不到的 key 不丢，
+        # 显示名退回 key —— 老存档里可能有内容包没有的语言。
+        sheet["languages"] = sheet_languages(content, actor, locale)
     return sheet
 
 

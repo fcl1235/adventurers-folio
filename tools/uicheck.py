@@ -636,7 +636,7 @@ def _check_live_wiring(bundle) -> list[str]:
 
 
 def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
-    """建卡向导（P7）：8 步的尺寸 + 骨架顺序 + 真实建出一张卡。
+    """建卡向导（P7）：9 步的尺寸 + 骨架顺序 + 真实建出一张卡。
 
     向导是**独立形态**（`app.mode`），不进 `pages`，所以主循环量不到它；
     单独跑一遍，否则以后往某一步里加个控件就没人拦了。
@@ -696,6 +696,11 @@ def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
         weapons = [row["id"] for row in
                    api.mastery_choices(bundle, "dnd2024.class.fighter", 5)["options"]][:4]
         wizard.draft["masteries"] = weapons
+        # 语言：通用语自动会，玩家只选两门标准语言（G36）。不选就建不出卡 ——
+        # 这正是这一步存在的意义，别让冒烟脚本变成「跳过校验」的后门。
+        lang_opts = api.step_options(bundle, "languages", wizard.draft)
+        wanted_langs = [row["key"] for row in lang_opts["standard"]][:2]
+        wizard.draft["languages"] = wanted_langs
         # 主输入框写的是**当前语言**那个名字（英文界面写 name_en）
         wanted_name = "铁砧" if LOCALE == "zh" else "Anvil"
         wizard.draft["name_%s" % LOCALE] = wanted_name
@@ -717,6 +722,13 @@ def _check_wizard(bundle, avail_w: int, avail_h: int) -> list[str]:
         if len(origin.get("masteries") or ()) != len(weapons):
             problems.append("向导：精通只记下了 %d 件，应 %d 件"
                             % (len(origin.get("masteries") or ()), len(weapons)))
+        # 语言：通用语 + 选的那两门，且通用语要标成「自动」
+        lang_rows = sheet.get("languages") or []
+        if len(lang_rows) != len(wanted_langs) + 1:
+            problems.append("向导：语言记下了 %d 门，应为 %d 门（通用语 + %d 门自选）"
+                            % (len(lang_rows), len(wanted_langs) + 1, len(wanted_langs)))
+        elif not any(row.get("source") == "common" for row in lang_rows):
+            problems.append("向导：语言里没有标成 common 的条目（通用语没自动给）")
     finally:
         app.destroy()
     return problems
@@ -909,7 +921,7 @@ def main(argv: list[str] | None = None) -> int:
     problems.extend(_check_live_wiring(bundle))
     problems.extend(_check_rest(bundle))
     problems.extend(_check_concentration(bundle))
-    print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 / 休息 / 专注 —— %s"
+    print("活接线：能力选择行 / 法术施放 / 遭遇战跨页 / 休息 / 专注 / 语言 —— %s"
           % ("OK" if not problems else "见上"))
 
     if problems:

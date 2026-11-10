@@ -49,6 +49,7 @@ API_DIRS = (PROJECT_ROOT / "dnd5r" / "api", PROJECT_ROOT / "dnd5r" / "rules")
 # 模块名写进这里，然后跑 `--api` 看还缺哪些。
 API_ADOPTED = {
     "dnd5r/api/wizard.py", "dnd5r/api/origin.py", "dnd5r/api/progress.py",
+    "dnd5r/api/languages.py",
     "dnd5r/rules/abilities.py", "dnd5r/rules/spellcasting.py",
     "dnd5r/rules/starting.py",
 }

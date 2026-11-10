@@ -38,6 +38,21 @@ EN: dict[str, str] = {
     "物种只给特性（黑暗视觉、抗性、速度、每级生命），**不**给属性加值。":
         "Species grants traits only (Darkvision, resistances, speed, HP per level) — "
         "**not** ability bonuses.",
+    "语言": "Languages",
+    "通用语自动会；再从标准语言里选 2 门。职业还会额外给（德鲁伊语、盗贼黑话、游侠 2 门）。":
+        "You know Common automatically; pick two more from the Standard Languages. "
+        "Classes may grant extra ones (a secret tongue, a cant, or two from some classes).",
+    "通用语自动会；再从标准语言里选 %d 门":
+        "Common is automatic; pick %d more from the Standard Languages.",
+    "通用语自动会；再从标准语言里选 %d 门（职业额外给 %d 门，可以选稀有语言）":
+        "Common is automatic; pick %d more from the Standard Languages "
+        "(%d extra slots from your class may also take a Rare language).",
+    "同一门语言选了两次：%s": "The same language is picked twice: %s",
+    "没有这些语言：%s": "No such languages: %s",
+    "标准语言至少要选 %d 门（现在 %d 门）":
+        "Pick at least %d Standard languages (currently %d)",
+    "要选 %d 门语言，现在选了 %d 门":
+        "Pick %d languages; %d are currently chosen",
     "属性": "Ability Scores",
     "点买 27 点、标准数组、或掷 4d6 弃最低。上限 15 是购买上限，16 以上只能靠背景与专长。":
         "Point buy (27 points), standard array, or 4d6 drop lowest. 15 is the purchase "

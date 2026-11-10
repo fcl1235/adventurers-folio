@@ -34,6 +34,7 @@ from .skills import (
     CHOICE_UNIVERSE, SKILL_KEYS, TOOL_KINDS, SkillDef, ToolDef, parse_skill,
     parse_tool,
 )
+from .languages import LanguageDef, parse_language
 from .feats import (
     CHOICE_KINDS, FEAT_KINDS, SPELL_LIST_ANY, FeatChoice, FeatDef, parse_feat,
     parse_feat_choice,
@@ -95,6 +96,7 @@ __all__ = [
     "MulticlassDef", "parse_multiclass_entry",
     "parse_armor", "parse_weapon", "parse_monster", "parse_summon",
     "parse_skill", "parse_tool", "parse_feat", "parse_feat_choice",
+    "parse_language", "LanguageDef",
     "parse_spell", "parse_spell_list", "powers_at_level", "lookup_dice",
     "load_plugin", "load_all",
     "FEAT_KINDS", "CHOICE_KINDS", "CHOICE_UNIVERSE", "DAMAGE_TYPES", "SKILL_KEYS",

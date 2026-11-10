@@ -1065,6 +1065,8 @@ class WizardTest(unittest.TestCase):
             background_bonus={"str": 2, "con": 1},
             scores={"str": 15, "dex": 14, "con": 13, "int": 12, "wis": 10, "cha": 8},
             skills=["athletics", "perception"],
+            # 语言是建卡的一步（G36）：不填这条，建卡会被「要选 2 门语言」挡住
+            languages=["elvish", "dwarvish"],
             masteries=["dnd2024.item.weapon.longsword",
                        "dnd2024.item.weapon.greataxe",
                        "dnd2024.item.weapon.longbow",
@@ -1196,6 +1198,35 @@ class WizardTest(unittest.TestCase):
         wizard._on_subclass()
         self.assertTrue(wizard.draft["subclass"].startswith("dnd2024.subclass.wizard."))
 
+    def test_language_step_writes_back(self):
+        """语言步（G36）：勾一门就写进草案，计数跟着走。"""
+        app = self._app()
+        app.open_wizard()
+        wizard = app.wizard
+        wizard.draft.update({"class_id": FIGHTER, "class_level": 1,
+                             "languages": []})
+        wizard.go(api.STEP_INDEX["languages"])
+        app.update_idletasks()
+        # 可勾的是标准 9 门（10 门去掉通用语）+ 稀有 9 门；职业固定给的
+        # （战士没有）与通用语是静态行，不进勾选表。
+        self.assertEqual(len(wizard.language_vars), 18)
+        key = next(iter(wizard.language_vars))
+        wizard.language_vars[key].set(1)
+        app.update_idletasks()
+        self.assertIn(key, wizard.draft["languages"])
+        self.assertIn("1 / 2", wizard.language_count_var.get())
+
+    def test_overview_shows_languages(self):
+        """卡面「熟练与精通」块要真的写出语言，不是只在档案里躺着。"""
+        actor = api.new_character(self.bundle, FIGHTER, 1, SCORES,
+                                  extra_languages=["common", "elvish", "dwarvish"])
+        app = DesktopApp(self.bundle, actor, selftest=True)
+        self.addCleanup(app.destroy)
+        app.refresh()
+        text = app.overview.language_var.get()
+        self.assertIn("通用语", text)
+        self.assertIn("精灵语", text)
+
     def test_scores_step_offers_bonus_plans(self):
         app = self._app()
         app.open_wizard()
@@ -1203,7 +1234,8 @@ class WizardTest(unittest.TestCase):
         wizard.go(1)
         wizard.background_pane.select_id("dnd2024.background.soldier")
         wizard._on_background()
-        wizard.go(3)
+        # 按 key 跳，不写死索引：语言步插进来之后 3 已经不是属性了
+        wizard.go(api.STEP_INDEX["scores"])
         app.update_idletasks()
         plans = api.bonus_plans("dnd2024.background.soldier", self.bundle)
         self.assertEqual(len(wizard._bonus_labels), len(plans))

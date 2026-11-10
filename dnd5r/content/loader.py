@@ -29,6 +29,7 @@ from .items import (
     ArmorDef, GearDef, WeaponDef, parse_armor, parse_gear, parse_weapon,
 )
 from .packages import StartingPack, parse_starting_pack
+from .languages import LanguageDef, parse_language
 from .skills import SkillDef, ToolDef, parse_skill, parse_tool
 from .species import SpeciesDef, parse_species
 from .spells import SpellDef, parse_spell, parse_spell_list
@@ -49,6 +50,7 @@ class PluginContent:
     feats: dict[str, FeatDef] = field(default_factory=dict)
     skills: dict[str, SkillDef] = field(default_factory=dict)
     tools: dict[str, ToolDef] = field(default_factory=dict)
+    languages: dict[str, LanguageDef] = field(default_factory=dict)
     summons: dict[str, "SummonDef"] = field(default_factory=dict)
     monsters: dict[str, "MonsterDef"] = field(default_factory=dict)
     multiclass: dict[str, MulticlassDef] = field(default_factory=dict)
@@ -77,6 +79,8 @@ class ContentBundle:
     feats: dict[str, FeatDef] = field(default_factory=dict)
     skills: dict[str, SkillDef] = field(default_factory=dict)
     tools: dict[str, ToolDef] = field(default_factory=dict)
+    # 语言表（标准 + 稀有）。`Profile.languages` 存的是这里的 key，不是 id。
+    languages: dict[str, LanguageDef] = field(default_factory=dict)
     summons: dict[str, "SummonDef"] = field(default_factory=dict)
     monsters: dict[str, "MonsterDef"] = field(default_factory=dict)
     multiclass: dict[str, MulticlassDef] = field(default_factory=dict)
@@ -246,6 +250,7 @@ class ContentBundle:
             "spell_lists": len(self.spell_lists),
             "skills": len(self.skills),
             "tools": len(self.tools),
+            "languages": len(self.languages),
             "summons": len(self.summons),
             "monsters": len(self.monsters),
             "by_kind": self.book.stats(),
@@ -336,6 +341,7 @@ def load_plugin(folder: str | Path) -> PluginContent:
     _load_backgrounds(base, result)
     _load_skills(base, result)
     _load_tools(base, result)
+    _load_languages(base, result)
     _load_summons(base, result)
     _load_monsters(base, result)
     result.book.validate_augments()
@@ -506,6 +512,35 @@ def _load_backgrounds(base: Path, result: PluginContent) -> None:
             result.errors.append("%s 的背景 id 重复：%s" % (rel, item.id))
             continue
         result.backgrounds[item.id] = item
+
+
+def _load_languages(base: Path, result: PluginContent) -> None:
+    """语言表：一个插件一份 `languages.yaml`（19 行，名称+标准/稀有）。
+
+    没有必填条数：主程序不依赖某门具体语言存在（自制设定可以完全换一套表），
+    `Profile.languages` 里的 key 查不到只影响显示名，不影响建卡。
+    """
+    path = base / "languages.yaml"
+    if not path.exists():
+        return
+    rel = "%s/languages.yaml" % base.name
+    try:
+        rows = _read_yaml(path) or []
+    except PluginError as exc:
+        result.errors.append(str(exc))
+        return
+    if isinstance(rows, Mapping):
+        rows = [rows]
+    for row in rows:
+        try:
+            language = parse_language(row, source=rel)
+        except (PluginError, DndError) as exc:
+            result.errors.append(str(exc))
+            continue
+        if language.id in result.languages:
+            result.errors.append("%s 的语言 id 重复：%s" % (rel, language.id))
+            continue
+        result.languages[language.id] = language
 
 
 def _load_skills(base: Path, result: PluginContent) -> None:
@@ -787,6 +822,7 @@ def load_all(root: str | Path = "plugins") -> ContentBundle:
                 content.starting_gear)
         _absorb(bundle, content, "技能", bundle.skills, content.skills)
         _absorb(bundle, content, "工具", bundle.tools, content.tools)
+        _absorb(bundle, content, "语言", bundle.languages, content.languages)
         _absorb(bundle, content, "召唤物", bundle.summons, content.summons)
         _absorb(bundle, content, "怪物", bundle.monsters, content.monsters)
         _absorb(bundle, content, "兼职条目", bundle.multiclass, content.multiclass)

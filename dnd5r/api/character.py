@@ -291,6 +291,7 @@ def new_character(
     masteries: Sequence[str] = (),
     extra_proficiencies: Sequence[str] = (),
     extra_expertise: Sequence[str] = (),
+    extra_languages: Sequence[str] = (),
     starting_pack: str | None = None,
 ) -> Actor:
     """按内容建角色：HP 上限、资源池、豁免熟练全部从 ClassDef 出来。
@@ -331,6 +332,8 @@ def new_character(
         masteries=tuple(masteries),
         extra_proficiencies=tuple(extra_proficiencies),
         extra_expertise=tuple(extra_expertise),
+        # 语言按 **key** 传（`elvish`）；通用语也在里面 —— 规则层不知道哪个是通用语
+        extra_languages=tuple(extra_languages),
         starting_pack=starting_pack,
     )
 

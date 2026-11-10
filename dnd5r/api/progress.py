@@ -190,6 +190,9 @@ def draft_from_actor(content: ContentBundle, actor: Actor,
         "score_mode": "edit",
         "scores": {key: int(value) for key, value in profile.base_scores.items()},
         "skills": sorted(keep),
+        # 语言原样带回去（含通用语）：界面的语言一步把这些当成「已选」，
+        # 但它自己会排除「已经会」的项，所以不会重复显示。
+        "languages": sorted(profile.languages),
         "masteries": sorted(profile.masteries),
         "cantrips": {class_id: cantrips} if cantrips else {},
         "prepared": {class_id: prepared} if prepared else {},
@@ -246,12 +249,16 @@ def apply_draft(content: ContentBundle, actor: Actor, draft: Mapping[str, Any],
         stale_feat = content.backgrounds[old.background].origin_feat
     feats = tuple(dict.fromkeys(
         [item for item in old.feats if item != stale_feat] + list(profile.feats)))
-    # 专长选择 / 专精 / 语言 / 抗性：草案不编辑，全部并回（同名项草案优先）
+    # 专长选择 / 专精 / 语言 / 抗性：草案不编辑的项全部并回（同名项草案优先）。
+    # **语言现在归草案管**（G36 加了「语言」一步）：草案带了 `languages` 键就
+    # 以它为准 —— 用并集的话「把精灵语换成矮人语」永远换不掉，旧的那门会一直
+    # 挂在那儿。没带这个键的调用方（老接口、脚本）仍然沿用旧档案。
     choices = {key: value for key, value in old.choices.items()
                if not (stale_feat and key.startswith(stale_feat + "."))}
     choices.update({key: tuple(value) for key, value in profile.choices.items()})
+    languages = profile.languages if "languages" in draft else old.languages
     profile = replace(profile, feats=feats, choices=choices,
                       expertise=old.expertise | profile.expertise,
-                      languages=old.languages,
+                      languages=languages,
                       resistances=old.resistances | profile.resistances)
     return rebuild_actor(content, actor, profile)

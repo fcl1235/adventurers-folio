@@ -24,6 +24,7 @@ from ..model.resources import Pool, PoolKind, Refresh
 from ..model.statblock import ABILITY_KEYS, Abilities, Statblock
 from .feats import check_feat_choices, collect_picks, feat_spells, hard_problems, picks_for
 from .health import hit_dice_pool, hit_points_max, multiclass_hit_points
+from .languages import split_tokens as split_language_tokens
 from .progression import MAX_TOTAL_LEVEL, effective_caster_level, slots_from_table
 from .modifiers import resolve as resolve_modifiers
 from .morph import CrAxis, eligible_forms
@@ -182,6 +183,7 @@ def build_actor(
     kind: ActorKind = ActorKind.PC,
     extra_proficiencies: tuple[str, ...] = (),
     extra_expertise: tuple[str, ...] = (),
+    extra_languages: tuple[str, ...] = (),
     extra_resistances: tuple[str, ...] = (),
     subclass: str | None = None,
     feats: tuple[str, ...] = (),
@@ -356,6 +358,10 @@ def build_actor(
         if origin_def.tool and any(item.key == origin_def.tool
                                    for item in bundle.tools.values()):
             origin_tokens.append("tool.%s" % origin_def.tool)
+    # `language.*` 与熟练共用 token 命名空间：语言必须落到 `Profile.languages`，
+    # 留在熟练集合里就永远显示不出来，也挡不住「已会又选一遍」。
+    language_tokens, prof_tokens = split_language_tokens(
+        tuple(extra_proficiencies) + tuple(picks.proficiencies))
     profile = Profile(
         classes=tuple(ClassEntry.make(def_.id, lv) for def_, lv in all_defs),
         subclasses=tuple(subclass_map.values()),
@@ -363,9 +369,11 @@ def build_actor(
                        | frozenset(class_def.proficiencies)
                        | frozenset(grant_tokens)
                        | frozenset(origin_tokens)
-                       | frozenset(extra_proficiencies)
-                       | picks.proficiencies),
+                       | frozenset(prof_tokens)),
         expertise=picks.expertise | frozenset(extra_expertise),
+        # 语言与熟练共用一个 token 命名空间（`language.elvish`），所以进来的
+        # `extra_proficiencies` 要先分流；否则 token 停在熟练集合里，卡上查不到。
+        languages=frozenset(extra_languages) | frozenset(language_tokens),
         feats=chosen_feats,
         choices=picked_choices,
         resistances=picks.resistances | frozenset(extra_resistances),
@@ -548,6 +556,7 @@ def build_from_profile(
     extra_prof: tuple[str, ...] = ()
     extra_exp: tuple[str, ...] = ()
     extra_res: tuple[str, ...] = ()
+    extra_lang: tuple[str, ...] = ()
     actor: Actor | None = None
     for _ in range(3):
         extras = tuple((item.class_id, int(item.class_level))
@@ -556,7 +565,7 @@ def build_from_profile(
             bundle, entry.class_id, int(entry.class_level), scores,
             name_zh, name_en, actor_id=actor_id, kind=kind,
             extra_proficiencies=extra_prof, extra_expertise=extra_exp,
-            extra_resistances=extra_res,
+            extra_resistances=extra_res, extra_languages=extra_lang,
             subclass=primary_subclass, feats=profile.feats, choices=profile.choices,
             cantrips=profile.cantrips, prepared=profile.prepared,
             extra_classes=extras, extra_subclasses=extra_subclasses,
@@ -570,11 +579,14 @@ def build_from_profile(
         missing_prof = tuple(sorted(set(profile.proficiencies) - set(got.proficiencies)))
         missing_exp = tuple(sorted(set(profile.expertise) - set(got.expertise)))
         missing_res = tuple(sorted(set(profile.resistances) - set(got.resistances)))
-        if not (missing_prof or missing_exp or missing_res):
+        # 语言也要收敛：不补的话「改一个专长 → 精灵语没了」
+        missing_lang = tuple(sorted(set(profile.languages) - set(got.languages)))
+        if not (missing_prof or missing_exp or missing_res or missing_lang):
             return actor
         extra_prof = tuple(sorted(set(extra_prof) | set(missing_prof)))
         extra_exp = tuple(sorted(set(extra_exp) | set(missing_exp)))
         extra_res = tuple(sorted(set(extra_res) | set(missing_res)))
+        extra_lang = tuple(sorted(set(extra_lang) | set(missing_lang)))
     # 补了两轮还差，说明差值在自我增殖（数据有问题），不能带着错往下走
     raise RuleError("按档案重建时熟练/专精/抗性无法收敛，档案可能有矛盾项")
 
@@ -599,6 +611,9 @@ def rebuild_actor(
     profile = profile if profile is not None else actor.profile
     if profile is None:
         raise RuleError("角色没有职业档案，无法重建")
+    # 旧档案里可能还混着 `language.*` 熟练 token：先归一化，否则下面的差值
+    # 收敛会永远差一项（补进熟练又被分流回语言）。
+    profile = profile.normalized()
     name = actor.statblock.name
     fresh = build_from_profile(bundle, profile, name.zh, name.en,
                                actor_id=actor.id, kind=actor.kind)

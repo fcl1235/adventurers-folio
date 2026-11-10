@@ -21,6 +21,10 @@ asi_levels: [4, 8, 10, 12, 16]
 # 依据 data/raw/class-levels-2024.json 的 class_specific.weapon_mastery；
 # 圣武士/游侠/盗贼的原文只写「两种武器」且未提升级增量，故只登记 1 级。
 mastery_counts: { 1: 2 }
+# 职业自选语言（2024）：等级 → 门数。盗贼 1 级的「盗贼黑话」给固定的黑话
+# （那条走特性的 grant_proficiency），**另外**再给 1 门自选 —— 两件事分开记，
+# 混成一门会少一门语言。原文见 thieves_cant 特性的 en 文案。
+language_choices: { 1: 1 }
 skill_choices: 4
 skill_list:
   - acrobatics
@@ -77,15 +81,18 @@ powers:
     target: self
     text:
       zh: |-
-        掌握盗贼暗语与暗号。
+        掌握盗贼暗语与暗号，并额外学会一门自选语言。
       en: |-
         You picked up various languages in the communities where you plied your roguish talents. You know Thieves' Cant and one other language of your choice, which you choose from the language tables in "Character Creation."
     effects:
+      - grant_proficiency: language.thieves_cant
+      # 那「一门自选」不在这里 —— 写在职业顶层的 language_choices: {1: 1}。
+      # 固定会的与自选的混在一条效果里，界面上就分不出哪门是白给的。
       - note:
           zh: |-
-            数值结算见 P5 后续：本条先登记规则原文。
+            另有一门语言自选，建卡「语言」一步里选。
           en: |-
-            Number resolution lands later in P5; the rule text is registered here.
+            One further language of your choice is picked in the Languages step.
 
   - id: dnd2024.class.rogue.weapon_mastery
     name: {zh: 武器专精, en: Weapon Mastery}

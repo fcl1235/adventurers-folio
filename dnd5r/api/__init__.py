@@ -64,11 +64,16 @@ from .origin import (
     origin_view, random_scores, score_cost, score_presets, set_masteries,
     set_origin, species_catalog,
 )
-# 建卡向导（P7）：8 步的目录与最终组装。界面只拿数据，不自己查内容
+# 建卡向导（P7）：9 步的目录与最终组装。界面只拿数据，不自己查内容
 from .wizard import (
     STEP_INDEX, WIZARD_STEPS, bonus_plans, build_from_draft, class_catalog, wizard_steps,
     draft_problems, empty_draft, mastery_choices, skill_catalog, spell_choices,
     step_options, subclass_choices, tool_catalog,
+)
+# 语言（G36）：通用语自动 + 2 门标准自选 + 职业给的门数
+from .languages import (
+    BASIC_LANGUAGE_SLOTS, class_fixed_keys, common_key, granted_slots,
+    language_options, need_of, sheet_languages,
 )
 # 升级（P7）：改等级 → 重建（保住背包/HP/资源），并把「还差选什么」列出来
 from .progress import apply_draft, draft_from_actor, level_up, level_up_view
@@ -125,6 +130,9 @@ __all__ = [
     "tool_catalog", "subclass_choices", "mastery_choices", "spell_choices",
     "step_options", "draft_problems", "build_from_draft", "bonus_plans",
     "level_up", "level_up_view", "draft_from_actor", "apply_draft",
+    # 语言（G36）
+    "language_options", "sheet_languages", "common_key", "need_of",
+    "granted_slots", "class_fixed_keys", "BASIC_LANGUAGE_SLOTS",
     "attack_roll", "opportunity_attack", "monster_attack", "attack_options",
     "marks_of", "tokens_of",
     "eligible_forms_for", "morph_class_of", "form_options", "form_view",
